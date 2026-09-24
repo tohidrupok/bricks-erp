@@ -1,0 +1,10 @@
+<h2>Edit Property - {{ prop.property_name }}</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Update</button>
+</form>
+
+<a href="{% url 'property_list' %}">Back</a>

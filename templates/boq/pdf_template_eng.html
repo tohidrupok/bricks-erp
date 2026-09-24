@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BOQ Details</title>
+    <style>
+        /* body {
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            margin: 40px 50px;
+            color: #333;
+            position: relative;
+        }
+        */
+        /* Header styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #0A8754;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            height: 60px;
+        }
+
+        .project-info {
+            text-align: right;
+        }
+
+        .project-info h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #0A8754;
+        }
+
+        .project-info p {
+            margin: 3px 0;
+            font-size: 12px;
+        }
+
+        /* Category title */
+        .category-title {
+            font-size: 16px;
+            background-color: #f2f2f2;
+            padding: 10px;
+            border-left: 5px solid #0A8754;
+            margin-bottom: 15px;
+        }
+
+       table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #000;
+        }
+
+        th {
+            background: #f0f0f0;
+            font-weight: bold;
+        }
+
+        th, td {
+            padding: 3px;
+            text-align: center;
+        }
+
+        .description {
+            text-align: left;
+        }
+
+        .total-row td {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+
+        .summary-table td {
+            font-weight: bold;
+        }
+
+        .total {
+            font-size: 15px;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        /* Footer styles */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+            padding: 10px 0;
+            border-top: 1px solid #ccc;
+            background-color: #fff;
+        }
+
+        .summary-box {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 400px;
+            float: right;
+            background: #f8f8f8;
+        }
+
+        .summary-box h4 {
+            margin-top: 0;
+            font-size: 16px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+
+        .summary-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .summary-box li {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 13px;
+        }
+
+        .summary-box li.total {
+            font-weight: bold;
+            font-size: 14px;
+            border-top: 1px solid #ccc;
+            margin-top: 6px;
+            padding-top: 8px;
+        }
+
+        .summary-box {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 400px;
+            float: right;
+            background: #f8f8f8;
+        }
+
+        .summary-box h4 {
+            margin-top: 0;
+            font-size: 16px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+
+        .summary-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .summary-box li {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 13px;
+        }
+
+        .summary-box li.total {
+            font-weight: bold;
+            font-size: 14px;
+            border-top: 1px solid #ccc;
+            margin-top: 6px;
+            padding-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+         <div class="logo">
+            <img src="{% static 'images/BTP_logo_bricks.webp' %}" alt="Company Logo">
+          </div>
+        <div class="project-info">
+            <h2>Project: {{ project.project_first_name }}</h2>
+            <p>Date: {{ project.current_date }}</p>
+        </div>
+    </div>
+
+    <!-- Category Title -->
+    <div class="category-title">
+        <strong>BOQ Items - {{ category_name }} Bill of Quantities by Category</strong>
+    </div>
+
+
+     <!-- BOQ Section -->
+     {% for category_type, categories in boq_by_type_and_category.items %}
+     <h3>{{ category_type }}</h3>
+     {% for category_name, data in categories.items %}
+         <h4>{{ category_name }}</h4>
+         <table>
+             <thead>
+                 <tr>
+                     <th>Item</th>
+                     <th>Unit</th>
+                     <th>Qty</th>
+                     <th>Rate</th>
+                     <th>Amount</th>
+                 </tr>
+             </thead>
+             <tbody>
+                 {% for item in data.items %}
+                     <tr>
+                         <td>{{ item.item_name }}</td>
+                         <td>{{ item.unit }}</td>
+                         <td>{{ item.qty }}</td>
+                         <td>{{ item.rate }}</td>
+                         <td>{{ item.amount }}</td>
+                     </tr>
+                 {% endfor %}
+             </tbody>
+         </table>
+         <p class="total">Total for {{ category_name }}: Tk {{ data.total|floatformat:2 }}</p>
+     {% endfor %}
+ {% endfor %}
+
+    <!-- Employee Section -->
+    <h3>Employee Costs</h3>
+    <table>
+        <thead>
+            <tr>
+                <th style="background-color: #0A8754; color: white;">Employee_Name</th>
+                <th style="background-color: #0A8754; color: white;">Month_Salary</th>
+                <th style="background-color: #0A8754; color: white;">Project_Duration</th>
+                <th style="background-color: #0A8754; color: white;">Total_Salary</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employee in employee_costs %}
+                <tr>
+                    <td>{{ employee.employee_name }}</td>
+                    <td>{{ employee.first_month_salary }}</td>
+                    <td>{{ employee.project_duration_months }}</td>
+                    <td>{{ employee.total_salary }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!--<p><strong>Total Employee Cost: Tk {{ employee_cost_total }}</strong></p> -->
+    <p class="total">Total Employee Cost: Tk {{ employee_cost_total |floatformat:2 }}</p>
+
+    <!-- Safety Equipment Section -->
+    <h3>Safety Equipment Costs</h3>
+    <table>
+        <thead>
+            <tr>
+                <th style="background-color: #0A8754; color: white;">Item_Name</th>
+                <th style="background-color: #0A8754; color: white;">Quantity</th>
+                <th style="background-color: #0A8754; color: white;">Item_Cost</th>
+                <th style="background-color: #0A8754; color: white;">Total_Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for equipment in safety_equipment %}
+                <tr>
+                    <td>{{ equipment.item_name }}</td>
+                    <td>{{ equipment.quantity }}</td>
+                    <td>{{ equipment.item_cost }}</td>
+                    <td>{{ equipment.total_cost }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!--<p><strong>Total Safety Equipment Cost: Tk {{ safety_equipment_total }}</strong></p> -->
+    <p class="total">Total Safety Equipment Cost: Tk {{ safety_equipment_total |floatformat:2 }}</p>
+
+     <!-- Expense Section -->
+     <h3>Expense Costs</h3>
+     <table>
+         <thead>
+             <tr style="background-color:#f0f0f0">
+                 <th style="background-color: #0A8754; color: white;">Item_Name</th>
+                 <th style="background-color: #0A8754; color: white;">Quantity</th>
+                 <th style="background-color: #0A8754; color: white;">Item_Cost</th>
+                 <th style="background-color: #0A8754; color: white;">Total_Cost</th>
+             </tr>
+         </thead>
+         <tbody>
+             {% for expense_cost in expense_costs %}
+                 <tr>
+                     <td>{{ expense_cost.item_name }}</td>
+                     <td>{{ expense_cost.quantity }}</td>
+                     <td>{{ expense_cost.item_cost }}</td>
+                     <td>{{ expense_cost.total_cost }}</td>
+                 </tr>
+             {% endfor %}
+         </tbody>
+     </table>
+     <!--<p><strong>Total Safety Equipment Cost: Tk {{ expense_total }}</strong></p> -->
+     <p class="total">Total Expense Cost: Tk {{ expense_cost_total |floatformat:2 }}</p>
+
+     
+    <hr class="my-4 border-gray-200">
+   <!-- Summary Section -->
+    <div class="flex justify-end mt-8">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md border border-gray-300">
+            <h4 class="text-2xl font-semibold text-gray-800 text-center mb-4" style="font-weight:bold;font-size:20px">Summary</h4>
+            
+            <ul class="space-y-4">
+                <!--{% for category, data in boq_by_category.items %}
+                <li class="flex justify-between py-2 text-sm text-gray-700">
+                    <span class="font-medium"><b>{{ category }}</b></span>
+                    <span class="font-semibold text-gray-800">Tk {{ data.total|floatformat:2 }}</span>
+                </li>
+                {% endfor %} 
+                <hr style="height: 1px; background-color: black; border: none;width:50%">
+                -->
+                {% for item in total_by_category_type %}
+                <li class="flex justify-between py-2 text-sm text-gray-700">
+                    <span lass="font-medium"><b>{{ item.category_type }}</b></span>
+                    <span class="font-semibold text-gray-800""> &nbsp; Tk {{ item.total_amount }}</span>
+                </li>
+                {% endfor %}
+                <li class="flex justify-between py-2 text-sm text-gray-700">
+                    <span class="font-medium"><b>Employee Costing</b></span>
+                    <span class="font-semibold text-gray-800">Tk {{ employee_cost_total|floatformat:2 }}</span>
+                </li>
+                
+                <li class="flex justify-between py-2 text-sm text-gray-700">
+                    <span class="font-medium"><b>Equipment Cost</b></span>
+                    <span class="font-semibold text-gray-800">Tk {{ safety_equipment_total|floatformat:2 }}</span>
+                </li>
+                <li class="flex justify-between py-2 text-sm text-gray-700">
+                    <span class="font-medium"><b>Expense Cost</b></span>
+                    <span class="font-semibold text-gray-800">Tk {{ expense_cost_total|floatformat:2 }}</span>
+                </li>
+                <hr class="my-4 border-gray-200">
+                
+                <li class="flex justify-between py-2 text-lg font-semibold text-gray-900" style="font-weight:bold;font-size:20px">
+                    <span><b>Grand Total - </b></span>
+                    <span class="text-primary font-bold text-xl">Tk {{ grand_total|floatformat:2 }}</span>
+                </li>
+                <hr class="my-4 border-gray-200">
+                
+                <li class="flex justify-between py-2 text-lg font-semibold text-gray-900" style="font-weight:bold;font-size:20px">
+                    <span><b>Percentage (%)- </b></span>
+                    <span class="text-primary font-bold text-xl">{{ project.percentage|floatformat:2 }}</span>
+                </li>
+                <li class="flex justify-between py-2 text-lg font-semibold text-gray-900" style="font-weight:bold;font-size:20px">
+                    <span><b>Percentage Value - </b></span>
+                    <span class="text-primary font-bold text-xl">Tk {{ project.percentage_value|floatformat:2 }}</span>
+                </li>
+                <li class="flex justify-between py-2 text-lg font-semibold text-gray-900" style="font-weight:bold;font-size:20px">
+                    <span><b>Final Total - </b></span>
+                    <span class="text-primary font-bold text-xl">Tk {{ project.final_total_with_extra|floatformat:2 }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- Footer -->
+    <div class="footer" style="margin-bottom: 1px; padding: 10px 0; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #ccc;">
+        © {{ year }} BTP Construction Ltd. | This is a system-generated document.
+    </div> 
+</body>
+</html>

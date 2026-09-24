@@ -1,0 +1,558 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Room List - BM ERP{% endblock %}
+
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ══════════════════════════════
+     RL — Room List Design System
+  ══════════════════════════════ */
+  :root {
+    --rl-ink:         #0f172a;
+    --rl-ink-soft:    #334155;
+    --rl-muted:       #64748b;
+    --rl-rule:        #e2e8f0;
+    --rl-rule-soft:   #f1f5f9;
+    --rl-bg:          #f0f5fb;
+    --rl-surface:     #ffffff;
+    --rl-primary:     #1d4ed8;
+    --rl-primary-lt:  #3b82f6;
+    --rl-primary-bg:  #eff6ff;
+    --rl-teal:        #0d9488;
+    --rl-teal-bg:     #f0fdf9;
+    --rl-green:       #059669;
+    --rl-green-bg:    #ecfdf5;
+    --rl-rose:        #e11d48;
+    --rl-rose-bg:     #fff1f2;
+    --rl-amber:       #d97706;
+    --rl-amber-bg:    #fffbeb;
+    --rl-font:        'Outfit', sans-serif;
+    --rl-mono:        'JetBrains Mono', monospace;
+    --rl-r-sm:        8px;
+    --rl-r-md:        12px;
+    --rl-r-lg:        18px;
+    --rl-r-xl:        22px;
+    --rl-shadow:      0 1px 4px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+    --rl-shadow-md:   0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  .rl-wrap {
+    font-family: var(--rl-font);
+    color: var(--rl-ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ══ TOPBAR ══ */
+  .rl-topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--rl-rule);
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    gap: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    margin-bottom: 0;
+  }
+  .rl-topbar-left  { display: flex; align-items: center; gap: 10px; }
+  .rl-topbar-right { display: flex; align-items: center; gap: 6px; }
+
+  .rl-brand {
+    display: flex; align-items: center; gap: 8px;
+    text-decoration: none;
+  }
+  .rl-brand-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+    border-radius: var(--rl-r-sm);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(29,78,216,0.25);
+    flex-shrink: 0;
+  }
+  .rl-brand-icon svg {
+    width: 16px; height: 16px;
+    stroke: #fff; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .rl-brand-name {
+    font-size: 15px; font-weight: 800;
+    color: var(--rl-ink); letter-spacing: -0.3px;
+  }
+  .rl-brand-name span { color: var(--rl-primary); }
+
+  .rl-topbar-sep { width: 1px; height: 22px; background: var(--rl-rule); }
+
+  .rl-page-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12.5px; font-weight: 600;
+    color: var(--rl-ink-soft);
+    background: var(--rl-rule-soft);
+    border: 1px solid var(--rl-rule);
+    border-radius: 20px; padding: 4px 12px 4px 8px;
+  }
+  .rl-page-pill svg {
+    width: 13px; height: 13px;
+    stroke: var(--rl-teal); fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .rl-topbar-dot { width: 4px; height: 4px; background: var(--rl-rule); border-radius: 50%; }
+
+  .rl-nav-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: var(--rl-r-sm);
+    font-family: var(--rl-font); font-size: 13px; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    transition: all 0.15s ease; border: 1px solid var(--rl-rule);
+    white-space: nowrap;
+  }
+  .rl-nav-btn svg {
+    width: 14px; height: 14px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+    transition: transform 0.15s;
+  }
+  .rl-nav-btn-dash { background: var(--rl-rule-soft); color: var(--rl-ink-soft); }
+  .rl-nav-btn-dash:hover { background: #e2e8f0; color: var(--rl-ink); }
+  .rl-nav-btn-back { background: transparent; color: var(--rl-muted); }
+  .rl-nav-btn-back:hover { background: var(--rl-rule-soft); color: var(--rl-ink); border-color: #cbd5e1; }
+  .rl-nav-btn-back:hover svg { transform: translateX(-2px); }
+
+  /* ══ HERO ══ */
+  .rl-hero {
+    background: linear-gradient(120deg, #0f2d5c 0%, #1d4ed8 55%, #38bdf8 100%);
+    padding: 28px 28px 24px;
+    position: relative; overflow: hidden;
+  }
+  .rl-hero::before {
+    content: ''; position: absolute; right: -60px; top: -60px;
+    width: 280px; height: 280px;
+    background: rgba(255,255,255,0.05); border-radius: 50%;
+  }
+  .rl-hero::after {
+    content: ''; position: absolute; left: 45%; bottom: -80px;
+    width: 220px; height: 220px;
+    background: rgba(56,189,248,0.08); border-radius: 50%;
+  }
+  .rl-hero-inner {
+    position: relative; z-index: 1;
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  .rl-hero-left { display: flex; align-items: center; gap: 14px; }
+  .rl-hero-icon {
+    width: 48px; height: 48px;
+    background: rgba(255,255,255,0.13);
+    border: 1.5px solid rgba(255,255,255,0.22);
+    border-radius: var(--rl-r-md);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(6px); flex-shrink: 0;
+  }
+  .rl-hero-icon svg {
+    width: 22px; height: 22px;
+    stroke: #fff; fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .rl-hero-title {
+    font-size: 22px; font-weight: 800; color: #fff;
+    letter-spacing: -0.4px; line-height: 1.1;
+  }
+  .rl-hero-sub {
+    font-size: 12px; color: rgba(255,255,255,0.6);
+    font-family: var(--rl-mono); margin-top: 3px;
+  }
+  .rl-hero-stats { display: flex; gap: 10px; }
+  .rl-hero-stat {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--rl-r-md);
+    padding: 10px 18px; text-align: center;
+    backdrop-filter: blur(4px);
+  }
+  .rl-hero-stat-val { font-size: 22px; font-weight: 800; color: #fff; line-height: 1; }
+  .rl-hero-stat-label {
+    font-size: 10px; color: rgba(255,255,255,0.6);
+    font-family: var(--rl-mono); margin-top: 2px;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+
+  /* ══ TOOLBAR ══ */
+  .rl-toolbar {
+    display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap;
+    gap: 14px; padding: 18px 28px;
+  }
+
+  .rl-search-wrap { position: relative; flex: 1; min-width: 240px; max-width: 380px; }
+  .rl-search-wrap svg {
+    position: absolute; left: 12px; top: 50%;
+    transform: translateY(-50%);
+    width: 15px; height: 15px;
+    stroke: var(--rl-muted); fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    pointer-events: none;
+  }
+  .rl-search-input {
+    width: 100%; padding: 9px 12px 9px 36px;
+    border: 1.5px solid var(--rl-rule);
+    border-radius: var(--rl-r-sm);
+    font-family: var(--rl-font); font-size: 13px;
+    color: var(--rl-ink); background: #fff;
+    outline: none; transition: all 0.15s; box-sizing: border-box;
+  }
+  .rl-search-input:focus {
+    border-color: var(--rl-primary-lt);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.10);
+  }
+  .rl-search-input::placeholder { color: #94a3b8; }
+
+  .rl-toolbar-right { display: flex; align-items: center; gap: 8px; }
+
+  .rl-btn-add {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 18px; border-radius: var(--rl-r-sm);
+    font-family: var(--rl-font); font-size: 13px; font-weight: 700;
+    color: #fff; text-decoration: none;
+    background: linear-gradient(135deg, var(--rl-primary), var(--rl-primary-lt));
+    box-shadow: 0 3px 10px rgba(29,78,216,0.28);
+    transition: all 0.15s ease; border: none; cursor: pointer;
+  }
+  .rl-btn-add:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(29,78,216,0.36); }
+  .rl-btn-add svg {
+    width: 15px; height: 15px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .rl-count-badge {
+    font-size: 12px; font-weight: 700;
+    color: var(--rl-muted);
+    font-family: var(--rl-mono);
+    background: var(--rl-rule-soft);
+    border: 1px solid var(--rl-rule);
+    border-radius: 20px; padding: 5px 12px;
+  }
+
+  /* ══ TABLE CARD ══ */
+  .rl-table-card {
+    background: var(--rl-surface);
+    border-radius: var(--rl-r-xl);
+    border: 1px solid var(--rl-rule);
+    box-shadow: var(--rl-shadow);
+    overflow: hidden;
+    margin: 0 28px 28px;
+  }
+
+  .rl-table-scroll { overflow-x: auto; }
+
+  .rl-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 13.5px; min-width: 700px;
+  }
+
+  .rl-table thead tr {
+    background: var(--rl-rule-soft);
+    border-bottom: 1px solid var(--rl-rule);
+  }
+  .rl-table thead th {
+    padding: 12px 18px;
+    text-align: left;
+    font-size: 10.5px; font-weight: 700;
+    color: var(--rl-muted);
+    letter-spacing: 0.8px; text-transform: uppercase;
+    font-family: var(--rl-mono); white-space: nowrap;
+  }
+  .rl-table thead th.center { text-align: center; }
+
+  .rl-table tbody tr {
+    border-bottom: 1px solid var(--rl-rule-soft);
+    transition: background 0.12s;
+  }
+  .rl-table tbody tr:last-child { border-bottom: none; }
+  .rl-table tbody tr:hover { background: #f8fbff; }
+
+  .rl-table td {
+    padding: 13px 18px;
+    vertical-align: middle;
+    color: var(--rl-ink-soft);
+  }
+  .rl-table td.center { text-align: center; }
+
+  /* Project cell */
+  .rl-project-cell {
+    display: flex; align-items: center; gap: 9px;
+  }
+  .rl-project-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--rl-primary), var(--rl-primary-lt));
+    flex-shrink: 0;
+  }
+  .rl-project-name { font-weight: 600; color: var(--rl-ink); }
+
+  /* Room name */
+  .rl-room-name { font-weight: 700; color: var(--rl-ink); }
+
+  /* Flat chip */
+  .rl-flat-chip {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px;
+    background: var(--rl-rule-soft);
+    border: 1px solid var(--rl-rule);
+    border-radius: 20px;
+    font-family: var(--rl-mono); font-size: 11.5px;
+    color: var(--rl-ink-soft); font-weight: 500;
+  }
+
+  /* Status badges */
+  .rl-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 11.5px; font-weight: 700;
+    font-family: var(--rl-mono); white-space: nowrap;
+  }
+  .rl-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .rl-badge-active   { background: var(--rl-green-bg); color: var(--rl-green); }
+  .rl-badge-deactive { background: var(--rl-rose-bg);  color: var(--rl-rose);  }
+  .rl-badge-warning  { background: var(--rl-amber-bg); color: var(--rl-amber); }
+
+  /* Rent cell */
+  .rl-rent-val {
+    font-weight: 700; font-family: var(--rl-mono);
+    font-size: 13.5px; color: var(--rl-teal);
+  }
+  .rl-rent-unit { font-size: 10.5px; color: var(--rl-muted); font-weight: 400; margin-left: 2px; }
+
+  /* Action buttons */
+  .rl-actions { display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .rl-action-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 11px; border-radius: 7px;
+    font-size: 12px; font-weight: 600; text-decoration: none;
+    border: 1.5px solid transparent; cursor: pointer;
+    transition: all 0.14s ease; font-family: var(--rl-font);
+  }
+  .rl-action-btn svg {
+    width: 12px; height: 12px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .rl-btn-view   { color: var(--rl-muted);    background: var(--rl-rule-soft); border-color: var(--rl-rule); }
+  .rl-btn-view:hover   { background: #e2e8f0; color: var(--rl-ink); transform: translateY(-1px); }
+  .rl-btn-edit   { color: var(--rl-primary);  background: var(--rl-primary-bg); border-color: #bfdbfe; }
+  .rl-btn-edit:hover   { background: #dbeafe; transform: translateY(-1px); }
+  .rl-btn-delete { color: var(--rl-rose);     background: var(--rl-rose-bg);   border-color: #fecdd3; }
+  .rl-btn-delete:hover { background: #fee2e2; transform: translateY(-1px); }
+
+  /* Empty state */
+  .rl-empty {
+    text-align: center; padding: 60px 24px; color: var(--rl-muted);
+  }
+  .rl-empty svg {
+    width: 44px; height: 44px; stroke: #cbd5e1; fill: none;
+    stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round;
+    display: block; margin: 0 auto 14px;
+  }
+  .rl-empty p { font-size: 13.5px; }
+
+  /* ══ ANIMATION ══ */
+  .rl-fade { animation: rl-up 0.32s ease both; }
+  @keyframes rl-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ══ RESPONSIVE ══ */
+  @media (max-width: 768px) {
+    .rl-topbar { padding: 0 16px; }
+    .rl-hero   { padding: 22px 16px; }
+    .rl-toolbar { padding: 14px 16px; }
+    .rl-table-card { margin: 0 16px 20px; }
+    .rl-hero-stats { display: none; }
+    .rl-search-wrap { max-width: 100%; }
+  }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-700 before:fixed before:inset-0 before:z-[-1]">
+
+  {% include 'partials/mobile.html' %}
+
+  <div class="mt-[4.7rem] flex md:mt-0">
+    {% include 'partials/sidebar_list.html' %}
+
+    <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+
+      {% include 'partials/header.html' %}
+
+      <!-- ══ ROOM LIST UI ══ -->
+      <div class="rl-wrap rl-fade mt-6">
+
+        <!-- TOPBAR -->
+        <nav class="rl-topbar">
+          <div class="rl-topbar-left">
+            <a href="{% url 'dashboard' %}" class="rl-brand">
+              <div class="rl-brand-icon">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              </div>
+              <span class="rl-brand-name">BM <span>ERP</span></span>
+            </a>
+            <div class="rl-topbar-sep"></div>
+            <span class="rl-page-pill">
+              <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Room Management
+            </span>
+          </div>
+          <div class="rl-topbar-right">
+            <a href="{% url 'dashboard' %}" class="rl-nav-btn rl-nav-btn-dash">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              Dashboard
+            </a>
+            <div class="rl-topbar-dot"></div>
+            <a href="javascript:history.back()" class="rl-nav-btn rl-nav-btn-back">
+              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+              Back
+            </a>
+          </div>
+        </nav>
+
+        <!-- HERO -->
+        <div class="rl-hero">
+          <div class="rl-hero-inner">
+            <div class="rl-hero-left">
+              <div class="rl-hero-icon">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </div>
+              <div>
+                <div class="rl-hero-title">All Project Rooms</div>
+                <div class="rl-hero-sub">Property Management · Room Registry</div>
+              </div>
+            </div>
+            <div class="rl-hero-stats">
+              <div class="rl-hero-stat">
+                <div class="rl-hero-stat-val">{{ rooms|length }}</div>
+                <div class="rl-hero-stat-label">Total Rooms</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TOOLBAR -->
+        <div class="rl-toolbar">
+          <div class="rl-search-wrap">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="rlSearch" class="rl-search-input" placeholder="Search room, flat, or project…">
+          </div>
+          <div class="rl-toolbar-right">
+            <span class="rl-count-badge" id="rlCount">{{ rooms|length }} rooms</span>
+            <a href="{% url 'room_create' %}" class="rl-btn-add">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add New Room
+            </a>
+          </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="rl-table-card">
+          <div class="rl-table-scroll">
+            <table class="rl-table">
+              <thead>
+                <tr>
+                  <th>Project</th>
+                  <th>Flat</th>
+                  <th>Room</th>
+                  <th class="center">Status</th>
+                  <th>Total Rent</th>
+                  <th class="center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="rlTableBody">
+                {% for room in rooms %}
+                <tr>
+                  <td>
+                    <div class="rl-project-cell">
+                      <div class="rl-project-dot"></div>
+                      <span class="rl-project-name">{{ room.project.name }}</span>
+                    </div>
+                  </td>
+                  <td><span class="rl-flat-chip">{{ room.flat }}</span></td>
+                  <td><span class="rl-room-name">{{ room.room_name }}</span></td>
+                  <td class="center">
+                    {% if room.status == "Active" %}
+                      <span class="rl-badge rl-badge-active"><span class="rl-badge-dot"></span>Active</span>
+                    {% elif room.status == "Deactive" %}
+                      <span class="rl-badge rl-badge-deactive"><span class="rl-badge-dot"></span>Deactive</span>
+                    {% elif room.status == "Warning" %}
+                      <span class="rl-badge rl-badge-warning"><span class="rl-badge-dot"></span>Warning</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="rl-rent-val">{{ room.total_monthly_rent }}</span>
+                    <span class="rl-rent-unit">Tk</span>
+                  </td>
+                  <td class="center">
+                    <div class="rl-actions">
+                      <a href="{% url 'room_details' room.id %}" class="rl-action-btn rl-btn-view">
+                        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        View
+                      </a>
+                      <a href="{% url 'room_update' room.pk %}" class="rl-action-btn rl-btn-edit">
+                        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        Edit
+                      </a>
+                      <!--<a href="{% url 'room_delete' room.pk %}"-->
+                      <!--   onclick="return confirm('Are you sure you want to delete this room?');"-->
+                      <!--   class="rl-action-btn rl-btn-delete">-->
+                      <!--  <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>-->
+                      <!--  Delete-->
+                      <!--</a>-->
+                    </div>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="6">
+                    <div class="rl-empty">
+                      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                      <p>No rooms found.<br>Click "Add New Room" to get started.</p>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+      <!-- /rl-wrap -->
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const rlSearch = document.getElementById('rlSearch');
+  const rlCount  = document.getElementById('rlCount');
+
+  rlSearch.addEventListener('input', function () {
+    const q = this.value.toLowerCase().trim();
+    const rows = document.querySelectorAll('#rlTableBody tr');
+    let visible = 0;
+
+    rows.forEach(row => {
+      const match = !q || row.innerText.toLowerCase().includes(q);
+      row.style.display = match ? '' : 'none';
+      if (match && row.querySelector('td')) visible++;
+    });
+
+    rlCount.textContent = q ? `${visible} result${visible !== 1 ? 's' : ''}` : `{{ rooms|length }} rooms`;
+  });
+</script>
+
+{% endblock %}

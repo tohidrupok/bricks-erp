@@ -1,0 +1,250 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sales Installment Summary</title>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: silver;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 960px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo img {
+      height: 50px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .label-box {
+      background-color: #e2f0d9;
+      color: #000;
+      padding: 4px 10px;
+      font-weight: bold;
+      font-size: 13px;
+      border-radius: 4px;
+    }
+
+    .sub-head {
+      font-size: 11px;
+      color: #555;
+	  margin-top: -18px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .voucher-header {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .project-name {
+      margin: 4px 0;
+      font-size: 12px;
+	  margin-bottom: 1px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 10px;
+    }
+
+    .table th,
+    .table td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .section {
+      margin-top: 12px;
+      font-size: 11.5px;
+    }
+
+    .signature-section {
+      margin-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      text-align: center;
+    }
+
+    .signature-box {
+      flex: 1;
+      padding: 8px;
+    }
+
+    .signature-box:not(:last-child) {
+      margin-right: 10px;
+    }
+
+    .signature-line {
+      display: block;
+      margin-top: 10px;
+      border-top: 1px solid #000;
+      width: 100%;
+    }
+
+    .bm-property {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #333;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+      flex-wrap: wrap;
+    }
+    
+    .back-btn {
+      background-color: green;
+      color: white;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    
+    .print-btn {
+      background-color: #1e3c98;
+      color: white;
+      padding: 5px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .card {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+    <!-- Header -->
+    <div class="card-header">
+        <div class="logo">
+            <img src="{% static '/images/BTP_logo_webp.webp' %}" alt="Company Logo">
+        </div>
+        <div style="text-align: right;">
+            <div class="label-box">Sales Installment Summary</div>
+            <p style="font-size: 11px; margin-top: 4px;">
+              Printing Date: {{ print_time|date:"F j, Y, g:i a" }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Address -->
+    <div class="sub-head">
+        House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br>
+        +880191322203<br>
+        md2bayid@gmail.com
+    </div>
+
+    <hr style="margin: 8px 0;">
+
+    <!-- Project Header -->
+    <div class="project-name"><strong>Project:</strong> {{ property_sale.project_name }}</div>
+    <div class="project-name"><strong>Property:</strong> {{ property_sale.property_name }}</div>
+    <div class="project-name"><strong>Customer:</strong> {{ installments.first.customer_name }}</div>
+
+    <!-- Installments Table -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Installment Head</th>
+                <th>Amount</th>
+                <th>Cheque No.</th>
+                <th>Cheque Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for installment in installments %}
+            <tr>
+                <td>{{ installment.month|date:"M Y" }}</td>
+                <td>{{ installment.get_payment_type_display }}</td>
+                <td>{{ installment.amount|intcomma }}</td>
+                <td>{{ installment.cheque_no|default:"N/A" }}</td>
+                <td>{% if installment.cheque_date %}{{ installment.cheque_date|date:"d-m-Y" }}{% else %}N/A{% endif %}</td>
+                <td>{{ installment.pay_status }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="6" style="text-align:center;">No installments found.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+     <!-- Signatures -->
+    <div class="signature-section">
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Prepared By
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Checked By
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Approved By
+      </div>
+    </div>
+    <!-- Footer -->
+    <div class="footer no-print">
+        <button onclick="window.location.href='{% url 'installment_list' property_sale.id %}'" class="back-btn">← Back</button>
+        <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+    </div>
+
+</div>
+
+</body>
+</html>

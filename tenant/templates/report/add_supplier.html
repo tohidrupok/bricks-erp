@@ -1,0 +1,391 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tenant Ledger Filter - BM ERP{% endblock %}
+
+{% block content %} 
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 
+    dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] 
+            bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+
+            {% include 'partials/header.html' %}
+
+            <div class="mt-10 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12">
+                    
+                    <div class="w-full max-w-3xl mx-auto bg-white dark:bg-darkmode-600 
+                        p-10 shadow-2xl rounded-2xl border border-gray-200 dark:border-darkmode-400">
+
+                        <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+                        
+                        <style>
+                        .asp-wrapper {
+                          font-family: 'Sora', sans-serif;
+                        }
+                        
+                        .asp-card {
+                          background: #ffffff;
+                          border-radius: 20px;
+                          overflow: hidden;
+                          box-shadow:
+                            0 0 0 1px rgba(99, 102, 241, 0.08),
+                            0 8px 32px rgba(99, 102, 241, 0.10),
+                            0 2px 8px rgba(0,0,0,0.04);
+                        }
+                        
+                        .asp-card::before {
+                          content: '';
+                          display: block;
+                          height: 4px;
+                          background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 40%, #ec4899 100%);
+                        }
+                        
+                        .asp-header {
+                          padding: 26px 32px 20px;
+                          border-bottom: 1px solid #f1f1f5;
+                          display: flex;
+                          align-items: center;
+                          gap: 14px;
+                          background: linear-gradient(135deg, #fafafa 0%, #f5f3ff 100%);
+                        }
+                        
+                        .asp-header-icon {
+                          width: 44px;
+                          height: 44px;
+                          background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                          border-radius: 12px;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          flex-shrink: 0;
+                          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+                        }
+                        
+                        .asp-header-icon svg {
+                          width: 22px;
+                          height: 22px;
+                          fill: none;
+                          stroke: #fff;
+                          stroke-width: 2;
+                          stroke-linecap: round;
+                          stroke-linejoin: round;
+                        }
+                        
+                        .asp-title {
+                          font-size: 18px;
+                          font-weight: 700;
+                          color: #1e1b4b;
+                          margin: 0;
+                          letter-spacing: -0.3px;
+                        }
+                        
+                        .asp-subtitle {
+                          font-size: 12px;
+                          color: #7c7ca0;
+                          margin: 2px 0 0;
+                          font-weight: 400;
+                          font-family: 'JetBrains Mono', monospace;
+                        }
+                        
+                        .asp-body {
+                          padding: 28px 32px 32px;
+                        }
+                        
+                        .asp-alert-success {
+                          padding: 11px 16px;
+                          border-radius: 10px;
+                          font-size: 13px;
+                          font-weight: 500;
+                          margin-bottom: 20px;
+                          display: flex;
+                          align-items: center;
+                          gap: 8px;
+                          background: #f0fdf4;
+                          color: #166534;
+                          border: 1px solid #bbf7d0;
+                          animation: asp-fadeIn 0.3s ease;
+                        }
+                        
+                        .asp-section-label {
+                          font-size: 10px;
+                          font-weight: 600;
+                          color: #a5b4fc;
+                          letter-spacing: 1.2px;
+                          text-transform: uppercase;
+                          margin: 0 0 16px;
+                          font-family: 'JetBrains Mono', monospace;
+                        }
+                        
+                        .asp-grid {
+                          display: grid;
+                          grid-template-columns: 1fr 1fr;
+                          gap: 16px;
+                          margin-bottom: 16px;
+                        }
+                        
+                        .asp-grid-full {
+                          grid-column: 1 / -1;
+                        }
+                        
+                        .asp-field {
+                          display: flex;
+                          flex-direction: column;
+                          gap: 6px;
+                        }
+                        
+                        .asp-label {
+                          font-size: 12px;
+                          font-weight: 600;
+                          color: #4b4b7c;
+                          letter-spacing: 0.2px;
+                        }
+                        
+                        .asp-label .asp-req {
+                          color: #ec4899;
+                          font-size: 14px;
+                          line-height: 1;
+                        }
+                        
+                        .asp-input,
+                        .asp-textarea {
+                          width: 100%;
+                          padding: 10px 14px;
+                          border: 1.5px solid #e8e8f4;
+                          border-radius: 10px;
+                          background: #fafaff;
+                          font-family: 'Sora', sans-serif;
+                          font-size: 13.5px;
+                          color: #1e1b4b;
+                          transition: all 0.2s ease;
+                          outline: none;
+                          box-sizing: border-box;
+                        }
+                        
+                        .asp-input::placeholder,
+                        .asp-textarea::placeholder {
+                          color: #b0b0cc;
+                        }
+                        
+                        .asp-input:focus,
+                        .asp-textarea:focus {
+                          border-color: #6366f1;
+                          background: #fff;
+                          box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+                        }
+                        
+                        .asp-input:hover,
+                        .asp-textarea:hover {
+                          border-color: #a5b4fc;
+                          background: #fff;
+                        }
+                        
+                        .asp-textarea {
+                          resize: vertical;
+                          min-height: 80px;
+                          line-height: 1.6;
+                        }
+                        
+                        .asp-divider {
+                          height: 1px;
+                          background: linear-gradient(90deg, transparent, #e8e8f4 20%, #e8e8f4 80%, transparent);
+                          margin: 20px 0;
+                        }
+                        
+                        .asp-footer {
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          flex-wrap: wrap;
+                          gap: 12px;
+                        }
+                        
+                        .asp-btn-submit {
+                          display: inline-flex;
+                          align-items: center;
+                          gap: 8px;
+                          padding: 12px 28px;
+                          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+                          color: #fff;
+                          border: none;
+                          border-radius: 11px;
+                          font-family: 'Sora', sans-serif;
+                          font-size: 14px;
+                          font-weight: 600;
+                          cursor: pointer;
+                          transition: all 0.2s ease;
+                          letter-spacing: 0.2px;
+                          box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+                          position: relative;
+                          overflow: hidden;
+                        }
+                        
+                        .asp-btn-submit::after {
+                          content: '';
+                          position: absolute;
+                          inset: 0;
+                          background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+                          opacity: 0;
+                          transition: opacity 0.2s ease;
+                        }
+                        
+                        .asp-btn-submit:hover {
+                          transform: translateY(-1px);
+                          box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+                        }
+                        
+                        .asp-btn-submit:hover::after {
+                          opacity: 1;
+                        }
+                        
+                        .asp-btn-submit:active {
+                          transform: translateY(0);
+                        }
+                        
+                        .asp-btn-submit svg,
+                        .asp-btn-submit span {
+                          position: relative;
+                          z-index: 1;
+                        }
+                        
+                        .asp-btn-submit svg {
+                          width: 16px;
+                          height: 16px;
+                          stroke: currentColor;
+                          fill: none;
+                          stroke-width: 2.2;
+                          stroke-linecap: round;
+                          stroke-linejoin: round;
+                        }
+                        
+                        .asp-footer-note {
+                          font-size: 11.5px;
+                          color: #a0a0c0;
+                          font-family: 'JetBrains Mono', monospace;
+                        }
+                        
+                        @keyframes asp-fadeIn {
+                          from { opacity: 0; transform: translateY(-6px); }
+                          to   { opacity: 1; transform: translateY(0); }
+                        }
+                        
+                        @media (max-width: 600px) {
+                          .asp-grid { grid-template-columns: 1fr; }
+                          .asp-header, .asp-body { padding-left: 20px; padding-right: 20px; }
+                        }
+                        </style>
+                        
+                        <div class="asp-wrapper">
+                          <div class="asp-card">
+                        
+                            <!-- Header -->
+                            <div class="asp-header">
+                              <div class="asp-header-icon">
+                                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                              </div>
+                              <div>
+                                <p class="asp-title">Add Supplier</p>
+                                <p class="asp-subtitle">Procurement · Vendor Management</p>
+                              </div>
+                            </div>
+                        
+                            <!-- Body -->
+                            <div class="asp-body">
+                        
+                              <!-- Flash Messages -->
+                              {% if messages %}
+                                {% for message in messages %}
+                                <div class="asp-alert-success">
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                  </svg>
+                                  {{ message }}
+                                </div>
+                                {% endfor %}
+                              {% endif %}
+                        
+                              <form method="POST">
+                                {% csrf_token %}
+                        
+                                <!-- Basic Info -->
+                                <p class="asp-section-label">Basic Information</p>
+                                <div class="asp-grid">
+                        
+                                  <div class="asp-field">
+                                    <label class="asp-label">Supplier Name <span class="asp-req">*</span></label>
+                                    <input type="text" name="name" class="asp-input" placeholder="Enter supplier name" required>
+                                  </div>
+                        
+                                  <div class="asp-field">
+                                    <label class="asp-label">Company Name</label>
+                                    <input type="text" name="company_name" class="asp-input" placeholder="Enter company name">
+                                  </div>
+                        
+                                </div>
+                        
+                                <div class="asp-divider"></div>
+                        
+                                <!-- Contact Info -->
+                                <p class="asp-section-label">Contact Details</p>
+                                <div class="asp-grid">
+                        
+                                  <div class="asp-field">
+                                    <label class="asp-label">Phone</label>
+                                    <input type="text" name="phone" class="asp-input" placeholder="+880 ...">
+                                  </div>
+                        
+                                  <div class="asp-field">
+                                    <label class="asp-label">Email</label>
+                                    <input type="email" name="email" class="asp-input" placeholder="supplier@example.com">
+                                  </div>
+                        
+                                  <div class="asp-field asp-grid-full">
+                                    <label class="asp-label">Address</label>
+                                    <textarea name="address" class="asp-textarea" placeholder="Enter full address…"></textarea>
+                                  </div>
+                        
+                                </div>
+                        
+                                <div class="asp-divider"></div>
+                        
+                                <!-- Account Info -->
+                                <p class="asp-section-label">Account Information</p>
+                                <div class="asp-grid">
+                        
+                                  <div class="asp-field">
+                                    <label class="asp-label">Head of Account</label>
+                                    <input type="text" name="head_of_account" class="asp-input" placeholder="Account head name">
+                                  </div>
+                        
+                                </div>
+                        
+                                <div class="asp-divider"></div>
+                        
+                                <!-- Footer -->
+                                <div class="asp-footer">
+                                  <button type="submit" class="asp-btn-submit">
+                                    <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                    <span>Save Supplier</span>
+                                  </button>
+                                  <span class="asp-footer-note">* Required fields</span>
+                                </div>
+                        
+                              </form>
+                            </div><!-- /asp-body -->
+                          </div><!-- /asp-card -->
+                        </div><!-- /asp-wrapper -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

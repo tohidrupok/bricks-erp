@@ -1,0 +1,97 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Customer Lead Details- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <div class="max-w-5xl mx-auto p-8 bg-white shadow-xl rounded-2xl">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-8 border-b pb-4">📋 Customer Lead Details</h2>
+                
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600">Lead Name</label>
+                            <p class="text-gray-900 text-base">{{ customer_lead.lead_name }}</p>
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600">Customer</label>
+                            <p class="text-gray-900">{{ customer_lead.customer.customer_name }}</p>
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600">Project Name</label>
+                            <p class="text-gray-900">{{ customer_lead.project_name.project_name }}</p>
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600">First Contact Date</label>
+                            <p class="text-gray-900">{{ customer_lead.first_contact_date|date:"Y-m-d" }}</p>
+                        </div>
+                
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-600">First Contact Note</label>
+                            <p class="text-gray-900 whitespace-pre-line">{{ customer_lead.first_contact_note }}</p>
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600">Second Contact Date</label>
+                            <p class="text-gray-900">{{ customer_lead.second_contact_date|date:"Y-m-d" }}</p>
+                        </div>
+                
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-600">Second Contact Note</label>
+                            <p class="text-gray-900 whitespace-pre-line">{{ customer_lead.second_contact_note }}</p>
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600">Third Contact Date</label>
+                            <p class="text-gray-900">{{ customer_lead.third_contact_date|date:"Y-m-d" }}</p>
+                        </div>
+                
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-600">Third Contact Note</label>
+                            <p class="text-gray-900 whitespace-pre-line">{{ customer_lead.third_contact_note }}</p>
+                        </div>
+                
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-600">Additional Note</label>
+                            <p class="text-gray-900 whitespace-pre-line">{{ customer_lead.note }}</p>
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-600">Status</label>
+                            <p class="text-gray-900">{{ customer_lead.status|title }}</p>
+                        </div>
+                        
+                
+                    </div>
+                
+                    <div class="mt-10 text-right">
+                        <a href="{% url 'customer_lead_list' %}" style="background-color:#1e3c98" class="inline-flex items-center gap-2 bg-gray-700 hover:bg-gray-800 text-white px-6 py-2 rounded-lg shadow">
+                            🔙 Back to List
+                        </a>
+                    </div>
+                </div>
+                
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

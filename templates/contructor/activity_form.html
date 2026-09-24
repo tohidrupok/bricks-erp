@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Contractor Activity - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    background-color: silver;
+    padding: 20px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .table th, .table td {
+    border: 1px solid #ccc;
+    padding: 6px 8px;
+    text-align: left;
+  }
+
+  .btn {
+    padding: 6px 12px;
+    font-size: 11px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .btn-add {
+    background-color: #1e3a8a;
+    color: white;
+  }
+
+  .btn-save {
+    background-color: #84cc16;
+    color: white;
+  }
+
+  .btn-delete {
+    color: red;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    background: none;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+  {% include 'partials/mobile.html' %}
+  <div class="mt-[4.7rem] flex md:mt-0">
+    {% include 'partials/sidebar_list.html' %}
+    <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+      {% include 'partials/header.html' %}
+
+      <div class="card mt-10">
+        <h2 class="text-lg font-bold mb-4">Contractor Activity Entry</h2>
+        <form id="activity-form">
+          {% csrf_token %}
+          <input type="hidden" id="project_id" value="{{ project.id }}">
+          <input type="text" id="project_name" value="{{ project_name }}" readonly class="mb-4 border border-gray-300 px-2 py-1 rounded w-full">
+
+          <div class="overflow-x-auto">
+            <table class="table">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th>Contractor</th>
+                  <th>Working Head</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Amount Paid</th>
+                  <th>Status</th>
+                  <th>Remarks</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="activity-body">
+                <tr>
+                  <td>
+                    <select name="contractor" class="border px-2 py-1 w-full" required>
+                      <option value="">Select Contractor</option>
+                      {% for contractor in contractors %}
+                        <option value="{{ contractor.id }}">{{ contractor.supervisor_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </td>
+                  <td><input type="text" name="working_head" class="border px-2 py-1 w-full" required></td>
+                  <td><input type="date" name="work_start_date" class="border px-2 py-1 w-full" value="{{ today|date:'Y-m-d' }}" required></td>
+                  <td><input type="date" name="work_end_date" class="border px-2 py-1 w-full" value="{{ today|date:'Y-m-d' }}" required></td>
+                  <td><input type="number" name="amount_paid" step="0.01" class="border px-2 py-1 w-full" required></td>
+                  <td>
+                    <select name="status" class="border px-2 py-1 w-full">
+                      <option value="ongoing">Ongoing</option>
+                      <option value="completed">Completed</option>
+                      <option value="paused">Paused</option>
+                    </select>
+                  </td>
+                  <td><input type="text" name="remarks" class="border px-2 py-1 w-full"></td>
+                 <td>
+				  <button type="button" class="btn-delete" onclick="deleteRow(this)">
+					<span style="color: red; font-size: 16px;">🗑️</span>
+				  </button>
+				</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+         <div class="mt-4 flex gap-3">
+		  <a href="{% url 'activity_list' %}">
+			<button type="button" class="btn btn-save">🔙 Back</button>
+		  </a>
+		  &nbsp;
+		  <button type="button" class="btn btn-add" onclick="addRow()">➕ Add Row</button>
+		  <button type="submit" class="btn btn-save">💾 Save All</button>
+		</div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  function addRow() {
+    const table = document.getElementById("activity-body");
+    const newRow = table.rows[0].cloneNode(true);
+    newRow.querySelectorAll("input, select").forEach(el => {
+      if (el.tagName === "SELECT") {
+        el.selectedIndex = 0;
+      } else {
+        el.value = "";
+      }
+    });
+    table.appendChild(newRow);
+  }
+
+  function deleteRow(button) {
+    const row = button.closest("tr");
+    const table = document.getElementById("activity-body");
+    if (table.rows.length > 1) {
+      row.remove();
+    } else {
+      alert("At least one row is required.");
+    }
+  }
+
+  document.getElementById("activity-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const rows = document.querySelectorAll("#activity-body tr");
+    const data = [];
+    rows.forEach(row => {
+      const contractor = row.querySelector('select[name="contractor"]').value;
+      const working_head = row.querySelector('input[name="working_head"]').value;
+      const work_start_date = row.querySelector('input[name="work_start_date"]').value;
+      const work_end_date = row.querySelector('input[name="work_end_date"]').value;
+      const amount_paid = row.querySelector('input[name="amount_paid"]').value;
+      const status = row.querySelector('select[name="status"]').value;
+      const remarks = row.querySelector('input[name="remarks"]').value;
+
+      if (contractor && working_head && work_start_date && work_end_date && amount_paid) {
+        data.push({ contractor, working_head, work_start_date, work_end_date, amount_paid, status, remarks });
+      }
+    });
+
+    if (data.length === 0) {
+      alert("Please fill at least one valid row.");
+      return;
+    }
+
+    fetch("{% url 'activity_add' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie('csrftoken')
+      },
+      body: JSON.stringify({
+        data: data,
+        project_id: document.getElementById("project_id").value
+      })
+    })
+    .then(res => res.json())
+    .then(result => {
+      if (result.status === "success") {
+        alert("Activities saved successfully.");
+        window.location.href = "{% url 'activity_list' %}";
+      } else {
+        alert("Error: " + (result.message || "Failed to save"));
+        console.error(result);
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert("Something went wrong.");
+    });
+  });
+</script>
+{% endblock %}

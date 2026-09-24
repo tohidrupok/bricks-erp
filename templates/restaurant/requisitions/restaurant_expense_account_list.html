@@ -1,0 +1,378 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+
+body{
+    background:#eef2f7;
+}
+
+/* Container */
+
+.container-box{
+    max-width:1300px;
+    margin:25px auto;
+}
+
+/* Stats */
+
+.stats{
+    display:flex;
+    gap:20px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+}
+
+.stat-card{
+    flex:1;
+    min-width:220px;
+    background:white;
+    border-radius:15px;
+    padding:20px;
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+
+.stat-card h4{
+    color:#777;
+    margin:0;
+    font-size:14px;
+}
+
+.stat-card h2{
+    margin-top:12px;
+    color:#198754;
+    font-weight:bold;
+}
+
+/* Main Card */
+
+.main-card{
+    background:white;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+}
+
+/* Header */
+
+.card-header{
+    background:linear-gradient(135deg,#198754,#20c997);
+    padding:20px 25px;
+    color:white;
+}
+
+.card-header h3{
+    margin:0;
+}
+
+.card-header small{
+    opacity:.85;
+}
+
+/* Filter */
+
+.filter{
+    padding:20px;
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.search-box{
+    flex:1;
+}
+
+.search-box input{
+    width:100%;
+    border:1px solid #ddd;
+    border-radius:8px;
+    padding:12px;
+}
+
+.add-btn{
+    background:#198754;
+    color:white;
+    text-decoration:none;
+    padding:12px 20px;
+    border-radius:8px;
+    font-weight:bold;
+}
+
+/* Table */
+
+.table-responsive{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+thead{
+    background:#0d6efd;
+    color:white;
+}
+
+th{
+    padding:15px;
+    text-align:left;
+}
+
+td{
+    padding:15px;
+    border-bottom:1px solid #eee;
+}
+
+tbody tr:nth-child(even){
+    background:#fafafa;
+}
+
+tbody tr:hover{
+    background:#f0f8ff;
+}
+
+/* Badges */
+
+.badge-category{
+    background:#fff3cd;
+    color:#856404;
+    padding:5px 12px;
+    border-radius:20px;
+    font-size:13px;
+}
+
+.badge-expense{
+    background:#d1ecf1;
+    color:#0c5460;
+    padding:5px 12px;
+    border-radius:20px;
+}
+
+.badge-bazar{
+    background:#d4edda;
+    color:#155724;
+    padding:5px 12px;
+    border-radius:20px;
+}
+
+.amount{
+    background:#e8fff0;
+    color:#198754;
+    padding:7px 15px;
+    border-radius:20px;
+    font-weight:bold;
+}
+
+/* Buttons */
+
+.btn{
+    padding:8px 14px;
+    border-radius:8px;
+    color:white;
+    text-decoration:none;
+    font-size:13px;
+}
+
+.btn-edit{
+    background:#0d6efd;
+}
+
+.btn-delete{
+    background:#dc3545;
+}
+
+.no-data{
+    text-align:center;
+    color:#999;
+}
+
+@media(max-width:768px){
+
+    .filter{
+        flex-direction:column;
+    }
+
+    .stats{
+        flex-direction:column;
+    }
+
+}
+
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+  {% include 'partials/mobile.html' %}
+  <div class="mt-[4.7rem] flex md:mt-0">
+    {% include 'partials/sidebar_list.html' %}
+    <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+      {% include 'partials/header.html' %}
+
+<div class="container-box">
+
+    <!-- Statistics -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+            <h4>Total Expenses</h4>
+            <h2>{{ expenses.count }}</h2>
+        </div>
+
+        <div class="stat-card">
+            <h4>Total Amount</h4>
+            <h2>৳{{ total_amount|floatformat:2 }}</h2>
+        </div>
+
+    </div>
+
+
+    <div class="main-card">
+
+        <div class="card-header">
+            <h3>🍽 Restaurant Expense List</h3>
+            <small>Manage Restaurant Expenses</small>
+        </div>
+
+
+        <!-- Search -->
+
+        <div class="filter">
+
+            <div class="search-box">
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="🔍 Search..."
+                    onkeyup="searchTable()">
+            </div>
+        </div>
+
+
+        <!-- Table -->
+
+        <div class="table-responsive">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>SL</th>
+                        <th>Project</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Expense Name</th>
+                        <th>Amount</th>
+                        <!--<th>Action</th>-->
+                    </tr>
+
+                </thead>
+
+                <tbody id="expenseTable">
+
+                {% for expense in expenses %}
+
+                    <tr>
+
+                        <td>{{ forloop.counter }}</td>
+
+                        <td>
+                            {{ expense.project_name }}
+                        </td>
+
+                        <td>
+                            <span class="badge-category">
+                                {{ expense.restu_cate_name }}
+                            </span>
+                        </td>
+
+                        <td>
+
+                            {% if expense.restu_expense_type == 'Bazar' %}
+                                <span class="badge-bazar">
+                                    🛒 Bazar
+                                </span>
+                            {% else %}
+                                <span class="badge-expense">
+                                    💰 Expense
+                                </span>
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ expense.restu_expense_name }}
+                        </td>
+
+                        <td>
+                            <span class="amount">
+                                ৳{{ expense.restu_expense_amount }}
+                            </span>
+                        </td>
+
+                        <!--<td>-->
+
+                        <!--    <a href="{% url 'edit_restaurant_expense_public' expense.id %}"-->
+                        <!--       class="btn btn-edit">-->
+                        <!--       ✏ Edit-->
+                        <!--    </a>-->
+
+                        <!--    <a href="{% url 'delete_restaurant_expense_public' expense.id %}"-->
+                        <!--       class="btn btn-delete"-->
+                        <!--       onclick="return confirm('Are you sure?')">-->
+                        <!--       🗑 Delete-->
+                        <!--    </a>-->
+
+                        <!--</td>-->
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="7" class="no-data">
+                            No expense records found.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+</div>
+</div>
+<script>
+
+function searchTable(){
+
+    let input=document.getElementById("searchInput").value.toLowerCase();
+
+    let rows=document.querySelectorAll("#expenseTable tr");
+
+    rows.forEach(function(row){
+
+        if(row.innerText.toLowerCase().includes(input)){
+            row.style.display="";
+        }
+        else{
+            row.style.display="none";
+        }
+
+    });
+
+}
+
+</script>
+
+{% endblock %}

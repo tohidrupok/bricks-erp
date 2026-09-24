@@ -1,0 +1,53 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Flat/Plot Edit Record - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+                
+                <div class="mt-10 max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-bold mb-6">Confirm Delete</h2>
+                    <form method="POST" class="flex gap-4">
+                        {% csrf_token %}
+                        <button type="submit" style="background-color:#84cc16" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                            Yes, Delete
+                        </button>
+                        <a href="{% url 'flat_plot_summary' %}" style="margin-left:0.5%;background-color:#1e3a8a"  class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+                            Cancel
+                        </a>
+                    </form>
+                </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

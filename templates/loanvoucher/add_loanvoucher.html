@@ -1,0 +1,438 @@
+<!-- templates/CreditVoucher.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payable Amount Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}                
+                <!-- END: Top Bar -->
+                <div class="flex items-center justify-between mt-10">
+                    <h2 class="text-lg font-medium">Payable Amount List   &nbsp;</h2>
+                    <a href="{% url 'add_loanvoucher' %}">
+                        <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white shadow-md">
+                            Refresh
+                        </button>
+                    </a>
+					 <a style="margin-left:0.5%" href="{% url 'add_loanvoucher' %}">
+                        <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white shadow-md">
+                            Payable
+                        </button>
+                    </a>
+					 <a style="margin-left:0.5%" href="{% url 'add_rechvoucher' %}">
+                        <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white shadow-md">
+                            Receivable
+                        </button>
+                    </a>
+                </div>
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                        <form method="POST" class="w-full max-w-4xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                            {% csrf_token %}
+                            <h2 class="text-xl font-semibold mb-6 text-center text-gray-800"><span style="color:green">Add Payable Amount </span> </h2>
+                            
+                            
+    						 <!-- <select disabled>-->
+    							<!--{% for cashTy in No_Method %}-->
+    							<!--  <option selected>{{ cashTy.cash_type_name }}</option>-->
+    							<!--{% endfor %}-->
+    						 <!-- </select>-->
+    						  <!-- Hidden input to actually submit value -->
+    						 <!-- <input type="hidden" name="cash_type" value="{{ cashs.0.id }}">-->
+    						 <input type="hidden" name="cash_type" value="{{ No_Method.0.id }}">
+    						
+    						<div class="mb-4 relative dropdown w-full max-w-md">
+                            <label class="block font-medium text-gray-800 mb-1">Name</label>
+                        
+                            <!-- Searchable Input -->
+                            <input type="text"
+                                   id="expense_search_input"
+                                   oninput="filterDropdown(this)"
+                                   onclick="toggleDropdown(this)"
+                                   placeholder="Payable Name"
+                                   class="border border-slate-300 rounded-md p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   autocomplete="off"
+                                   value="{{ selected_expense_name|default:'' }}">
+                        
+                            <!-- Hidden field to store the selected ID -->
+                            <input type="hidden" name="source_name" id="selected_expense_id" value="{{ form.source_name.value|default:'' }}">
+                        
+                            <!-- Dropdown list -->
+                            <div class="dropdown-content border bg-white w-full shadow-lg hidden absolute mt-1 max-h-60 overflow-y-auto z-50 rounded-md">
+                                {% for expense in expenses %}
+                                    <div onclick="selectDropdownItem(this)" data-id="{{ expense.id }}">
+                                        {{ expense.head_exp_code }} - {{ expense.head_exp_name }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        
+                            <!-- Error Display -->
+                            {% for error in form.expense_name.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                            <!-- Project -->
+                            <div class="mb-4">
+                                <label for="id_project_name" class="font-medium text-lg text-gray-800">Project Name</label>
+                                <select id="id_project_name"
+                                        name="project_name"
+                                        class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="" disabled {% if not form.project_name.value %} selected {% endif %}>Select Project Name</option>
+                                    {% for value, label in form.project_name.field.choices %}
+                                        <option value="{{ value }}" {% if value|stringformat:"s" == form.project_name.value|stringformat:"s" %} selected {% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% for error in form.project_name.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        
+                            <!-- Type Dropdown -->
+                            <div class="mb-4">
+                                <label for="id_type" class="font-medium text-lg text-gray-800">Type</label>
+                                <select id="id_type" name="type"
+                                        class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                        onchange="toggleFields()">
+                                    <option value="">Select Type</option>
+                                    <option value="Customer" {% if form.type.value == "Customer" %}selected{% endif %}>Customer</option>
+                                    <option value="Contructor" {% if form.type.value == "Contructor" %}selected{% endif %}>Contructor</option>
+                                    <option value="Vendor" {% if form.type.value == "Vendor" %}selected{% endif %}>Supplier</option>
+                                    <option value="Expense" {% if form.type.value == "Expense" %}selected{% endif %}>Expense</option>
+									<option value="Bank" {% if form.type.value == "Bank" %}selected{% endif %}>Bank</option>
+                                </select>
+                                {% for error in form.type.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        
+                            <!-- Customer Name -->
+                            <div id="customerFields" class="mb-4" style="display:none;">
+                                <label for="id_customer_name" class="font-medium text-lg text-gray-800">Customer Name</label>
+                                <select id="id_customer_name" name="customer_name"
+                                        class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="" disabled {% if not form.customer_name.value %} selected {% endif %}>Select Customer Name</option>
+                                    {% for value, label in form.customer_name.field.choices %}
+                                        <option value="{{ value }}" {% if value|stringformat:"s" == form.customer_name.value|stringformat:"s" %} selected {% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% for error in form.customer_name.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        
+                            <!-- Conductor Name -->
+                            <div id="contructorFields" class="mb-4" style="display:none;">
+                                <label for="id_conductor_name" class="font-medium text-lg text-gray-800">Contructor Name</label>
+                                <select id="id_conductor_name" name="conductor_name"
+                                        class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="" disabled {% if not form.conductor_name.value %} selected {% endif %}>Select Contructor Name</option>
+                                    {% for value, label in form.conductor_name.field.choices %}
+                                        <option value="{{ value }}" {% if value|stringformat:"s" == form.conductor_name.value|stringformat:"s" %} selected {% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% for error in form.conductor_name.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        
+                            <!-- Vendor -->
+                            <div class="mb-4" id="vendorFields" style="display:none;">
+                                <label for="id_vendor_name" class="font-medium text-lg text-gray-800">Supplier Name</label>
+                                <select id="id_vendor_name" name="vendor_name"
+                                        class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                    <option value="" {% if not form.vendor_name.value %}selected{% endif %}>Select Supplier</option>
+                                    {% for choice in form.vendor_name.field.choices %}
+                                        <option value="{{ choice.0 }}" {% if choice.0|stringformat:"s" == form.vendor_name.value|stringformat:"s" %}selected{% endif %}>{{ choice.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% for error in form.vendor_name.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        <div class="mb-4" id="bankFields" style="display: none;">
+                            <label for="id_bankName" class="font-medium text-lg text-gray-800">Bank Name</label>
+                            <select id="id_bankName"
+                                name="bankName"
+                                class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-blue-500 focus:border-blue-500 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+                                <option value="" disabled {% if not form.type.value %} selected {% endif %}>Select Bank Name</option>
+                                {% for value, label in form.bankName.field.choices %}
+                                    <option value="{{ value }}" {% if value == form.bankName.value %} selected {% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            {% for error in form.bankName.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                            <!-- Expense Name Dropdown -->
+                        <div class="mb-4 relative dropdown w-full max-w-md" id="expenseFields" style="display: none;">
+                            <label class="block font-medium text-gray-800 mb-1">Expense Name</label>
+                        
+                            <!-- Searchable Input -->
+                            <input type="text"
+                                   id="expense_search_input"
+                                   oninput="filterDropdown(this)"
+                                   onclick="toggleDropdown(this)"
+                                   placeholder="Search Expense Name"
+                                   class="border border-slate-300 rounded-md p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   autocomplete="off"
+                                   value="{{ selected_expense_name|default:'' }}">
+                        
+                            <!-- Hidden field to store the selected ID -->
+                            <input type="hidden" name="expense_name" id="selected_expense_id" value="{{ form.expense_name.value|default:'' }}">
+                        
+                            <!-- Dropdown list -->
+                            <div class="dropdown-content border bg-white w-full shadow-lg hidden absolute mt-1 max-h-60 overflow-y-auto z-50 rounded-md">
+                                {% for expense in expenses %}
+                                    <div onclick="selectDropdownItem(this)" data-id="{{ expense.id }}">
+                                        {{ expense.head_exp_code }} - {{ expense.head_exp_name }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        
+                            <!-- Error Display -->
+                            {% for error in form.expense_name.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        
+                        <style>
+                        .dropdown-content div {
+                            padding: 0.5rem;
+                            cursor: pointer;
+                            transition: background-color 0.2s ease;
+                        }
+                        .dropdown-content div:hover {
+                            background-color: #f3f4f6;
+                        }
+                        .dropdown-content div.selected {
+                            background-color: #e0f2fe;
+                        }
+                        </style>
+                        
+                        <script>
+                        function toggleDropdown(input) {
+                            const wrapper = input.closest('.dropdown');
+                            const dropdown = wrapper.querySelector('.dropdown-content');
+                            dropdown.classList.toggle('hidden');
+                        }
+                        
+                        function filterDropdown(input) {
+                            const dropdown = input.closest('.dropdown').querySelector('.dropdown-content');
+                            const filter = input.value.toLowerCase();
+                            dropdown.querySelectorAll('div').forEach(item => {
+                                item.style.display = item.textContent.toLowerCase().includes(filter) ? '' : 'none';
+                            });
+                        }
+                        
+                        function selectDropdownItem(div) {
+                            const wrapper = div.closest('.dropdown');
+                            const input = wrapper.querySelector('input[type="text"]');
+                            const hidden = wrapper.querySelector('input[type="hidden"]');
+                        
+                            // Set selected name and ID
+                            input.value = div.textContent.trim();
+                            hidden.value = div.getAttribute('data-id');
+                        
+                            // Close dropdown
+                            wrapper.querySelector('.dropdown-content').classList.add('hidden');
+                        
+                            // Highlight selection
+                            wrapper.querySelectorAll('.dropdown-content div').forEach(el => el.classList.remove('selected'));
+                            div.classList.add('selected');
+                        }
+                        
+                        // Call toggleFields if you have it to show expenseFields when needed
+                        window.onload = function() {
+                            toggleFields && toggleFields();
+                        };
+                        </script>
+                        
+                            <!-- Head of Account -->
+                            <div class="mb-4">
+                                <label for="id_headAcct" class="font-medium text-lg text-gray-800">Head of Account</label>
+                                <select id="id_headAcct" name="headAcct"
+                                        class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                    <option value="" {% if not form.headAcct.value %}selected{% endif %}>Select Head of Account</option>
+                                    {% for obj in form.fields.headAcct.queryset %}
+                                        <option value="{{ obj.pk }}" {% if obj.pk|stringformat:"s" == form.headAcct.value|stringformat:"s" %}selected{% endif %}>{{ obj }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% for error in form.headAcct.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        
+                            <!-- MR/Bill No -->
+                            <div class="mb-4">
+                                <label for="id_mr_or_bill_no" class="font-medium text-lg text-gray-800">M.R/Bill No</label>
+                                <input type="text" id="id_mr_or_bill_no" name="mr_or_bill_no"
+                                       class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                       placeholder="Enter M.R/Bill No"
+                                       value="{{ form.mr_or_bill_no.value|default_if_none:'' }}">
+                                {% for error in form.mr_or_bill_no.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        
+                            <!-- Date -->
+                            <div class="mb-4">
+                                <label for="id_date" class="font-medium text-lg text-gray-800">Date</label>
+                                <input type="date" id="id_date" name="date"
+                                       class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                        value="{{ form.date.value|default:today|date:'Y-m-d' }}">  
+                                {% for error in form.date.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        
+                            <!-- Amount -->
+                            <div class="mb-4">
+                                <label for="id_amount" class="font-medium text-lg text-gray-800">Amount</label>
+                                <input type="number" step="0.01" id="id_amount" name="amount"
+                                       class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                       placeholder="Enter Amount"
+                                       value="{{ form.amount.value|default_if_none:'' }}">
+                                {% for error in form.amount.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        
+                            <!-- Carrier -->
+                            <div class="mb-4">
+                                <label for="id_carrier" class="font-medium text-lg text-gray-800">Carrier</label>
+                                <input type="text" id="id_carrier" name="carrier"
+                                       class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                       placeholder="Enter Carrier Name"
+                                       value="{{ form.carrier.value|default_if_none:'' }}">
+                                {% for error in form.carrier.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        
+                            <!-- Particulars -->
+                            <div class="mb-4">
+                                <label for="id_particulars" class="font-medium text-lg text-gray-800">Note</label>
+                                <textarea id="id_particulars" name="particulars"
+                                          class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                          rows="3" placeholder="Enter Note">{{ form.particulars.value|default_if_none:'' }}</textarea>
+                                {% for error in form.particulars.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        
+                            <!-- Confirmed -->
+                            <div class="mb-4">
+                                <label class="font-medium text-lg text-gray-800 block mb-2">Confirm?</label>
+                                <label class="inline-flex items-center mr-6">
+                                    <input type="radio" name="is_confirmed" value="True" {% if form.is_confirmed.value|stringformat:"s" == "True" %}checked{% endif %}>
+                                    <span class="ml-2">Yes</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="is_confirmed" value="False" {% if form.is_confirmed.value|stringformat:"s" == "False" or not form.is_confirmed.value %}checked{% endif %}>
+                                    <span class="ml-2">No</span>
+                                </label>
+                                {% for error in form.is_confirmed.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        
+                            <!-- Submit Buttons -->
+                            <div class="text-center mt-6">
+                                <button type="submit" style="background-color:#1e3c98"
+                                        class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 rounded-md">
+                                   Save 
+                                </button>
+                                <a href="{% url 'loanvoucher_list' %}" style="margin-left:0.5%;background-color:#1e3c98"
+                                   class="ml-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md">
+                                    Back to List
+                                </a>
+                            </div>
+                        </form>
+                        
+                        <style>
+                        .dropdown-content div {
+                            padding: 0.5rem;
+                            cursor: pointer;
+                            transition: background-color 0.2s ease;
+                        }
+                        .dropdown-content div:hover {
+                            background-color: #f3f4f6;
+                        }
+                        .dropdown-content div.selected {
+                            background-color: #e0f2fe;
+                        }
+                        </style>
+                        
+                        <script>
+                        function toggleDropdown(input) {
+                            const wrapper = input.closest('.dropdown');
+                            const dropdown = wrapper.querySelector('.dropdown-content');
+                            dropdown.classList.toggle('hidden');
+                        }
+                        
+                        function filterDropdown(input) {
+                            const dropdown = input.closest('.dropdown').querySelector('.dropdown-content');
+                            const filter = input.value.toLowerCase();
+                            dropdown.querySelectorAll('div').forEach(item => {
+                                item.style.display = item.textContent.toLowerCase().includes(filter) ? '' : 'none';
+                            });
+                        }
+                        
+                        function selectDropdownItem(div) {
+                            const wrapper = div.closest('.dropdown');
+                            const input = wrapper.querySelector('input[type="text"]');
+                            const hidden = wrapper.querySelector('input[type="hidden"]');
+                        
+                            input.value = div.textContent.trim();
+                            hidden.value = div.getAttribute('data-id');
+                        
+                            wrapper.querySelector('.dropdown-content').classList.add('hidden');
+                        
+                            wrapper.querySelectorAll('.dropdown-content div').forEach(el => el.classList.remove('selected'));
+                            div.classList.add('selected');
+                        }
+                        
+                        // Show/hide fields based on selected Type
+                        function toggleFields() {
+                            var type = document.getElementById("id_type").value;
+                        
+                            document.getElementById("customerFields").style.display = "none";
+                            document.getElementById("contructorFields").style.display = "none";
+                            document.getElementById("vendorFields").style.display = "none";
+                            document.getElementById("expenseFields").style.display = "none";
+							document.getElementById("bankFields").style.display = "none";
+                        
+                            if (type === "Customer") {
+                                document.getElementById("customerFields").style.display = "block";
+                            } else if (type === "Contructor") {
+                                document.getElementById("contructorFields").style.display = "block";
+                            } else if (type === "Vendor") {
+                                document.getElementById("vendorFields").style.display = "block";
+                            } else if (type === "Expense") {
+                                document.getElementById("expenseFields").style.display = "block";
+                            }else if (type === "Bank") {
+                                document.getElementById("bankFields").style.display = "block";
+                            }
+                        }
+                        
+                        window.onload = toggleFields;
+                        </script>
+
+                    </div>
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

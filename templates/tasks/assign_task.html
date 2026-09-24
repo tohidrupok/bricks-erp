@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - BM ERP{% endblock %}
+
+{% block content %} 
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            {% include 'partials/header.html' %}                
+            <div class="flex items-center justify-between mt-10 border-b pb-4 border-slate-200/60">
+                <h2 class="text-lg font-medium text-slate-700">{{ title }}</h2>
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'task_assign_btp_employee' %}" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer bg-primary border-primary text-white shadow-md hover:opacity-90">
+                        Refresh Dashboard
+                    </a>
+                    <a href="javascript:history.back()" class="bg-white hover:bg-slate-200 border border-slate-300 text-slate-600 px-3 py-2 rounded-md text-xs font-semibold transition">
+                        ⬅️ Back
+                    </a>
+                </div>
+            </div>
+
+            {% if messages %}
+            <div class="mt-4 space-y-2">
+                {% for message in messages %}
+                <div class="p-3 text-xs rounded-lg border {% if message.tags == 'success' %}bg-emerald-50 text-emerald-800 border-emerald-200{% else %}bg-rose-50 text-rose-800 border-rose-200{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="mt-5 grid grid-cols-12 gap-6">
+                
+                <div class="intro-y col-span-12 lg:col-span-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm h-fit">
+                    <h3 class="text-base font-bold text-slate-800 mb-4 border-b pb-2">Assign New Task</h3>
+                    
+                    <form method="POST" enctype="multipart/form-data" id="taskForm" class="space-y-4">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                        <div class="p-2 bg-red-50 text-red-600 text-xs rounded border border-red-200">
+                            Please correct fields validation input errors below.
+                        </div>
+                        {% endif %}
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Target Project</label>
+                            {{ form.project }}
+                            {% if form.project.errors %}
+                                <p class="text-[11px] text-rose-600 mt-1">{{ form.project.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Assignee Employee</label>
+                            {{ form.employee }}
+                            {% if form.employee.errors %}
+                                <p class="text-[11px] text-rose-600 mt-1">{{ form.employee.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Task Title / Subject</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <p class="text-[11px] text-rose-600 mt-1">{{ form.title.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Task Details Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <p class="text-[11px] text-rose-600 mt-1">{{ form.description.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Deadline Target Date</label>
+                            {{ form.deadline }}
+                            {% if form.deadline.errors %}
+                                <p class="text-[11px] text-rose-600 mt-1">{{ form.deadline.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Optional Attachment Document</label>
+                            <div class="mt-1 bg-slate-50 p-2 border border-dashed rounded-lg">
+                                {{ form.attachment }}
+                            </div>
+                            {% if form.attachment.errors %}
+                                <p class="text-[11px] text-rose-600 mt-1">{{ form.attachment.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <button type="submit" style="background-color:#1e3ea7" class="w-full bg-blue-600 text-white rounded-lg py-2.5 font-bold text-xs hover:bg-blue-700 transition shadow-sm flex items-center justify-center gap-2">
+                            🚀 Dispatch Task Assignment
+                        </button>
+                    </form>
+                </div>
+
+                <div class="intro-y col-span-12 lg:col-span-8">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+                        <h3 class="text-base font-bold text-slate-800">Active Employee Status Track Overview</h3>
+                        
+                        <div class="w-full sm:w-auto">
+                            <div class="relative w-full sm:w-64 text-slate-500">
+                                <input id="searchInput" type="text" placeholder="Search employee, design, project..." class="w-full pl-3 pr-10 py-2 text-xs border border-slate-200 bg-white rounded-xl shadow-sm focus:ring-4 focus:ring-primary focus:border-slate-300 transition focus:outline-none" oninput="handleSearch()">
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-xs">🔍</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="employeeGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {% for item in employee_cards %}
+                        <div class="employee-card bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between transition hover:shadow-md"
+                             data-search="{{ item.emp.rda_emp_name|lower }} {{ item.emp.rda_position|lower }} {{ item.emp.project_name.project_first_name|default:'general workspace'|lower }}">
+                            
+                            <div class="flex items-start gap-3">
+                                <div class="w-12 h-12 rounded-full overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0">
+                                    {% if item.emp.rda_photo %}
+                                    <img src="{{ item.emp.rda_photo.url }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                    <div class="w-full h-full flex items-center justify-center font-bold text-slate-400 text-[10px] uppercase bg-slate-200">
+                                        Emp
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-sm text-slate-800">{{ item.emp.rda_emp_name }}</h4>
+                                    <p class="text-xs text-slate-400">{{ item.emp.rda_position }}</p>
+                                    <p class="text-[10px] text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded mt-1 inline-block border border-blue-100">
+                                        📌 {{ item.emp.project_name.project_first_name|default:"General Workspace" }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 text-center my-4 border-t border-b border-slate-100 py-2 bg-slate-50/50 rounded-lg">
+                                <div>
+                                    <span class="block text-[10px] font-medium text-slate-400 uppercase">Pending</span>
+                                    <span class="text-sm font-bold text-amber-600">{{ item.pending }}</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] font-medium text-slate-400 uppercase">Completed</span>
+                                    <span class="text-sm font-bold text-emerald-600">{{ item.done }}</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] font-medium text-slate-400 uppercase">Total</span>
+                                    <span class="text-sm font-bold text-slate-700">{{ item.total }}</span>
+                                </div>
+                            </div>
+
+                            <a href="{% url 'admin_employee_task_details' item.emp.id %}" class="w-full text-center bg-slate-100 text-slate-700 text-xs py-2 rounded-md hover:bg-slate-200 font-medium transition border border-slate-200">
+                                View Complete Audit History
+                            </a>
+                        </div>
+                        {% empty %}
+                        <div class="col-span-2 bg-white border rounded-xl py-12 text-center text-slate-400 text-xs shadow-sm">
+                            No active profiles registered in the database system architecture.
+                        </div>
+                        {% endfor %}
+
+                        <div id="emptySearchFallback" class="hidden col-span-2 bg-white border border-slate-200 rounded-xl py-16 text-center shadow-sm">
+                            <span class="text-3xl block mb-2">🔍</span>
+                            <h4 class="font-bold text-slate-700 text-sm">No Match Logged</h4>
+                            <p class="text-xs text-slate-400 mt-1">No employees match your active structural lookup keywords filters parameters.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

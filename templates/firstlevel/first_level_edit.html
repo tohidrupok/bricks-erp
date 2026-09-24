@@ -1,0 +1,198 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Firt Level ( Project Name ) Update- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				    {% include 'partials/header.html' %}
+                <div class="container mx-auto mt-10 ml-10"> 
+                <!-- END: Top Bar -->
+                <h1 class="text-3xl font-semibold text-gray-900 mb-6">Edit Project: {{ project.project_first_name }}</h1>
+
+                <form method="POST" enctype="multipart/form-data" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                    {% csrf_token %}
+                
+                    <!-- Project Name -->
+                    <div class="mb-4">
+                        <label for="id_project_first_name" class="block text-gray-700 font-semibold">Project Name</label>
+                        <input type="text" name="project_first_name" id="id_project_first_name" value="{{ form.project_first_name.value }}" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter project name">
+                    </div>
+                
+                   <!-- Location (Dropdown styled like input for edit form) -->
+                    <div class="mb-4">
+                        <label for="id_location" class="block text-gray-700 font-semibold">Location</label>
+                        <select name="location" id="id_location" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select Location</option>
+                        {% for location in form.fields.location.queryset %}
+                            <option value="{{ location.id }}" {% if form.initial.location|stringformat:"s" == location.id|stringformat:"s" or form.data.location == location.id|stringformat:"s" %}selected{% endif %}>
+                            {{ location.location_name }}
+                            </option>
+                        {% endfor %}
+                        </select>
+                        {% if form.location.errors %}
+                        <ul class="text-red-600 mt-1">
+                            {% for error in form.location.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+  
+                
+                    <!-- Project Type -->
+                    <div class="mb-4">
+                        <label for="project_type" class="block text-gray-700 font-semibold">Project Type</label>
+                        <select id="project_type" name="project_type" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="Own Project" {% if form.project_type.value == 'Own Project' %}selected{% endif %}>Own Project</option>
+                            <option value="Joint Venture Project" {% if form.project_type.value == 'Joint Venture Project' %}selected{% endif %}>Joint Venture Project</option>
+                            <option value="Only Construction Company" {% if form.project_type.value == 'Only Construction Company' %}selected{% endif %}>Only Construction Company</option>
+                        </select>
+                        
+                        {% if form.project_type.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.project_type.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                
+                   <!-- Project Owner Dropdown -->
+                    <div class="mb-4">
+                        <label for="project_owner" class="block text-gray-700 font-semibold">Project Owner</label>
+                        <select id="project_owner" name="project_owner" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Select Owner</option>
+                            {% for owner in form.fields.project_owner.queryset %}
+                                <option value="{{ owner.id }}" {% if form.project_owner.value|stringformat:"s" == owner.id|stringformat:"s" %}selected{% endif %}>{{ owner.owner_name }}</option>
+                            {% endfor %}
+                        </select>
+                        
+                        {% if form.project_owner.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.project_owner.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                
+                    <!-- Project Start Month -->
+                    <div class="mb-4">
+                        <label for="id_project_start_month" class="block text-gray-700 font-semibold">Project Start Month (e.g., April 2025)</label>
+                        <input type="text" name="project_start_month" id="id_project_start_month" value="{{ form.project_start_month.value }}" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter start month">
+                    </div>
+                
+                    <!-- Project Duration -->
+                <div class="mb-4">
+                    <label for="id_project_duration" class="block text-gray-700 font-semibold">Project Duration (months)</label>
+                    <input 
+                        type="number" 
+                        name="project_duration" 
+                        id="id_project_duration" 
+                        value="{{ form.project_duration.value }}" 
+                        class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400" 
+                        placeholder="Enter duration in months" 
+                        min="1" 
+                        step="1"
+                    >
+                    {% if form.project_duration.errors %}
+                        <ul class="text-red-600 mt-1">
+                            {% for error in form.project_duration.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                
+                    <!-- Project Size -->
+                    <div class="mb-4">
+                        <label for="id_project_size_sq_ft" class="block text-gray-700 font-semibold">Project Size (sq ft)</label>
+                        <input type="number" name="project_size_sq_ft" id="id_project_size_sq_ft" value="{{ form.project_size_sq_ft.value }}" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter project size in square feet">
+                    </div>
+                
+                    <!-- Number of Units -->
+                    <div class="mb-4">
+                        <label for="id_number_of_units" class="block text-gray-700 font-semibold">Number of Units</label>
+                        <input type="number" name="number_of_units" id="id_number_of_units" value="{{ form.number_of_units.value }}" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter number of units">
+                    </div>
+                
+                    <!-- Number of Floors -->
+                    <div class="mb-4">
+                        <label for="id_number_of_floors" class="block text-gray-700 font-semibold">Number of Floors</label>
+                        <input type="number" name="number_of_floors" id="id_number_of_floors" value="{{ form.number_of_floors.value }}" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter number of floors">
+                    </div>
+                
+                    <!-- Units per Floor -->
+                    <div class="mb-4">
+                        <label for="id_units_per_floor" class="block text-gray-700 font-semibold">Units per Floor</label>
+                        <input type="number" name="units_per_floor" id="id_units_per_floor" value="{{ form.units_per_floor.value }}" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter units per floor">
+                    </div>
+                
+                    <!-- Soil Test Completed -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-semibold">Soil Test Completed</label>
+                        {{ form.soil_test_completed }}
+                    </div>
+                
+                    <!-- Drawing Test Completed -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-semibold">Drawing Test Completed</label>
+                        {{ form.drawing_test_completed }}
+                    </div>
+                
+                    <!-- Agreement Completed -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-semibold">Agreement Completed</label>
+                        {{ form.agreement_completed }}
+                    </div>
+                
+                    <!-- Upload Soil Test Document -->
+                    <div class="mb-4">
+                        <label for="id_soil_test" class="block text-gray-700 font-semibold">Upload Soil Test Document</label>
+                        {{ form.soil_test }}
+                    </div>
+                
+                    <!-- Upload Drawing Test Document -->
+                    <div class="mb-4">
+                        <label for="id_drawing_test" class="block text-gray-700 font-semibold">Upload Drawing Test Document</label>
+                        {{ form.drawing_test }}
+                    </div>
+                
+                    <!-- Upload Agreement Document -->
+                    <div class="mb-4">
+                        <label for="id_agreement_document" class="block text-gray-700 font-semibold">Upload Agreement Document</label>
+                        {{ form.agreement_document }}
+                    </div>               
+                  
+                
+                    <!-- Submit Button -->
+                    <div class="mb-6">
+                        <div class="mt-8 text-center">
+                            <button type="submit" style="background-color:#1e3c98" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Changes</button>
+                            <a href="{% url 'first_level_list' %}" style="margin-left:0.5%;background-color:#1e3c98" class="px-8 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Back to List</a>
+                        </div>
+                    </div>
+                </form>
+                
+                  
+                  </div>    
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

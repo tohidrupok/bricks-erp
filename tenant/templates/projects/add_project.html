@@ -1,0 +1,697 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ form.instance.pk|yesno:"Update,Create" }} Project - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    {% include 'partials/mobile.html' %}
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+
+            {% include 'partials/header.html' %}
+
+            <div class="mt-6 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 p-5">
+                    <div class="w-full max-w-5xl mx-auto bg-white dark:bg-darkmode-600 p-8 shadow-lg rounded-xl">
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ══ PRJ Design System ══ */
+  :root {
+    --prj-ink:        #0f172a;
+    --prj-ink-soft:   #334155;
+    --prj-muted:      #64748b;
+    --prj-rule:       #e2e8f0;
+    --prj-rule-soft:  #f1f5f9;
+    --prj-bg:         #f0f5fb;
+    --prj-surface:    #ffffff;
+    --prj-primary:    #1d4ed8;
+    --prj-primary-lt: #3b82f6;
+    --prj-primary-bg: #eff6ff;
+    --prj-teal:       #0d9488;
+    --prj-teal-bg:    #f0fdf9;
+    --prj-green:      #059669;
+    --prj-green-bg:   #ecfdf5;
+    --prj-font:       'Outfit', sans-serif;
+    --prj-mono:       'JetBrains Mono', monospace;
+    --prj-r-sm:       8px;
+    --prj-r-md:       12px;
+    --prj-r-lg:       18px;
+    --prj-r-xl:       22px;
+    --prj-shadow:     0 1px 4px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+    --prj-shadow-md:  0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  .prj-wrap {
+    font-family: var(--prj-font);
+    color: var(--prj-ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ══ TOPBAR ══ */
+  .prj-topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--prj-rule);
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    gap: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    margin-bottom: 0;
+  }
+
+  .prj-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .prj-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+  .prj-brand-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+    border-radius: var(--prj-r-sm);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(29,78,216,0.25);
+    flex-shrink: 0;
+  }
+  .prj-brand-icon svg {
+    width: 16px; height: 16px;
+    stroke: #fff; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .prj-brand-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--prj-ink);
+    letter-spacing: -0.3px;
+  }
+  .prj-brand-name span { color: var(--prj-primary); }
+
+  .prj-topbar-sep {
+    width: 1px; height: 22px;
+    background: var(--prj-rule);
+  }
+
+  .prj-page-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--prj-ink-soft);
+    background: var(--prj-rule-soft);
+    border: 1px solid var(--prj-rule);
+    border-radius: 20px;
+    padding: 4px 12px 4px 8px;
+  }
+  .prj-page-pill svg {
+    width: 13px; height: 13px;
+    stroke: var(--prj-teal); fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .prj-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .prj-topbar-dot {
+    width: 4px; height: 4px;
+    background: var(--prj-rule);
+    border-radius: 50%;
+  }
+
+  .prj-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--prj-r-sm);
+    font-family: var(--prj-font);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    border: 1px solid var(--prj-rule);
+    white-space: nowrap;
+  }
+  .prj-nav-btn svg {
+    width: 14px; height: 14px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+    transition: transform 0.15s ease;
+  }
+  .prj-nav-btn-dash {
+    background: var(--prj-rule-soft);
+    color: var(--prj-ink-soft);
+  }
+  .prj-nav-btn-dash:hover { background: #e2e8f0; color: var(--prj-ink); }
+
+  .prj-nav-btn-back {
+    background: transparent;
+    color: var(--prj-muted);
+  }
+  .prj-nav-btn-back:hover {
+    background: var(--prj-rule-soft);
+    color: var(--prj-ink);
+    border-color: #cbd5e1;
+  }
+  .prj-nav-btn-back:hover svg { transform: translateX(-2px); }
+
+  /* ══ HERO ══ */
+  .prj-hero {
+    background: linear-gradient(120deg, #0f2d5c 0%, #1d4ed8 55%, #38bdf8 100%);
+    padding: 28px 28px 26px;
+    position: relative;
+    overflow: hidden;
+  }
+  .prj-hero::before {
+    content: '';
+    position: absolute; right: -60px; top: -60px;
+    width: 260px; height: 260px;
+    background: rgba(255,255,255,0.05); border-radius: 50%;
+  }
+  .prj-hero::after {
+    content: '';
+    position: absolute; left: 40%; bottom: -80px;
+    width: 200px; height: 200px;
+    background: rgba(56,189,248,0.08); border-radius: 50%;
+  }
+  .prj-hero-inner {
+    position: relative; z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .prj-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .prj-hero-icon {
+    width: 48px; height: 48px;
+    background: rgba(255,255,255,0.13);
+    border: 1.5px solid rgba(255,255,255,0.22);
+    border-radius: var(--prj-r-md);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(6px);
+    flex-shrink: 0;
+  }
+  .prj-hero-icon svg {
+    width: 22px; height: 22px;
+    stroke: #fff; fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .prj-hero-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.4px;
+    line-height: 1.1;
+  }
+  .prj-hero-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    font-family: var(--prj-mono);
+    margin-top: 3px;
+  }
+  .prj-hero-stat {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--prj-r-md);
+    padding: 10px 18px;
+    text-align: center;
+    backdrop-filter: blur(4px);
+  }
+  .prj-hero-stat-val {
+    font-size: 22px; font-weight: 800; color: #fff; line-height: 1;
+  }
+  .prj-hero-stat-label {
+    font-size: 10px; color: rgba(255,255,255,0.6);
+    font-family: var(--prj-mono); margin-top: 2px;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+
+  /* ══ BODY LAYOUT ══ */
+  .prj-body {
+    display: grid;
+    grid-template-columns: minmax(300px, 380px) 1fr;
+    gap: 22px;
+    padding: 24px 28px;
+  }
+
+  /* ══ CARD ══ */
+  .prj-card {
+    background: var(--prj-surface);
+    border-radius: var(--prj-r-xl);
+    border: 1px solid var(--prj-rule);
+    box-shadow: var(--prj-shadow);
+    overflow: hidden;
+  }
+
+  .prj-card-head {
+    padding: 15px 22px;
+    border-bottom: 1px solid var(--prj-rule);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #f8faff 0%, #f0f5fd 100%);
+  }
+  .prj-card-icon {
+    width: 30px; height: 30px;
+    border-radius: var(--prj-r-sm);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .prj-card-icon svg {
+    width: 14px; height: 14px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .prj-card-icon.blue { background: var(--prj-primary-bg); color: var(--prj-primary); }
+  .prj-card-icon.teal { background: var(--prj-teal-bg);    color: var(--prj-teal);    }
+
+  .prj-card-h   { font-size: 13.5px; font-weight: 700; color: var(--prj-ink); }
+  .prj-card-sub { font-size: 10.5px; color: var(--prj-muted); font-family: var(--prj-mono); margin-top: 1px; }
+
+  /* ══ FORM ══ */
+  .prj-form-body {
+    padding: 20px 22px 24px;
+  }
+
+  .prj-form-section {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #a5b4fc;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    font-family: var(--prj-mono);
+    margin: 16px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .prj-form-section::after {
+    content: ''; flex: 1;
+    height: 1px; background: var(--prj-rule);
+  }
+
+  .prj-field { margin-bottom: 14px; }
+
+  .prj-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--prj-muted);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-family: var(--prj-mono);
+  }
+
+  /* Style Django-rendered inputs */
+  .prj-form-body input[type="text"],
+  .prj-form-body input[type="email"],
+  .prj-form-body input[type="number"],
+  .prj-form-body input[type="date"],
+  .prj-form-body select,
+  .prj-form-body textarea {
+    width: 100%;
+    padding: 9px 13px;
+    border: 1.5px solid var(--prj-rule);
+    border-radius: var(--prj-r-sm);
+    background: #f8faff;
+    font-family: var(--prj-font);
+    font-size: 13.5px;
+    color: var(--prj-ink);
+    box-sizing: border-box;
+    transition: all 0.18s ease;
+    outline: none;
+  }
+  .prj-form-body input:focus,
+  .prj-form-body select:focus,
+  .prj-form-body textarea:focus {
+    border-color: var(--prj-primary-lt);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+  }
+  .prj-form-body textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
+
+  .prj-btn-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .prj-btn-save {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 22px;
+    background: linear-gradient(135deg, var(--prj-primary) 0%, var(--prj-primary-lt) 100%);
+    color: #fff;
+    border: none;
+    border-radius: var(--prj-r-sm);
+    font-family: var(--prj-font);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(29,78,216,0.28);
+    transition: all 0.18s ease;
+  }
+  .prj-btn-save:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(29,78,216,0.36); }
+  .prj-btn-save svg {
+    width: 14px; height: 14px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .prj-btn-room-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--prj-muted);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .prj-btn-room-link svg {
+    width: 13px; height: 13px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .prj-btn-room-link:hover { color: var(--prj-primary); }
+
+  /* ══ PROJECT LIST ══ */
+  .prj-list-body {
+    padding: 16px 22px 22px;
+    max-height: 72vh;
+    overflow-y: auto;
+  }
+  .prj-list-body::-webkit-scrollbar { width: 3px; }
+  .prj-list-body::-webkit-scrollbar-thumb { background: #c8d8ef; border-radius: 4px; }
+
+  .prj-search-wrap {
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .prj-search-wrap svg {
+    position: absolute; left: 11px; top: 50%;
+    transform: translateY(-50%);
+    width: 14px; height: 14px;
+    stroke: var(--prj-muted); fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    pointer-events: none;
+  }
+  .prj-search-input {
+    width: 100%;
+    padding: 8px 12px 8px 34px;
+    border: 1.5px solid var(--prj-rule);
+    border-radius: var(--prj-r-sm);
+    font-family: var(--prj-font);
+    font-size: 13px;
+    color: var(--prj-ink);
+    background: var(--prj-rule-soft);
+    outline: none;
+    transition: all 0.15s;
+    box-sizing: border-box;
+  }
+  .prj-search-input:focus {
+    border-color: var(--prj-primary-lt);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.10);
+  }
+  .prj-search-input::placeholder { color: #94a3b8; }
+
+  .prj-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--prj-r-md);
+    border: 1px solid var(--prj-rule);
+    background: var(--prj-rule-soft);
+    margin-bottom: 8px;
+    transition: all 0.15s ease;
+    cursor: default;
+  }
+  .prj-item:last-child { margin-bottom: 0; }
+  .prj-item:hover {
+    background: var(--prj-primary-bg);
+    border-color: #bfdbfe;
+    transform: translateX(3px);
+  }
+
+  .prj-item-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1.5px solid var(--prj-rule);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--prj-muted);
+    font-family: var(--prj-mono);
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .prj-item:hover .prj-item-num {
+    background: var(--prj-primary);
+    border-color: var(--prj-primary);
+    color: #fff;
+  }
+
+  .prj-item-icon {
+    width: 32px; height: 32px;
+    background: #fff;
+    border: 1px solid var(--prj-rule);
+    border-radius: var(--prj-r-sm);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .prj-item-icon svg {
+    width: 14px; height: 14px;
+    stroke: var(--prj-teal); fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .prj-item:hover .prj-item-icon { background: var(--prj-primary-bg); border-color: #bfdbfe; }
+  .prj-item:hover .prj-item-icon svg { stroke: var(--prj-primary); }
+
+  .prj-item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--prj-ink-soft);
+    flex: 1;
+    transition: color 0.15s;
+  }
+  .prj-item:hover .prj-item-name { color: var(--prj-primary); }
+
+  .prj-item-arrow {
+    width: 16px; height: 16px;
+    stroke: #cbd5e1; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .prj-item:hover .prj-item-arrow { stroke: var(--prj-primary-lt); transform: translateX(2px); }
+
+  .prj-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--prj-muted);
+  }
+  .prj-empty svg {
+    width: 40px; height: 40px;
+    stroke: #cbd5e1; fill: none;
+    stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round;
+    display: block; margin: 0 auto 12px;
+  }
+  .prj-empty p { font-size: 13px; }
+
+  /* ══ ANIMATIONS ══ */
+  .prj-fade { animation: prj-up 0.32s ease both; }
+  .prj-d1   { animation-delay: 0.06s; }
+  @keyframes prj-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ══ RESPONSIVE ══ */
+  @media (max-width: 900px) {
+    .prj-body { grid-template-columns: 1fr; padding: 18px 16px; }
+    .prj-hero { padding: 22px 18px; }
+    .prj-topbar { padding: 0 16px; }
+    .prj-hero-stat { display: none; }
+  }
+</style>
+
+<div class="prj-wrap">
+
+  <!-- ══ TOPBAR ══ -->
+  <nav class="prj-topbar">
+    <div class="prj-topbar-left">
+      <a href="{% url 'dashboard' %}" class="prj-brand">
+        <div class="prj-brand-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <span class="prj-brand-name">BM <span>ERP</span></span>
+      </a>
+      <div class="prj-topbar-sep"></div>
+      <span class="prj-page-pill">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Project Management
+      </span>
+    </div>
+    <div class="prj-topbar-right">
+      <a href="{% url 'dashboard' %}" class="prj-nav-btn prj-nav-btn-dash">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <div class="prj-topbar-dot"></div>
+      <a href="javascript:history.back()" class="prj-nav-btn prj-nav-btn-back">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </a>
+    </div>
+  </nav>
+
+  <!-- ══ HERO ══ -->
+  <div class="prj-hero">
+    <div class="prj-hero-inner">
+      <div class="prj-hero-left">
+        <div class="prj-hero-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        </div>
+        <div>
+          <div class="prj-hero-title">Project Management</div>
+          <div class="prj-hero-sub">Property · Project Registry</div>
+        </div>
+      </div>
+      <div class="prj-hero-stat">
+        <div class="prj-hero-stat-val">{{ projects|length }}</div>
+        <div class="prj-hero-stat-label">Total Projects</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BODY ══ -->
+  <div class="prj-body">
+
+    <!-- FORM CARD -->
+    <div class="prj-card prj-fade">
+      <div class="prj-card-head">
+        <div class="prj-card-icon blue">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <div>
+          <div class="prj-card-h">Add New Project</div>
+          <div class="prj-card-sub">Fill in the project details</div>
+        </div>
+      </div>
+
+      <div class="prj-form-body">
+        <span class="prj-form-section">Project Info</span>
+
+        <form method="POST">
+          {% csrf_token %}
+          {{ form.as_p }}
+
+          <div class="prj-btn-row">
+            <button type="submit" class="prj-btn-save">
+              <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Save Project
+            </button>
+            <a href="{% url 'room_list' %}" class="prj-btn-room-link">
+              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+              Back to Room List
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- LIST CARD -->
+    <div class="prj-card prj-fade prj-d1">
+      <div class="prj-card-head">
+        <div class="prj-card-icon teal">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        </div>
+        <div>
+          <div class="prj-card-h">Project Directory</div>
+          <div class="prj-card-sub">{{ projects|length }} project{{ projects|length|pluralize }} registered</div>
+        </div>
+      </div>
+
+      <div class="prj-list-body">
+
+        <!-- Search -->
+        <div class="prj-search-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" class="prj-search-input" placeholder="Search projects…" oninput="prjFilter(this.value)">
+        </div>
+
+        <!-- Items -->
+        <div id="prjList">
+          {% for project in projects %}
+          <div class="prj-item" data-name="{{ project.name|lower }}">
+            <span class="prj-item-num">{{ forloop.counter }}</span>
+            <div class="prj-item-icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+            </div>
+            <span class="prj-item-name">{{ project.name }}</span>
+            <svg class="prj-item-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          {% empty %}
+          <div class="prj-empty">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+            <p>No projects yet.<br>Add your first project using the form.</p>
+          </div>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /prj-body -->
+</div><!-- /prj-wrap -->
+
+<script>
+  function prjFilter(query) {
+    const q = query.toLowerCase().trim();
+    document.querySelectorAll('#prjList .prj-item[data-name]').forEach(item => {
+      item.style.display = (!q || item.dataset.name.includes(q)) ? '' : 'none';
+    });
+  }
+</script>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

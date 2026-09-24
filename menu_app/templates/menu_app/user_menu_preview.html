@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Preview Menu as User</h4>
+
+<form method="get" class="row g-2 mb-4">
+  <div class="col-auto">
+    <select name="user_id" class="form-select" onchange="this.form.submit()">
+      <option value="">-- Select a user --</option>
+      {% for u in users %}
+        <option value="{{ u.pk }}" {% if selected_user and selected_user.pk == u.pk %}selected{% endif %}>
+          {{ u.get_username }}{% if u.is_superuser %} (superuser){% endif %}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+</form>
+
+{% if selected_user %}
+  <h6 class="text-muted">Visible to {{ selected_user.get_username }}:</h6>
+  {% if selected_user.is_superuser %}
+    <div class="alert alert-info">Superuser — sees every menu item.</div>
+  {% endif %}
+  <ul class="list-group">
+    {% for node in visible_tree %}
+      <li class="list-group-item">
+        <i data-lucide="{{ node.parent.icon }}"></i> <strong>{{ node.parent.title }}</strong>
+        {% if node.children %}
+          <ul class="list-group list-group-flush mt-2">
+            {% for child in node.children %}
+              <li class="list-group-item ps-4">
+                <i data-lucide="{{ child.icon }}"></i> {{ child.title }}
+                <span class="text-muted small">({{ child.url_name }})</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted">No menu items visible to this user.</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,516 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Received Voucher List - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+                <div class="intro-y flex h-10 items-center">
+                    <h2 class="mr-5 truncate text-lg font-medium">Received/Collection Notice</h2>
+                
+                    <div class="ml-auto flex items-center gap-3">
+                        
+                        <!-- Back Button -->
+                        <a href="javascript:history.back()" class="flex items-center text-primary">
+                            <i data-lucide="arrow-left" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Back
+                        </a>
+                
+                        <!-- Dashboard Button -->
+                        <a href="{% url 'tenant_dashboard' %}" class="flex items-center text-primary">
+                            <i data-lucide="layout-dashboard" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Dashboard
+                        </a>
+                
+                        <!-- Reload Button -->
+                        <a class="flex items-center text-primary" href="">
+                            <i data-lucide="refresh-ccw" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Reload Data
+                        </a>
+                
+                    </div>
+                </div>
+
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                
+                
+                <style>
+                      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+                    
+                      .sms-root {
+                        font-family: 'Plus Jakarta Sans', sans-serif;
+                        padding: 1.5rem;
+                        background: #f5f7ff;
+                        border-radius: 16px;
+                      }
+                    
+                      /* ── Top Action Bar ── */
+                      .sms-topbar {
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        margin-bottom: 1.5rem;
+                      }
+                    
+                      .sms-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 7px;
+                        padding: 9px 18px;
+                        border-radius: 10px;
+                        font-size: 0.82rem;
+                        font-weight: 600;
+                        border: none;
+                        cursor: pointer;
+                        text-decoration: none;
+                        transition: all 0.18s ease;
+                        letter-spacing: 0.2px;
+                        white-space: nowrap;
+                      }
+                      .sms-btn:hover { transform: translateY(-2px); opacity: 0.92; text-decoration: none; }
+                    
+                      .sms-btn-list {
+                        background: linear-gradient(135deg, #3b5bdb, #4dabf7);
+                        color: #fff;
+                        box-shadow: 0 4px 14px rgba(59,91,219,0.3);
+                      }
+                      .sms-btn-refresh {
+                        background: linear-gradient(135deg, #2f9e44, #69db7c);
+                        color: #fff;
+                        box-shadow: 0 4px 14px rgba(47,158,68,0.3);
+                      }
+                      .sms-btn-send {
+                        background: linear-gradient(135deg, #c92a2a, #ff6b6b);
+                        color: #fff;
+                        box-shadow: 0 4px 14px rgba(201,42,42,0.3);
+                        width: 100%;
+                        justify-content: center;
+                        padding: 12px;
+                        font-size: 0.9rem;
+                        border-radius: 12px;
+                        margin-top: 0.5rem;
+                      }
+                      .sms-btn-select {
+                        background: #e9fac8;
+                        color: #5c940d;
+                        border: 1.5px solid #c0eb75;
+                        padding: 6px 14px;
+                        border-radius: 8px;
+                        font-size: 0.78rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.15s;
+                      }
+                      .sms-btn-select:hover { background: #c0eb75; }
+                      .sms-btn-unselect {
+                        background: #fff0f6;
+                        color: #a61e4d;
+                        border: 1.5px solid #faa2c1;
+                        padding: 6px 14px;
+                        border-radius: 8px;
+                        font-size: 0.78rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.15s;
+                      }
+                      .sms-btn-unselect:hover { background: #faa2c1; }
+                    
+                      /* ── Search ── */
+                      .sms-search-wrap {
+                        margin-left: auto;
+                        position: relative;
+                      }
+                      .sms-search-wrap input {
+                        padding: 9px 36px 9px 14px;
+                        border-radius: 10px;
+                        border: 1.5px solid #d0d5f0;
+                        font-size: 0.82rem;
+                        width: 220px;
+                        outline: none;
+                        transition: border 0.15s;
+                        background: #fff;
+                        font-family: inherit;
+                      }
+                      .sms-search-wrap input:focus { border-color: #3b5bdb; box-shadow: 0 0 0 3px rgba(59,91,219,0.1); }
+                      .sms-search-icon {
+                        position: absolute;
+                        right: 10px;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        font-size: 13px;
+                        color: #94a3b8;
+                        pointer-events: none;
+                      }
+                    
+                      /* ── Cards ── */
+                      .sms-card {
+                        background: #fff;
+                        border-radius: 16px;
+                        box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+                        margin-bottom: 1.2rem;
+                        overflow: hidden;
+                      }
+                    
+                      .sms-card-header {
+                        padding: 13px 20px;
+                        font-weight: 700;
+                        font-size: 0.85rem;
+                        letter-spacing: 0.4px;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                      }
+                      .sms-card-header.blue { background: linear-gradient(135deg, #3b5bdb, #4dabf7); color: #fff; }
+                      .sms-card-header.green { background: linear-gradient(135deg, #2f9e44, #69db7c); color: #fff; }
+                    
+                      .sms-card-body {
+                        padding: 16px 20px;
+                      }
+                    
+                      /* ── Select actions row ── */
+                      .sms-action-row {
+                        display: flex;
+                        gap: 8px;
+                        margin-bottom: 14px;
+                        align-items: center;
+                        flex-wrap: wrap;
+                      }
+                    
+                      .sms-selected-badge {
+                        margin-left: auto;
+                        background: #e7f5ff;
+                        color: #1971c2;
+                        border-radius: 20px;
+                        padding: 3px 12px;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                      }
+                    
+                      /* ── Table ── */
+                      .sms-table-wrap {
+                        max-height: 340px;
+                        overflow-y: auto;
+                        border-radius: 10px;
+                        border: 1.5px solid #e8ecf8;
+                      }
+                      .sms-table-wrap::-webkit-scrollbar { width: 5px; }
+                      .sms-table-wrap::-webkit-scrollbar-track { background: #f1f5f9; }
+                      .sms-table-wrap::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 10px; }
+                    
+                      .sms-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 0.82rem;
+                      }
+                      .sms-table thead tr {
+                        background: #f0f4ff;
+                        position: sticky;
+                        top: 0;
+                        z-index: 2;
+                      }
+                      .sms-table thead th {
+                        padding: 10px 14px;
+                        text-align: left;
+                        font-weight: 700;
+                        color: #3b5bdb;
+                        font-size: 0.77rem;
+                        letter-spacing: 0.5px;
+                        text-transform: uppercase;
+                        border-bottom: 2px solid #c5d0f5;
+                      }
+                      .sms-table tbody tr {
+                        border-bottom: 1px solid #f0f4ff;
+                        transition: background 0.12s;
+                      }
+                      .sms-table tbody tr:hover { background: #f8f9ff; }
+                      .sms-table tbody tr.sms-row-checked { background: #eef2ff; }
+                      .sms-table td {
+                        padding: 9px 14px;
+                        color: #374151;
+                        vertical-align: middle;
+                      }
+                      .sms-table td:first-child { width: 50px; text-align: center; }
+                      .sms-table .sms-no-data {
+                        text-align: center;
+                        color: #e03131;
+                        padding: 24px;
+                        font-weight: 500;
+                      }
+                    
+                      /* Custom checkbox */
+                      .sms-check {
+                        width: 17px;
+                        height: 17px;
+                        accent-color: #3b5bdb;
+                        cursor: pointer;
+                        border-radius: 4px;
+                      }
+                    
+                      /* ── Textarea ── */
+                      .sms-textarea {
+                        width: 100%;
+                        min-height: 110px;
+                        border: 1.5px solid #d0d5f0;
+                        border-radius: 10px;
+                        padding: 12px 14px;
+                        font-size: 0.85rem;
+                        font-family: 'Plus Jakarta Sans', sans-serif;
+                        resize: vertical;
+                        outline: none;
+                        transition: border 0.15s;
+                        color: #1a1f36;
+                        background: #fafbff;
+                      }
+                      .sms-textarea:focus { border-color: #3b5bdb; box-shadow: 0 0 0 3px rgba(59,91,219,0.1); }
+                    
+                      /* ── Char counter ── */
+                      .sms-char-counter {
+                        font-size: 0.74rem;
+                        color: #94a3b8;
+                        text-align: right;
+                        margin-top: 6px;
+                      }
+                      .sms-char-counter span { font-weight: 700; color: #3b5bdb; }
+                    
+                      /* ── Name badge in table ── */
+                      .sms-name-badge {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                      }
+                      .sms-avatar {
+                        width: 28px;
+                        height: 28px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #3b5bdb, #7048e8);
+                        color: white;
+                        font-size: 0.7rem;
+                        font-weight: 700;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-shrink: 0;
+                      }
+                    
+                      /* phone */
+                      .sms-phone {
+                        font-family: 'Courier New', monospace;
+                        font-size: 0.8rem;
+                        color: #2f9e44;
+                        font-weight: 600;
+                        letter-spacing: 0.5px;
+                      }
+                    
+                      /* animation */
+                      .sms-card { animation: smsSlideIn 0.35s ease both; }
+                      .sms-card:nth-child(2) { animation-delay: 0.1s; }
+                      .sms-card:nth-child(3) { animation-delay: 0.2s; }
+                      @keyframes smsSlideIn {
+                        from { opacity: 0; transform: translateY(14px); }
+                        to   { opacity: 1; transform: translateY(0); }
+                      }
+                    
+                      @media (max-width: 576px) {
+                        .sms-search-wrap { margin-left: 0; width: 100%; }
+                        .sms-search-wrap input { width: 100%; }
+                      }
+                    </style>
+                    
+                    <div class="sms-root mt-5">
+                      <form method="POST">
+                        {% csrf_token %}
+                    
+                        <!-- Top Bar -->
+                        <div class="sms-topbar">
+                            <a href="{% url 'tenant_dashboard' %}" class="sms-btn sms-btn-list">
+                                <svg width="16" height="16" fill="none" stroke="currentColor"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+                                    viewBox="0 0 24 24">
+                                    <line x1="19" y1="12" x2="5" y2="12"/>
+                                    <polyline points="12 19 5 12 12 5"/>
+                                </svg>
+                                Back
+                            </a>
+
+                          <a href="{% url 'tenant_dashboard' %}" class="sms-btn sms-btn-list">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                            Dashboard
+                          </a>  
+                          <a href="{% url 'varatiya_bulk_sms_list' %}" class="sms-btn sms-btn-list">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                            SMS List
+                          </a>
+                          <a href="{% url 'varatiya_bulk_sms' %}" class="sms-btn sms-btn-refresh">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+                            Refresh
+                          </a>
+                    
+                          <div class="sms-search-wrap">
+                            <input id="smsSearchInput" type="text" placeholder="Search tenant..." oninput="smHandleSearch()">
+                            <span class="sms-search-icon">🔍</span>
+                          </div>
+                        </div>
+                    
+                        <!-- Contact List Card -->
+                        <div class="sms-card">
+                          <div class="sms-card-header blue">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                            Varatiya Contact List
+                            <span id="smsBadge" class="sms-selected-badge ms-auto" style="margin-left:auto;">0 selected</span>
+                          </div>
+                          <div class="sms-card-body">
+                            <div class="sms-action-row">
+                              <button type="button" class="sms-btn-select" onclick="smSelectAll()">
+                                ✅ Select All
+                              </button>
+                              <button type="button" class="sms-btn-unselect" onclick="smUnselectAll()">
+                                ✖ Unselect All
+                              </button>
+                            </div>
+                    
+                            <div class="sms-table-wrap">
+                              <table class="sms-table" id="smsTable">
+                                <thead>
+                                  <tr>
+                                    <th>✓</th>
+                                    <th>Name</th>
+                                    <th>Contact</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {% for var in varatiya_list %}
+                                  <tr>
+                                    <td>
+                                      <input type="checkbox"
+                                             class="sms-check"
+                                             name="selected_varatiya"
+                                             value="{{ var.id }}"
+                                             onchange="smUpdateBadge()">
+                                    </td>
+                                    <td>
+                                      <span class="sms-name-badge">
+                                        <span class="sms-avatar">{{ var.name|slice:":1"|upper }}</span>
+                                        {{ var.name }}
+                                      </span>
+                                    </td>
+                                    <td><span class="sms-phone">{{ var.contact }}</span></td>
+                                  </tr>
+                                  {% empty %}
+                                  <tr>
+                                    <td colspan="3" class="sms-no-data">⚠️ No Varatiya Found</td>
+                                  </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                    
+                        <!-- Message Body Card -->
+                        <div class="sms-card">
+                          <div class="sms-card-header green">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                            Message Body (Editable)
+                          </div>
+                          <div class="sms-card-body">
+                            {{ form.message }}
+                            <div class="sms-char-counter">Characters: <span id="smsCharCount">0</span></div>
+                          </div>
+                        </div>
+                    
+                        <!-- Send Button -->
+                        <button type="submit" class="sms-btn sms-btn-send">
+                          🚀 Send SMS to Selected Tenants
+                        </button>
+                    
+                      </form>
+                    </div>
+                    
+                    <script>
+                      // Search
+                      function smHandleSearch() {
+                        const q = document.getElementById('smsSearchInput').value.toLowerCase();
+                        document.querySelectorAll('#smsTable tbody tr').forEach(row => {
+                          if (row.querySelector('.sms-no-data')) return;
+                          const txt = row.innerText.toLowerCase();
+                          row.style.display = txt.includes(q) ? '' : 'none';
+                        });
+                      }
+                    
+                      // Select / Unselect
+                      function smSelectAll() {
+                        document.querySelectorAll('input[name="selected_varatiya"]').forEach(cb => {
+                          cb.checked = true;
+                          cb.closest('tr').classList.add('sms-row-checked');
+                        });
+                        smUpdateBadge();
+                      }
+                    
+                      function smUnselectAll() {
+                        document.querySelectorAll('input[name="selected_varatiya"]').forEach(cb => {
+                          cb.checked = false;
+                          cb.closest('tr').classList.remove('sms-row-checked');
+                        });
+                        smUpdateBadge();
+                      }
+                    
+                      // Badge counter
+                      function smUpdateBadge() {
+                        const count = document.querySelectorAll('input[name="selected_varatiya"]:checked').length;
+                        document.getElementById('smsBadge').textContent = count + ' selected';
+                        document.querySelectorAll('input[name="selected_varatiya"]').forEach(cb => {
+                          cb.closest('tr').classList.toggle('sms-row-checked', cb.checked);
+                        });
+                      }
+                    
+                      // Char counter for textarea
+                      const msgField = document.querySelector('textarea[name="message"]');
+                      if (msgField) {
+                        msgField.classList.add('sms-textarea');
+                        const counter = document.getElementById('smsCharCount');
+                        function updateCount() { counter.textContent = msgField.value.length; }
+                        msgField.addEventListener('input', updateCount);
+                        updateCount();
+                      }
+                    </script>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,217 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BOQ View - {{ project.project_first_name }}</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: silver;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 960px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .logo img {
+      height: 50px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .label-box {
+      background-color: #e2f0d9;
+      color: #000;
+      padding: 4px 10px;
+      font-weight: bold;
+      font-size: 13px;
+      border-radius: 4px;
+    }
+
+    .voucher-header {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      font-size: 12px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 10px;
+    }
+
+    .table th, .table td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .section {
+      margin-top: 12px;
+    }
+
+    .signature-section {
+      margin-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      text-align: center;
+    }
+
+    .signature-box {
+      flex: 1;
+      padding: 8px;
+    }
+
+    .signature-box:not(:last-child) {
+      margin-right: 10px;
+    }
+
+    .signature-line {
+      display: block;
+      margin-top: 10px;
+      border-top: 1px solid #000;
+      width: 100%;
+    }
+
+    .back-btn, .print-btn {
+      padding: 5px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .back-btn {
+      background-color: green;
+      color: white;
+    }
+
+    .print-btn {
+      background-color: #1e3c98;
+      color: white;
+    }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white; padding: 0; }
+      .card { box-shadow: none; border: none; margin: 0; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Header -->
+  <div class="card-header">
+    <div class="logo">
+      <img src="{% static '/images/BTP_logo_webp.webp' %}" alt="Logo">
+    </div>
+    <div style="text-align: right;">
+      <div class="label-box">BOQ View</div>
+      <p style="font-size: 11px; margin-top: 4px;">Printing Date: {{ now|date:"F j, Y, g:i a" }}</p>
+    </div>
+  </div>
+
+  <!-- Project Info -->
+  <div class="voucher-header">
+    <div><strong>Project:</strong> {{ project.project_first_name }}</div>
+    <div><strong>Filter Status:</strong> {{ status|default:"All" }}</div>
+    <div><strong>Date:</strong> {{ reqiDate|default:"-" }}</div>
+  </div>
+
+  <!-- Totals by BOQ Type -->
+  <div class="section">
+    <h3>Totals by BOQ Type</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>BOQ Type</th>
+          <th style="text-align:right;">Total Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in total_by_category_type %}
+        <tr>
+          <td>{{ row.category_type }}</td>
+          <td style="text-align:right;">{{ row.total_amount|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- BOQ Details -->
+  {% for type_key, categories in boq_by_type_and_category.items %}
+    <div class="section">
+      <h3>{{ type_key }}</h3>
+      {% for category_key, block in categories.items %}
+        <h4>{{ category_key }} (Total: {{ block.total|floatformat:2 }})</h4>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Item</th>
+              <th>Supplier</th>
+              <th>Unit</th>
+              <th style="text-align:right;">Qty</th>
+              <th style="text-align:right;">Rate</th>
+              <th style="text-align:right;">Amount</th>
+              <th>Remark</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in block.items %}
+            <tr>
+              <td>{{ item.category_name }}</td>
+              <td>{{ item.item_name }}</td>
+              <td>{{ item.supplier_name }}</td>
+              <td>{{ item.unit }}</td>
+              <td style="text-align:right;">{{ item.qty|floatformat:2 }}</td>
+              <td style="text-align:right;">{{ item.rate|floatformat:2 }}</td>
+              <td style="text-align:right;">{{ item.amount|floatformat:2 }}</td>
+              <td>{{ item.remark }}</td>
+              <td>{{ item.status_item }}</td>
+              <td>{{ item.boq_date|date:"Y-m-d" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endfor %}
+    </div>
+  {% endfor %}
+
+  <!-- Grand Total -->
+  <div class="section">
+    <h3>Grand Total: {{ grand_total|floatformat:2 }}</h3>
+  </div>
+
+  <!-- Back and Print Buttons -->
+  <div class="section no-print">
+    <button class="back-btn" onclick="window.history.back()">← Back</button>
+    <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+  </div>
+
+</div>
+
+</body>
+</html>

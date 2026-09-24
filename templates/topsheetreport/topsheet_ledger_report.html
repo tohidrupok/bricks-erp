@@ -1,0 +1,128 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Top Sheet Ledger Report - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+                
+                {% for data in entry_data %}
+                    {% if forloop.first %}
+                        <h2 class="intro-y mt-10 text-lg font-medium">{{ data.entry.project_name.project_first_name }} Reports</h2>
+                    {% endif %}
+                {% endfor %}
+
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{% url 'topsheet_reports_list' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Back</button>
+                        </a>
+                        <a href="{{ request.get_full_path }}">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">
+                                Refresh
+                            </button>
+                        </a>
+                        <a href="{% url 'topsheet_ledger_manage_pdf' %}?head={{ request.GET.head }}&head_value={{ request.GET.head_value }}&balance={{ request.GET.balance }}&cash_type_name={{ request.GET.cash_type_name }}&transaction={{ request.GET.transaction }}&from_date={{ request.GET.from_date }}&to_date={{ request.GET.to_date }}"">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">
+                                View Report
+                            </button>
+                        </a>
+                         
+                    </div>
+            
+                    <!-- BEGIN: Bank Ledger Report Table -->
+						<div class="intro-y col-span-12 overflow-auto lg:overflow-visible mt-5">
+							<table class="w-full border border-collapse text-sm">
+								<thead>
+									<tr class="bg-gray-100 text-gray-800">
+										<th class="border px-4 py-2 text-left">Project Name</th>
+										<th class="border px-4 py-2 text-left">Head of Account</th>
+										<th class="border px-4 py-2 text-left">Name</th>
+										<th class="border px-4 py-2 text-left">Date</th>
+										<th class="border px-4 py-2 text-left">Description</th>
+										<th class="border px-4 py-2 text-right">Debit</th>
+										<th class="border px-4 py-2 text-right">Credit</th>
+										<th class="border px-4 py-2 text-right">Balance</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for data in entry_data %}
+									<tr class="hover:bg-gray-50">
+										<td class="border px-4 py-2">{{ data.entry.project_name.project_first_name }}</td>
+										<td class="border px-4 py-2">{{ data.entry.head.head_name }}</td>
+										<td class="border px-4 py-2">
+											{% if data.entry.vendor %}
+												{{ data.entry.vendor }}
+											{% elif data.entry.customer_name %}
+												{{ data.entry.customer_name }}
+											{% elif data.entry.bankname %}
+												{{ data.entry.bankname }}
+											{% else %}
+												N/A
+											{% endif %}
+										</td>
+										<td class="border px-4 py-2">{{ data.entry.date }}</td>
+										<td class="border px-4 py-2">{{ data.entry.description }}</td>
+										<td class="border px-4 py-2 text-right">
+											{{ data.entry.debit|floatformat:2 }}
+										</td>
+										<td class="border px-4 py-2 text-right">
+											{{ data.entry.credit|floatformat:2 }}
+										</td>
+										<td class="border px-4 py-2 text-right">
+											{{ data.balance|floatformat:2 }}
+										</td>
+									</tr>
+									{% empty %}
+									<tr>
+										<td colspan="8" class="text-center text-gray-500 py-4">No records found.</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+						<!-- END: Bank Ledger Report Table -->
+
+                    </div>
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

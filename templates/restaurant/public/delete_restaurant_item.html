@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Restaurant Item</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#eef2f7;
+    margin:0;
+    padding:0;
+}
+
+.container{
+    max-width:500px;
+    margin:40px auto;
+    padding:0 15px;
+}
+
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    text-align:center;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.btn{
+    padding:10px 14px;
+    border:none;
+    border-radius:6px;
+    color:white;
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-block;
+}
+
+.btn-red{background:#dc3545;}
+.btn-gray{background:#6c757d;}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <h2>Delete Item</h2>
+
+        <p>Are you sure you want to delete?</p>
+
+        <h3>{{ item.rest_item_name }}</h3>
+
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-red">Yes Delete</button>
+        </form>
+
+        <br>
+
+        <a href="{% url 'public_restaurant_item_name' %}" class="btn btn-gray">Cancel</a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Re-Purchase Details - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+  .message.success {
+    color: green;
+    background-color: #d4edda;
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  .message.error {
+    color: red;
+    background-color: #f8d7da;
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  .table th, .table td {
+    font-size: 11px;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+  }
+
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+  }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+  {% include 'partials/mobile.html' %}
+  <div class="mt-[4.7rem] flex md:mt-0">
+    {% include 'partials/sidebar_list.html' %}
+    <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+      {% include 'partials/header.html' %}
+
+      <div class="card mt-10">
+        <div class="flex justify-between items-center mb-4 no-print">
+          <div class="flex gap-2">
+            <a href="{% url 'purchase_list' %}">
+              <button style="background-color:#84cc16" class="bg-green-600 text-white px-3 py-2 rounded text-sm">🔙 Back</button>
+            </a>			
+            <button onclick="location.reload()" style="background-color:#1e3a8a" class="bg-blue-800 text-white px-3 py-2 rounded text-sm">🔄 Refresh</button>
+          </div>
+		  &nbsp;
+          <div class="relative w-48">
+            <input id="searchInput" type="text" placeholder="🔍 Search..." class="w-full text-xs py-1.5 pl-3 pr-8 border rounded-md shadow-sm focus:ring focus:ring-blue-300 focus:outline-none" oninput="handleSearch()">
+          </div>
+        </div>
+
+        <h2 class="text-lg font-semibold mb-4">🧾 Re-Purchase for Requisition ID: <span class="text-blue-800">{{ requi_uniq_id }}</span> | Purchase ID: <span class="text-blue-800">{{ purch_id }}</span></h2>
+
+        {% if messages %}
+          <ul>
+            {% for message in messages %}
+              <li class="message {{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        <form method="post" action="{% url 'purchase_repurchase_save' requi_uniq_id %}">
+          {% csrf_token %}
+          <table class="table-auto w-full border border-gray-300 mb-6">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="border px-3 py-2">Purch ID</th>
+                <th class="border px-3 py-2">Vendor</th>
+                <th class="border px-3 py-2">Item Name</th>
+                <th class="border px-3 py-2">Qty</th>
+                <th class="border px-3 py-2">Rate</th>
+                <th class="border px-3 py-2">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              {% for req in requisitions %}
+              <tr>
+                <td class="border px-2 py-1">
+                  <input type="text" name="purch_id_{{ forloop.counter }}" value="{{ req.purch_id }}" class="w-full border px-2 py-1" required>
+                  <input type="hidden" name="id_{{ forloop.counter }}" value="{{ req.id }}">
+                </td>
+                <td class="border px-2 py-1">
+                  <select name="vendor_name_{{ forloop.counter }}" class="w-full border px-2 py-1">
+                    <option value="">-- Select Supplier --</option>
+                    {% for supplier in suppliers %}
+                      <option value="{{ supplier.supplier_name }}"
+                        {% if req.vendor_name == supplier.supplier_name %}
+                          selected
+                        {% endif %}
+                      >{{ supplier.supplier_name }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td class="border px-2 py-1">
+                  <input type="text" name="item_name_{{ forloop.counter }}" value="{{ req.item_name }}" class="w-full border px-2 py-1 bg-gray-100" readonly>
+                </td>
+                <td class="border px-2 py-1">
+                  <input type="number" step="any" name="qty_{{ forloop.counter }}" value="{{ req.qty }}" class="w-full border px-2 py-1" oninput="calculateAmount(this)">
+                </td>
+                <td class="border px-2 py-1">
+                  <input type="number" step="any" name="rate_{{ forloop.counter }}" value="{{ req.rate }}" class="w-full border px-2 py-1" oninput="calculateAmount(this)">
+                </td>
+                <td class="border px-2 py-1">
+                  <input type="number" step="any" name="amount_{{ forloop.counter }}" value="{{ req.amount }}" class="w-full border px-2 py-1 amount-field" readonly>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <div class="text-center mt-4">
+            <button type="submit" style="background-color:#1e3a8a" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded shadow">
+              💾 Save 
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function handleSearch() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#tableBody tr');
+    rows.forEach(row => {
+      const text = row.innerText.toLowerCase();
+      row.style.display = text.includes(input) ? '' : 'none';
+    });
+  }
+
+  function calculateAmount(input) {
+    const row = input.closest('tr');
+    const qty = parseFloat(row.querySelector('input[name^="qty_"]').value) || 0;
+    const rate = parseFloat(row.querySelector('input[name^="rate_"]').value) || 0;
+    const amountField = row.querySelector('input[name^="amount_"]');
+    amountField.value = (qty * rate).toFixed(2);
+  }
+</script>
+{% endblock %}

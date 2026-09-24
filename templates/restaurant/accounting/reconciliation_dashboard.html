@@ -1,0 +1,48 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reconciliation Dashboard - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="text-2xl font-bold mt-10 mb-6 text-center text-blue-900">🏦 Bank Reconciliation Dashboard</h2>
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					{% for bank in bank_accounts %}
+						<div class="bg-white rounded-lg shadow p-5 hover:shadow-md transition duration-300">
+							<h3 class="text-xl font-semibold text-gray-800 mb-2">{{ bank.cash_type_name }}</h3>
+							<p class="text-gray-600 mb-4">💰 Current Balance: <strong>{{ bank.type_amount }}</strong></p>
+							
+							<div class="flex flex-wrap gap-2">
+								<a href="{% url 'reconciliation_list' bank.id %}" style="margin-left:0.5%;background-color:#1e3c98"
+								   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">🔍 View Transactions</a>
+								<a href="{% url 'reconciliation_create' bank.id %}" style="margin-left:0.5%;background-color:#1e3c98"
+								   class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm">➕ Match Entry</a>
+								<a href="{% url 'reconciliation_report' bank.id %}" style="margin-left:0.5%;background-color:#1e3c98"
+								   class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm">📄 View Report</a>
+							</div>
+						</div>
+					{% empty %}
+						<div class="col-span-12 text-center text-gray-500 mt-10">
+							No bank accounts available for reconciliation.
+						</div>
+					{% endfor %}
+				</div>           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}🗑️ Deleted Records Log - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+  .card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 20px;
+    max-width: 1100px;
+    margin: auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+
+  .table th,
+  .table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .table th {
+    background-color: #1e3a8a;
+    color: white;
+  }
+
+  .json-data {
+    display: none;
+    background-color: #f8f9fa;
+    padding: 10px;
+    border: 1px dashed #adb5bd;
+    white-space: pre-wrap;
+    font-family: Consolas, monospace;
+    font-size: 11px;
+    margin-top: 5px;
+  }
+
+  .btn-toggle, .undo-button {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .btn-toggle {
+    background-color: #0d6efd;
+    color: white;
+    margin-right: 6px;
+  }
+
+  .undo-button {
+    background-color: #198754;
+    color: white;
+    border: none;
+  }
+
+  .undo-button:hover {
+    background-color: #157347;
+  }
+
+  .no-record {
+    text-align: center;
+    color: #6c757d;
+    padding: 30px;
+    font-style: italic;
+  }
+
+  .search-input {
+    width: 250px;
+    font-size: 12px;
+    padding: 5px 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5">
+  <div class="card mt-10">
+    <div class="top-buttons flex flex-wrap items-center space-x-2 no-print mb-3">
+      <a href="{% url 'deleted_records' %}">
+        <button style="background-color:#1e3a8a" class="btn-refresh h-8 px-4 text-xs bg-blue-800 text-white rounded">🔄 Refresh</button>
+      </a>
+      &nbsp;
+      <div class="flex-grow"></div>
+      <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search..." oninput="handleSearch()">
+    </div>
+
+    <div class="section-title">🗑️ Deleted Records Log</div>
+
+    <table class="table" id="deletedTable">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Deleted By</th>
+          <th>Deleted At</th>
+          <th>Data & Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in records %}
+        <tr>
+          <td>{{ record.model_name }}</td>
+          <td>{{ record.deleted_by|default:"System" }}</td>
+          <td>{{ record.deleted_at|date:"Y-m-d H:i:s" }}</td>
+          <td>
+            <button class="btn-toggle" onclick="toggleData({{ record.id }})">🔍 Show/Hide</button>
+            <form action="{% url 'undo_deleted_record' record.pk %}" method="post" class="inline undo-form" onsubmit="return confirm('Are you sure you want to restore this record?');">
+              {% csrf_token %}
+              <button type="submit" class="undo-button">⏪ Undo</button>
+            </form>
+            <div id="data-{{ record.id }}" class="json-data">
+              {{ record.deleted_data|safe }}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="no-record">No deleted records found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  function toggleData(id) {
+    const dataBox = document.getElementById('data-' + id);
+    dataBox.style.display = (dataBox.style.display === 'block') ? 'none' : 'block';
+  }
+
+  function handleSearch() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#deletedTable tbody tr');
+    rows.forEach(row => {
+      const text = row.innerText.toLowerCase();
+      row.style.display = text.includes(input) ? '' : 'none';
+    });
+  }
+</script>
+{% endblock %}

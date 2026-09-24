@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Expense Requisition Voucher List - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    /* Highlighting styles for Project Name and Date */
+    .highlight {
+        color: #4CAF50;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+            <h2 class="intro-y mt-10 text-lg font-medium">Expense Requisition List</h2>
+
+            {% if messages %}
+            <ul>
+                {% for message in messages %}
+                <li class="message {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <div class="mt-5 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                    <a href="{% url 'expense_requisition_add' %}">
+                        <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Add Expense Requisition</button>
+                    </a>
+                    <a href="{% url 'grouped_requisitions' %}">
+                        <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">⬅ Back to Requisitions List</button>
+                    </a>
+
+                    <div class="mx-auto hidden text-slate-500 md:block"></div>
+
+                    <div class="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">
+                        <div class="relative w-56 text-slate-500 mb-4">
+                            <input id="searchInput" type="text" placeholder="Search..." class="w-full p-2 text-sm border rounded-md shadow-sm focus:ring-4 focus:ring-primary" oninput="handleSearch()">
+                            <i class="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4">🔍</i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BEGIN: Expense Requisition Table -->
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                    <div class="card mt-10">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-6">📝 Expense Details</h2>
+
+                        <p><strong class="highlight">Project:</strong> {{ project }}</p>
+                        <p><strong class="highlight">Date:</strong> {{ date }}</p>
+
+                        <table class="min-w-full table-auto border-collapse border-2 border-gray-500">
+                            <thead class="bg-gray-300">
+                                <tr class="font-bold text-white">
+                                    <th class="px-6 py-3 border-b-2 border-gray-400 text-left" style="color: black;">Employee</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-400 text-left" style="color: black;">Item</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-400 text-left" style="color: black;">Qty</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-400 text-left" style="color: black;">Rate</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-400 text-left" style="color: black;">Amount</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-400 text-left" style="color: black;">Description</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-400 text-left" style="color: black;">Approval Status</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-400 text-left" style="color: black;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in requisitions %}
+                                <tr class="font-semibold">
+                                    <td class="px-6 py-3 border-b-2 border-gray-300" style="color: black;">{{ req.employee_name }}</td>
+                                    <td class="px-6 py-3 border-b-2 border-gray-300" style="color: black;">{{ req.item_name }}</td>
+                                    <td class="px-6 py-3 border-b-2 border-gray-300 text-center">{{ req.qty }}</td>
+                                    <td class="px-6 py-3 border-b-2 border-gray-300 text-center">{{ req.rate }}</td>
+                                    <td class="px-6 py-3 border-b-2 border-gray-300 text-center">{{ req.amount }}</td>
+                                    <td class="px-6 py-3 border-b-2 border-gray-300" style="color: black;">{{ req.descript }}</td>
+                                    <td class="px-6 py-3 border-b-2 border-gray-300 text-center">
+                                        {% if req.approv_status == "approved" %}
+                                        <span class="font-bold" style="color: green;">Approved</span>
+                                        {% elif req.approv_status == "rejected" %}
+                                        <span class="font-bold" style="color: red;">Rejected</span>
+                                        {% else %}
+                                        <span class="font-bold" style="color: red;">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-3 border-b-2 border-gray-300 text-center space-x-2">
+                                        <a href="{% url 'edit_expense_requisition' req.pk %}"
+											   style="display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+													  background-color: #1e3a8a; color: white; padding: 6px 12px; border-radius: 5px;
+													  min-width: 90px; text-decoration: none;">
+											  ✏️ Edit
+											</a>
+                                     </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="px-6 py-3 text-center font-semibold" style="color: black;">No requisitions found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- END: Expense Requisition Table -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

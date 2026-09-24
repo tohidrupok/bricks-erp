@@ -1,0 +1,319 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ledger Manage - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Ledger Manage</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{% url 'reports_manage_list' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Back</button>
+                        </a>
+                        <a href="{% url 'ledger_manage' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Refresh</button>
+                        </a>
+                    </div>
+            
+                    <!-- BEGIN: Property Owners List -->
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <form method="get" action="{% url 'ledger_report' %}" class="w-full max-w-4xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                            <h2 class="text-2xl font-semibold text-gray-800 text-center mb-6">Ledger Report Filter</h2>
+                            
+                            <div class="space-y-4">
+                                <!-- Project Name -->
+                                <div>
+                                    <label for="project" class="block font-medium text-gray-800">Project Name</label>
+                                    <select name="project" id="project" class="w-full border border-slate-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        {% for projectName in projectNames %}
+                                            <option value="{{ projectName.id }}">{{ projectName.project_first_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+								<br>
+								<!-- All Branch or type  Branch Radio Buttons -->
+								<div>
+									<label class="block font-medium text-gray-800 mb-2"><b>Branch Type</b></label>
+									<div class="flex space-x-6">
+										<label class="inline-flex items-center">
+											<input type="radio" name="branch" value="allbranch" class="form-radio text-blue-600"
+												{% if request.GET.allbranch == 'allbranch' %}checked{% endif %}>
+											<span class="ml-2 text-gray-700">All Branch &nbsp;&nbsp;&nbsp;&nbsp; </span>
+										</label>
+										<label class="inline-flex items-center">
+											<input type="radio" name="branch" value="onebranch" class="form-radio text-blue-600"
+												{% if request.GET.onebranch == 'onebranch' or not request.GET.branch %}checked{% endif %}>
+											<span class="ml-2 text-gray-700">One Branch</span>
+										</label>
+									</div>
+								</div>
+							
+								<br>
+                                 <!-- Type -->
+								<div class="mb-4">
+									<label for="id_type" class="font-medium text-lg text-gray-800">Select Type</label>
+									<select id="id_type" name="type" 
+											class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2" onchange="toggleFields()">
+										<option value="">Select Type</option>
+										<option value="Contructor" {% if form.type.value == "Contructor" %}selected{% endif %}>Contructor</option>
+										<option value="Vendor" {% if form.type.value == "Vendor" %}selected{% endif %}>Supplier</option>
+										<option value="Customer" {% if form.type.value == "Customer" %}selected{% endif %}>Customer</option>
+										<option value="Expense" {% if form.type.value == "Expense" %}selected{% endif %}>Expense</option>
+									</select>
+									{% for error in form.type.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div>
+								<!-- Contructor -->
+								<div class="mb-4" id="contructor_field" style="display:none;">
+									<label for="id_contructor" class="font-medium text-lg text-gray-800">Contructor Name</label>
+									<select id="id_contructor" name="contructor" 
+											class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+										<option value="" {% if not form.contructor.value %}selected{% endif %}>Select Contructor</option>
+										{% for choice in form.contructor.field.choices %}
+											<option value="{{ choice.0 }}" {% if choice.0 == form.contructor.value %}selected{% endif %}>{{ choice.1 }}</option>
+										{% endfor %}
+									</select>
+									{% for error in form.contructor.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div>
+								<!-- Vendor -->
+								<div class="mb-4" id="vendor_field" style="display:none;">
+									<label for="id_vendor" class="font-medium text-lg text-gray-800">Supplier Name</label>
+									<select id="id_vendor" name="vendor" 
+											class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+										<option value="" {% if not form.vendor.value %}selected{% endif %}>Select Supplier</option>
+										{% for choice in form.vendor.field.choices %}
+											<option value="{{ choice.0 }}" {% if choice.0 == form.vendor.value %}selected{% endif %}>{{ choice.1 }}</option>
+										{% endfor %}
+									</select>
+									{% for error in form.vendor.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div> 
+								<!-- Customer Name -->
+								<div id="customerFields" class="mb-4" style="display:none;">
+									<label for="id_customer_name" class="font-medium text-lg text-gray-800">Customer Name</label>
+									<select id="id_customer_name" name="customer_name"
+											class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-blue-500 focus:border-blue-500 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+										<option value="" disabled {% if not form.type.value %} selected {% endif %}>Select Customer Name</option>
+										{% for value, label in form.customer_name.field.choices %}
+											<option value="{{ value }}" {% if value == form.customer_name.value %} selected {% endif %}>{{ label }}</option>
+										{% endfor %}
+									</select>
+									{% for error in form.customer_name.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div> 
+								<!-- Expense Name -->
+								<div id="expenseFields" class="mb-4" style="display:none;"> 
+									<label for="id_expense_name" class="font-medium text-lg text-gray-800">Expense Name</label>
+										<select name="expense_name" id="id_expense_name" class="w-full border border-slate-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+											{% for exp_name in head_exp_name %}
+												<option value="{{ exp_name.id }}" {% if request.GET.exp_name == exp_name.id|stringformat:"s" %}selected{% endif %}>
+													{{ exp_name.head_exp_name }}
+												</option>
+											{% endfor %}
+										</select>
+								</div> 
+								<!-- Opening Balance Radio Buttons -->
+                           <div>
+								<label class="block font-medium text-gray-800 mb-2"><b>Opening Balance</b></label>
+								<div class="flex">
+									<!-- Include -->
+									<label class="inline-flex items-center mr-12 w-40">
+										<input type="radio" name="balance" value="include" class="form-radio text-blue-600"
+											{% if request.GET.balance == 'include' %}checked{% endif %}>
+										<span class="ml-2 text-gray-700">Include Single</span>
+									</label>
+
+									<!-- Exclude -->
+									<label class="inline-flex items-center mr-12 w-40">
+										<input type="radio" name="balance" value="exclude" class="form-radio text-blue-600"
+											{% if request.GET.balance == 'exclude' or not request.GET.balance %}checked{% endif %}>
+										<span class="ml-2 text-gray-700">Exclude Single</span>
+									</label>
+
+									<!-- All -->
+									<label class="inline-flex items-center w-40">
+										<input type="radio" name="balance" value="all" class="form-radio text-blue-600"
+											{% if request.GET.balance == 'all' %}checked{% endif %}>
+										<span class="ml-2 text-gray-700">All Method</span>
+									</label>
+								</div>
+							</div>
+
+                            <!-- Bank Type Dropdown -->
+                            <div>
+                                <label for="cash_type_name" class="block font-medium text-gray-800 mb-2"><b>Bank Type</b></label>
+                                <select name="cash_type_name" id="cash_type_name" class="w-full border border-slate-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    {% for cashType in cashTypes %}
+                                        <option value="{{ cashType.id }}" {% if request.GET.head == cashType.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ cashType.cash_type_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+								<br>                                
+                                
+								<!-- Transaction Type Radio Buttons -->
+								<div>
+									<label class="block font-medium text-gray-800 mb-2"><b>Transaction Type</b></label>
+									<div class="flex space-x-6">
+										<label class="inline-flex items-center">
+											<input type="radio" name="transaction" value="all" class="form-radio text-blue-600"
+												{% if request.GET.transaction == 'all' %}checked{% endif %}>
+											<span class="ml-2 text-gray-700">All Transactions &nbsp;&nbsp;&nbsp;&nbsp; </span>
+										</label>
+										<label class="inline-flex items-center">
+											<input type="radio" name="transaction" value="datewise" class="form-radio text-blue-600"
+												{% if request.GET.transaction == 'datewise' or not request.GET.transaction %}checked{% endif %}>
+											<span class="ml-2 text-gray-700">Date Wise</span>
+										</label>
+									</div>
+								</div>
+								
+								<br>
+								
+								<!-- From Date -->
+								<div>
+									<label for="from_date" class="block font-medium text-gray-800 mb-2"><b>From Date</b></label>
+									<input type="date" name="from_date" id="from_date"
+										value="{{ request.GET.from_date|default:today|date:'Y-m-d' }}"
+										class="w-full border border-slate-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+								</div>
+
+								<!-- To Date -->
+								<div>
+									<label for="to_date" class="block font-medium text-gray-800 mb-2"><b>To Date</b></label>
+									<input type="date" name="to_date" id="to_date"
+										value="{{ request.GET.to_date|default:today|date:'Y-m-d' }}"
+										class="w-full border border-slate-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+								</div>
+                                <br/>
+                                <!-- Submit Button -->
+                                <div class="text-center">
+                                    <button type="submit" style="background-color:#1e3c98" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors duration-200">
+                                        Show Results
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+						<!-- Branch and Date fields readonly option -->
+						<script>
+							document.addEventListener('DOMContentLoaded', function () {
+								// Elements for date logic
+								const transactionRadios = document.querySelectorAll('input[name="transaction"]');
+								const fromDate = document.getElementById('from_date');
+								const toDate = document.getElementById('to_date');
+
+								// Elements for branch logic
+								const branchRadios = document.querySelectorAll('input[name="branch"]');
+								const typeSelect = document.getElementById('id_type');
+
+								function updateDateFields() {
+									const selectedTransaction = document.querySelector('input[name="transaction"]:checked')?.value;
+									const isAllTransaction = selectedTransaction === 'all';
+
+									fromDate.readOnly = isAllTransaction;
+									toDate.readOnly = isAllTransaction;
+
+									fromDate.style.backgroundColor = isAllTransaction ? '#f1f1f1' : '';
+									toDate.style.backgroundColor = isAllTransaction ? '#f1f1f1' : '';
+								}
+
+								function updateBranchFields() {
+									const selectedBranch = document.querySelector('input[name="branch"]:checked')?.value;
+									const isAllBranch = selectedBranch === 'allbranch';
+
+									typeSelect.disabled = isAllBranch;
+									typeSelect.style.backgroundColor = isAllBranch ? '#f1f1f1' : '';
+								}
+
+								// Initial setup
+								updateDateFields();
+								updateBranchFields();
+
+								// Event listeners
+								transactionRadios.forEach(radio => {
+									radio.addEventListener('change', updateDateFields);
+								});
+
+								branchRadios.forEach(radio => {
+									radio.addEventListener('change', updateBranchFields);
+								});
+							});
+						</script>					
+
+                         <!-- Type Fields -->
+                         <script>
+                            function toggleFields() {
+                                    var type = document.getElementById("id_type").value;
+                                    
+                                    // Hide all fields first
+                                    document.getElementById("contructor_field").style.display = "none";
+                                    document.getElementById("vendor_field").style.display = "none";
+                                    document.getElementById("customerFields").style.display = "none";
+                                    document.getElementById("expenseFields").style.display = "none";
+                                    
+                                    // Show corresponding fields based on selected type
+                                    if (type == "Contructor") {
+                                        document.getElementById("contructor_field").style.display = "block";
+                                    } else if (type == "Vendor") {
+                                        document.getElementById("vendor_field").style.display = "block";
+                                    }
+                                    else if (type == "Customer") {
+                                        document.getElementById("customerFields").style.display = "block";
+                                    }
+                                    else if (type == "Expense") {
+                                        document.getElementById("expenseFields").style.display = "block";
+                                    }
+                                }
+
+                        </script>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

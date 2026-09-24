@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>দলিল তালিকা (Document List)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Hind Siliguri', 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-gray-50 p-6">
+
+    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200">
+        
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 border-b pb-4 gap-4">
+            <h2 class="text-2xl font-bold text-indigo-700">📋 সংরক্ষিত দলিল সমূহের তালিকা</h2>
+        
+            <div class="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">                           
+                <div class="relative w-56 text-slate-500 mb-4">
+                    <input id="searchInput" type="text" placeholder="Search..." 
+                        class="w-full p-2 text-sm border rounded-md shadow-sm focus:ring-4 focus:ring-primary" 
+                        oninput="handleSearch()">
+                    <i class="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4">🔍</i>
+                </div>
+            </div>
+        
+            <!-- Back Button -->
+            <a href="{% url 'dashboard' %}" 
+               class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded shadow text-sm transition">
+                ← ফিরে যান
+            </a>
+        
+            <!-- Add New Document Button -->
+            <a href="{% url 'new_create_document' %}" 
+               class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow text-sm transition">
+                + নতুন দলিল যোগ করুন
+            </a>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded text-white bg-green-500 font-semibold">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+            <table class="min-w-full divide-y divide-gray-200 text-sm text-left">
+                <thead class="bg-indigo-50 text-indigo-900 font-semibold">
+                    <tr>
+                        <th class="px-4 py-3">ক্রমিক</th>
+                        <th class="px-4 py-3">ফাইল কোড</th>
+                        <th class="px-4 py-3">দলিল নং</th>
+                        <th class="px-4 py-3">দলিলের ধরন</th>
+                        <th class="px-4 py-3">তারিখ</th>
+                        <th class="px-4 py-3">ক্রেতা / বিক্রেতা</th>
+                        <th class="px-4 py-3">মৌজা/দাগ/খতিয়ান/ফাইল লোকেশন </th>
+                        <th class="px-4 py-3">স্ক্যান কপি</th>
+                        <th class="px-4 py-3">বর্তমান অবস্থা</th>
+                        <th class="px-4 py-3 text-center">অ্যাকশন</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody" class="divide-y divide-gray-200 bg-white">
+                    {% for doc in documents %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-4 py-3 font-medium text-gray-900">{{ doc.sl_no }}</td>
+                        <td class="px-4 py-3"><span class="px-2 py-1 bg-indigo-100 text-indigo-800 rounded font-bold text-xs">{{ doc.get_file_code_display }}</span></td>
+                        <td class="px-4 py-3 font-medium">{{ doc.doc_no }}</td>
+                        <td class="px-4 py-3">{{ doc.doc_type }}</td>
+                        <td class="px-4 py-3 whitespace-nowrap">{{ doc.doc_date }}</td>
+                        <td class="px-4 py-3">
+                            <div class="text-xs text-gray-500">বিক্রেতা: {{ doc.seller }}</div>
+                            <div class="text-xs text-indigo-600">ক্রেতা: {{ doc.buyer }}</div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="text-xs">মৌজা: {{ doc.mouza }}</div>
+                            <div class="text-xs text-gray-500">খতিয়ান: {{ doc.khatian }}, দাগ: {{ doc.dag_no }}, ফাইল লোকেশন: {{ doc.file_location }}</div>
+                            <div class="text-xs">মৌজা: {{ doc.mouza }}</div>
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if doc.scanned_copy %}
+                                <a href="{{ doc.scanned_copy.url }}" target="_blank" class="text-blue-600 hover:underline font-semibold text-xs">📄 দেখুন (View)</a>
+                            {% else %}
+                                <span class="text-gray-400 text-xs">নেই</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3"><span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">{{ doc.current_status }}</span></td>
+                        <td class="px-4 py-3 text-center whitespace-nowrap space-x-1">
+                            {% if request.session.department == "admin" %}
+                            <a href="{% url 'new_edit_document' doc.pk %}" class="bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold py-1 px-2.5 rounded text-xs transition">সম্পাদনা</a>
+                            <a href="{% url 'new_delete_document' doc.pk %}" class="bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-1 px-2.5 rounded text-xs transition">মুছুন</a>
+                            {% else %}
+                            Not Allow
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center py-8 text-gray-500 font-semibold">কোনো দলিল ডাটাবেজে খুঁজে পাওয়া যায়নি।</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <script>
+                            function handleSearch() {
+                                let searchValue = document.getElementById('searchInput').value.toLowerCase();
+                                let rows = document.querySelectorAll("#tableBody tr");
+                    
+                                rows.forEach(row => {
+                                    let columns = row.getElementsByTagName("td");
+                                    let rowText = "";
+                                    
+                                    // Combine text content of all columns in the row for searching
+                                    for (let i = 0; i < columns.length; i++) {
+                                        rowText += columns[i].textContent.toLowerCase(); // Get all text in row
+                                    }
+                    
+                                    // If search term is found in the row's combined text, show the row, else hide it
+                                    if (rowText.includes(searchValue)) {
+                                        row.style.display = ""; // Show row
+                                    } else {
+                                        row.style.display = "none"; // Hide row
+                                    }
+                                });
+                            }
+                        </script>
+        </div>
+    </div>
+
+</body>
+</html>

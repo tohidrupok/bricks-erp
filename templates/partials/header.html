@@ -1,0 +1,135 @@
+{% load static %}
+<!-- Add this to enable Alpine.js -->
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+<div class="relative z-[51] flex h-[67px] items-center border-b border-slate-200">
+    <!-- BEGIN: Breadcrumb -->
+    <nav aria-label="breadcrumb" class="flex -intro-x mr-auto hidden sm:flex">
+        <ol class="flex items-center text-theme-1 dark:text-slate-300">
+            <li class="">
+                <a href="">BRICKS</a>
+            </li>
+            <li class="relative ml-5 pl-0.5 before:content-[''] before:w-[14px] before:h-[14px] before:bg-chevron-black before:transform before:rotate-[-90deg] before:bg-[length:100%] before:-ml-[1.125rem] before:absolute before:my-auto before:inset-y-0 dark:before:bg-chevron-white text-slate-800 cursor-text dark:text-slate-400">
+                <a href="">ERP</a>
+            </li>
+        </ol>
+    </nav>
+    <!-- END: Breadcrumb -->
+    <!-- BEGIN: Search -->
+     <!-- BEGIN: Notifications -->
+    <div x-data="{ open: false }" class="relative intro-x mr-auto sm:mr-6">
+        <!-- Notification Icon -->
+        <div @click="open = !open" class="cursor-pointer relative block text-slate-600">
+            {% if unread_count > 0 %}
+            <span class="absolute -top-1 right-[-6px] h-4 min-w-[16px] text-[10px] leading-tight text-white px-1 rounded-full bg-danger text-center">
+                {{ unread_count }}
+            </span>
+            {% endif %}
+            <i data-lucide="bell" class="stroke-1.5 w-5 h-5 dark:text-slate-500"></i>
+        </div>
+
+
+        <!-- Dropdown Menu -->
+        <!-- <div x-show="open" @click.away="open = false"
+            x-transition
+            class="absolute right-0 z-[9999] mt-2 w-[350px] p-5 bg-white shadow-lg rounded-md">
+            <div class="mb-5 font-medium">Notifications</div>
+            {% for notification in notifications %}
+            <div class="cursor-pointer relative flex items-start mb-4 hover:bg-slate-100 p-2 rounded">
+                <div class="image-fit relative mr-2 h-12 w-12 flex-none">
+                    {% if notification.sender.employee.photo %}
+                        <img class="rounded-full object-cover h-12 w-12"
+                            src="{{ notification.sender.employee.photo.url }}" alt="User Photo">
+                    {% else %}
+                        <img class="rounded-full object-cover h-12 w-12"
+                            src="{% static 'images/fakers/profile-2.png' %}" alt="Default User Photo">
+                    {% endif %}
+                </div>
+                <div class="ml-2 w-full">
+                    <div class="flex justify-between items-center">
+                        <a href="{% url 'read_notification' notification.id %}"
+                        class="font-semibold text-sm text-slate-800">
+                            {{ notification.sender.get_full_name }}
+                        </a>
+                        <span class="text-xs text-slate-400">{{ notification.created_at|date:"h:i A" }}</span>
+                    </div>
+                    <div class="text-slate-500 text-sm mt-1">
+                        {{ notification.message|truncatechars:100 }}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-slate-500 text-sm">No new notifications</div>
+            {% endfor %}
+        </div> -->
+        <!-- Notification Popup Centered -->
+        <div x-show="open" @click.away="open = false"
+            x-transition
+            class="fixed top-20 left-1/2 transform -translate-x-1/2 z-[9999] w-[95%] sm:w-[400px] p-5 bg-white shadow-lg rounded-md">
+            <div class="mb-5 font-medium text-center">Notifications</div>
+            {% for notification in notifications %}
+            <div class="cursor-pointer relative flex items-start mb-4 hover:bg-slate-100 p-2 rounded">
+                <div class="image-fit relative mr-2 h-12 w-12 flex-none">
+                    {% if notification.sender.employee.photo %}
+                        <img class="rounded-full object-cover h-12 w-12"
+                            src="{{ notification.sender.employee.photo.url }}" alt="User Photo">
+                    {% else %}
+                        <img class="rounded-full object-cover h-12 w-12"
+                            src="{% static 'images/fakers/profile-2.png' %}" alt="Default User Photo">
+                    {% endif %}
+                </div>
+                <div class="ml-2 w-full">
+                    <div class="flex justify-between items-center">
+                        <a href="{% url 'read_notification' notification.id %}"
+                        class="font-semibold text-sm text-slate-800">
+                            {{ notification.sender.get_full_name }}
+                        </a>
+                        <span class="text-xs text-slate-400">{{ notification.created_at|date:"h:i A" }}</span>
+                    </div>
+                    <div class="text-slate-500 text-sm mt-1">
+                        {{ notification.message|truncatechars:100 }}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-slate-500 text-sm text-center">No new notifications</div>
+            {% endfor %}
+        </div>
+
+    </div>    
+    <!-- BEGIN: Account Menu -->
+    <div data-tw-merge="" data-tw-placement="bottom-end" class="dropdown relative">
+    <button data-tw-toggle="dropdown" aria-expanded="false" class="cursor-pointer image-fit zoom-in intro-x block h-9 w-9 overflow-hidden rounded-full shadow-lg border-2 border-white/20">
+        {% if request.user.employee and request.user.employee.photo %}
+            <img src="{{ request.user.employee.photo.url }}" alt="{{ request.user.username }}">
+        {% else %}
+            <div class="w-full h-full bg-primary text-white flex items-center justify-center font-bold text-xs">
+                {{ request.user.username|slice:":2"|upper }}
+            </div>
+        {% endif %}
+    </button>
+    <div data-transition="" data-selector=".show" data-enter="transition-all ease-linear duration-150" data-enter-from="absolute !mt-5 invisible opacity-0 translate-y-1" data-enter-to="!mt-1 visible opacity-100 translate-y-0" data-leave="transition-all ease-linear duration-150" data-leave-from="!mt-1 visible opacity-100 translate-y-0" data-leave-to="absolute !mt-5 invisible opacity-0 translate-y-1" class="dropdown-menu absolute z-[9999] hidden">
+        <div data-tw-merge="" class="dropdown-content rounded-md border-transparent p-2 shadow-[0px_3px_10px_#00000017] dark:border-transparent dark:bg-darkmode-600 mt-px w-56 bg-theme-1 text-white">
+            <div class="p-2 font-medium font-normal">
+                <div class="font-medium">BRICKS - ERP</div>
+                <div class="mt-0.5 text-xs text-white/70 dark:text-slate-500">
+                    {{ request.session.user_name|default:request.user.username }}
+                </div>
+            </div>
+            <div class="h-px my-2 -mx-2 bg-slate-200/60 dark:bg-darkmode-400 bg-white/[0.08]">
+            </div>
+            <a href="{% url 'user_profile' %}" class="cursor-pointer flex items-center p-2 transition duration-300 ease-in-out rounded-md hover:bg-slate-200/60 dark:bg-darkmode-600 dark:hover:bg-darkmode-400 dropdown-item hover:bg-white/5">
+                <i data-tw-merge="" data-lucide="user" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                Profile
+            </a>
+            <div class="h-px my-2 -mx-2 bg-slate-200/60 dark:bg-darkmode-400 bg-white/[0.08]">
+            </div>
+            <a href="{% url 'logout' %}" class="cursor-pointer flex items-center p-2 transition duration-300 ease-in-out rounded-md hover:bg-slate-200/60 dark:bg-darkmode-600 dark:hover:bg-darkmode-400 dropdown-item hover:bg-white/5">
+                <i data-tw-merge="" data-lucide="toggle-right" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                Logout
+            </a>
+        </div>
+    </div>
+</div>
+    <!-- END: Account Menu -->
+</div>

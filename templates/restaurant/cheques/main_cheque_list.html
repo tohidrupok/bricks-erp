@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ book.book_name }} - Cheques - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    {% include 'partials/mobile.html' %}
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+
+        {% include 'partials/sidebar_list.html' %}
+
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+
+            {% include 'partials/header_dashboard.html' %}
+
+            <div class="btp-cheque-container mt-10">
+
+                <!-- Header -->
+                <div class="btp-cheque-header flex justify-between items-center mb-6">
+                    <h1>Cheques for {{ book.book_name }} ({{ book.book_number }})</h1>
+                    <a href="{% url 'rest_main_cheque_book_list' %}" class="btp-back-link">&larr; Back to Cheque Books</a>
+                </div>
+
+                <!-- Add Cheque Form -->
+                <div class="btp-form-card mb-8 w-full md:w-1/2">
+                    <h2>Add New Cheque</h2>
+                    <form method="post" class="btp-form">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btp-btn-primary">➕ Add Cheque</button>
+                    </form>
+                </div>
+                <style>
+                .btn-right {
+                    text-align: right;
+                    margin-bottom: 10px;
+                }
+                
+                .pdf-btn {
+                    background: linear-gradient(135deg, #28a745, #1e7e34);
+                    color: white;
+                    border: none;
+                    padding: 8px 18px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    transition: 0.25s ease;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                }
+                
+                .pdf-btn:hover {
+                    background: linear-gradient(135deg, #218838, #16692c);
+                    transform: translateY(-1px);
+                }
+
+                </style>
+               <div class="btn-right">
+                    <button class="pdf-btn"
+                            onclick="location.href='{% url 'rest_cheque_book_print' book.id %}'">
+                        📄 PDF View
+                    </button>
+                </div>
+
+
+
+                <!-- Cheques List -->
+                <h2 class="btp-list-title">All Cheques</h2>
+                <div class="btp-table-wrapper">
+                    <table class="btp-table">
+                        <thead>
+                            <tr>
+                                <th>Cheque No</th>
+                                <th>Payee</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Remarks</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cheque in cheques %}
+                            <tr>
+                                <td>{{ cheque.cheque_number }}</td>
+                                <td>{{ cheque.payee_name }}</td>
+                                <td>{{ cheque.amount }}</td>
+                                <td>
+                                    {% if cheque.status == 'unused' %}
+                                        <span class="status-unused">{{ cheque.get_status_display }}</span>
+                                    {% elif cheque.status == 'used' %}
+                                        <span class="status-used">{{ cheque.get_status_display }}</span>
+                                    {% elif cheque.status == 'issued' %}
+                                        <span class="status-issued">{{ cheque.get_status_display }}</span>
+                                    {% elif cheque.status == 'discount' %}
+                                        <span class="status-discount">{{ cheque.get_status_display }}</span>
+                                    {% elif cheque.status == 'cleared' %}
+                                        <span class="status-cleared">{{ cheque.get_status_display }}</span>
+                                    {% elif cheque.status == 'cancelled' %}
+                                        <span class="status-cancelled">{{ cheque.get_status_display }}</span>
+                                    {% else %}
+                                        <span>{{ cheque.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ cheque.remarks }}</td>
+                                <td class="btp-actions">
+                                    <button onclick="location.href='{% url 'rest_main_edit_book' cheque.id %}'" class="btp-btn-action btp-edit">Edit</button>
+                                    <button onclick="if(confirm('Are you sure you want to delete this cheque?')) { location.href='{% url 'rest_main_delete_book' cheque.id %}'; }" class="btp-btn-action btp-delete">Delete</button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="btp-empty">No Cheques Found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ===== Styles ===== -->
+<style>
+/* Container */
+.btp-cheque-container { background: #fff; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 40px 45px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+/* Header */
+.btp-cheque-header h1 { color: #1e355f; font-size: 24px; font-weight: 700; }
+.btp-back-link { text-decoration: none; color: #2c6fff; font-weight: 600; }
+
+/* Form */
+.btp-form-card { background: linear-gradient(to bottom right, #f9fbff, #eef3fb); border: 1px solid #e3e9f2; border-radius: 12px; padding: 25px 30px; margin-bottom: 50px; }
+.btp-form-card h2 { font-size: 18px; color: #1e355f; margin-bottom: 15px; }
+.btp-form label { font-weight: 500; color: #34495e; display: block; margin-bottom: 6px; }
+.btp-form input, .btp-form select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #d0d7e2; font-size: 14px; outline: none; margin-bottom: 15px; background-color: #fff; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+.btp-form input:focus, .btp-form select:focus { border-color: #2c6fff; box-shadow: 0 0 0 3px rgba(44,111,255,0.15); }
+.btp-btn-primary { background: #2c6fff; color: #fff; border: none; padding: 10px 22px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s ease-in-out; }
+.btp-btn-primary:hover { background: #204ecf; transform: translateY(-2px); }
+
+/* List Title */
+.btp-list-title { font-size: 20px; color: #1e355f; margin-bottom: 15px; border-left: 4px solid #2c6fff; padding-left: 12px; font-weight: 600; }
+
+/* Table */
+.btp-table-wrapper { overflow-x: auto; }
+.btp-table { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; }
+.btp-table th, .btp-table td { padding: 14px 16px; border: 1px solid #e4e8f1; font-size: 14px; color: #2c3e50; }
+.btp-table th { background: #f3f6fb; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.btp-table tr:nth-child(even) { background: #fafbfe; }
+.btp-table tr:hover { background: #eef3ff; transition: 0.2s; }
+
+/* Status colors */
+.status-unused { background-color: #3498db; color: #fff; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 13px; }
+.status-used { background-color: #9b59b6; color: #fff; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 13px; }
+.status-issued { background-color: #f39c12; color: #fff; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 13px; }
+.status-discount { background-color: #1abc9c; color: #fff; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 13px; }
+.status-cleared { background-color: #2ecc71; color: #fff; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 13px; }
+.status-cancelled { background-color: #e74c3c; color: #fff; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 13px; }
+
+/* Action buttons */
+.btp-btn-action { border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-right: 6px; font-size: 13px; transition: all 0.2s ease-in-out; }
+.btp-edit { background-color: #1abc9c; color: #fff; } .btp-edit:hover { background-color: #13997f; }
+.btp-delete { background-color: #e74c3c; color: #fff; } .btp-delete:hover { background-color: #c0392b; }
+
+/* Empty row */
+.btp-empty { text-align: center; color: #888; padding: 25px 0; font-size: 15px; }
+
+@media (max-width: 768px) { .btp-form-card { width: 100%; padding: 20px; } }
+</style>
+{% endblock %}

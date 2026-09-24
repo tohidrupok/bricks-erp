@@ -1,0 +1,22 @@
+{% extends 'office_inventory/base.html' %}
+{% block header %}Employee Asset Profiles{% endblock %}
+{% block content %}
+<div class="card card-stat p-3">
+<table class="table table-hover align-middle">
+<thead><tr><th>Employee</th><th>Currently Assigned</th><th>Total Ever Assigned</th><th></th></tr></thead>
+<tbody>
+{% for e in employees %}
+<tr>
+  <td>{{ e }}</td>
+  <td><span class="badge bg-warning">{{ e.active_count }}</span></td>
+  <td><span class="badge bg-secondary">{{ e.total_count }}</span></td>
+  <td><a href="{% url 'office_inventory:employee_asset_profile' e.pk %}" class="btn btn-sm btn-outline-primary">
+      <i class="bi bi-person-vcard"></i> View Profile</a></td>
+</tr>
+{% empty %}
+<tr><td colspan="4" class="text-center text-muted">No employees have been assigned any items yet.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CRM - Lead Accounts{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+            <div class="container mx-auto mt-6">
+                
+                <!-- Top Action Navigation Bar -->
+                <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm mb-6 border border-slate-200">
+                    <!-- Search Input -->
+                    <form method="GET" class="w-full md:w-80">
+                        <div class="relative w-full">
+                            <input type="text" name="q" value="{{ search_query }}" placeholder="Search by Name, Mobile, Address..." 
+                                   class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </span>
+                        </div>
+                    </form>
+
+                    <!-- Top Action Buttons (Explicit dark-text styling for full visibility) -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" onclick="toggleModal('leadAddModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center shadow-sm transition">
+                            + New Lead
+                        </button>
+                        <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-2 rounded-lg text-xs font-semibold shadow-sm transition">Call Assign</button>
+                        <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-2 rounded-lg text-xs font-semibold shadow-sm transition">Bulk Import</button>
+                        <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-2 rounded-lg text-xs font-semibold shadow-sm transition">Send SMS</button>
+                        
+                        <form id="convertForm" method="POST" action="{% url 'convert_to_customer' %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-2 rounded-lg text-xs font-semibold flex items-center shadow-sm transition">
+                                + Convert To Customer
+                            </button>
+                        </form>
+
+                        <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-2 rounded-lg text-xs font-semibold shadow-sm transition">Transfer</button>
+                        <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-2 rounded-lg text-xs font-semibold shadow-sm transition">Wish SMS</button>
+                        <button type="button" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center shadow-sm transition">Filter</button>
+                    </div>
+                </div>
+
+                <!-- Lead Table Card Container -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <form id="bulkForm">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <!-- Solid dark slate header styling to guarantee absolute label contrast -->
+                                <thead class="bg-slate-900 text-white uppercase text-[11px] tracking-wider">
+                                    <tr>
+                                        <th class="p-3 text-center border-r border-slate-800 w-12 font-bold">SL</th>
+                                        <th class="p-3 text-center border-r border-slate-800 w-10">
+                                            <input type="checkbox" id="selectAll" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                        </th>
+                                        <th class="p-3 border-r border-slate-800 font-bold">Name & Details</th>
+                                        <th class="p-3 border-r border-slate-800 font-bold">Mobile</th>
+                                        <th class="p-3 border-r border-slate-800 font-bold">SR/Officer</th>
+                                        <th class="p-3 border-r border-slate-800 font-bold">CR</th>
+                                        <th class="p-3 border-r border-slate-800 font-bold">Last Activity</th>
+                                        <th class="p-3 border-r border-slate-800 font-bold">Next Activity</th>
+                                        <th class="p-3 text-center font-bold">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-slate-700">
+                                    {% for lead in leads %}
+                                    <tr class="hover:bg-slate-50/80 transition">
+                                        <td class="p-3 text-center font-medium text-slate-500">{{ forloop.counter }}</td>
+                                        <td class="p-3 text-center">
+                                            <input type="checkbox" name="selected_leads" value="{{ lead.id }}" class="lead-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                        </td>
+                                        <td class="p-3 leading-relaxed">
+                                            <div class="text-indigo-600 font-bold">ID: {{ lead.lead_code }}</div>
+                                            <div class="font-semibold text-slate-900">Name: {{ lead.name }}</div>
+                                            <div class="text-slate-500 text-[11px]">Address: {{ lead.address|default:"-" }}</div>
+                                            <div class="text-indigo-500 text-[11px]">Project: {{ lead.project.name|default:"-" }}</div>
+                                            <div class="text-slate-400 text-[11px]">Source: {{ lead.source|default:"-" }}</div>
+                                        </td>
+                                        <td class="p-3 font-semibold text-slate-800 whitespace-nowrap">{{ lead.phone }}</td>
+                                        <td class="p-3 font-medium text-slate-700 whitespace-nowrap">{{ lead.assign_user|default:"Admin" }}</td>
+                                        <td class="p-3 text-slate-500 whitespace-nowrap">{{ lead.cr|default:"-" }}</td>
+                                        <td class="p-3 leading-relaxed min-w-[160px]">
+                                            {% if lead.last_activity %}
+                                                <div class="font-semibold text-slate-800">{{ lead.last_activity.activity_type }}</div>
+                                                <div class="text-[11px] text-slate-600">Date: {{ lead.last_activity.created_at|date:"d-m-Y" }}</div>
+                                                <div class="text-[11px] text-slate-600">Status: {{ lead.last_activity.status }}</div>
+                                                <div class="text-slate-500 italic text-[11px] truncate max-w-xs">Comment: {{ lead.last_activity.comment }}</div>
+                                            {% else %}
+                                                <span class="text-slate-400">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="p-3 leading-relaxed min-w-[140px]">
+                                            {% if lead.next_activity_date %}
+                                                <div class="font-semibold text-slate-800">{{ lead.next_activity_type }}</div>
+                                                <div class="text-[11px] text-slate-600">Date: {{ lead.next_activity_date|date:"d-m-Y" }}</div>
+                                            {% else %}
+                                                <span class="text-slate-400">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="p-3 text-center whitespace-nowrap">
+                                            <div class="flex items-center justify-center space-x-1">
+                                                <button type="button" onclick="openActivityModal('{{ lead.id }}')" title="Edit Activity"
+                                                        class="p-1.5 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition shadow-sm">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                </button>
+                                                <button type="button" onclick="openPhoneModal('{{ lead.phone }}')" title="Call"
+                                                        class="p-1.5 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition shadow-sm">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                                </button>
+                                                <a href="{% url 'lead_delete' lead.id %}" onclick="return confirm('Delete this lead?');" title="Delete"
+                                                   class="p-1.5 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition shadow-sm">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="9" class="p-8 text-center text-slate-400">No lead entries found.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+
+<!-- ================= LEAD ADD/EDIT MODAL ================= -->
+<div id="leadAddModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-slate-100 animate-fade-in flex flex-col">
+        <!-- Modal Header -->
+        <div class="flex justify-between items-center px-6 py-4 bg-slate-50 border-b border-slate-200">
+            <h3 class="text-base font-bold text-slate-800">Add New Lead Account</h3>
+            <button type="button" onclick="toggleModal('leadAddModal')" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition text-xl font-bold">&times;</button>
+        </div>
+
+        <form method="POST" action="{% url 'lead_create' %}" class="p-6 space-y-5">
+            {% csrf_token %}
+            
+            <!-- Basic Info Section -->
+            <div class="space-y-3">
+                <div class="bg-indigo-50 text-indigo-900 font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider border border-indigo-100">Basic Info</div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3.5 bg-slate-50/60 p-4 rounded-xl border border-slate-200">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Date</label>
+                        <input type="date" name="date" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Lead Code</label>
+                        <input type="text" name="lead_code" placeholder="Auto Generated" readonly class="w-full border border-slate-200 rounded-lg p-2 text-xs bg-slate-100 text-slate-500 cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Name <span class="text-rose-500">*</span></label>
+                        <input type="text" name="name" required placeholder="Full Name" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Phone/Mobile <span class="text-rose-500">*</span></label>
+                        <div class="flex shadow-sm">
+                            <span class="bg-slate-100 border border-r-0 border-slate-300 rounded-l-lg px-2 py-1.5 text-xs flex items-center text-slate-600">🇧🇩 (+880)</span>
+                            <input type="text" name="phone" required placeholder="Enter mobile" class="w-full border border-slate-300 rounded-r-lg p-2 text-xs bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Secondary Number</label>
+                        <input type="text" name="secondary_phone" placeholder="Secondary Number" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Assign User/SR</label>
+                        <input type="text" name="assign_user" value="Admin" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">If CR</label>
+                        <select name="cr" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="">Select User</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Lead Stages</label>
+                        <select name="lead_stage" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="">Select Option</option>
+                            <option value="New">New</option>
+                            <option value="Booked">Booked</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lead Details Accordion -->
+            <details class="group bg-slate-50/60 rounded-xl overflow-hidden border border-slate-200">
+                <summary class="flex justify-between items-center bg-indigo-50 text-indigo-900 font-bold px-4 py-2.5 cursor-pointer text-xs uppercase tracking-wider">
+                    <span>Lead Details</span>
+                    <span class="transition group-open:rotate-180">▼</span>
+                </summary>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3.5 p-4">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Lead Source</label>
+                        <select name="lead_source" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                            <option value="">Select Source</option>
+                            <option value="Facebook">Facebook</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Interested Project</label>
+                        <select name="interested_project" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                            <option value="">Select Interested Project</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Lead Category</label>
+                        <select name="lead_category" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                            <option value="">Select Category</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Campaign</label>
+                        <select name="campaign" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                            <option value="">Select Lead Source</option>
+                        </select>
+                    </div>
+                </div>
+            </details>
+
+            <!-- Personal Info Accordion -->
+            <details class="group bg-slate-50/60 rounded-xl overflow-hidden border border-slate-200">
+                <summary class="flex justify-between items-center bg-indigo-50 text-indigo-900 font-bold px-4 py-2.5 cursor-pointer text-xs uppercase tracking-wider">
+                    <span>Personal Info</span>
+                    <span class="transition group-open:rotate-180">▼</span>
+                </summary>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 p-4">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Organization</label>
+                        <input type="text" name="organization" placeholder="Organization" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Designation</label>
+                        <input type="text" name="designation" placeholder="Designation" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Birth Date</label>
+                        <input type="date" name="birth_date" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Anniversary Date</label>
+                        <input type="date" name="anniversary_date" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Profession</label>
+                        <select name="profession" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                            <option value="">Select Profession</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Address</label>
+                        <input type="text" name="address" placeholder="Address" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                    </div>
+                    <div class="md:col-span-3">
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Email</label>
+                        <input type="email" name="email" placeholder="Email address" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                    </div>
+                </div>
+            </details>
+
+            <!-- Buttons -->
+            <div class="flex justify-end space-x-3 pt-4 border-t border-slate-200">
+                <button type="button" onclick="toggleModal('leadAddModal')" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition">Close</button>
+                <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 transition">Submit Lead</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Placeholder for Dynamic Lead Activity Modal -->
+<div id="activityModalContainer"></div>
+
+<script>
+function toggleModal(modalId) {
+    document.getElementById(modalId).classList.toggle('hidden');
+}
+
+// Select All Checkbox Handler
+document.getElementById('selectAll').addEventListener('change', function() {
+    let checkboxes = document.querySelectorAll('.lead-checkbox');
+    checkboxes.forEach(cb => cb.checked = this.checked);
+});
+
+// Load Dynamic Activity Modal via AJAX
+function openActivityModal(leadId) {
+    fetch(`/leads/${leadId}/activity/`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('activityModalContainer').innerHTML = html;
+        });
+}
+
+function openPhoneModal(phone) {
+    window.open(`tel:${phone}`);
+}
+</script>
+{% endblock %}

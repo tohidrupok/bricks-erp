@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profite Amount Manage - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- Sidebar -->
+        {% include 'partials/sidebar_list.html' %}
+
+        <!-- Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+            <!-- Top Bar -->
+            {% include 'partials/header.html' %}
+
+            <!-- Page Header -->
+            <div class="intro-y mt-10 mb-5 flex items-center justify-between">
+                <h2 class="text-lg font-medium">Profit Amount Manage</h2>
+            </div>
+            <div class="mx-auto hidden text-slate-500 md:block">                             </div>
+            
+            <div class="mt-1 w-full flex flex-wrap justify-between items-center gap-4">
+            <!-- Left Side: Button -->
+             <!-- Left Side: Button -->
+            <div class="flex items-center space-x-2">
+                <a href="{% url 'profit_ledger_list' %}">
+                    <button class="bg-success border-success text-white font-medium px-3 py-2 rounded-md shadow-md">
+                        Back
+                    </button>
+                </a>
+            </div>
+            <div class="flex items-center space-x-2">
+                <a href="{% url 'profit_shareamount_list' %}">
+                    <button class="bg-primary border-primary text-white font-medium px-3 py-2 rounded-md shadow-md">
+                        Refresh
+                    </button>
+                </a>
+            </div>
+            <!-- Right Side: Balance + Search -->
+        
+        </div>
+
+            <!-- Messages -->
+            {% if messages %}
+            <ul class="mb-4">
+                {% for message in messages %}
+                <li class="message {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <!-- Table Section -->
+          <div class="grid grid-cols-12 gap-6">
+            <div class="col-span-12">
+        
+                <h1 class="text-3xl font-bold text-center text-gray-800 mb-1">
+                    Project Profit Report
+                </h1>
+                <p class="text-sm text-gray-500 mb-6 text-center">As of {{ today }}</p>
+                <div class="flex justify-end mb-4" style="margin-top:-150px">
+                        <div class="text-right bg-white p-4 shadow border rounded w-64">
+                            <h3 class="text-lg font-bold mb-2">Totals</h3>
+                            <p><strong>Total Profit:</strong> {{ total_profit }}</p>
+                            <p><strong>Total 25% Amount:</strong> {{ total_profit_25 }}</p>
+                            <p><strong>Total Final Profit:</strong> {{ total_final_profit }}</p>
+                        </div>
+                    </div>
+                <div class="overflow-x-auto">
+                    <h2 class="text-2xl font-bold mb-4">Saved Project Profit Records</h2>
+
+                    <table class="min-w-full border border-gray-300 bg-white shadow">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="border px-3 py-2">Project</th>
+                                <th class="border px-3 py-2">Profit</th>
+                                <th class="border px-3 py-2">25%</th>
+                                <th class="border px-3 py-2">Final Profit</th>
+                                <th class="border px-3 py-2">Updated</th>
+                            </tr>
+                        </thead>
+                    
+                        <tbody id="tableBody">
+                            {% for rec in records %}
+                                <tr class="border">
+                                    <td class="border px-3 py-2">{{ rec.project.project_first_name }}</td>
+                                    <td class="border px-3 py-2">{{ rec.profit }}</td>
+                                    <td class="border px-3 py-2">{{ rec.profit_25 }}</td>
+                                    <td class="border px-3 py-2">{{ rec.final_profit }}</td>
+                                    <td class="border px-3 py-2">{{ rec.updated_at }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+        
+            </div>
+        </div>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const searchInput = document.getElementById("searchInput");
+                    const tableBody = document.getElementById("tableBody");
+                    const rows = tableBody.getElementsByTagName("tr");
+                
+                    searchInput.addEventListener("keyup", function () {
+                        const filter = searchInput.value.toLowerCase();
+                
+                        for (let i = 0; i < rows.length; i++) {
+                            const projectCell = rows[i].getElementsByTagName("td")[0]; 
+                            let show = projectCell && projectCell.textContent.toLowerCase().includes(filter);
+                            rows[i].style.display = show ? "" : "none";
+                        }
+                    });
+                });
+                </script>
+
+
+        </div>
+    </div>
+</div>
+{% endblock %}

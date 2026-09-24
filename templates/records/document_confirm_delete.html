@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>দলিল মুছে ফেলার নিশ্চিতকরণ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Hind Siliguri', sans-serif; }</style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+    <div class="max-w-md w-full mx-4 bg-white p-6 rounded-lg shadow-lg border border-red-200 text-center">
+        <div class="text-red-500 text-5xl mb-4">⚠️</div>
+        <h2 class="text-xl font-bold text-gray-900 mb-2">আপনি কি নিশ্চিত?</h2>
+        <p class="text-gray-600 text-sm mb-6">
+            দলিল নম্বর <strong class="text-gray-900">"{{ document.doc_no }}"</strong> এর সমস্ত তথ্য চিরতরে মুছে ফেলা হবে। এই কাজটি আর ফিরিয়ে আনা সম্ভব নয়।
+        </p>
+
+        <form method="POST" class="flex justify-center space-x-4">
+            {% csrf_token %}
+            <a href="{% url 'new_document_list' %}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded transition">
+                বাতিল করুন
+            </a>
+            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded shadow transition">
+                হ্যাঁ, মুছে ফেলুন
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>

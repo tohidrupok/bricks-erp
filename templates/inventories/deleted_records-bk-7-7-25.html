@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deleted Records</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 30px;
+            background-color: #f9f9f9;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 14px 16px;
+            border: 1px solid #e0e0e0;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .toggle-btn {
+            cursor: pointer;
+            color: #007bff;
+            text-decoration: underline;
+            margin-bottom: 6px;
+            display: inline-block;
+        }
+
+        .json-data {
+            display: none;
+            background-color: #fdfdfd;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            white-space: pre-wrap;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .undo-form {
+            margin-top: 10px;
+        }
+
+        .undo-button {
+            padding: 6px 12px;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            font-size: 13px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .undo-button:hover {
+            background-color: #218838;
+        }
+
+        .no-record {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+        }
+    </style>
+
+    <script>
+        function toggleData(id) {
+            const dataBox = document.getElementById('data-' + id);
+            dataBox.style.display = (dataBox.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function confirmUndo() {
+            return confirm("Are you sure you want to restore this record?");
+        }
+    </script>
+</head>
+<body>
+
+    <h2>🗑️ Deleted Records Log</h2>
+    {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+    {% endif %}
+    <table>
+        <thead>
+            <tr>
+                <th>Model</th>
+                <th>Deleted By</th>
+                <th>Deleted At</th>
+                <th>Deleted Data & Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+                <tr>
+                    <td>{{ record.model_name }}</td>
+                    <td>{{ record.deleted_by|default:"System" }}</td>
+                    <td>{{ record.deleted_at|date:"Y-m-d H:i:s" }}</td>
+                    <td>
+                        <span class="toggle-btn" onclick="toggleData({{ record.id }})">🔍 Show/Hide Data</span>
+                        <div id="data-{{ record.id }}" class="json-data">
+                            <pre>{{ record.deleted_data|safe }}</pre>
+                        </div>
+                        <form action="{% url 'undo_deleted_record' record.pk %}" method="post" class="undo-form" onsubmit="return confirmUndo();">
+                            {% csrf_token %}
+                            <button type="submit" class="undo-button">⏪ Undo</button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" class="no-record">No deleted records found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

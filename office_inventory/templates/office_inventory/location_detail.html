@@ -1,0 +1,31 @@
+{% extends 'office_inventory/base.html' %}
+
+{% block header %}Location Details{% endblock %}
+
+{% block content %}
+<div class="card card-stat p-3" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-header mb-3">
+        <h2>Location Profile</h2>
+    </div>
+    
+    <div class="data-row mb-2">
+        <span class="label font-weight-bold text-muted" style="width: 120px; display: inline-block;">Location Code:</span>
+        <span class="value"><strong>{{ location.code }}</strong></span>
+    </div>
+    <div class="data-row mb-2">
+        <span class="label font-weight-bold text-muted" style="width: 120px; display: inline-block;">Name:</span>
+        <span class="value">{{ location.name }}</span>
+    </div>
+    <div class="data-row mb-3">
+        <span class="label font-weight-bold text-muted" style="width: 120px; display: inline-block;">Address:</span>
+        <span class="value">{{ location.address|default:"No physical address provided."|linebreaksbr }}</span>
+    </div>
+    
+    <hr>
+    
+    <div class="footer-links d-flex gap-2">
+        <a href="{% url 'office_inventory:location_update' location.pk %}" class="btn btn-warning">Modify Details</a>
+        <a href="{% url 'office_inventory:location_list' %}" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+{% endblock %}

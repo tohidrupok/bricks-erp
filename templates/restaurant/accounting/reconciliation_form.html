@@ -1,0 +1,86 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reconciliation Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="text-2xl font-bold mt-10 mb-6 text-blue-900 text-center">
+				  🔄 Reconcile Transaction – {{ bank.cash_type_name }}
+				</h2>
+
+				<div class="max-w-3xl mx-auto bg-white shadow-md rounded-lg p-6">
+				  <form method="POST" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg space-y-6">
+					{% csrf_token %}
+
+					<!-- Hidden Bank Account -->
+					<input type="hidden" name="bank_account" value="{{ bank.id }}">
+
+					<!-- Statement Transaction -->
+					<div>
+					  <label for="{{ form.statement_txn.id_for_label }}" class="block font-medium text-gray-700 mb-2">
+						{{ form.statement_txn.label }}
+					  </label>
+					  {{ form.statement_txn }}
+					  {% if form.statement_txn.errors %}
+						<p class="text-red-600 text-sm mt-1">{{ form.statement_txn.errors }}</p>
+					  {% endif %}
+					</div>
+
+					<!-- Ledger Entry -->
+					<div>
+					  <label for="{{ form.ledger_entry.id_for_label }}" class="block font-medium text-gray-700 mb-2">
+						{{ form.ledger_entry.label }}
+					  </label>
+					  {{ form.ledger_entry }}
+					  {% if form.ledger_entry.errors %}
+						<p class="text-red-600 text-sm mt-1">{{ form.ledger_entry.errors }}</p>
+					  {% endif %}
+					</div>
+
+					<!-- Note -->
+					<div>
+					  <label for="{{ form.note.id_for_label }}" class="block font-medium text-gray-700 mb-2">
+						{{ form.note.label }}
+					  </label>
+					  {{ form.note }}
+					  {% if form.note.errors %}
+						<p class="text-red-600 text-sm mt-1">{{ form.note.errors }}</p>
+					  {% endif %}
+					</div>
+
+					<!-- Buttons -->
+					<div class="flex justify-center space-x-4 mt-6">
+					  <button type="submit"
+							  class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 rounded-md"
+							  style="background-color:#1e3c98">
+						💾 Reconcile
+					  </button>
+					  <a href="{% url 'reconciliation_list' bank.id %}"
+						 class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md"
+						 style="margin-left:0.5%; background-color:#1e3c98">
+						🔙 Cancel
+					  </a>
+					</div>
+				  </form>
+				</div>
+          
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

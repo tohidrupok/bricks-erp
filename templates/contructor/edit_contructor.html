@@ -1,0 +1,179 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contructor Name Update- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				    {% include 'partials/header.html' %}
+                <div class="container mx-auto mt-10 ml-10"> 
+                <!-- END: Top Bar -->
+                <h1 class="text-3xl font-semibold text-gray-900 mb-6">Edit Project: {{ project.project_first_name }}</h1>
+
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                    <form method="POST" enctype="multipart/form-data" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                        {% csrf_token %}
+                        
+                        <h2 class="text-xl font-semibold mb-4 text-center">Edit BoQ Contractor</h2>
+                        
+                        <!-- Contractor Name Field -->
+                        <div class="mb-4">
+                            <label for="supervisor_name" class="font-medium text-lg text-gray-800">Contractor Name</label>
+                            <input type="text"
+                                   id="supervisor_name"
+                                   name="supervisor_name"
+                                   class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 
+                                          focus:ring-4 focus:ring-blue-500 focus:border-blue-500 
+                                          dark:bg-darkmode-800 dark:border-transparent 
+                                          dark:focus:ring-slate-700 dark:focus:ring-opacity-50"
+                                   placeholder="Enter Contractor Name"
+                                   value="{{ form.supervisor_name.value|default_if_none:'' }}">
+                            {% if form.supervisor_name.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.supervisor_name.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    
+                        <!-- Contractor Address Field -->
+                        <div class="mb-4">
+                            <label for="address" class="font-medium text-lg text-gray-800">Contractor Address</label>
+                            <input type="text"
+                                   id="address"
+                                   name="address"
+                                   class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 
+                                          focus:ring-4 focus:ring-blue-500 focus:border-blue-500 
+                                          dark:bg-darkmode-800 dark:border-transparent 
+                                          dark:focus:ring-slate-700 dark:focus:ring-opacity-50"
+                                   placeholder="Enter Address"
+                                   value="{{ form.address.value|default_if_none:'' }}">
+                            {% if form.address.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.address.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    
+                        <!-- Contractor Phone Field -->
+                        <div class="mb-4">
+                            <label for="phone" class="font-medium text-lg text-gray-800">Contractor Phone</label>
+                            <input type="text"
+                                   id="phone"
+                                   name="phone"
+                                   class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 
+                                          focus:ring-4 focus:ring-blue-500 focus:border-blue-500 
+                                          dark:bg-darkmode-800 dark:border-transparent 
+                                          dark:focus:ring-slate-700 dark:focus:ring-opacity-50"
+                                   placeholder="Enter Phone Number"
+                                   value="{{ form.phone.value|default_if_none:'' }}">
+                            {% if form.phone.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.phone.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    
+                        <!-- Contractor Email Field -->
+                        <div class="mb-4">
+                            <label for="email" class="font-medium text-lg text-gray-800">Contractor Email</label>
+                            <input type="email"
+                                   id="email"
+                                   name="email"
+                                   class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 
+                                          focus:ring-4 focus:ring-blue-500 focus:border-blue-500 
+                                          dark:bg-darkmode-800 dark:border-transparent 
+                                          dark:focus:ring-slate-700 dark:focus:ring-opacity-50"
+                                   placeholder="Enter Email"
+                                   value="{{ form.email.value|default_if_none:'' }}">
+                            {% if form.email.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.email.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    
+                        <!-- Contractor Description Field -->
+                        <div class="mb-4">
+                            <label for="description" class="font-medium text-lg text-gray-800">Contractor Description</label>
+                            <textarea id="description" 
+                                      name="description" 
+                                      rows="3"
+                                      class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 
+                                             focus:ring-4 focus:ring-blue-500 focus:border-blue-500 
+                                             dark:bg-darkmode-800 dark:border-transparent 
+                                             dark:focus:ring-slate-700 dark:focus:ring-opacity-50"
+                                      placeholder="Enter Description">{{ form.description.value|default_if_none:'' }}</textarea>
+                            {% if form.description.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.description.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    
+                        <!-- Active Status Radio Buttons -->
+                        <div class="mb-4">
+                            <label class="font-medium text-lg text-gray-800">Active Status</label>
+                            <div class="flex items-center">
+                                <input type="radio" 
+                                       id="active_yes" 
+                                       name="active" 
+                                       value="True" 
+                                       class="mr-2"
+                                       {% if form.active.value == True %}checked{% endif %}>
+                                <label for="active_yes" class="mr-4">Yes</label>
+                                <input type="radio" 
+                                       id="active_no" 
+                                       name="active" 
+                                       value="False" 
+                                       class="mr-2"
+                                       {% if form.active.value == False %}checked{% endif %}>
+                                <label for="active_no">No</label>
+                            </div>
+                            {% if form.active.errors %}
+                                <p class="text-red-600 text-sm">{{ form.active.errors }}</p>
+                            {% endif %}
+                        </div>                 
+                      
+                    
+                        <!-- Submit and Back Buttons -->
+                        <div class="text-center mt-6">
+                            <button type="submit" style="background-color:#1e3c98"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md">
+                                💾 Update Contractor
+                            </button>
+                            <a href="{% url 'boq_contructor_list' %}" style="margin-left:0.5%;background-color:#1e3c98"
+                               class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md ml-2">
+                                🔙 Back to List
+                            </a>
+                        </div>
+                    </form>
+                    
+                    
+                </div>
+                  </div>    
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

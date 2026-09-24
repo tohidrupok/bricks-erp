@@ -1,0 +1,245 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Requisition Comparative</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: #f5f5f5;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 100%;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .label-box {
+      background-color: #dbeafe;
+      color: #1e3a8a;
+      padding: 6px 12px;
+      font-weight: bold;
+      font-size: 14px;
+      border-radius: 4px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 10px;
+      table-layout: auto;
+    }
+
+    .table th,
+    .table td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: center;
+    }
+
+    .total-row {
+      font-weight: bold;
+      background-color: #f3f4f6;
+    }
+
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .back-button, .print-btn {
+      background-color: #1e3c98;
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .print-btn {
+      background-color: #1e3c98;
+      color: white;
+      padding: 5px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body * {
+        visibility: hidden;
+      }
+
+      .card, .card * {
+        visibility: visible;
+      }
+
+      .card {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+      }
+
+      .no-print {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <div class="label-box">Requisition Comparative Sheet</div>
+      <div><strong>Project:</strong> {{ project.project_first_name }}</div>
+    </div>
+
+    <form method="POST" onsubmit="return validateCheckboxSelection()">
+      {% csrf_token %}
+      <input type="hidden" name="project_id" value="{{ project.id }}">
+
+      <label style="margin-bottom: 5px; display:block">
+        <input type="checkbox" id="select_all_lowest" style="margin-right:5px; accent-color: green;">
+        Select All Lowest Rate
+      </label>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th rowspan="2">SL</th>
+            <th rowspan="2">Item Name</th>
+            <th rowspan="2">Unit</th>
+            <th rowspan="2">Qty</th>
+            {% for vendor in vendor_names %}
+              <th colspan="3">{{ vendor }}</th>
+            {% endfor %}
+          </tr>
+          <tr>
+            {% for vendor in vendor_names %}
+              <th>Rate</th>
+              <th>Amount</th>
+              <th>Select</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ item.item_name }}</td>
+              <td>{{ item.unit }}</td>
+              <td>{{ item.qty }}</td>
+              {% for data in item.vendor_data %}
+                <td>
+                  {% if data.rate %}
+                    <div style="
+                      {% if data.is_lowest %}
+                        background-color: #d1fae5; color: green; font-weight: bold;
+                      {% elif data.is_highest %}
+                        background-color: #fee2e2; color: red; font-weight: bold;
+                      {% endif %}
+                      padding: 4px 6px;
+                      border-radius: 4px;
+                    ">
+                      {{ data.rate }}
+                    </div>
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+                <td>{{ data.amount|default:"-" }}</td>
+                <td>
+                  {% if data.rate and data.id %}
+                    <input type="checkbox" name="approved_rates" value="{{ data.id }}" class="rate-checkbox" {% if data.is_lowest %}data-lowest="true" style="accent-color: green;"{% endif %}>
+                  {% else %}-{% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+
+          <tr class="total-row">
+            <td colspan="4">Vendor Totals</td>
+            {% for total in vendor_totals %}
+              <td colspan="3">{{ total|intcomma }}</td>
+            {% endfor %}
+          </tr>
+
+          <tr class="total-row">
+            <td colspan="100%">Final Total: {{ final_total|intcomma }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="approval-section" style="margin-top:20px">
+        <label for="approval_status">Approval Status</label>
+        <select name="approval_status" id="approval_status" required>
+          <option value="">-- Select --</option>
+          <option value="approved" {% if current_status == "approved" %}selected{% endif %}>Approved</option>
+          <option value="rejected" {% if current_status == "rejected" %}selected{% endif %}>Rejected</option>
+        </select>
+
+        <label for="note">Note</label>
+        <textarea name="note" id="note" rows="4" style="width:100%">{{ current_note }}</textarea>
+
+        <button type="submit" class="back-button" style="margin-top:10px; width:100%">Update & Approval</button>
+      </div>
+    </form>
+
+    <div class="action-row no-print">
+      <a href="{% url 'requisition_comparative_list' %}" class="back-button">← Back to Requisition List</a>
+      <!-- <button onclick="window.print()" class="print-btn">🖨️ Print</button> -->
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('select_all_lowest').addEventListener('change', function () {
+      const check = this.checked;
+      const boxes = document.querySelectorAll('input.rate-checkbox[data-lowest="true"]');
+      boxes.forEach(cb => cb.checked = check);
+    });
+  </script>
+  
+  <script>
+  document.getElementById('select_all_lowest').addEventListener('change', function () {
+    const check = this.checked;
+    const boxes = document.querySelectorAll('input.rate-checkbox[data-lowest="true"]');
+    boxes.forEach(cb => cb.checked = check);
+  });
+
+  function validateCheckboxSelection() {
+    const checkboxes = document.querySelectorAll('input[name="approved_rates"]:checked');
+    if (checkboxes.length === 0) {
+      alert("Please select Checkbox - least one rate to approve.");
+      return false;
+    }
+    return true;
+  }
+</script>
+</body>
+</html>

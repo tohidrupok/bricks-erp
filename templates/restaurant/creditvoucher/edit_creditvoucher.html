@@ -1,0 +1,365 @@
+<!-- templates/CreditVoucher.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Received Voucher Update- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				    {% include 'partials/header.html' %}
+                <div class="container mx-auto mt-10 ml-10"> 
+                <!-- END: Top Bar -->
+                <h1 class="text-3xl font-semibold text-gray-900 mb-6">Edit Received/Collection Voucher Details</h1>
+
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                    <form method="POST" class="w-full max-w-4xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                        {% csrf_token %}
+                        <h2 class="text-xl font-semibold mb-6 text-center text-gray-800">Edit Received Voucher</h2>
+                    
+                        <!-- Project -->
+                        <div class="mb-4">
+                            <label for="id_project" class="font-medium text-lg text-gray-800">Project Name</label>
+                            <select id="id_project" name="project_name"
+                                class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                                <option value="" disabled {% if not form.project_name.value %} selected {% endif %}>Select Project Name</option>
+                                {% for value, label in form.project_name.field.choices %}
+                                    <option value="{{ value }}" {% if value == form.project_name.value %} selected {% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            {% for error in form.project_name.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Type Dropdown -->
+                        <div class="mb-4">
+                            <label for="id_type" class="font-medium text-lg text-gray-800">Type</label>
+                            <select id="id_type" name="type"
+                                    class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                    onchange="toggleFields()">
+                                <option value="Customer" {% if form.type.value == "Customer" %}selected{% endif %}>Customer</option>
+									<option value="Capital" {% if form.type.value == "Capital" %}selected{% endif %}>Capital Accounts</option>
+									<option value="Investment" {% if form.type.value == "Investment" %}selected{% endif %}>Investment Account</option>
+									<option value="Revenue" {% if form.type.value == "Revenue" %}selected{% endif %}>Revenue Account</option>
+									<option value="Contructor" {% if form.type.value == "Contructor" %}selected{% endif %}>Contructor</option>
+                                    <option value="Vendor" {% if form.type.value == "Vendor" %}selected{% endif %}>Supplier</option>
+                                    <option value="Donation" {% if form.type.value == "Donation" %}selected{% endif %}>Donation</option>
+                                    <option value="Employee" {% if form.type.value == "Employee" %}selected{% endif %}>Employee</option>
+                                    <option value="Others" {% if form.type.value == "Others" %}selected{% endif %}>Others</option>
+                                </select>
+                            {% for error in form.type.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Customer Name -->
+                        <div id="customerFields" class="mb-4" style="display:none;">
+                            <label for="id_customer_name" class="font-medium text-lg text-gray-800">Customer Name</label>
+                            <select id="id_customer_name" name="customer_name"
+                                    class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                                <option value="" disabled {% if not form.customer_name.value %} selected {% endif %}>Select Customer Name</option>
+                                {% for value, label in form.customer_name.field.choices %}
+                                    <option value="{{ value }}" {% if value == form.customer_name.value %} selected {% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            {% for error in form.customer_name.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Lead Name -->
+                        <div id="leadFields" class="mb-4" style="display:none;">
+                            <label for="id_lead_name" class="font-medium text-lg text-gray-800">Lead Name</label>
+                            <select id="id_lead_name" name="lead_name"
+                                    class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                                <option value="" disabled {% if not form.lead_name.value %} selected {% endif %}>Select Lead Name</option>
+                                {% for value, label in form.lead_name.field.choices %}
+                                    <option value="{{ value }}" {% if value == form.lead_name.value %} selected {% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            {% for error in form.lead_name.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <!-- Customer Name -->
+                            <div id="capitalFields" class="mb-4" style="display:none;">
+								<label for="id_capi_name" class="font-medium text-lg text-gray-800">Capital Name</label>
+								<select id="id_capi_name" name="capi_name" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-blue-500 focus:border-blue-500 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+									<option value="" disabled {% if not form.capi_name.value %} selected {% endif %}>Select Capital Name</option>
+									{% for value, label in form.capi_name.field.choices %}
+										<option value="{{ value }}" {% if value == form.capi_name.value %} selected {% endif %}>{{ label }}</option>
+									{% endfor %}
+								</select>
+								{% for error in form.capi_name.errors %}
+									<p class="text-red-600 text-sm">{{ error }}</p>
+								{% endfor %}
+							</div>
+                            
+                             <div id="revenueFields" class="mb-4" style="display:none;">
+								<label for="id_reve_name" class="font-medium text-lg text-gray-800">Revenue Name</label>
+								<select id="id_reve_name" name="reve_name" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-blue-500 focus:border-blue-500 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+									<option value="" disabled {% if not form.reve_name.value %} selected {% endif %}>Select Revenue Name</option>
+									{% for value, label in form.reve_name.field.choices %}
+										<option value="{{ value }}" {% if value == form.reve_name.value %} selected {% endif %}>{{ label }}</option>
+									{% endfor %}
+								</select>
+								{% for error in form.reve_name.errors %}
+									<p class="text-red-600 text-sm">{{ error }}</p>
+								{% endfor %}
+							</div>
+
+
+							<!-- Customer Name -->
+                            <div id="investmentFields" class="mb-4" style="display:none;">
+								<label for="id_invest_name" class="font-medium text-lg text-gray-800">Investment Name</label>
+								<select id="id_invest_name" name="invest_name" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-blue-500 focus:border-blue-500 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+									<option value="" disabled {% if not form.invest_name.value %} selected {% endif %}>Select Investment Name</option>
+									{% for value, label in form.invest_name.field.choices %}
+										<option value="{{ value }}" {% if value == form.invest_name.value %} selected {% endif %}>{{ label }}</option>
+									{% endfor %}
+								</select>
+								{% for error in form.invest_name.errors %}
+									<p class="text-red-600 text-sm">{{ error }}</p>
+								{% endfor %}
+							</div>
+								<!-- Customer Name -->
+                            <div id="contructorFields" class="mb-4" style="display:none;">
+								<label for="id_contructor" class="font-medium text-lg text-gray-800">Contructor Name</label>
+								<select id="id_contructor" name="contructor" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-blue-500 focus:border-blue-500 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+									<option value="" disabled {% if not form.contructor.value %} selected {% endif %}>Select Contructor Name</option>
+									{% for value, label in form.contructor.field.choices %}
+										<option value="{{ value }}" {% if value == form.contructor.value %} selected {% endif %}>{{ label }}</option>
+									{% endfor %}
+								</select>
+								{% for error in form.contructor.errors %}
+									<p class="text-red-600 text-sm">{{ error }}</p>
+								{% endfor %}
+							</div>
+								<!-- Customer Name -->
+                            <div id="supplierFields" class="mb-4" style="display:none;">
+								<label for="id_vendor" class="font-medium text-lg text-gray-800">Supplier Name</label>
+								<select id="id_vendor" name="vendor" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-blue-500 focus:border-blue-500 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+									<option value="" disabled {% if not form.vendor.value %} selected {% endif %}>Select Supplier Name</option>
+									{% for value, label in form.vendor.field.choices %}
+										<option value="{{ value }}" {% if value == form.vendor.value %} selected {% endif %}>{{ label }}</option>
+									{% endfor %}
+								</select>
+								{% for error in form.vendor.errors %}
+									<p class="text-red-600 text-sm">{{ error }}</p>
+								{% endfor %}
+							</div>
+							
+							<!-- Customer Name -->
+                            <div id="donationFields" class="mb-4" style="display:none;">
+								<label for="id_donation_name" class="font-medium text-lg text-gray-800">Donation Name</label>
+								<select id="id_donation_name" name="donation_name" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-blue-500 focus:border-blue-500 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+									<option value="" disabled {% if not form.donation_name.value %} selected {% endif %}>Select Donation Name</option>
+									{% for value, label in form.donation_name.field.choices %}
+										<option value="{{ value }}" {% if value == form.donation_name.value %} selected {% endif %}>{{ label }}</option>
+									{% endfor %}
+								</select>
+								{% for error in form.donation_name.errors %}
+									<p class="text-red-600 text-sm">{{ error }}</p>
+								{% endfor %}
+							</div>
+							<!-- Customer Name -->
+                            <div id="employeeFields" class="mb-4" style="display:none;">
+								<label for="id_empl_name" class="font-medium text-lg text-gray-800">Employee Name</label>
+								<select id="id_empl_name" name="empl_name" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-blue-500 focus:border-blue-500 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+									<option value="" disabled {% if not form.empl_name.value %} selected {% endif %}>Select Employee Name</option>
+									{% for value, label in form.empl_name.field.choices %}
+										<option value="{{ value }}" {% if value == form.empl_name.value %} selected {% endif %}>{{ label }}</option>
+									{% endfor %}
+								</select>
+								{% for error in form.empl_name.errors %}
+									<p class="text-red-600 text-sm">{{ error }}</p>
+								{% endfor %}
+							</div>
+
+                        <!-- Others -->
+                        <div id="othersFields" class="mb-4" style="display:none;">
+                            <label for="id_others" class="font-medium text-lg text-gray-800">Others Name</label>
+                            <input type="text" id="id_others" name="others"
+                                   class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                   placeholder="Enter Others Name"
+                                   value="{{ form.others.value }}">
+                            {% for error in form.others.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Cash Type -->
+                        <div class="mb-4">
+                            <label for="id_cash_type" class="font-medium text-lg text-gray-800">Cash Type</label>
+                            <select id="id_cash_type" name="cash_type"
+                                    class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                                <option value="" disabled {% if not form.cash_type.value %} selected {% endif %}>Select Cash Type</option>
+                                {% for value, label in form.cash_type.field.choices %}
+                                    <option value="{{ value }}" {% if value == form.cash_type.value %} selected {% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            {% for error in form.cash_type.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Cheque Number -->
+                        <div class="mb-4">
+                            <label for="id_cheque_number" class="font-medium text-lg text-gray-800">Cheque Number</label>
+                            <input type="text" id="id_cheque_number" name="cheque_number"
+                                   class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                   placeholder="Enter Cheque Number"
+                                   value="{{ form.cheque_number.value }}">
+                            {% for error in form.cheque_number.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Head of Account -->
+                        <div class="mb-4">
+                            <label for="id_head_of_account" class="font-medium text-lg text-gray-800">Head of Account</label>
+                            <select id="id_head_of_account" name="head_of_account"
+                                    class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                {% for value, label in form.head_of_account.field.choices %}
+                                    <option value="{{ value }}" {% if value == form.head_of_account.value %} selected {% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            {% for error in form.head_of_account.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- MR/Bill No -->
+                        <div class="mb-4">
+                            <label for="id_mr_or_bill_no" class="font-medium text-lg text-gray-800">M.R/Bill No</label>
+                            <input type="text" id="id_mr_or_bill_no" name="mr_or_bill_no"
+                                   class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                   placeholder="Enter M.R/Bill No"
+                                   value="{{ form.mr_or_bill_no.value|default_if_none:'' }}">
+                            {% for error in form.mr_or_bill_no.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Date -->
+                        <div class="mb-4">
+                            <label for="id_date" class="font-medium text-lg text-gray-800">Date</label>
+                            <input type="date" id="id_date" name="date"
+                                class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                value="{{ form.date.value|date:'Y-m-d' }}">
+                            {% for error in form.date.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Amount -->
+                        <div class="mb-4">
+                            <label for="id_amount" class="font-medium text-lg text-gray-800">Amount</label>
+                            <input type="number" step="0.01" id="id_amount" name="amount"
+                                   class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                   placeholder="Enter Amount"
+                                   value="{{ form.amount.value|default_if_none:'' }}">
+                            {% for error in form.amount.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Particulars -->
+                        <div class="mb-4">
+                            <label for="id_particulars" class="font-medium text-lg text-gray-800">Particulars</label>
+                            <textarea id="id_particulars" name="particulars"
+                                      class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                      rows="3">{{ form.particulars.value|default_if_none:'' }}</textarea>
+                            {% for error in form.particulars.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Confirmed -->
+                        <div class="mb-4">
+                            <label class="font-medium text-lg text-gray-800 block mb-2">Confirm?</label>
+                            <label class="inline-flex items-center mr-6">
+                                <input type="radio" name="is_confirmed" value="True"
+                                       {% if form.is_confirmed.value == True %}checked{% endif %}>
+                                <span class="ml-2">Yes</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="is_confirmed" value="False"
+                                       {% if form.is_confirmed.value == False %}checked{% endif %}>
+                                <span class="ml-2">No</span>
+                            </label>
+                            {% for error in form.is_confirmed.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Submit Buttons -->
+                        <div class="text-center mt-6">
+                            <button type="submit" style="background-color:#1e3c98" class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 rounded-md">
+                                💾 Update Voucher
+                            </button>
+                            <a href="{% url 'creditvoucher_list' %}" style="margin-left:0.5%;background-color:#1e3c98" class="ml-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md">
+                                🔙 Back to List
+                            </a>
+                        </div>
+                    </form>
+                    
+                    <script>
+                        function toggleFields() {
+                            var type = document.getElementById("id_type").value;
+                    
+                            document.getElementById("customerFields").style.display = "none";
+                            document.getElementById("leadFields").style.display = "none";
+							document.getElementById("capitalFields").style.display = "none";
+							document.getElementById("investmentFields").style.display = "none";
+                            document.getElementById("othersFields").style.display = "none";
+                            document.getElementById("contructorFields").style.display = "none";
+                            document.getElementById("cupplierFields").style.display = "none";
+                            document.getElementById("donationFields").style.display = "none";
+                            document.getElementById("employeeFields").style.display = "none";
+                            document.getElementById("revenueFields").style.display = "none";
+                    
+                            if (type == "Customer") {
+                                document.getElementById("customerFields").style.display = "block";
+                                document.getElementById("leadFields").style.display = "block";
+                            } else if (type == "Capital") {
+                                document.getElementById("capitalFields").style.display = "block";
+                            }
+							else if (type == "Investment") {
+                                document.getElementById("investmentFields").style.display = "block";
+                            }else if (type == "Contructor") {
+                                document.getElementById("contructorFields").style.display = "block";
+                            }else if (type == "Supplier") {
+                                document.getElementById("supplierFields").style.display = "block";
+                            }else if (type == "Donation") {
+                                document.getElementById("donationFields").style.display = "block";
+                            }else if (type == "Employee") {
+                                document.getElementById("employeeFields").style.display = "block";
+                            } else if (type == "Revenue") {
+                                document.getElementById("revenueFields").style.display = "block";
+                            } else if (type == "Others") {
+                                document.getElementById("othersFields").style.display = "block";
+                            }
+                        }
+                    
+                        window.onload = toggleFields;
+                    </script>
+                    
+                </div>
+                
+                  </div>    
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'office_inventory/base.html' %}
+{% block header %}Delete Damage Reason{% endblock %}
+{% block content %}
+<div class="card card-stat p-4" style="max-width:500px;">
+  <p>Are you sure you want to delete damage reason <strong>{{ reason.name }}</strong>?</p>
+  <form method="post">{% csrf_token %}
+    <button class="btn btn-danger">Yes, Delete</button>
+    <a href="{% url 'office_inventory:damage_reason_list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

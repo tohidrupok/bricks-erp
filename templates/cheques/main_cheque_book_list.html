@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cheque Book Management - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    {% include 'partials/mobile.html' %}
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+
+        {% include 'partials/sidebar_list.html' %}
+
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+
+            {% include 'partials/header_dashboard.html' %}
+
+            <div class="btp-chequebook-wrapper mt-10">
+
+                <!-- Header -->
+                <div class="btp-header">
+                    <h1>🏦 BTP Properties - Cheque Book Management</h1>
+                    <p class="btp-subtitle">Manage and monitor all cheque books across tenant accounts efficiently.</p>
+                </div>
+
+                <!-- Add Cheque Book Form (half-width) -->
+                <div class="btp-form-card w-full md:w-1/2">
+                    <h2>Add New Cheque Book</h2>
+                    <form method="post" class="btp-form">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btp-btn-primary">➕ Add Cheque Book</button>
+                    </form>
+                </div>
+
+                <!-- Cheque Book List -->
+                <div class="btp-list-section mt-6">
+                    <h2 class="btp-list-title">All Cheque Books</h2>
+                    <div class="btp-table-wrapper">
+                        <table class="btp-table">
+                            <thead>
+                                <tr>
+                                    <th>Book Name</th>
+                                    <th>Book Number</th>
+                                    <th>Account</th>
+                                    <th>Issue Date</th>
+                                    <th>Total Cheques</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for book in books %}
+                                <tr>
+                                    <td>{{ book.book_name }}</td>
+                                    <td>{{ book.book_number }}</td>
+                                    <td>{{ book.account.cash_type_name }}</td>
+                                    <td>{{ book.issue_date }}</td>
+                                    <td>{{ book.total_cheques }}</td>
+                                    <td class="btp-actions">
+                                        <a href="{% url 'main_cheque_list' book.id %}" class="btp-view">View</a>
+                                        <a href="{% url 'main_edit_book' book.id %}" class="btp-edit">Edit</a>
+                                        <a href="{% url 'main_delete_book' book.id %}" class="btp-delete">Delete</a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="btp-empty">No cheque books found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ===== Styles ===== -->
+<style>
+.btp-chequebook-wrapper { background: #fff; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 40px 45px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+.btp-header { text-align: center; margin-bottom: 40px; }
+.btp-header h1 { color: #1e355f; font-size: 30px; font-weight: 700; margin-bottom: 8px; }
+.btp-subtitle { color: #5a6a85; font-size: 15px; }
+
+.btp-form-card { background: linear-gradient(to bottom right, #f9fbff, #eef3fb); border: 1px solid #e3e9f2; border-radius: 12px; padding: 25px 30px; margin-bottom: 50px; }
+
+.btp-form-card h2 { font-size: 18px; color: #1e355f; margin-bottom: 15px; }
+
+.btp-form label { font-weight: 500; color: #34495e; display: block; margin-bottom: 6px; }
+.btp-form input, .btp-form select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #d0d7e2; font-size: 14px; outline: none; margin-bottom: 15px; background-color: #fff; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+.btp-form input:focus, .btp-form select:focus { border-color: #2c6fff; box-shadow: 0 0 0 3px rgba(44,111,255,0.15); }
+
+.btp-btn-primary { background: #2c6fff; color: #fff; border: none; padding: 10px 22px; border-radius: 8px; font-weight: 600; transition: all 0.2s ease-in-out; cursor: pointer; }
+.btp-btn-primary:hover { background: #204ecf; transform: translateY(-2px); }
+
+.btp-list-section { margin-top: 20px; }
+.btp-list-title { font-size: 20px; color: #1e355f; margin-bottom: 15px; border-left: 4px solid #2c6fff; padding-left: 12px; font-weight: 600; }
+
+.btp-table-wrapper { overflow-x: auto; }
+.btp-table { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; }
+.btp-table th, .btp-table td { padding: 14px 16px; border: 1px solid #e4e8f1; font-size: 14px; color: #2c3e50; }
+.btp-table th { background: #f3f6fb; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.btp-table tr:nth-child(even) { background: #fafbfe; }
+.btp-table tr:hover { background: #eef3ff; transition: 0.2s; }
+
+.btp-actions a { text-decoration: none; font-weight: 600; margin-right: 12px; transition: color 0.2s ease; }
+.btp-view { color: #2c6fff; }
+.btp-edit { color: #1abc9c; }
+.btp-delete { color: #e74c3c; }
+.btp-actions a:hover { text-decoration: underline; }
+
+.btp-empty { text-align: center; color: #888; padding: 25px 0; font-size: 15px; }
+
+@media (max-width: 768px) { .btp-form-card { width: 100%; padding: 20px; } }
+</style>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

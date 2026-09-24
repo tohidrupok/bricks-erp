@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ book.book_name }} - Cheques - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header_dashboard.html' %}
+            <!-- END: Top Bar -->
+
+            <div class="btp-cheque-container mt-6">
+
+                <!-- Header -->
+                <div class="btp-cheque-header flex justify-between items-center mb-6">
+                    <h1>Cheques for {{ book.book_name }} ({{ book.book_number }})</h1>
+                    <a href="{% url 'cheque_book_list' %}" class="btp-back-link">&larr; Back to Cheque Books</a>
+                </div>
+
+                <!-- Add Cheque Form -->
+                <div class="btp-cheque-form mb-8">
+                    <h2>Add New Cheque</h2>
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btp-btn-submit">Add Cheque</button>
+                    </form>
+                </div>
+
+                <!-- Cheques List -->
+                <h2 class="btp-cheque-list-title">All Cheques</h2>
+                <table class="w-full text-left border-separate border-spacing-y-[10px]">
+                    <thead>
+                        <tr>
+                            <th>Cheque No</th>
+                            <th>Payee</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cheque in cheques %}
+                        <tr>
+                            <td>{{ cheque.cheque_number }}</td>
+                            <td>{{ cheque.payee_name }}</td>
+                            <td>{{ cheque.amount }}</td>
+                            <td>{{ cheque.status|title }}</td>
+                            <td>{{ cheque.remarks }}</td>
+                            <td class="btp-cheque-actions">
+                                <a href="{% url 'edit_cheque' cheque.id %}" class="btp-link-edit">Edit</a>
+                                <a href="{% url 'delete_cheque' cheque.id %}" class="btp-link-delete">Delete</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="btp-empty-row">No Cheques Found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+
+<!-- ===== BTP Cheque Styles ===== -->
+<style>
+/* Container */
+.btp-cheque-container {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    padding: 35px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header */
+.btp-cheque-header h1 {
+    color: #1e355f;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.btp-back-link {
+    text-decoration: none;
+    color: #2c6fff;
+    font-weight: 600;
+}
+
+/* Form */
+.btp-cheque-form {
+    background: #f6f8fc;
+    padding: 25px;
+    border-radius: 10px;
+}
+
+.btp-cheque-form h2 {
+    color: #2c3e50;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.btp-btn-submit {
+    background-color: #2c6fff;
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btp-btn-submit:hover {
+    background-color: #204ecf;
+}
+
+/* List Title */
+.btp-cheque-list-title {
+    color: #34495e;
+    margin-bottom: 12px;
+    font-size: 20px;
+    border-left: 4px solid #2c6fff;
+    padding-left: 10px;
+}
+
+/* Table */
+.btp-cheque-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.btp-cheque-table th,
+.btp-cheque-table td {
+    border: 1px solid #e1e6ef;
+    padding: 12px 14px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.btp-cheque-table th {
+    background: #eef3fb;
+    color: #2f3e54;
+    font-weight: 600;
+}
+
+.btp-cheque-table tr:nth-child(even) {
+    background: #fafbfc;
+}
+
+/* Action Links */
+.btp-cheque-actions a {
+    text-decoration: none;
+    font-weight: 600;
+    margin-right: 10px;
+    transition: color 0.2s;
+}
+
+.btp-link-edit { color: #1abc9c; }
+.btp-link-delete { color: #e74c3c; }
+
+.btp-cheque-actions a:hover {
+    text-decoration: underline;
+}
+
+.btp-empty-row {
+    text-align: center;
+    color: #777;
+    padding: 20px;
+}
+</style>
+<!-- ===== END Cheque Styles ===== -->
+{% endblock %}

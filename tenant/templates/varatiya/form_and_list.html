@@ -1,0 +1,798 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tenant Manage - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    {% include 'partials/mobile.html' %}
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+
+            {% include 'partials/header.html' %}
+
+            <div class="mt-6 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                    
+{% load static %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  /* ── TNT Design System ── */
+  :root {
+    --tnt-primary: #0f4c81;
+    --tnt-primary-light: #1a6bb5;
+    --tnt-accent: #00b4d8;
+    --tnt-accent-soft: #e0f7fc;
+    --tnt-success: #10b981;
+    --tnt-danger: #ef4444;
+    --tnt-warning: #f59e0b;
+    --tnt-bg: #f0f5fb;
+    --tnt-card: #ffffff;
+    --tnt-border: #e2eaf4;
+    --tnt-text: #1a2640;
+    --tnt-muted: #6b7fa3;
+    --tnt-font: 'Plus Jakarta Sans', sans-serif;
+    --tnt-mono: 'DM Mono', monospace;
+    --tnt-radius: 16px;
+    --tnt-shadow: 0 4px 24px rgba(15,76,129,0.09), 0 1px 4px rgba(15,76,129,0.05);
+    --tnt-shadow-lg: 0 12px 40px rgba(15,76,129,0.14);
+  }
+
+  .tnt-page {
+    font-family: var(--tnt-font);
+    color: var(--tnt-text);
+    background: var(--tnt-bg);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── Banner ── */
+  .tnt-banner {
+    background: linear-gradient(120deg, #0f4c81 0%, #1a6bb5 55%, #00b4d8 100%);
+    padding: 22px 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    position: relative;
+    overflow: hidden;
+    flex-wrap: wrap;
+  }
+
+  .tnt-banner::before {
+    content: '';
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 240px; height: 240px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+
+  .tnt-banner::after {
+    content: '';
+    position: absolute;
+    right: 80px; bottom: -80px;
+    width: 180px; height: 180px;
+    background: rgba(0,180,216,0.15);
+    border-radius: 50%;
+  }
+
+  /* Banner left */
+  .tnt-banner-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .tnt-banner-icon {
+    width: 52px; height: 52px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .tnt-banner-icon svg {
+    width: 26px; height: 26px;
+    stroke: #fff; fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .tnt-banner-text h1 {
+    color: #fff;
+    font-size: 22px;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.4px;
+  }
+
+  .tnt-banner-text p {
+    color: rgba(255,255,255,0.72);
+    margin: 3px 0 0;
+    font-size: 12.5px;
+    font-family: var(--tnt-mono);
+  }
+
+  /* Banner right: action buttons */
+  .tnt-banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+  }
+
+  .tnt-banner-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 9px;
+    font-family: var(--tnt-font);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    border: 1.5px solid rgba(255,255,255,0.28);
+    white-space: nowrap;
+    backdrop-filter: blur(6px);
+  }
+  .tnt-banner-btn svg {
+    width: 14px; height: 14px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+    transition: transform 0.15s ease;
+  }
+  .tnt-banner-btn-dash {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+  }
+  .tnt-banner-btn-dash:hover {
+    background: rgba(255,255,255,0.26);
+    border-color: rgba(255,255,255,0.5);
+  }
+  .tnt-banner-btn-back {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.88);
+  }
+  .tnt-banner-btn-back:hover {
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    border-color: rgba(255,255,255,0.42);
+  }
+  .tnt-banner-btn-back:hover svg { transform: translateX(-2px); }
+
+  .tnt-banner-sep {
+    width: 4px; height: 4px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+  }
+
+  /* ── Layout ── */
+  .tnt-body {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 24px;
+    padding: 28px 32px;
+  }
+
+  /* ── Card ── */
+  .tnt-card {
+    background: var(--tnt-card);
+    border-radius: var(--tnt-radius);
+    box-shadow: var(--tnt-shadow);
+    border: 1px solid var(--tnt-border);
+    overflow: hidden;
+  }
+
+  .tnt-card-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--tnt-border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #f7faff 0%, #eef4fb 100%);
+  }
+
+  .tnt-card-header-dot {
+    width: 8px; height: 8px;
+    background: linear-gradient(135deg, var(--tnt-primary), var(--tnt-accent));
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .tnt-card-header h2 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--tnt-primary);
+    margin: 0;
+    letter-spacing: 0.1px;
+    text-transform: uppercase;
+    font-family: var(--tnt-mono);
+  }
+
+  /* ── Form ── */
+  .tnt-form-body {
+    padding: 22px 24px 28px;
+    max-height: 680px;
+    overflow-y: auto;
+  }
+
+  .tnt-form-body::-webkit-scrollbar { width: 4px; }
+  .tnt-form-body::-webkit-scrollbar-track { background: #f0f5fb; }
+  .tnt-form-body::-webkit-scrollbar-thumb { background: #c8d8ef; border-radius: 4px; }
+
+  .tnt-error-box {
+    background: #fff1f1;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    font-size: 12.5px;
+    color: #b91c1c;
+  }
+
+  .tnt-error-box ul {
+    margin: 0; padding-left: 16px;
+  }
+
+  .tnt-field {
+    margin-bottom: 14px;
+  }
+
+  .tnt-label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--tnt-muted);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-family: var(--tnt-mono);
+  }
+
+  /* Target Django-rendered form widgets */
+  .tnt-form-body input[type="text"],
+  .tnt-form-body input[type="email"],
+  .tnt-form-body input[type="number"],
+  .tnt-form-body input[type="file"],
+  .tnt-form-body select,
+  .tnt-form-body textarea {
+    width: 100%;
+    padding: 9px 13px;
+    border: 1.5px solid var(--tnt-border);
+    border-radius: 9px;
+    background: #f7faff;
+    font-family: var(--tnt-font);
+    font-size: 13.5px;
+    color: var(--tnt-text);
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    outline: none;
+  }
+
+  .tnt-form-body input[type="text"]:focus,
+  .tnt-form-body input[type="email"]:focus,
+  .tnt-form-body input[type="number"]:focus,
+  .tnt-form-body select:focus,
+  .tnt-form-body textarea:focus {
+    border-color: var(--tnt-primary-light);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(26, 107, 181, 0.12);
+  }
+
+  .tnt-form-body textarea {
+    resize: vertical;
+    min-height: 72px;
+    line-height: 1.6;
+  }
+
+  .tnt-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* Buttons */
+  .tnt-btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .tnt-btn-save {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 22px;
+    background: linear-gradient(135deg, #0f4c81 0%, #1a6bb5 100%);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    font-family: var(--tnt-font);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(15,76,129,0.28);
+    transition: all 0.2s ease;
+    letter-spacing: 0.2px;
+  }
+
+  .tnt-btn-save:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(15,76,129,0.38);
+    background: linear-gradient(135deg, #1a6bb5 0%, #0f4c81 100%);
+  }
+
+  .tnt-btn-save svg {
+    width: 15px; height: 15px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .tnt-btn-reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    background: #f0f5fb;
+    color: var(--tnt-muted);
+    border: 1.5px solid var(--tnt-border);
+    border-radius: 9px;
+    font-family: var(--tnt-font);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .tnt-btn-reset:hover {
+    background: #e2eaf4;
+    color: var(--tnt-text);
+    border-color: #c8d8ef;
+  }
+
+  /* ── Table Panel ── */
+  .tnt-table-body {
+    padding: 0;
+    max-height: 680px;
+    overflow-y: auto;
+  }
+
+  .tnt-table-body::-webkit-scrollbar { width: 4px; }
+  .tnt-table-body::-webkit-scrollbar-thumb { background: #c8d8ef; border-radius: 4px; }
+
+  .tnt-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+
+  .tnt-table thead th {
+    background: linear-gradient(90deg, #0f4c81 0%, #1a6bb5 100%);
+    color: rgba(255,255,255,0.9);
+    padding: 13px 18px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: var(--tnt-mono);
+  }
+
+  .tnt-table thead th:first-child { border-radius: 0; }
+
+  .tnt-table tbody tr {
+    border-bottom: 1px solid #eef2f9;
+    transition: background 0.15s ease;
+  }
+
+  .tnt-table tbody tr:hover {
+    background: #f4f8ff;
+  }
+
+  .tnt-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .tnt-table td {
+    padding: 13px 18px;
+    color: var(--tnt-text);
+    vertical-align: middle;
+  }
+
+  .tnt-table .tnt-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .tnt-avatar {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, #c8d8ef, #e0edfb);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--tnt-primary);
+    flex-shrink: 0;
+    border: 2px solid #e2eaf4;
+  }
+
+  .tnt-name-text {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--tnt-text);
+  }
+
+  .tnt-contact-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--tnt-mono);
+    font-size: 12px;
+    color: var(--tnt-muted);
+    background: #f0f5fb;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--tnt-border);
+  }
+
+  .tnt-contact-chip svg {
+    width: 12px; height: 12px;
+    stroke: var(--tnt-accent);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .tnt-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tnt-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 11px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    border: 1.5px solid transparent;
+  }
+
+  .tnt-action-btn svg {
+    width: 12px; height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .tnt-action-btn.view {
+    color: var(--tnt-success);
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+  }
+  .tnt-action-btn.view:hover { background: #d1fae5; transform: translateY(-1px); }
+
+  .tnt-action-btn.edit {
+    color: #2563eb;
+    background: #eff6ff;
+    border-color: #bfdbfe;
+  }
+  .tnt-action-btn.edit:hover { background: #dbeafe; transform: translateY(-1px); }
+
+  .tnt-action-btn.delete {
+    color: var(--tnt-danger);
+    background: #fff1f2;
+    border-color: #fecdd3;
+  }
+  .tnt-action-btn.delete:hover { background: #fee2e2; transform: translateY(-1px); }
+
+  .tnt-empty-row td {
+    text-align: center;
+    padding: 40px;
+    color: var(--tnt-muted);
+    font-size: 13px;
+  }
+
+  /* Responsive */
+  @media (max-width: 960px) {
+    .tnt-body { grid-template-columns: 1fr; padding: 20px 16px; }
+    .tnt-form-row { grid-template-columns: 1fr; }
+    .tnt-banner { padding: 18px 20px; }
+    .tnt-banner-actions { width: 100%; }
+  }
+</style>
+
+<div class="tnt-page">
+
+  <!-- ══ Banner ══ -->
+  <div class="tnt-banner">
+
+    <!-- Left: icon + title -->
+    <div class="tnt-banner-left">
+      <div class="tnt-banner-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <div class="tnt-banner-text">
+        <h1>Bayzid Hossain House</h1>
+        <p>Property Management · Tenant Registry</p>
+      </div>
+    </div>
+
+    <!-- Right: Dashboard + Back -->
+    <div class="tnt-banner-actions">
+      <a href="{% url 'tenant_dashboard' %}" class="tnt-banner-btn tnt-banner-btn-dash">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        Dashboard
+      </a>
+      <div class="tnt-banner-sep"></div>
+      <a href="javascript:history.back()" class="tnt-banner-btn tnt-banner-btn-back">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Body -->
+  <div class="tnt-body">
+
+    <!-- ── Form Card ── -->
+    <div class="tnt-card">
+      <div class="tnt-card-header">
+        <div class="tnt-card-header-dot"></div>
+        <h2>Create New Tenant</h2>
+      </div>
+      <div class="tnt-form-body">
+
+        {% if form.errors %}
+        <div class="tnt-error-box">
+          <ul>
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}
+                <li><strong>{{ field|capfirst }}:</strong> {{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <div class="tnt-field">
+            <label class="tnt-label">Name</label>
+            {{ form.name }}
+          </div>
+
+          <div class="tnt-field">
+            <label class="tnt-label">Image</label>
+            {{ form.image }}
+          </div>
+
+          <div class="tnt-form-row">
+            <div class="tnt-field">
+              <label class="tnt-label">NID</label>
+              {{ form.nid }}
+            </div>
+            <div class="tnt-field">
+              <label class="tnt-label">Contact</label>
+              {{ form.contact }}
+            </div>
+          </div>
+
+          <div class="tnt-form-row">
+            <div class="tnt-field">
+              <label class="tnt-label">Occupation</label>
+              {{ form.occupation }}
+            </div>
+            <div class="tnt-field">
+              <label class="tnt-label">Number of Members</label>
+              {{ form.number_of_members }}
+            </div>
+          </div>
+
+          <div class="tnt-field">
+            <label class="tnt-label">Permanent Address</label>
+            {{ form.permanent_address }}
+          </div>
+
+          <div class="tnt-form-row">
+            <div class="tnt-field">
+              <label class="tnt-label">Contact Person</label>
+              {{ form.reference_name }}
+            </div>
+            <div class="tnt-field">
+              <label class="tnt-label">Person Number</label>
+              {{ form.reference_contact }}
+            </div>
+          </div>
+
+          <div class="tnt-field">
+            <label class="tnt-label">Description</label>
+            {{ form.description }}
+          </div>
+
+          <div class="tnt-btn-row">
+            <button type="submit" class="tnt-btn-save">
+              <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Save Tenant
+            </button>
+            <button type="reset" class="tnt-btn-reset">
+              Cancel
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- ── List Card ── -->
+    <div class="tnt-card">
+      <div class="tnt-card-header flex items-center justify-between flex-wrap gap-4">
+    
+        <!-- Left Side -->
+        <div class="flex items-center gap-2">
+            <div class="tnt-card-header-dot"></div>
+            <h2 class="text-xl font-semibold">Tenant Listing</h2>
+        </div>
+    
+        <!-- Right Side -->
+        <div class="relative w-full sm:w-64 text-slate-500">
+            <input
+                id="searchInput"
+                type="text"
+                placeholder="Search..."
+                class="w-full pl-4 pr-10 py-2 text-sm border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                oninput="handleSearch()"
+            >
+            <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                🔍
+            </span>
+        </div>
+    
+    </div>
+      <div class="tnt-table-body">
+        <table class="tnt-table">
+          <thead>
+            <tr>
+              <th>Tenant</th>
+              <th>Contact</th>
+              <th style="text-align:center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            {% for varatiya in varatiyas %}
+            <tr>
+              <td>
+                <div class="tnt-name-cell">
+                  <div class="tnt-avatar">{{ varatiya.name|slice:":1"|upper }}</div>
+                  <span class="tnt-name-text">{{ varatiya.name }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="tnt-contact-chip">
+                  <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.36 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  {{ varatiya.contact }}
+                </span>
+              </td>
+              <td style="text-align:center;">
+                <div class="tnt-actions" style="justify-content:center;">
+                  <a href="{% url 'varatiya_detail' varatiya.pk %}" class="tnt-action-btn view">
+                    <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    View
+                  </a>
+                  <a href="{% url 'varatiya_update' varatiya.pk %}" class="tnt-action-btn edit">
+                    <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Edit
+                  </a>
+                  <!--<a href="{% url 'varatiya_delete' varatiya.pk %}" class="tnt-action-btn delete"-->
+                  <!--   onclick="return confirm('Are you sure you want to delete this Tenant?');">-->
+                  <!--  <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>-->
+                  <!--  Delete-->
+                  <!--</a>-->
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr class="tnt-empty-row">
+              <td colspan="3">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#c8d8ef" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 10px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                No tenants found yet.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+         <script>
+                            function handleSearch() {
+                                let searchValue = document.getElementById('searchInput').value.toLowerCase();
+                                let rows = document.querySelectorAll("#tableBody tr");
+                    
+                                rows.forEach(row => {
+                                    let columns = row.getElementsByTagName("td");
+                                    let rowText = "";
+                                    
+                                    // Combine text content of all columns in the row for searching
+                                    for (let i = 0; i < columns.length; i++) {
+                                        rowText += columns[i].textContent.toLowerCase(); // Get all text in row
+                                    }
+                    
+                                    // If search term is found in the row's combined text, show the row, else hide it
+                                    if (rowText.includes(searchValue)) {
+                                        row.style.display = ""; // Show row
+                                    } else {
+                                        row.style.display = "none"; // Hide row
+                                    }
+                                });
+                            }
+                        </script>
+      </div>
+    </div>
+
+  </div><!-- /tnt-body -->
+</div><!-- /tnt-page -->
+
+                   
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

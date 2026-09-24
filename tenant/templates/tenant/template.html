@@ -1,0 +1,45 @@
+<!-- templates/dashboard.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tenant - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header_dashboard.html' %}
+
+                <!-- END: Top Bar -->
+                <div class="grid grid-cols-12 gap-6">
+                    <div class="col-span-12 2xl:col-span-9">
+                        <div class="grid grid-cols-12 gap-6">
+                            <!-- BEGIN: General Report -->
+                            <div class="col-span-12 mt-8">
+                                <div class="intro-y flex h-10 items-center">
+                                    <h2 class="mr-5 truncate text-lg font-medium">General Report Generator</h2>
+                                    <a class="ml-auto flex items-center text-primary" href="">
+                                        <i data-tw-merge="" data-lucide="refresh-ccw" class="stroke-1.5 mr-3 h-4 w-4"></i>
+                                        Reload Data
+                                    </a>
+                                </div>
+                                
+    
+                                
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

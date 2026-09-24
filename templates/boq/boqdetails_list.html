@@ -1,0 +1,204 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}BOQ Details List - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>    
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">BOQ Details List</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <!-- Button to open the popup -->
+                        <!--<a href="javascript:void(0);" onclick="openPopup()">-->
+                        <!--    <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">-->
+                        <!--        Add New BOQ-->
+                        <!--    </button>-->
+                        <!--</a>-->
+                        
+                        <!-- Refresh Button -->
+                        <a href="{% url 'boqdetails_list' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">
+                                Refresh
+                            </button>
+                        </a>
+                        
+                        <div class="mx-auto hidden text-slate-500 md:block"></div>                
+                        <!-- Search Input -->
+                        
+                    </div>
+                
+                    <!-- BEGIN: Property Owners List -->
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <div class="container mx-auto p-6">
+                            <h2 class="text-2xl font-bold mb-4">BOQ List (Project Wise)</h2>
+                        
+                           <!-- Filters Row -->
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
+                            
+                                <!-- Project Dropdown -->
+                                <form method="get" class="flex items-center">
+                                    <label for="project_id" class="mr-2 font-semibold whitespace-nowrap">Select Project:</label>
+                                    <select name="project_id" id="project_id" 
+                                            onchange="this.form.submit()" 
+                                            class="border rounded px-3 py-1">
+                                        <option value="">-- All Projects --</option>
+                                        {% for project in projects %}
+                                            <option value="{{ project.id }}" {% if project.id|stringformat:"s" == selected_project %}selected{% endif %}>
+                                                {{ project.project_first_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            
+                                <!-- Search Box -->
+                                <div class="relative w-full sm:w-56 text-slate-500">
+                                    <input id="searchInput" type="text" 
+                                           placeholder="Search..." 
+                                           class="w-full p-2 text-sm border rounded-md shadow-sm focus:ring-4 focus:ring-primary" 
+                                           oninput="handleSearch()">
+                                    <i class="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4">🔍</i>
+                                </div>
+                            
+                            </div>
+
+                        
+                            <!-- BOQ Table -->
+                            <table class="table-auto border-collapse border border-gray-400 w-full text-sm">
+                                <thead>
+                                    <tr class="bg-gray-200">
+                                        <th class="border px-2 py-1">Project</th>
+                                        <th class="border px-2 py-1">Category Type</th>
+                                        <th class="border px-2 py-1">Type Name</th>
+                                        <th class="border px-2 py-1">Category Name</th>
+                                        <th class="border px-2 py-1">Supplier</th>
+                                        <th class="border px-2 py-1">Item</th>
+                                        <th class="border px-2 py-1">Unit</th>
+                                        <th class="border px-2 py-1">Qty</th>
+                                        <th class="border px-2 py-1">Rate</th>
+                                        <th class="border px-2 py-1">Amount</th>
+                                        <th class="border px-2 py-1">Remark</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody">
+                                    {% for boq in boqs %}
+                                        <tr>
+                                            <td class="border px-2 py-1">{{ boq.project_name.project_first_name }}</td>
+                                            <td class="border px-2 py-1">{{ boq.category_type }}</td>
+                                            <td class="border px-2 py-1">{{ boq.type_name }}</td>
+                                            <td class="border px-2 py-1">{{ boq.category_name }}</td>
+                                            <td class="border px-2 py-1">{{ boq.supplier_name }}</td>
+                                            <td class="border px-2 py-1">{{ boq.item_name }}</td>
+                                            <td class="border px-2 py-1">{{ boq.unit }}</td>
+                                            <td class="border px-2 py-1">{{ boq.qty }}</td>
+                                            <td class="border px-2 py-1">{{ boq.rate }}</td>
+                                            <td class="border px-2 py-1">{{ boq.amount }}</td>
+                                            <td class="border px-2 py-1">{{ boq.remark }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="11" class="border px-2 py-2 text-center text-red-500">
+                                                No BOQ records found.
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                
+                                    <!-- Totals Row -->
+                                    <!--<tr class="bg-green-100 font-bold">-->
+                                    <!--    <td colspan="7" class="border px-2 py-2 text-right">TOTAL:</td>-->
+                                    <!--    <td class="border px-2 py-2">{{ total_qty }}</td>-->
+                                    <!--    <td class="border px-2 py-2">{{ avg_rate|floatformat:2 }}</td>-->
+                                    <!--    <td class="border px-2 py-2">{{ total_amount }}</td>-->
+                                    <!--    <td class="border px-2 py-2"></td>-->
+                                    <!--</tr>-->
+                                    <tr class="bg-green-100 font-bold totals-row">
+                                        <td colspan="7" class="border px-2 py-2 text-right">TOTAL:</td>
+                                        <td class="border px-2 py-2" id="totalQty">{{ total_qty }}</td>
+                                        <td class="border px-2 py-2" id="avgRate">{{ avg_rate|floatformat:2 }}</td>
+                                        <td class="border px-2 py-2" id="totalAmount">{{ total_amount }}</td>
+                                        <td class="border px-2 py-2"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <script>
+                                function handleSearch() {
+                                    let searchValue = document.getElementById('searchInput').value.toLowerCase();
+                                    let rows = document.querySelectorAll("#tableBody tr:not(.totals-row)");
+                                
+                                    let totalQty = 0;
+                                    let totalRate = 0;
+                                    let totalAmount = 0;
+                                    let visibleCount = 0;
+                                
+                                    rows.forEach(row => {
+                                        let columns = row.getElementsByTagName("td");
+                                        let rowText = "";
+                                
+                                        for (let i = 0; i < columns.length; i++) {
+                                            rowText += columns[i].textContent.toLowerCase();
+                                        }
+                                
+                                        if (rowText.includes(searchValue)) {
+                                            row.style.display = ""; 
+                                            // collect totals
+                                            totalQty += parseFloat(columns[7].textContent) || 0;
+                                            totalRate += parseFloat(columns[8].textContent) || 0;
+                                            totalAmount += parseFloat(columns[9].textContent) || 0;
+                                            visibleCount++;
+                                        } else {
+                                            row.style.display = "none"; 
+                                        }
+                                    });
+                                
+                                    // update totals row
+                                    let avgRate = visibleCount > 0 ? (totalRate / visibleCount).toFixed(2) : 0;
+                                    document.getElementById("totalQty").textContent = totalQty;
+                                    document.getElementById("avgRate").textContent = avgRate;
+                                    document.getElementById("totalAmount").textContent = totalAmount;
+                                }
+                            </script>
+                        </div>						
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

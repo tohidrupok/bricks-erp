@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cheque Book Management - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header_dashboard.html' %}
+            <!-- END: Top Bar -->
+
+            <div class="btp-chequebook-container mt-6">
+
+                <!-- Header -->
+                <div class="btp-chequebook-header">
+                    <h1>Cheque Book Management</h1>
+                </div>
+
+                <!-- Add ChequeBook Form -->
+                <div class="btp-chequebook-form">
+                    <h2>Add New Cheque Book</h2>
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btp-btn-submit">Add Cheque Book</button>
+                    </form>
+                </div>
+
+                <!-- ChequeBook List -->
+                <h2 class="btp-chequebook-list-title">All Cheque Books</h2>
+                <table class="btp-chequebook-table">
+                    <thead>
+                        <tr>
+                            <th>Book Name</th>
+                            <th>Book Number</th>
+                            <th>Account</th>
+                            <th>Issue Date</th>
+                            <th>Total Cheques</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for book in books %}
+                        <tr>
+                            <td>{{ book.book_name }}</td>
+                            <td>{{ book.book_number }}</td>
+                            <td>{{ book.account.account_name }}</td>
+                            <td>{{ book.issue_date }}</td>
+                            <td>{{ book.total_cheques }}</td>
+                            <td class="btp-chequebook-actions">
+                                <a href="{% url 'cheque_list' book.id %}" class="btp-link-view">View</a>
+                                <a href="{% url 'edit_book' book.id %}" class="btp-link-edit">Edit</a>
+                                <a href="{% url 'delete_book' book.id %}" class="btp-link-delete">Delete</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="btp-empty-row">No Cheque Books Found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+
+<!-- ===== BTP ChequeBook Styles ===== -->
+<style>
+.btp-chequebook-container {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    padding: 35px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.btp-chequebook-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.btp-chequebook-header h1 {
+    color: #1e355f;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.btp-chequebook-form {
+    background: #f6f8fc;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 40px;
+}
+
+.btp-chequebook-form h2 {
+    color: #2c3e50;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.btp-btn-submit {
+    background-color: #2c6fff;
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btp-btn-submit:hover {
+    background-color: #204ecf;
+}
+
+.btp-chequebook-list-title {
+    color: #34495e;
+    margin-bottom: 12px;
+    font-size: 20px;
+    border-left: 4px solid #2c6fff;
+    padding-left: 10px;
+}
+
+.btp-chequebook-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.btp-chequebook-table th,
+.btp-chequebook-table td {
+    border: 1px solid #e1e6ef;
+    padding: 12px 14px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.btp-chequebook-table th {
+    background: #eef3fb;
+    color: #2f3e54;
+    font-weight: 600;
+}
+
+.btp-chequebook-table tr:nth-child(even) {
+    background: #fafbfc;
+}
+
+.btp-chequebook-actions a {
+    text-decoration: none;
+    font-weight: 600;
+    margin-right: 10px;
+    transition: color 0.2s;
+}
+
+.btp-link-view { color: #2c6fff; }
+.btp-link-edit { color: #1abc9c; }
+.btp-link-delete { color: #e74c3c; }
+
+.btp-chequebook-actions a:hover {
+    text-decoration: underline;
+}
+
+.btp-empty-row {
+    text-align: center;
+    color: #777;
+    padding: 20px;
+}
+</style>
+<!-- ===== END ChequeBook Styles ===== -->
+{% endblock %}
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

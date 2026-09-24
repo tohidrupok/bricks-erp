@@ -1,0 +1,102 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Project- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-2xl font-semibold text-gray-900">Project Details</h2>
+                <div class="mt-6 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <div class="project-detail p-8 bg-white rounded-lg shadow-lg border border-gray-200">
+                            <!-- Project Header -->
+                            <h1 class="text-3xl font-semibold text-gray-900 mb-4">
+                                {{ project.project_name }}
+                            </h1>
+                            
+                            <!-- Project Description -->
+                            <p class="text-lg text-gray-700 mb-6">{{ project.project_description }}</p>
+                            
+                            <!-- Project Status -->
+                            <div class="mb-6">
+                                <p class="text-xl font-medium text-gray-800"><strong>Status:</strong> {{ project.project_status }}</p>
+                            </div>
+                            
+                            <!-- Project Dates -->
+                            <div class="grid grid-cols-2 gap-6">
+                                <div class="mb-6">
+                                    <p class="text-xl font-medium text-gray-800"><strong>Start Date:</strong> {{ project.project_start_date }}</p>
+                                </div>
+                                <div class="mb-6">
+                                    <p class="text-xl font-medium text-gray-800"><strong>End Date:</strong> {{ project.project_end_date }}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Land Details -->
+                            <div class="mb-6">
+                                <h3 class="text-xl font-semibold text-gray-800 mb-2">Land Details</h3>
+                                <p class="text-lg text-gray-700"><strong>Area:</strong> {{ project.land_details_area }} sq. ft.</p>
+                                <p class="text-lg text-gray-700"><strong>Purchase Price:</strong> ৳{{ project.land_purchase_price }}</p>
+                                <p class="text-lg text-gray-700"><strong>Current Market Price:</strong> ৳{{ project.land_current_market_price }}</p>
+                            </div>
+                
+                            <!-- Building Details -->
+                            <div class="mb-6">
+                                <h3 class="text-xl font-semibold text-gray-800 mb-2">Building Details</h3>
+                                <p class="text-lg text-gray-700"><strong>Number of Stories:</strong> {{ project.number_of_stories }}</p>
+                                <p class="text-lg text-gray-700"><strong>Flat Type A:</strong> {{ project.flat_type_a }}</p>
+                                <p class="text-lg text-gray-700"><strong>Flat Type B:</strong> {{ project.flat_type_b }}</p>
+                                <p class="text-lg text-gray-700"><strong>Flat Type C:</strong> {{ project.flat_type_c }}</p>
+                                <p class="text-lg text-gray-700"><strong>Flat Type D:</strong> {{ project.flat_type_d }}</p>
+                                <p class="text-lg text-gray-700"><strong>Parking Details:</strong> {{ project.parking_details }}</p>
+                            </div>
+                
+                            <!-- Costing/Budgeting -->
+                            <div class="mb-6">
+                                <h3 class="text-xl font-semibold text-gray-800 mb-2">Costing/Budgeting</h3>
+                                <p class="text-lg text-gray-700"><strong>Construction Cost:</strong> ৳{{ project.construction_cost }}</p>
+                                <p class="text-lg text-gray-700"><strong>Labor Cost:</strong> ৳{{ project.labor_cost }}</p>
+                                <p class="text-lg text-gray-700"><strong>Material Cost:</strong> ৳{{ project.material_cost }}</p>
+                                <p class="text-lg text-gray-700"><strong>Other Costs:</strong> ৳{{ project.other_costs }}</p>
+                            </div>
+                
+                            <!-- Profit Margin -->
+                            <div class="mb-6">
+                                <p class="text-lg text-gray-700"><strong>Profit Margin:</strong> {{ project.profit_margin }}%</p>
+                            </div>
+                
+                            <!-- Unit Cost, Profit Amount, and Sales Price -->
+                            <div class="mb-6">
+                                <p class="text-lg text-gray-700"><strong>Unit Cost:</strong> ৳{{ project.unit_cost }}</p>
+                                <p class="text-lg text-gray-700"><strong>Profit Amount:</strong> ৳{{ project.profit_amount }}</p>
+                                <p class="text-lg text-gray-700"><strong>Sales Price:</strong> ৳{{ project.sales_price }}</p>
+                            </div>
+                
+                            <!-- Back to Project List Button -->
+                            <div class="mt-8 text-center">
+                                <a href="{% url 'project_list' %}" style="background-color:#1e3c98" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                    Back to Project List
+                                </a>
+                            </div>
+                        </div>                        
+                    </div>
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

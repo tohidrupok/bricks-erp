@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Restaurant Requisition History - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+  @media print {
+    .no-print { display: none !important; }
+    body { background: white; padding: 0; }
+    .card { box-shadow: none; border: none; margin: 0; padding: 0; }
+  }
+  .transition-all { transition: all 0.2s ease-in-out; }
+  .form-container-card { background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; }
+  .custom-label { font-size: 0.875rem; font-weight: 600; color: #1e293b; margin-bottom: 0.375rem; display: block; }
+  .field-input-fallback { width: 100%; border-radius: 0.375rem; border: 1px solid #cbd5e1; padding: 0.5rem 0.75rem; font-size: 0.875rem; transition: border-color 0.15s ease; }
+  .field-input-fallback:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+</style>
+
+<div class="rubick px-4 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+  {% include 'partials/mobile.html' %}
+  
+  <div class="mt-[4.7rem] flex md:mt-0">
+    {% include 'partials/sidebar_list.html' %}
+    
+    <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+      {% include 'partials/header.html' %}
+        
+      <div class="intro-y mt-10 flex flex-col items-center justify-between gap-4 border-b border-slate-200 pb-5 sm:flex-row dark:border-darkmode-400">
+        <div>
+          <h2 class="text-2xl font-semibold text-slate-700 dark:text-slate-200">Restaurant Requisition Payment</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Manage and audit historical internal stock and branch requisitions.</p>
+        </div>
+        <div class="flex w-full items-center justify-end gap-3 sm:w-auto">
+          <a href="{% url 'restaurant_kitchen_ledger_list' %}" class="no-print">
+            <button style="background-color:#1e40ae" class="transition-all inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-90 focus:outline-none">
+              Back To Ledger List
+            </button>
+          </a>
+        </div>
+      </div>
+        
+      {% if messages %}
+      <div class="intro-y mt-4 space-y-2 no-print">
+        {% for message in messages %}
+        <div class="flex items-center justify-between rounded-lg border {% if message.tags == 'error' %}border-red-200 bg-red-50 text-red-700{% else %}border-blue-200 bg-blue-50 text-blue-700{% endif %} px-4 py-3 text-sm">
+          <div class="flex items-center gap-2">
+            <span>{% if message.tags == 'error' %}⚠️{% else %}ℹ️{% endif %}</span>
+            <p class="font-medium">{{ message }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+        
+      <div class="card intro-y mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-darkmode-400 dark:bg-darkmode-600">
+        <div class="border-b border-slate-200 bg-slate-50/50 px-6 py-4 dark:border-darkmode-400 dark:bg-darkmode-700">
+          <h3 class="text-base font-bold text-slate-800 dark:text-slate-200">Kitchen Ledger History Form</h3>
+        </div>
+
+        <div class="p-6">
+        <form method="POST" action="{% url 'restaurant_kitchen_ledger_payment' ledger_id %}" novalidate class="w-full max-w-4xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+  {% csrf_token %}
+  
+  {% if form.errors or form.non_field_errors %}
+    <div class="p-4 mb-6 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm font-semibold">
+      <p class="mb-2">Please correct the following errors:</p>
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
+  <div class="mb-8 bg-slate-50 border border-slate-200 p-4 rounded-xl">
+    <h6 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Linked Kitchen Ledger Metadata Info</h6>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+      <div>
+        <span class="text-slate-400 block font-medium">Ledger Type:</span>
+        <span class="font-bold text-slate-700 px-2.5 py-0.5 rounded bg-blue-100 text-blue-800 inline-block mt-1">{{ ledger_entry.type }}</span>
+      </div>
+      <div>
+        <span class="text-slate-400 block font-medium">Responsible Employee:</span>
+        <span class="font-semibold text-slate-800 block mt-1">{{ ledger_entry.employee }}</span>
+      </div>
+      <div>
+        <span class="text-slate-400 block font-medium">Target Stock Item:</span>
+        <span class="font-semibold text-slate-800 block mt-1">{{ ledger_entry.item_name }}</span>
+      </div>
+      <div>
+        <span class="text-slate-400 block font-medium">Pending Balance State:</span>
+        <span class="font-bold text-red-600 block mt-1">৳{{ ledger_entry.balance }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-8">
+    <h6 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2 mb-4">Daily Payment Record Metrics</h6>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 interaction-target-area">
+      {% for field in form %}
+        <div class="flex flex-col form-group-row-wrapper" id="div_id_{{ field.name }}">
+          <label for="{{ field.id_for_label }}" class="custom-label">
+            {{ field.label }}
+            {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+          </label>
+          <div class="relative rounded-md shadow-sm custom-input-wrapper">
+            {{ field }}
+          </div>
+          {% if field.help_text %}
+            <span class="text-xs text-slate-400 mt-1 leading-relaxed">{{ field.help_text }}</span>
+          {% endif %}
+          {% if field.errors %}
+            <span class="text-xs font-semibold text-red-600 mt-1">{{ field.errors.as_text }}</span>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="mb-8">
+    <h6 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2 mb-4">Bank Clearing Instrument Mapping</h6>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="flex flex-col">
+        <label for="cheque_number" class="custom-label">Cheque Number (Optional Selection)</label>
+        <select name="cheque_number" id="cheque_number" class="field-input-fallback bg-white">
+          <option value="None" selected>-- No Cheque (Direct Cash Settlement) --</option>
+          {% for cheque in cheques %}
+            <option value="{{ cheque.id }}">
+              {{ cheque.cheque_number }} (Balance: ৳{{ cheque.amount|default:"0.00" }})
+            </option>
+          {% endfor %}
+        </select>
+        <span class="text-xs text-slate-400 mt-1">Choosing an active clearing instrument flags it as <code>'used'</code> automatically upon saving.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="border-t border-slate-100 pt-5 flex items-center gap-3">
+    <button type="submit" style="background-color:#1e3c98" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-5 py-2.5 rounded-lg shadow transition-all focus:ring-4 focus:ring-blue-500/20">
+      Confirm & Save Daily Payment
+    </button>
+    <a href="javascript:history.back()" class="border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-sm px-5 py-2.5 rounded-lg transition-all">
+      Cancel & Return
+    </a>
+  </div>
+</form>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // 1. Uniformly inject Tailwind fallback CSS formatting classes across fields
+    const inputFields = document.querySelectorAll('.interaction-target-area input, .interaction-target-area select, .interaction-target-area textarea');
+    inputFields.forEach(field => {
+      if(!field.classList.contains('form-check-input')) {
+        field.classList.add('field-input-fallback');
+      }
+    });
+
+    // 2. Conditional Form Visibility Toggle Logic based on selected Accounting Type
+    const typeField = document.querySelector('[name="type"]');
+    const rowExpense = document.getElementById('div_id_rest_exp');
+    const rowPurchase = document.getElementById('div_id_pur_cost');
+
+    function toggleFormFields() {
+      if (!typeField) return;
+      const val = typeField.value;
+      
+      if (val === "Expense") {
+        if (rowExpense) rowExpense.style.display = "flex";
+        if (rowPurchase) rowPurchase.style.display = "none";
+      } else if (val === "Purchase") {
+        if (rowExpense) rowExpense.style.display = "none";
+        if (rowPurchase) rowPurchase.style.display = "flex";
+      } else {
+        // Fallback layout if blank/unselected
+        if (rowExpense) rowExpense.style.display = "flex";
+        if (rowPurchase) rowPurchase.style.display = "flex";
+      }
+    }
+
+    if (typeField) {
+      typeField.addEventListener('change', toggleFormFields);
+      toggleFormFields(); // Execute immediately to parse server-filled initial states
+    }
+  });
+</script>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const inputFields = document.querySelectorAll('.interaction-target-area input, .interaction-target-area select, .interaction-target-area textarea');
+    inputFields.forEach(field => {
+      if(!field.classList.contains('form-check-input')) {
+        field.classList.add('field-input-fallback');
+      }
+    });
+  });
+</script>
+{% endblock %}

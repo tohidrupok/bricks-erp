@@ -1,0 +1,103 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Restaurant Sales Update- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				    {% include 'partials/header.html' %}
+                <div class="container mx-auto mt-10 ml-10"> 
+                <!-- END: Top Bar -->
+                <h1 class="text-3xl font-semibold text-gray-900 mb-6">Edit Restaurant Sales Details</h1>
+
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">                    
+                    <form method="POST" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                        {% csrf_token %}
+                        <h2 class="text-xl font-semibold mb-4 text-center">Edit Restaurant Sales</h2>
+
+                        <!-- Invoice No -->
+                        <div class="mb-4">
+                            <label for="invoice_no" class="font-medium text-lg text-gray-800">Invoice No</label>
+                            {{ form.invoice_no }}
+                            {% for error in form.invoice_no.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Customer -->
+                        <div class="mb-4">
+                            <label for="customer" class="font-medium text-lg text-gray-800">Customer</label>
+                            {{ form.customer }}
+                            {% for error in form.customer.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Sale Date -->
+                        <div class="mb-4">
+                            <label for="sale_date" class="font-medium text-lg text-gray-800">Sale Date</label>
+                            {{ form.sale_date }}
+                            {% for error in form.sale_date.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        
+
+                        <!-- Total Amount -->
+                        <div class="mb-4">
+                            <label for="total_amount" class="font-medium text-lg text-gray-800">Total Amount</label>
+                            {{ form.total_amount }}
+                            {% for error in form.total_amount.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                       
+                        <!-- Discount -->
+                        <div class="mb-4">
+                            <label for="discount" class="font-medium text-lg text-gray-800">Discount</label>
+                            {{ form.discount }}
+                            {% for error in form.discount.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Note -->
+                        <div class="mb-4">
+                            <label for="note" class="font-medium text-lg text-gray-800">Note</label>
+                            {{ form.note }}
+                            {% for error in form.note.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="text-center mt-6">
+                            <button type="submit" style="background-color:#1e3c98" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md">
+                                💾 Update Item
+                            </button>
+                            <a href="{% url 'restaurant_sales_report' %}" style="margin-left:0.5%;background-color:#1e3c98" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md ml-2">
+                                🔙 Back to List
+                            </a>
+                        </div>
+                    </form>
+
+                    
+                </div>
+                  </div>    
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

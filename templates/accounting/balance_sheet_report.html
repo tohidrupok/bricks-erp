@@ -1,0 +1,230 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Balance Sheet</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    background-color: silver;
+    padding: 20px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  .logo img { height: 50px; }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .label-box {
+    background-color: #e2f0d9;
+    padding: 6px 12px;
+    font-weight: bold;
+    font-size: 14px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .sub-head { font-size: 11px; color: #555; margin-bottom: 8px; line-height: 1.4; }
+  form { margin: 12px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  form label { font-weight: bold; }
+  form select, form button { padding: 4px 8px; font-size: 12px; }
+
+  /* Table Styles */
+  .sheet {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+  .sheet th, .sheet td {
+    border: 1px solid #ccc;
+    padding: 8px 10px;
+  }
+  .sheet th {
+    background: #f3f6fa;
+    font-weight: bold;
+    text-align: right;
+  }
+  .sheet th.left-col { text-align: left; }
+  .left-col { font-weight: 500; }
+  .right-col { text-align: right; min-width: 90px; }
+  .num { color: #1e3c98; font-weight: 600; }
+  .label { color: #666; font-style: italic; }
+  .section { font-weight: bold; background: #dce6f1; }
+  .sheet tr:nth-child(even) { background: #fafafa; }
+
+  /* Totals row */
+  .totals-row { font-weight: bold; background: #f9fafb; }
+
+  /* Signature section */
+  .signature-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+  }
+  .signature-box {
+    text-align: center;
+    width: 22%;
+    font-size: 12px;
+  }
+  .signature-line {
+    display: block;
+    border-top: 1px solid #000;
+    margin: 40px 0 6px 0;
+  }
+
+  /* Footer buttons */
+  .footer { margin-top: 20px; display: flex; gap: 10px; }
+  .back-btn, .print-btn {
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .back-btn { background: #eee; }
+  .print-btn { background: #1e3c98; color: white; }
+  
+  @media print {
+    .no-print { display: none !important; }
+    body { background: white; padding: 0; }
+    .card { box-shadow: none; border: none; margin: 0; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+
+    <!-- Header -->
+    <div class="card-header">
+      <div class="logo">
+        <img src="{% static 'images/BTP_logo_bricks.webp' %}" alt="Company Logo">
+      </div>
+      <div style="text-align: right;">
+        <div class="label-box">Balance Sheet</div>
+        <p style="font-size: 11px; margin-top: 4px;">
+          Printing Date: {{ print_time|date:"F j, Y, g:i a" }}
+        </p>
+      </div>
+    </div>
+    
+    <!-- Address -->
+    <div class="sub-head">
+      Bonanai, Dhaka-1216<br>
+      01993005558, 09639246230, 09639246231 <br>
+      bricks@gmail.com, bricks@gmail.com, www.bricks.com
+    </div>
+    <hr>
+    <!-- Filters -->
+    <form method="get" class="no-print">
+      <label>Project:</label>
+      <select name="project">
+        <option value="">All</option>
+        {% for project in projects %}
+          <option value="{{ project.id }}" {% if project.id == selected_project %}selected{% endif %}>
+            {{ project.project_first_name }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <label>Month:</label>
+      <select name="month">
+        <option value="">All</option>
+        {% for m in months %}
+          <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>
+            {{ m|stringformat:"02d" }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <label>Year:</label>
+      <select name="year">
+        <option value="">All</option>
+        {% for y in years %}
+          <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="submit">Filter</button>
+      <button type="button" onclick="window.location.href='{% url 'balance_sheet_report' %}'">Reset</button>
+    </form>
+
+    <!-- Balance sheet table -->
+    <table class="sheet">
+      <thead>
+        <tr>
+          <th class="left-col">Account / Head</th>
+          {% for y in years %}
+            <th>{{ y }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for head, types in grouped.items %}
+          <tr>
+            <td colspan="{{ years|length|add:1 }}" class="section">{{ head }}</td>
+          </tr>
+          {% for type_name, names in types.items %}
+            <tr>
+              <td class="left-col label">{{ type_name }}</td>
+              <td class="right-col" colspan="{{ years|length }}"></td>
+            </tr>
+            {% for name, values in names.items %}
+            <tr>
+              <td class="left-col">{{ name }}</td>
+              {% for val in values %}
+                <td class="right-col"><span class="num">{{ val|floatformat:2 }}</span></td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          {% endfor %}
+        {% endfor %}
+
+        <!-- Totals -->
+        <tr class="totals-row">
+          <td class="left-col">Grand Total</td>
+          {% for t in totals %}
+            <td class="right-col"><span class="num">{{ t|floatformat:2 }}</span></td>
+          {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Signatures -->
+    <div class="signature-section">
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Prepared By
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Checked By
+      </div>      
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Approved By
+      </div>
+    </div>
+
+    <!-- Footer buttons -->
+    <div class="footer no-print">
+      <button onclick="window.location.href='{% url 'home' %}'" class="back-btn">← Back to List</button>
+      <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

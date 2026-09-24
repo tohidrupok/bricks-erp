@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTPLivePOS - Terminal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --sidebar-width: 220px; --topbar-height: 55px; }
+        body { background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow-x: hidden; margin: 0; }
+
+        /* Sidebar Styling */
+        .sidebar { width: var(--sidebar-width); background: #ffffff; height: 100vh; position: fixed; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; z-index: 1000; }
+        .sidebar .nav-link { color: #64748b; font-weight: 600; padding: 12px 20px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-size: 14px; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #0f172a; background: #f1f5f9; border-radius: 8px; margin: 0 8px; }
+
+        /* Topbar Styling */
+        .topbar { margin-left: var(--sidebar-width); height: var(--topbar-height); background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: sticky; top: 0; z-index: 900; }
+
+        /* Main Screen Container */
+        .main-content { margin-left: var(--sidebar-width); padding: 15px; height: calc(100vh - var(--topbar-height)); overflow-y: auto; }
+
+        /* Channel Selection Cards */
+        .channel-card { background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; cursor: pointer; text-align: left; height: 100%; transition: all 0.2s ease; }
+        .channel-card.active { border: 2px solid #0f172a; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+        /* Bright Green Table Grid (Matches Image 1) */
+        .table-btn { background: #4ade80; border-radius: 12px; height: 150px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #0f172a; cursor: pointer; border: none; width: 100%; transition: transform 0.15s ease-in-out; text-decoration: none; }
+        .table-btn:hover { transform: translateY(-3px); background: #22c55e; color: #fff; }
+
+        /* Menu Item Cards */
+        .menu-card { background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; overflow: hidden; cursor: pointer; height: 100%; transition: transform 0.1s; }
+        .menu-card:hover { transform: scale(1.02); }
+        .menu-card img { height: 95px; object-fit: cover; width: 100%; }
+
+        /* Category Selector Right Panel */
+        .category-tab { background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; text-align: center; font-weight: 700; cursor: pointer; margin-bottom: 8px; font-size: 12px; text-transform: uppercase; }
+        .category-tab.active { background: #0f172a; color: #fff; }
+
+        /* Right Side Cart Sidebar Panel */
+        .cart-panel { background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; height: calc(100vh - 90px); display: flex; flex-direction: column; }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div>
+        <div class="p-3 d-flex align-items-center gap-2 border-bottom">
+            <h4 class="fw-bold m-0 text-dark">BTPLivePOS</h4>
+        </div>
+        <nav class="nav flex-column mt-3">
+            <a class="nav-link" href="{% url 'dashboard_pos' %}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+            <a class="nav-link active" href="{% url 'pos_terminal' %}"><i class="fa-solid fa-cash-register"></i> POS Order</a>
+            <a class="nav-link" href="{% url 'order_history' %}"><i class="fa-solid fa-receipt"></i> Order History</a>
+            <a class="nav-link" href="{% url 'stock_boq' %}"><i class="fa-solid fa-boxes-stacked"></i> Stock & BOQ</a>
+        </nav>
+    </div>
+    <div class="p-3 border-top">
+        <div class="d-flex align-items-center gap-2">
+            <div class="bg-dark text-white rounded-circle p-2 fw-bold text-center" style="width: 35px; height: 35px;">{{ request.user.username|slice:":1"|upper }}</div>
+            <div>
+                <small class="d-block fw-bold text-dark">{{ request.user.username }}</small>
+                <small class="text-muted">POS Manager</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Topbar Header -->
+<div class="topbar">
+    <div class="d-flex align-items-center gap-3">
+        <h5 class="m-0 fw-bold"><i class="fa-solid fa-arrow-left me-2 d-none" id="backToTablesBtn" style="cursor:pointer;" onclick="closeMenuView()"></i>POS</h5>
+        <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Search menu..." onkeyup="filterMenu()" style="width: 260px;">
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        {% if active_period %}
+        <span class="badge bg-primary-subtle text-primary border border-primary py-2 px-3">
+            <i class="fa-solid fa-clock me-1"></i> Shift #{{ active_period.id }} Running
+        </span>
+        <a href="{% url 'toggle_work_period' %}" class="btn btn-sm btn-outline-danger">End Period</a>
+        {% else %}
+        <span class="badge bg-danger-subtle text-danger border border-danger py-2 px-3">No Shift Active</span>
+        <a href="{% url 'toggle_work_period' %}" class="btn btn-sm btn-success">Start Period</a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Main Area -->
+<div class="main-content">
+    
+    <!-- Channel Bar -->
+    <div class="row g-2 mb-3">
+        <div class="col"><div class="channel-card active" onclick="selectChannel('DINE_IN', this)"><div class="d-flex align-items-center gap-2"><i class="fa-solid fa-utensils fs-5"></i><div><strong class="d-block">Dine In</strong><small class="text-muted" style="font-size:10px;">Choose Table</small></div></div></div></div>
+        <div class="col"><div class="channel-card" onclick="selectChannel('FOODPANDA', this)"><div class="d-flex align-items-center gap-2"><i class="fa-solid fa-motorcycle text-danger fs-5"></i><div><strong class="d-block">Foodpanda</strong><small class="text-muted" style="font-size:10px;">Create Orders</small></div></div></div></div>
+        <div class="col"><div class="channel-card" onclick="selectChannel('FOODI', this)"><div class="d-flex align-items-center gap-2"><i class="fa-solid fa-bowl-food text-warning fs-5"></i><div><strong class="d-block">Foodi</strong><small class="text-muted" style="font-size:10px;">Create Orders</small></div></div></div></div>
+        <div class="col"><div class="channel-card" onclick="selectChannel('PATHAO', this)"><div class="d-flex align-items-center gap-2"><i class="fa-solid fa-truck-fast text-danger fs-5"></i><div><strong class="d-block">Pathao</strong><small class="text-muted" style="font-size:10px;">Create Orders</small></div></div></div></div>
+        <div class="col"><div class="channel-card" onclick="selectChannel('DELIVERY', this)"><div class="d-flex align-items-center gap-2"><i class="fa-solid fa-bicycle text-primary fs-5"></i><div><strong class="d-block">Delivery</strong><small class="text-muted" style="font-size:10px;">Create Orders</small></div></div></div></div>
+        <div class="col"><div class="channel-card" onclick="selectChannel('TAKEAWAY', this)"><div class="d-flex align-items-center gap-2"><i class="fa-solid fa-bag-shopping text-info fs-5"></i><div><strong class="d-block">Takeaway</strong><small class="text-muted" style="font-size:10px;">Create Orders</small></div></div></div></div>
+    </div>
+
+    <!-- VIEW 1: Table Grid Layout -->
+    <div id="tableView" class="row g-3">
+        {% for table in tables %}
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+            <button class="table-btn" onclick="openMenuForTable('{{ table.id }}', '{{ table.table_number }}')">
+                <small class="fw-bold opacity-75">Table No.</small>
+                <h3 class="fw-black my-1">TABLE {{ table.table_number }}</h3>
+                <span class="badge bg-white text-dark rounded-pill mt-2" style="font-size:10px;"><i class="fa-solid fa-circle text-success me-1"></i>AVAILABLE</span>
+            </button>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <p class="text-muted">No tables found. Add tables to start taking orders.</p>
+            <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#tableModal">+ Add Table</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- VIEW 2: Interactive Menu & Cart Ordering Panel -->
+    <div id="menuCartView" class="row g-3 d-none">
+        
+        <!-- Center Grid: Menu Items -->
+        <div class="col-md-6">
+            <div class="row g-2 overflow-auto" id="menuGrid" style="max-height: calc(100vh - 170px);">
+                {% for item in menu_items %}
+                <div class="col-6 col-md-4 menu-item-node" data-name="{{ item.name|lower }}" data-cat="{{ item.category.id }}">
+                    <div class="menu-card p-2" onclick="addToCart({{ item.id }}, '{{ item.name|escapejs }}', {{ item.selling_price }})">
+                        {% if item.image_url %}
+                        <img src="{{ item.image_url }}" alt="{{ item.name }}">
+                        {% endif %}
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <span class="badge bg-light text-dark border" style="font-size: 9px;">{{ item.category.name }}</span>
+                        </div>
+                        <strong class="d-block text-truncate mt-1" style="font-size: 12px;">{{ item.code }}. {{ item.name }}</strong>
+                        <span class="fw-bold text-dark" style="font-size: 13px;">BDT {{ item.selling_price }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right Side: Category Tab Selectors -->
+        <div class="col-md-2 border-end border-start px-2">
+            <div class="category-tab active" onclick="filterCategory('ALL', this)">All Menu</div>
+            {% for cat in categories %}
+            <div class="category-tab" onclick="filterCategory('{{ cat.id }}', this)">{{ cat.name }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Far Right: Detailed Billing Panel -->
+        <div class="col-md-4">
+            <div class="cart-panel p-3">
+                
+                <!-- Order Dropdowns Header -->
+                <div class="row g-1 mb-2 pb-2 border-bottom">
+                    <div class="col-4">
+                        <label style="font-size:10px;" class="fw-bold text-muted">Order Type</label>
+                        <select id="orderTypeSelect" class="form-select form-select-sm">
+                            <option value="DINE_IN">Dine In</option>
+                            <option value="TAKEAWAY">Takeaway</option>
+                            <option value="FOODPANDA">Foodpanda</option>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <label style="font-size:10px;" class="fw-bold text-muted">Change Table</label>
+                        <select id="tableSelectDropdown" class="form-select form-select-sm">
+                            {% for t in tables %}
+                            <option value="{{ t.id }}">TABLE {{ t.table_number }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <label style="font-size:10px;" class="fw-bold text-muted">Customer</label>
+                        <select id="customerSelect" class="form-select form-select-sm">
+                            <option value="">Select...</option>
+                            {% for c in customers %}
+                            <option value="{{ c.id }}">{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Live Cart Items Table -->
+                <div class="flex-grow-1 overflow-auto my-1">
+                    <table class="table table-borderless align-middle" style="font-size: 12px;">
+                        <tbody id="cartTableBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Footer Summary & Checkout Actions -->
+                <div class="border-top pt-2">
+                    <div class="d-flex justify-content-between text-muted mb-1" style="font-size:12px;">
+                        <span>Subtotal</span><strong id="cartSubtotal" class="text-dark">TK 0.00</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-1" style="font-size:12px;">
+                        <span>Discount</span>
+                        <input type="number" id="cartDiscount" class="form-control form-control-sm text-end w-25" value="0" oninput="renderCart()">
+                    </div>
+                    
+                    <div class="d-flex gap-2 my-2">
+                        <button class="btn btn-dark w-75 fw-bold py-2 d-flex justify-content-between align-items-center" onclick="submitOrder()">
+                            <span>Total <span id="cartTotal">0</span></span>
+                            <span>Place Order</span>
+                        </button>
+                        <button class="btn btn-outline-secondary w-25" onclick="closeMenuView()">Back</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Quick Table Creator -->
+<div class="modal fade" id="tableModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" action="{% url 'create_table' %}" method="POST">
+            {% csrf_token %}
+            <div class="modal-header"><h5 class="modal-title fw-bold">Add Restaurant Table</h5></div>
+            <div class="modal-body">
+                <div class="mb-3"><label class="form-label">Table Number/Name</label><input type="text" name="table_number" class="form-control" placeholder="e.g. 11 or VIP-1" required></div>
+                <div class="mb-3"><label class="form-label">Seating Capacity</label><input type="number" name="capacity" class="form-control" value="4" required></div>
+            </div>
+            <div class="modal-footer"><button type="submit" class="btn btn-success">Save Table</button></div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let currentChannel = 'DINE_IN';
+let currentTableId = null;
+let cart = [];
+
+function selectChannel(channel, el) {
+    currentChannel = channel;
+    document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('orderTypeSelect').value = channel;
+    
+    if (channel !== 'DINE_IN') {
+        openMenuForTable(null, channel);
+    }
+}
+
+function openMenuForTable(tableId, tableName) {
+    currentTableId = tableId;
+    if(tableId) {
+        document.getElementById('tableSelectDropdown').value = tableId;
+    }
+    document.getElementById('tableView').classList.add('d-none');
+    document.getElementById('menuCartView').classList.remove('d-none');
+    document.getElementById('backToTablesBtn').classList.remove('d-none');
+}
+
+function closeMenuView() {
+    document.getElementById('tableView').classList.remove('d-none');
+    document.getElementById('menuCartView').classList.add('d-none');
+    document.getElementById('backToTablesBtn').classList.add('d-none');
+}
+
+function addToCart(id, name, price) {
+    let item = cart.find(i => i.id === id);
+    if(item) { item.qty += 1; }
+    else { cart.push({ id, name, price, qty: 1 }); }
+    renderCart();
+}
+
+function renderCart() {
+    let tbody = document.getElementById('cartTableBody');
+    tbody.innerHTML = '';
+    let subtotal = 0;
+    
+    cart.forEach((item, idx) => {
+        let lineTotal = item.qty * item.price;
+        subtotal += lineTotal;
+        tbody.innerHTML += `
+            <tr>
+                <td class="fw-bold">${item.name}</td>
+                <td>
+                    <div class="btn-group btn-group-sm border">
+                        <button class="btn btn-light py-0 px-2" onclick="updateQty(${idx}, -1)">-</button>
+                        <span class="btn btn-light py-0 px-2 disabled text-dark fw-bold">${item.qty}</span>
+                        <button class="btn btn-light py-0 px-2" onclick="updateQty(${idx}, 1)">+</button>
+                    </div>
+                </td>
+                <td class="text-end fw-bold">${lineTotal.toFixed(2)}</td>
+            </tr>
+        `;
+    });
+
+    let discount = parseFloat(document.getElementById('cartDiscount').value) || 0;
+    let netTotal = Math.max(0, subtotal - discount);
+    
+    document.getElementById('cartSubtotal').innerText = 'TK ' + subtotal.toFixed(2);
+    document.getElementById('cartTotal').innerText = netTotal.toFixed(0);
+}
+
+function updateQty(idx, delta) {
+    cart[idx].qty += delta;
+    if(cart[idx].qty <= 0) cart.splice(idx, 1);
+    renderCart();
+}
+
+function filterCategory(catId, el) {
+    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.menu-item-node').forEach(node => {
+        let itemCat = node.getAttribute('data-cat');
+        node.style.display = (catId === 'ALL' || itemCat === catId) ? 'block' : 'none';
+    });
+}
+
+function filterMenu() {
+    let query = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('.menu-item-node').forEach(node => {
+        let name = node.getAttribute('data-name');
+        node.style.display = name.includes(query) ? 'block' : 'none';
+    });
+}
+
+function submitOrder() {
+    if(cart.length === 0) {
+        alert("Cart is empty!");
+        return;
+    }
+
+    let payload = {
+        channel: document.getElementById('orderTypeSelect').value,
+        table_id: document.getElementById('tableSelectDropdown').value,
+        customer_id: document.getElementById('customerSelect').value,
+        discount: document.getElementById('cartDiscount').value,
+        items: cart
+    };
+
+    fetch("{% url 'pos_terminal' %}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'success') {
+            alert('Order Created Successfully!');
+            cart = [];
+            renderCart();
+            closeMenuView();
+        } else { alert('Error: ' + data.message); }
+    });
+}
+</script>
+</body>
+</html>

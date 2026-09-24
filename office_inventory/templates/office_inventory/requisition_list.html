@@ -1,0 +1,65 @@
+{% extends 'office_inventory/base.html' %}
+{% block header %}Requisitions{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+  <form class="d-flex gap-2" method="get">
+    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">All Status</option>
+      {% for val, label in status_choices %}
+        <option value="{{ val }}" {% if selected_status == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </form>
+  <a href="{% url 'office_inventory:requisition_create' %}" class="btn btn-sm btn-primary">
+    <i class="bi bi-plus"></i> New Requisition
+  </a>
+</div>
+
+<div class="card card-stat p-3">
+<table class="table table-hover align-middle">
+<thead>
+  <tr>
+    <th>Req No</th>
+    <th>Date</th>
+    <th>Department</th>
+    <th>Employee</th>
+    <th>Item</th>
+    <th>Place</th>
+    <th>Qty</th>
+    <th>Status</th>
+    <th class="text-end">Actions</th>
+  </tr>
+</thead>
+<tbody>
+{% for r in requisitions %}
+<tr>
+  <td><a href="{% url 'office_inventory:requisition_detail' r.pk %}">{{ r.req_no }}</a></td>
+  <td>{{ r.date }}</td>
+  <td>{{ r.department }}</td>
+  <td>{{ r.employee }}</td>
+  <td>{{ r.item }}</td>
+  <td>{{ r.location.full_path|default:"-" }}</td>
+  <td>{{ r.requested_qty }} {{ r.unit|default:"" }}</td>
+  <td><span class="badge bg-secondary">{{ r.get_status_display }}</span></td>
+  
+  <td class="text-end">
+    {% if r.status != 'ADMIN_APPROVED' and r.status != 'ADMIN_REJECTED' and r.status != 'ISSUED' and r.status != 'CANCELLED' %}
+      <a href="{% url 'office_inventory:requisition_edit' r.pk %}" class="btn btn-sm btn-outline-warning me-1" title="Edit Requisition">
+        <i class="bi bi-pencil"></i> Edit
+      </a>
+      <a href="{% url 'office_inventory:requisition_delete' r.pk %}" class="btn btn-sm btn-outline-danger" title="Delete Requisition">
+        <i class="bi bi-trash"></i> Delete
+      </a>
+    {% else %}
+      <span class="text-muted small"><i class="bi bi-lock-fill me-1"></i>Locked</span>
+    {% endif %}
+  </td>
+</tr>
+{% empty %}
+<tr><td colspan="9" class="text-center text-muted">No requisitions.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

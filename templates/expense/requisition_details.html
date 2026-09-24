@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Expense Requisition Voucher List - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    /* Highlighting styles for Project Name and Date */
+    .highlight {
+        color: #4CAF50;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+            <h2 class="intro-y mt-10 text-lg font-medium">Expense Requisition List</h2>
+
+            {% if messages %}
+            <ul>
+                {% for message in messages %}
+                <li class="message {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <div class="mt-5 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                    <a href="{% url 'expense_requisition_add' %}">
+                        <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Add Expense Requisition</button>
+                    </a>
+                    <a href="{% url 'grouped_requisitions' %}">
+                        <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">⬅ Back to Requisitions List</button>
+                    </a>
+
+
+                    <div class="mx-auto hidden text-slate-500 md:block"></div>
+
+                    <div class="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">
+                        <div class="relative w-56 text-slate-500 mb-4">
+                            <input id="searchInput" type="text" placeholder="Search..." class="w-full p-2 text-sm border rounded-md shadow-sm focus:ring-4 focus:ring-primary" oninput="handleSearch()">
+                            <i class="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4">🔍</i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BEGIN: Expense Requisition Table -->
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                    <div class="card mt-10">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-6">📝 Expense Details</h2>
+
+                        <p><strong class="highlight">Project:</strong> {{ project }}</p>
+                        <p><strong class="highlight">Date:</strong> {{ date }}</p>
+
+                       <form method="POST" action="{% url 'approve_selected_requisitions' %}">
+    {% csrf_token %}
+
+    {% if request.session.department == "admin" %}
+    <div class="mb-4 flex justify-between items-center">
+        <label class="flex items-center space-x-2 text-sm font-semibold">
+            <input type="checkbox" id="select-all" class="form-checkbox text-blue-600">
+            <span>Select All</span>
+        </label>
+        <div class="space-x-2 flex">
+            <button type="submit" style="background-color:#1e3c98" class="transition duration-200 border inline-flex items-center justify-center py-2 px-4 rounded-md font-medium cursor-pointer
+                 bg-green-600 border-green-600 text-white hover:bg-green-700 shadow-md">
+                ✅ Approve
+            </button>
+            <a href="{% url 'print_exp_requisition_data' date_str=date_str project_id=project_id %}" style="margin-left:0.5%;background-color:green"
+               class="transition duration-200 border inline-flex items-center justify-center py-2 px-4 rounded-md font-medium
+                      bg-gray-700 border-gray-700 text-white hover:bg-gray-800 shadow-md">
+                🖨️ Print
+            </a>
+        </div>
+    </div>
+    {% else %}
+        <a href="{% url 'print_exp_requisition_data' date_str=date_str project_id=project_id %}"
+           class="transition duration-200 border inline-flex items-center justify-center py-2 px-4 rounded-md font-medium
+                  bg-gray-700 border-gray-700 text-white hover:bg-gray-800 shadow-md">
+            🖨️ Print
+        </a>
+    {% endif %}
+
+    <table class="min-w-full border border-gray-300 text-sm">
+        <thead>
+            <tr>
+                <th class="border px-3 py-2 text-center">✔</th>
+                <th class="border px-3 py-2">Project</th>
+                <th class="border px-3 py-2">Employee</th>
+                <th class="border px-3 py-2">Item</th>
+                <th class="border px-3 py-2">Qty</th>
+                <th class="border px-3 py-2">Rate</th>
+                <th class="border px-3 py-2">Amount</th>
+                <th class="border px-3 py-2">Description</th>
+                <th class="border px-3 py-2">Status</th>
+                <th class="border px-3 py-2">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requisitions %}
+            <tr class="font-semibold">
+                <td class="text-center border px-2 py-2">
+                    {% if req.approv_status != "approved" %}
+                    <input type="checkbox" name="selected_reqs" value="{{ req.id }}" class="row-checkbox">
+                    {% endif %}
+                </td>
+                <td class="border px-3 py-2">{{ req.project_name.project_first_name }}</td>
+                <td class="border px-3 py-2">{{ req.employee_name }}</td>
+                <td class="border px-3 py-2">{{ req.item_name }}</td>
+                <td class="border px-3 py-2 text-center">{{ req.qty }}</td>
+                <td class="border px-3 py-2 text-center">{{ req.rate }}</td>
+                <td class="border px-3 py-2 text-center">{{ req.amount }}</td>
+                <td class="border px-3 py-2">{{ req.descript }}</td>
+                <td class="border px-3 py-2 text-center">
+                    {% if req.approv_status == "approved" %}
+                        <span class="text-green-700 font-bold">Approved</span>
+                    {% elif req.approv_status == "rejected" %}
+                        <span class="text-red-700 font-bold">Rejected</span>
+                    {% else %}
+                        <span class="text-yellow-600 font-bold">Pending</span>
+                    {% endif %}
+                </td>
+                <td class="border px-3 py-2 text-center">
+                    {% if req.approv_status == "approved" %}
+                        {% if request.session.department == "admin" %}
+                            <a href="{% url 'edit_expense_requisition' req.pk %}" style="background-color:#1e3c98" class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-900 text-white rounded">
+                                ✏️ Edit
+                            </a>
+                            <a href="{% url 'delete_expense_requisition' req.pk %}" onclick="return confirm('Are you sure you want to delete this Item?');" style="margin-left:5%;background-color:red"
+                               class="inline-flex items-center justify-center px-3 py-1.5 bg-red-600 text-white rounded">
+                                🗑️ Delete
+                            </a>
+                        {% endif %} 
+                     {% else %}
+                             <a href="{% url 'edit_expense_requisition' req.pk %}" style="background-color:#1e3c98" class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-900 text-white rounded">
+                                ✏️ Edit
+                            </a>
+                            <a href="{% url 'delete_expense_requisition' req.pk %}" onclick="return confirm('Are you sure you want to delete this Item?');" style="margin-left:5%;background-color:red"
+                               class="inline-flex items-center justify-center px-3 py-1.5 bg-red-600 text-white rounded">
+                                🗑️ Delete
+                            </a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" class="px-6 py-3 text-center font-semibold text-gray-600">No requisitions found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</form>
+
+<!-- ===== Select All JS ===== -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+
+    selectAll.addEventListener('change', function() {
+        checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    });
+});
+</script>
+
+                        <!-- ✅ Select All Script -->
+                        <script>
+                          document.addEventListener("DOMContentLoaded", function () {
+                            const selectAll = document.getElementById("select-all");
+                            const checkboxes = document.querySelectorAll(".row-checkbox");
+                        
+                            selectAll.addEventListener("change", function () {
+                              checkboxes.forEach(checkbox => {
+                                checkbox.checked = selectAll.checked;
+                              });
+                            });
+                          });
+                        </script>
+
+
+                    </div>
+                </div>
+                <!-- END: Expense Requisition Table -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

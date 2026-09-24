@@ -1,0 +1,257 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Employee Ledger Voucher Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: silver;
+      padding: 20px;
+      color: #333;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 960px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo img {
+      height: 50px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .label-box {
+      background-color: #e2f0d9;
+      color: #000;
+      padding: 4px 10px;
+      font-weight: bold;
+      font-size: 13px;
+      border-radius: 4px;
+    }
+
+    .sub-head {
+      font-size: 11px;
+      color: #555;
+      margin-top: -18px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .voucher-header {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .project-name {
+      margin: 4px 0;
+      font-size: 12px;
+      margin-bottom: 1px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 10px;
+    }
+
+    .table th,
+    .table td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .section {
+      margin-top: 12px;
+      font-size: 11.5px;
+    }
+
+    .signature-section {
+      margin-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      text-align: center;
+    }
+
+    .signature-box {
+      flex: 1;
+      padding: 8px;
+    }
+
+    .signature-box:not(:last-child) {
+      margin-right: 10px;
+    }
+
+    .signature-line {
+      display: block;
+      margin-top: 10px;
+      border-top: 1px solid #000;
+      width: 100%;
+    }
+
+    .bm-property {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #333;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+      flex-wrap: wrap;
+    }
+
+    .print-btn, .btn {
+      background-color: #1e3c98;
+      color: white;
+      padding: 5px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn:hover, .print-btn:hover {
+      background-color: #16306d;
+    }
+
+    .no-data {
+      font-style: italic;
+      color: #555;
+      margin: 15px 0;
+      text-align: center;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background: white;
+        padding: 0;
+      }
+      .card {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <!-- Header -->
+    <div class="card-header">
+      <div class="logo">
+        <img src="{% static '/images/BTP_logo_webp.webp' %}" alt="Company Logo" />
+      </div>
+      <div style="text-align: right;">
+        <div class="label-box">Employee Ledger Voucher Report</div>
+        <p style="font-size: 11px; margin-top: 4px;">Printing Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+      </div>
+    </div>
+
+    <!-- Filters Summary -->
+    <div class="sub-head">
+      <strong>Employee:</strong> {{ selected_filters.employee_name }}<br />
+      <strong>Date Range:</strong> {{ selected_filters.from_date|default:"-" }} to {{ selected_filters.to_date|default:"-" }}
+    </div>
+
+    {% if report_data and report_data|length > 0 %}
+      {% for item in report_data %}
+        <div class="voucher-header">
+          <div class="project-name"><strong>Employee:</strong> {{ item.employee.employee_name }}</div>
+        </div>
+
+        {% if item.ledger_entries and item.ledger_entries|length > 0 %}
+          <table class="table" cellspacing="0" cellpadding="0">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Chq/Rec No.</th>
+                <th>Payment</th>
+                <th>Received</th>
+                <th>Balance</th>
+                <th>Account</th>
+                <th>Carrier</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for entry in item.ledger_entries %}
+              <tr>
+                <td>{{ entry.date|date:"Y-m-d" }}</td>
+                <td>{{ entry.description }}</td>
+                <td>{{ entry.chq_rec_no }}</td>
+                <td>{% if entry.payment %}{{ entry.payment|floatformat:2 }}{% else %}-{% endif %}</td>
+                <td>{% if entry.received %}{{ entry.received|floatformat:2 }}{% else %}-{% endif %}</td>
+                <td>{{ entry.balance|floatformat:2 }}</td>
+                <td>{{ entry.head_name }}</td>
+                <td>{{ entry.carrier }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="no-data">No ledger entries found for this employee.</p>
+        {% endif %}
+      {% endfor %}
+
+      <!-- Totals -->
+      <div class="section">
+        <p><strong>Salary:</strong> {{ report_data.0.salary|default:"0.00"|floatformat:2 }}</p>
+        <p><strong>Total Received:</strong> {{ report_data.0.total_received|default:"0.00"|floatformat:2 }}</p>
+        <p><strong>Total Paid (Ledger):</strong> {{ report_data.0.ledger_total|default:"0.00"|floatformat:2 }}</p>
+        <p>
+          <strong>Final Balance (Salary - Paid):</strong>
+          <span class="{% if report_data.0.final_balance < 0 %}text-red-600{% else %}text-green-700{% endif %}">
+            {{ report_data.0.final_balance|default:"0.00"|floatformat:2 }}
+          </span>
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer no-print">
+        <div></div>
+        <div>
+          <a href="{% url 'employee_summary_report' %}" class="btn">← Back to List</a>
+          <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+        </div>
+      </div>
+
+    {% else %}
+      <p class="no-data">No report data found.</p>
+    {% endif %}
+
+  </div>
+</body>
+</html>

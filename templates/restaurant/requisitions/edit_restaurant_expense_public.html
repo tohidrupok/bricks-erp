@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+
+body{
+    background:#eef2f7;
+}
+
+/* FORM CONTAINER */
+
+.form-container{
+    max-width:750px;
+    margin:25px auto;
+}
+
+/* CARD */
+
+.form-card{
+    background:#fff;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 5px 18px rgba(0,0,0,.08);
+}
+
+/* HEADER */
+
+.card-header{
+    background:linear-gradient(135deg,#0d6efd,#4e8cff);
+    color:#fff;
+    padding:20px 25px;
+}
+
+.card-header h3{
+    margin:0;
+    font-size:25px;
+    font-weight:600;
+}
+
+.card-header p{
+    margin-top:5px;
+    font-size:14px;
+    opacity:.9;
+}
+
+/* BODY */
+
+.card-body{
+    padding:30px;
+}
+
+/* FORM */
+
+.form-group{
+    margin-bottom:20px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:600;
+    color:#444;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+    width:100%;
+    padding:12px 15px;
+    border:1px solid #d7dce3;
+    border-radius:8px;
+    background:#fff;
+    font-size:15px;
+    transition:.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+    outline:none;
+    border-color:#0d6efd;
+    box-shadow:0 0 0 4px rgba(13,110,253,.12);
+}
+
+/* BUTTONS */
+
+.button-group{
+    margin-top:30px;
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.btn{
+    border:none;
+    padding:12px 20px;
+    border-radius:8px;
+    text-decoration:none;
+    font-weight:600;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.btn-update{
+    background:#0d6efd;
+    color:white;
+}
+
+.btn-update:hover{
+    background:#0b5ed7;
+}
+
+.btn-back{
+    background:#6c757d;
+    color:white;
+}
+
+.btn-back:hover{
+    background:#5c636a;
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+    .card-body{
+        padding:20px;
+    }
+
+    .button-group{
+        flex-direction:column;
+    }
+
+    .btn{
+        width:100%;
+        text-align:center;
+    }
+
+}
+
+</style>
+
+
+
+<div class="form-container">
+
+    <div class="form-card">
+
+        <div class="card-header">
+            <h3>✏️ Edit Restaurant Expense</h3>
+            <p>Update expense information below.</p>
+        </div>
+
+        <div class="card-body">
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label>Project Name</label>
+                    {{ form.project_name }}
+                </div>
+                
+                <div class="form-group">
+                    <label>Expense Type</label>
+                    {{ form.restu_expense_type }}
+                </div>
+                
+                <div class="form-group">
+                    <label>Expense Category</label>
+                    {{ form.restu_cate_name }}
+                </div>
+
+                <div class="form-group">
+                    <label>Expense Name</label>
+                    {{ form.restu_expense_name }}
+                </div>
+
+                <div class="form-group">
+                    <label>Amount</label>
+                    {{ form.restu_expense_amount }}
+                </div>
+
+                <div class="button-group">
+
+                    <button type="submit" class="btn btn-update">
+                        💾 Update Expense
+                    </button>
+
+                    <a href="{% url 'restaurant_expense_public_list' %}"
+                       class="btn btn-back">
+                        ← Back to Expense List
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

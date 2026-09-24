@@ -1,0 +1,365 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Restaurant Requisition Details</title>
+
+<style>
+
+body{
+    font-family:Arial,sans-serif;
+    font-size:11px;
+    background:silver;
+    padding:20px;
+}
+
+.card{
+    background:#fff;
+    max-width:1000px;
+    margin:auto;
+    padding:20px;
+    border-radius:6px;
+    box-shadow:0 2px 6px rgba(0,0,0,.15);
+}
+
+.card-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+}
+
+.logo img{
+    height:55px;
+}
+
+.label-box{
+    background:#dbeafe;
+    color:#1e3c98;
+    padding:6px 12px;
+    font-weight:bold;
+    border-radius:4px;
+}
+
+.sub-head{
+    font-size:11px;
+    margin-top:8px;
+    color:#555;
+    line-height:1.5;
+}
+
+.info-row{
+    display:flex;
+    justify-content:space-between;
+    margin-top:15px;
+    font-size:12px;
+}
+
+.table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+
+.table th,
+.table td{
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:left;
+}
+
+.table th{
+    background:#f3f4f6;
+}
+
+.status-approved{
+    color:green;
+    font-weight:bold;
+}
+
+.status-pending{
+    color:orange;
+    font-weight:bold;
+}
+
+.status-rejected{
+    color:red;
+    font-weight:bold;
+}
+
+.signature-section{
+    margin-top:40px;
+    display:flex;
+    justify-content:space-between;
+}
+
+.signature-box{
+    width:22%;
+    text-align:center;
+}
+
+.signature-line{
+    border-top:1px solid #000;
+    margin-top:40px;
+    padding-top:5px;
+}
+
+.footer{
+    margin-top:25px;
+    display:flex;
+    justify-content:space-between;
+}
+
+.btn{
+    border:none;
+    padding:8px 15px;
+    color:#fff;
+    cursor:pointer;
+    border-radius:4px;
+}
+
+.back-btn{
+    background:#198754;
+}
+
+.print-btn{
+    background:#1e3c98;
+}
+
+@media print{
+    .no-print{
+        display:none !important;
+    }
+
+    body{
+        background:white;
+        padding:0;
+    }
+
+    .card{
+        box-shadow:none;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <!-- Header -->
+
+    <div class="card-header">
+
+        <div class="logo">
+            <img src="{% static 'images/resturant-logo.png' %}">
+        </div>
+
+        <div style="text-align:right">
+            <div class="label-box">
+                Restaurant Requisition
+            </div>
+
+            <div style="margin-top:5px">
+                Print Date :
+                {{ print_time|date:"d M Y h:i A" }}
+            </div>
+        </div>
+
+    </div>
+
+    <div class="sub-head">
+        House-148 (4th Floor), Road-02, Block-A, Section-12,
+        Pallabi, Mirpur, Dhaka-1216
+    </div>
+
+    <hr>
+
+    <!-- Basic Information -->
+
+    <div class="info-row">
+        <div>
+            <strong>Project :</strong>
+            {{ requisition.project_name }}
+        </div>
+
+        <div>
+            <strong>Requisition ID :</strong>
+            {{ requisition.id }}
+        </div>
+        <div>
+            <strong>Approval ID :</strong>
+            {{ requisition.requi_uniq_id }}
+        </div>
+        <div>
+            <strong>Date :</strong>
+            {{ requisition.requisition_date }}
+        </div>
+    </div>
+
+    <!-- Main Table -->
+
+    <table class="table">
+
+        <tr>
+            <th width="25%">Employee</th>
+            <td>{{ requisition.employee_name }}</td>
+        </tr>
+
+        <tr>
+            <th>Supplier</th>
+            <td>{{ requisition.vendor_name }}</td>
+        </tr>
+
+        <tr>
+            <th>Item Name</th>
+            <td>{{ requisition.item_name }}</td>
+        </tr>
+
+        <tr>
+            <th>Unit</th>
+            <td>{{ requisition.unit }}</td>
+        </tr>
+
+        <tr>
+            <th>Quantity</th>
+            <td>{{ requisition.qty }}</td>
+        </tr>
+
+        <tr>
+            <th>Rate</th>
+            <td>৳ {{ requisition.rate|intcomma }}</td>
+        </tr>
+
+        <tr>
+            <th>Discount</th>
+            <td>৳ {{ requisition.discount|default:"0.00"|intcomma }}</td>
+        </tr>
+
+        <tr>
+            <th>Total Amount</th>
+            <td>
+                <strong style="color:green">
+                    ৳ {{ requisition.amount|intcomma }}
+                </strong>
+            </td>
+        </tr>
+
+        <tr>
+            <th>Description</th>
+            <td>{{ requisition.description }}</td>
+        </tr>
+
+        <tr>
+            <th>Remark</th>
+            <td>{{ requisition.remark|default:"-" }}</td>
+        </tr>
+
+    </table>
+
+    <!-- Approval Information -->
+
+    <table class="table">
+
+        <thead>
+            <tr>
+                <th>Approval Type</th>
+                <th>Status</th>
+                <th>Note</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>Admin</td>
+
+                <td>
+                    {% if requisition.approv_status == 'approved' %}
+                        <span class="status-approved">Approved</span>
+                    {% elif requisition.approv_status == 'pending' %}
+                        <span class="status-pending">Pending</span>
+                    {% else %}
+                        <span class="status-rejected">Rejected</span>
+                    {% endif %}
+                </td>
+
+                <td>{{ requisition.approv_note|default:"-" }}</td>
+            </tr>
+
+            <tr>
+                <td>Accounts</td>
+
+                <td>
+                    {{ requisition.get_approv_acct_status_display }}
+                </td>
+
+                <td>
+                    {{ requisition.approv_acct_note|default:"-" }}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Purchase</td>
+
+                <td>
+                    {{ requisition.get_approv_purch_status_display }}
+                </td>
+
+                <td>
+                    {{ requisition.approv_purch_note|default:"-" }}
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <!-- Signatures -->
+
+    <div class="signature-section">
+
+        <div class="signature-box">
+            <div class="signature-line">
+                Admin 
+            </div>
+        </div>
+
+        <div class="signature-box">
+            <div class="signature-line">
+                Accounts 
+            </div>
+        </div>
+
+        <div class="signature-box">
+            <div class="signature-line">
+                Purchase 
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+
+    <div class="footer no-print">
+
+        <button
+            onclick="window.location.href='{% url 'restau_requisition_list' %}'"
+            class="btn back-btn">
+            ← Back
+        </button>
+
+        <button
+            onclick="window.print()"
+            class="btn print-btn">
+            🖨 Print
+        </button>
+
+    </div>
+
+</div>
+
+</body>
+</html>

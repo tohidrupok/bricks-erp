@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Receive Voucher List - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+            <!-- BEGIN: Top Bar -->  
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+                <div class="intro-y flex h-10 items-center">
+                    <h2 class="mr-5 truncate text-lg font-medium">Receive voucher</h2>
+                
+                    <div class="ml-auto flex items-center gap-3">
+                        
+                        <!-- Back Button -->
+                        <a href="javascript:history.back()" class="flex items-center text-primary">
+                            <i data-lucide="arrow-left" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Back
+                        </a>
+                
+                        <!-- Dashboard Button -->
+                        <a href="{% url 'tenant_dashboard' %}" class="flex items-center text-primary">
+                            <i data-lucide="layout-dashboard" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Dashboard
+                        </a>
+                
+                        <!-- Reload Button -->
+                        <a class="flex items-center text-primary" href="">
+                            <i data-lucide="refresh-ccw" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Reload Data
+                        </a>
+                
+                    </div>
+                </div>
+            <h2 class="intro-y mt-10 text-lg font-medium">Receive Voucher List</h2>
+
+            {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                        <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <div class="mt-5 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                    <a href="{% url 'bill_summary_page' %}">
+                        <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary bg-primary border-primary text-white mr-2 shadow-md">Add Receive Voucher</button>
+                    </a>
+                    <a href="javascript:location.reload()" 
+                        class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 bg-success border-success text-white mr-2 shadow-md">
+                        Refresh
+                    </a>                      
+                    
+                    <div class="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">                           
+                        <div class="relative w-56 text-slate-500 mb-4">
+                            <input id="searchInput" type="text" placeholder="Search..." class="w-full p-2 text-sm border rounded-md shadow-sm focus:ring-4 focus:ring-primary" oninput="handleSearch()">
+                            <i class="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4">🔍</i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BEGIN: Table -->
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                    <table class="w-full text-left border-separate border-spacing-y-[10px]">
+                        <thead style="background-color: #d9f0ff;">
+                            <tr>
+                                <th class="font-medium px-5 py-3 border-b">Project</th>
+                                <th class="font-medium px-5 py-3 border-b">Tenant</th>
+                                <th class="font-medium px-5 py-3 border-b">Bill Month</th>
+                                <th class="font-medium px-5 py-3 border-b">Voucher</th>
+                                <th class="font-medium px-5 py-3 border-b">Payment Type</th>
+                                <th class="font-medium px-5 py-3 border-b">Amount</th>
+                                <th class="font-medium px-5 py-3 border-b text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            {% for voucher in vouchers %}
+                            <tr>
+                                <td class="px-5 py-3 border-b">{{ voucher.project_name }}</td>
+                                <td class="px-5 py-3 border-b">{{ voucher.tenant_name|default:"-" }}</td>
+                                <td class="px-5 py-3 border-b">{{ voucher.date|date:"M Y" }}</td>
+                                <td class="px-5 py-3 border-b" style="text-align:center;">
+                                    {{ voucher.id }}<br>
+                                    {% if voucher.approval_rv_status %}
+                                        <span style="display:inline-block; padding:4px 10px; background-color:#d1fae5; color:#065f46; border-radius:5px; font-weight:bold; font-size:13px;">
+                                            Approved
+                                        </span>
+                                    {% else %}
+                                        <span style="display:inline-block; padding:4px 10px; background-color:#ef4444; color:#fff; border-radius:5px; font-size:13px;">
+                                            Pending
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="px-5 py-3 border-b">{{ voucher.cash_type|default:"-" }}</td>
+                                <td class="px-5 py-3 border-b">{{ voucher.amount }}</td>
+                                <td class="px-5 py-3 border-b text-center">
+                                    <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; align-items: center;">
+                                        <!-- 📄 View -->
+                                        <a href="{% url 'receivevoucher_pdf' voucher.id %}" style="display:inline-block; padding:6px 12px; background-color:#84cc16; color:white; border-radius:5px; text-decoration:none; font-size:13px;">
+                                            📄 View
+                                        </a>
+
+                                        {% if request.session.department == "admin" %}
+                                            <!-- ✏️ Edit -->
+                                            <a href="{% url 'receive_voucher_edit' voucher.id %}" style="display:inline-block; padding:6px 12px; background-color:#1e40af; color:white; border-radius:5px; text-decoration:none; font-size:13px;">
+                                                ✏️ Edit
+                                            </a>
+
+                                            <!-- 🗑️ Delete -->
+                                            <a href="{% url 'receive_voucher_delete' voucher.id %}" onclick="return confirm('Are you sure?');" style="display:inline-block; padding:6px 12px; background-color:#dc2626; color:white; border-radius:5px; text-decoration:none; font-size:13px;">
+                                                🗑️ Delete
+                                            </a>
+                                        {% else %}
+                                            {% if voucher.approval_rv_status %}
+                                                <!-- Approved -->
+                                                <span style="display:inline-block; padding:6px 12px; background-color:#d1fae5; color:#065f46; border-radius:5px; font-weight:bold; font-size:13px;">
+                                                    Approved
+                                                </span>
+                                            {% else %}
+                                                <!-- ✏️ Edit -->
+                                                <a href="{% url 'receive_voucher_edit' voucher.id %}" style="display:inline-block; padding:6px 12px; background-color:#1e40af; color:white; border-radius:5px; text-decoration:none; font-size:13px;">
+                                                    ✏️ Edit
+                                                </a>
+                                                <!-- 🗑️ Delete -->
+                                                <a href="{% url 'receive_voucher_delete' voucher.id %}" onclick="return confirm('Are you sure?');" style="display:inline-block; padding:6px 12px; background-color:#dc2626; color:white; border-radius:5px; text-decoration:none; font-size:13px;">
+                                                    🗑️ Delete
+                                                </a>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="px-5 py-3 text-center">No data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <script>
+                        function handleSearch() {
+                            let searchValue = document.getElementById('searchInput').value.toLowerCase();
+                            let rows = document.querySelectorAll("#tableBody tr");
+
+                            rows.forEach(row => {
+                                let columns = row.getElementsByTagName("td");
+                                let rowText = "";
+                                for (let i = 0; i < columns.length; i++) {
+                                    rowText += columns[i].textContent.toLowerCase();
+                                }
+                                if (rowText.includes(searchValue)) {
+                                    row.style.display = "";
+                                } else {
+                                    row.style.display = "none";
+                                }
+                            });
+                        }
+                    </script>
+                </div>
+                <!-- END: Table -->
+
+                <!-- BEGIN: Pagination -->
+                <div class="intro-y col-span-12 flex flex-wrap items-center sm:flex-row sm:flex-nowrap" style="margin-top:20px;">
+                <!-- Showing info -->
+                <div style="margin:0 auto 10px auto; color:#6b7280; font-size:14px;">
+                    Showing {{ vouchers.start_index }} to {{ vouchers.end_index }} of {{ vouchers.paginator.count }} entries
+                </div>
+
+                <!-- Pagination -->
+                <div style="display:flex; justify-content:center; align-items:center; gap:8px; width:100%;">
+                    {% if vouchers.has_previous %}
+                        <a href="?page={{ vouchers.previous_page_number }}" 
+                        style="padding:6px 12px; background:#e5e7eb; border-radius:5px; text-decoration:none; color:#000; font-size:14px;"
+                        onmouseover="this.style.background='#d1d5db'" 
+                        onmouseout="this.style.background='#e5e7eb'">
+                        Previous
+                        </a>
+                    {% else %}
+                        <span style="padding:6px 12px; background:#f3f4f6; border-radius:5px; color:#9ca3af; font-size:14px;">Previous</span>
+                    {% endif %}
+
+                    {% for num in vouchers.paginator.page_range %}
+                        {% if vouchers.number == num %}
+                            <span style="padding:6px 12px; background:#3b82f6; color:#fff; border-radius:5px; font-size:14px;">{{ num }}</span>
+                        {% elif num > vouchers.number|add:'-5' and num < vouchers.number|add:'5' %}
+                            <a href="?page={{ num }}" 
+                            style="padding:6px 12px; background:#e5e7eb; border-radius:5px; text-decoration:none; color:#000; font-size:14px;"
+                            onmouseover="this.style.background='#d1d5db'" 
+                            onmouseout="this.style.background='#e5e7eb'">
+                            {{ num }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if vouchers.has_next %}
+                        <a href="?page={{ vouchers.next_page_number }}" 
+                        style="padding:6px 12px; background:#e5e7eb; border-radius:5px; text-decoration:none; color:#000; font-size:14px;"
+                        onmouseover="this.style.background='#d1d5db'" 
+                        onmouseout="this.style.background='#e5e7eb'">
+                        Next
+                        </a>
+                    {% else %}
+                        <span style="padding:6px 12px; background:#f3f4f6; border-radius:5px; color:#9ca3af; font-size:14px;">Next</span>
+                    {% endif %}
+                </div>
+                </div>
+
+
+                <!-- END: Pagination -->
+            </div>
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+{% endblock %}

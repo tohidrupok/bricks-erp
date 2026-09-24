@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ form.instance.pk|yesno:"Update,Create" }} Tenant - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    {% include 'partials/mobile.html' %}
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+
+            {% include 'partials/header.html' %}
+
+            <div class="mt-6 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 p-5">
+                    <div class="w-full max-w-3xl mx-auto bg-white dark:bg-darkmode-600 p-8 shadow-lg rounded-xl">
+                        <h2 class="text-2xl font-semibold text-center text-gray-800 dark:text-white mb-8">
+                            {{ form.instance.pk|yesno:"Update,Create" }} Tenant
+                        </h2>
+
+                        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                            {% csrf_token %}
+
+                            {% for field in form %}
+                                <div>
+                                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        {{ field.label }}
+                                    </label>
+
+                                    {# File preview for image fields #}
+                                    {% if field.name == 'image' and form.instance.image %}
+                                        <img src="{{ form.instance.image.url }}" alt="Current Image" class="w-24 h-24 object-cover mb-2 rounded">
+                                    {% elif field.name == 'nid' and form.instance.nid %}
+                                        <img src="{{ form.instance.nid.url }}" alt="Current NID" class="w-24 h-24 object-cover mb-2 rounded">
+                                    {% endif %}
+
+                                    {{ field }}
+
+                                    {% if field.errors %}
+                                        <p class="text-sm text-red-600 mt-1">{{ field.errors|striptags }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+
+                            <div class="flex items-center justify-between mt-8">
+                                <button type="submit"
+                                    class="bg-blue-600 hover:bg-blue-700 text-black font-medium px-6 py-2 rounded shadow dark:bg-blue-500 dark:hover:bg-blue-600">
+                                    Save
+                                </button>
+                                <a href="{% url 'varatiya_list' %}"
+                                   class="text-sm text-gray-600 hover:text-blue-600 underline dark:text-gray-400 dark:hover:text-blue-400">
+                                    ← Back to Tenant List
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

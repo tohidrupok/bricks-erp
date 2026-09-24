@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Form - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header_dashboard.html' %}
+            <!-- END: Top Bar -->
+
+            <div class="btp-edit-container mt-10">
+                <h2 class="btp-edit-header">Edit Information</h2>
+                <form method="post" class="btp-edit-form">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btp-btn-submit">Update</button>
+                </form>
+            </div>
+
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+
+<!-- ===== BTP Edit Form Styles ===== -->
+<style>
+.btp-edit-container {
+    width: 100%;
+    max-width: 550px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    padding: 35px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.btp-edit-header {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e355f;
+    margin-bottom: 25px;
+}
+
+.btp-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btp-btn-submit {
+    background-color: #2c6fff;
+    color: #fff;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btp-btn-submit:hover {
+    background-color: #204ecf;
+}
+</style>
+<!-- ===== END BTP Edit Styles ===== -->
+{% endblock %}

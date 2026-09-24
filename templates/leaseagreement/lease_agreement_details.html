@@ -1,0 +1,103 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lease Agreement Details- BM ERP{% endblock %}
+
+{% block content %} 
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-2xl font-semibold text-gray-900">Lease Agreement Details</h2>
+                <div class="mt-6 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <div class="property-detail p-8 bg-white rounded-lg shadow-lg border border-gray-200">
+                            <!-- Property Header -->
+                            <h1 class="text-3xl font-semibold text-gray-900 mb-4">
+                                Lease Agreement for {{ lease_agreement.property.address }}
+                            </h1>
+                
+                            <!-- Lease Agreement Details -->
+                            <div class="step mt-6">
+                                <h2 class="text-2xl font-semibold text-gray-900">Property</h2>
+                                <p class="text-lg text-gray-700">{{ lease_agreement.property.address }}</p>
+                            </div>
+                
+                            <div class="step mt-6">
+                                <h2 class="text-2xl font-semibold text-gray-900">Tenant</h2>
+                                <p class="text-lg text-gray-700">{{ lease_agreement.tenant.tenant_name }}</p>
+                            </div>
+                
+                            <div class="step mt-6">
+                                <h2 class="text-2xl font-semibold text-gray-900">Lease Start Date</h2>
+                                <p class="text-lg text-gray-700">{{ lease_agreement.lease_start_date }}</p>
+                            </div>
+                
+                            <div class="step mt-6">
+                                <h2 class="text-2xl font-semibold text-gray-900">Lease End Date</h2>
+                                <p class="text-lg text-gray-700">{{ lease_agreement.lease_end_date }}</p>
+                            </div>
+                
+                            <div class="step mt-6">
+                                <h2 class="text-2xl font-semibold text-gray-900">Lease Price</h2>
+                                <p class="text-lg text-gray-700">৳{{ lease_agreement.lease_price }}</p>
+                            </div>
+                
+                            <div class="step mt-6">
+                                <h2 class="text-2xl font-semibold text-gray-900">Security Deposit</h2>
+                                <p class="text-lg text-gray-700">৳{{ lease_agreement.security_deposit }}</p>
+                            </div>
+                
+                            <div class="step mt-6">
+                                <h2 class="text-2xl font-semibold text-gray-900">Lease Status</h2>
+                                <p class="text-lg text-gray-700">{{ lease_agreement.lease_status }}</p>
+                            </div>
+                
+                            <div class="step mt-6">
+                                <h2 class="text-2xl font-semibold text-gray-900">Payment Terms</h2>
+                                <p class="text-lg text-gray-700">{{ lease_agreement.payment_terms }}</p>
+                            </div>
+                
+                            <div class="step mt-6">
+                                <h2 class="text-2xl font-semibold text-gray-900">Agreement Document</h2>
+                            
+                                {% if lease_agreement.agreement_document %}
+                                <p class="text-lg text-gray-700">
+                                    <a href="{{ lease_agreement.agreement_document.url }}" target="_blank" class="text-blue-600 hover:underline">
+                                        <i class="fas fa-file-alt" style="margin-left:5%;font-size: 40px;"></i>
+                                    </a>
+                                </p>
+                                {% else %}
+                                    <p class="text-lg text-gray-700 text-red-600">No document available</p>
+                                {% endif %}
+                            </div>
+                            
+                
+                            <!-- Back to Lease Agreements List Button -->
+                            <div class="mt-8 text-center">
+                                <a href="{% url 'lease_agreement_list' %}" style="background-color:#1e3c98" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                    Back to Lease Agreements List
+                                </a>
+                            </div>
+                        </div>                        
+                    </div>
+                </div>
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

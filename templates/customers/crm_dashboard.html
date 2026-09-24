@@ -1,0 +1,377 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tenant List - BM ERP{% endblock %}
+
+{% block content %}
+
+{# Remove this line if base.html already loads Font Awesome 6 #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+/* ===== CRM dashboard (scoped: everything lives under .crm-page) ===== */
+.crm-page, .crm-page * { box-sizing: border-box; }
+.crm-page { --crm-primary:#4f46e5; --crm-primary-soft:#eef2ff; --crm-border:#e2e8f0; --crm-text:#334155; --crm-muted:#94a3b8; --crm-rose:#e11d48; color: var(--crm-text); }
+.crm-page a { text-decoration: none; }
+
+/* buttons */
+.crm-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 14px; border-radius:8px; border:1px solid var(--crm-primary); background:var(--crm-primary); color:#fff; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,.15); transition:.2s; }
+.crm-btn:hover { filter:brightness(1.1); }
+
+/* messages */
+.crm-messages { list-style:none; margin:12px 0 0; padding:0; }
+.crm-messages li { padding:10px 14px; margin-bottom:8px; border-radius:8px; background:#ecfdf5; color:#065f46; font-size:13px; }
+.crm-messages li.error, .crm-messages li.danger { background:#fef2f2; color:#991b1b; }
+.crm-messages li.warning { background:#fffbeb; color:#92400e; }
+
+/* toolbar */
+.crm-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:20px; }
+.crm-toolbar-spacer { flex:1 1 auto; }
+.crm-search { position:relative; width:14rem; max-width:100%; }
+.crm-search input { width:100%; padding:8px 34px 8px 12px; font-size:13px; border:1px solid var(--crm-border); border-radius:8px; background:#fff; outline:none; }
+.crm-search input:focus { border-color:var(--crm-primary); box-shadow:0 0 0 3px rgba(79,70,229,.2); }
+.crm-search i { position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:12px; color:var(--crm-muted); pointer-events:none; }
+
+/* sub navbar */
+.crm-topbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin-top:20px; padding:10px 16px; background:#fff; border:1px solid var(--crm-border); border-radius:12px; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+.crm-topbar-left, .crm-topbar-right { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.crm-brand { display:flex; align-items:center; gap:8px; }
+.crm-brand-logo { width:32px; height:32px; border-radius:8px; background:var(--crm-primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; }
+.crm-brand-name { font-size:12px; font-weight:700; letter-spacing:.06em; }
+.crm-nav { display:none; align-items:center; gap:4px; }
+@media (min-width:1024px){ .crm-nav { display:flex; } }
+.crm-nav a { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; color:#475569; transition:.2s; }
+.crm-nav a:hover { background:#f1f5f9; }
+.crm-nav a.is-active { background:var(--crm-primary-soft); color:var(--crm-primary); }
+.crm-pill-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px; background:#f1f5f9; color:#334155; font-size:12px; font-weight:600; transition:.2s; }
+.crm-pill-btn:hover { background:#e2e8f0; }
+.crm-metric-search { display:none; position:relative; }
+@media (min-width:640px){ .crm-metric-search { display:block; } }
+.crm-metric-search i { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--crm-muted); }
+.crm-metric-search input { width:12rem; padding:6px 14px 6px 32px; font-size:12px; border:1px solid var(--crm-border); border-radius:999px; background:#f8fafc; outline:none; }
+.crm-metric-search input:focus { border-color:var(--crm-primary); box-shadow:0 0 0 2px rgba(79,70,229,.25); }
+.crm-icon-btn { width:32px; height:32px; border:0; border-radius:50%; background:#f1f5f9; color:#475569; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.crm-icon-btn:hover { background:#e2e8f0; }
+
+/* user dropdown */
+.crm-user { position:relative; }
+.crm-user-btn { width:32px; height:32px; border:0; border-radius:50%; background:var(--crm-primary); color:#fff; font-weight:700; font-size:12px; cursor:pointer; }
+.crm-user-menu { display:none; position:absolute; right:0; top:100%; padding-top:8px; width:12rem; z-index:50; }
+.crm-user-menu-inner { background:#fff; border:1px solid var(--crm-border); border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,.12); padding:4px 0; }
+.crm-user:hover .crm-user-menu, .crm-user:focus-within .crm-user-menu { display:block; }
+.crm-user-name { padding:8px 16px; border-bottom:1px solid #f1f5f9; font-size:12px; font-weight:700; }
+.crm-user-link { display:flex; align-items:center; gap:8px; width:100%; padding:8px 16px; font-size:12px; color:#475569; background:none; border:0; text-align:left; cursor:pointer; }
+.crm-user-link:hover { background:#f8fafc; }
+.crm-user-link.is-danger { color:var(--crm-rose); }
+.crm-user-link.is-danger:hover { background:#fff1f2; }
+
+/* layout */
+.crm-layout { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; margin-top:16px; }
+@media (min-width:1280px){ .crm-layout { grid-template-columns:minmax(0,2fr) minmax(0,1fr); } }
+.crm-main, .crm-side { display:flex; flex-direction:column; gap:16px; min-width:0; }
+
+/* metric cards */
+.crm-stats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+@media (min-width:640px){ .crm-stats { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media (min-width:768px){ .crm-stats { grid-template-columns:repeat(5,minmax(0,1fr)); } }
+.crm-stat { display:flex; flex-direction:column; justify-content:space-between; gap:6px; min-height:64px; padding:12px; border-radius:12px; color:#fff; background:linear-gradient(135deg, var(--c1), var(--c2)); box-shadow:0 1px 3px rgba(0,0,0,.15); }
+.crm-stat-label { font-size:11px; font-weight:500; opacity:.9; line-height:1.25; }
+.crm-stat-value { font-size:18px; font-weight:700; text-align:right; line-height:1; }
+
+/* cards */
+.crm-card { background:#fff; border:1px solid var(--crm-border); border-radius:12px; box-shadow:0 1px 2px rgba(0,0,0,.05); overflow:hidden; }
+.crm-card-pad { padding:12px; }
+.crm-card-title { display:flex; align-items:center; gap:6px; margin-bottom:10px; font-size:12px; font-weight:700; }
+.crm-card-title i { color:var(--crm-primary); }
+
+/* to-do */
+.crm-todo { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; text-align:center; }
+@media (min-width:640px){ .crm-todo { grid-template-columns:repeat(6,minmax(0,1fr)); } }
+.crm-todo-item { padding:8px; border:1px solid #f1f5f9; border-radius:8px; background:#f8fafc; }
+.crm-todo-item.is-alert { background:#fff1f2; border-color:#ffe4e6; }
+.crm-todo-label { display:block; font-size:10px; font-weight:500; color:#64748b; }
+.crm-todo-value { font-size:14px; font-weight:700; }
+.crm-todo-item.is-alert .crm-todo-label, .crm-todo-item.is-alert .crm-todo-value { color:var(--crm-rose); }
+
+/* three columns */
+.crm-cols { display:grid; grid-template-columns:minmax(0,1fr); gap:12px; }
+@media (min-width:768px){ .crm-cols { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+.crm-col-head { padding:8px 12px; text-align:center; font-size:12px; font-weight:700; background:#e0e7ff; color:#312e81; border-bottom:1px solid #c7d2fe; }
+.crm-col-body { padding:12px; max-height:18rem; overflow-y:auto; font-size:12px; }
+.crm-lead-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding-bottom:8px; margin-bottom:12px; border-bottom:1px solid #f1f5f9; }
+.crm-lead-item:last-child { margin-bottom:0; }
+.crm-lead-code { display:block; color:var(--crm-primary); font-weight:600; }
+.crm-lead-name { display:block; font-weight:500; color:#475569; }
+.crm-lead-sub { display:block; font-size:10px; color:var(--crm-muted); }
+.crm-call { flex:none; width:28px; height:28px; border-radius:50%; background:#f1f5f9; color:#475569; display:flex; align-items:center; justify-content:center; font-size:10px; transition:.2s; }
+.crm-call:hover { background:#d1fae5; color:#059669; }
+.crm-empty { padding:16px 0; text-align:center; font-style:italic; color:var(--crm-muted); }
+
+/* calendar */
+.crm-user-row { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+.crm-tag { padding:4px 10px; border-radius:6px; background:#f1f5f9; font-size:12px; font-weight:700; }
+.crm-select { padding:4px; font-size:12px; font-weight:500; border:1px solid var(--crm-border); border-radius:8px; background:#fff; outline:none; color:#475569; }
+.crm-tabs { display:flex; gap:4px; margin-bottom:12px; overflow-x:auto; padding-bottom:4px; }
+.crm-tab { flex:none; padding:4px 10px; border:0; border-radius:6px; background:#f1f5f9; color:#475569; font-size:10px; font-weight:700; cursor:pointer; transition:.2s; }
+.crm-tab:hover { background:#e2e8f0; }
+.crm-tab.is-active { background:var(--crm-primary); color:#fff; }
+.crm-cal-head { display:flex; align-items:center; justify-content:space-between; padding:8px 0 12px; border-bottom:1px solid #f1f5f9; }
+.crm-cal-title { font-size:14px; font-weight:700; color:#1e293b; }
+.crm-cal-nav { display:flex; align-items:center; gap:4px; }
+.crm-cal-btn { width:24px; height:24px; border:0; border-radius:4px; background:#f1f5f9; color:#475569; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.crm-cal-btn:hover { background:#e2e8f0; }
+.crm-cal-today { width:auto; padding:0 8px; height:24px; background:var(--crm-primary-soft); color:var(--crm-primary); font-weight:700; }
+.crm-cal-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); text-align:center; font-size:11px; }
+.crm-cal-dow { padding:8px 0; font-size:10px; font-weight:700; color:var(--crm-muted); }
+.crm-cal-day { padding:6px 0; margin:1px; border-radius:6px; color:#475569; }
+.crm-cal-day.is-muted { color:#cbd5e1; }
+.crm-cal-day.is-today { background:var(--crm-primary); color:#fff; font-weight:700; }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+          
+            <div class="crm-page">
+
+                <!-- CRM SUB NAVBAR -->
+                <header class="crm-topbar">
+                    <div class="crm-topbar-left">
+                        
+                        <nav class="crm-nav">
+                            <a href="{% url 'crm_dashboard' %}" class="is-active"><i class="fa-solid fa-chart-pie"></i><span>CRM</span></a>
+                            <a href="#"><i class="fa-solid fa-gear"></i><span>Configuration</span></a>
+                            <a href="{% url 'lead_list' %}"><i class="fa-solid fa-user-plus"></i><span>Lead</span></a>
+                            <a href="#"><i class="fa-solid fa-headset"></i><span>Call Center</span></a>
+                            <a href="#"><i class="fa-solid fa-car"></i><span>Task/Visit</span></a>
+                            <a href="#"><i class="fa-solid fa-building"></i><span>Property</span></a>
+                            <a href="#"><i class="fa-solid fa-chart-line"></i><span>Reports</span></a>
+                            <a href="#"><i class="fa-solid fa-gauge"></i><span>KPI</span></a>
+                        </nav>
+                    </div>
+
+                   
+                </header>
+
+                <!-- DASHBOARD -->
+                <div class="crm-layout">
+
+                    <!-- MAIN -->
+                    <div class="crm-main">
+
+                        <!-- METRIC CARDS -->
+                        <div class="crm-stats">
+                            <div class="crm-stat" style="--c1:#f97316;--c2:#e11d48"><span class="crm-stat-label">Total Leads</span><span class="crm-stat-value">{{ total_leads_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#059669;--c2:#115e59"><span class="crm-stat-label">Junk Leads</span><span class="crm-stat-value">{{ junk_leads_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#2563eb;--c2:#312e81"><span class="crm-stat-label">Sold</span><span class="crm-stat-value">{{ sold_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#047857;--c2:#14532d"><span class="crm-stat-label">High Prospect</span><span class="crm-stat-value">{{ high_prospect_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#d97706;--c2:#854d0e"><span class="crm-stat-label">Priority</span><span class="crm-stat-value">{{ priority_count|default:0 }}</span></div>
+
+                            <div class="crm-stat" style="--c1:#a855f7;--c2:#a21caf"><span class="crm-stat-label">Lost</span><span class="crm-stat-value">{{ lost_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#65a30d;--c2:#047857"><span class="crm-stat-label">Closed</span><span class="crm-stat-value">{{ closed_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#92400e;--c2:#422006"><span class="crm-stat-label">Negotiation</span><span class="crm-stat-value">{{ negotiation_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#ef4444;--c2:#ea580c"><span class="crm-stat-label">Hot</span><span class="crm-stat-value">{{ hot_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#0e7490;--c2:#1e3a8a"><span class="crm-stat-label">Query</span><span class="crm-stat-value">{{ query_count|default:0 }}</span></div>
+
+                            <div class="crm-stat" style="--c1:#ca8a04;--c2:#92400e"><span class="crm-stat-label">New Call</span><span class="crm-stat-value">{{ new_call_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#14b8a6;--c2:#0e7490"><span class="crm-stat-label">Follow Up</span><span class="crm-stat-value">{{ followup_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#10b981;--c2:#0f766e"><span class="crm-stat-label">Lead</span><span class="crm-stat-value">{{ lead_metric_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#78716c;--c2:#a16207"><span class="crm-stat-label">Booked</span><span class="crm-stat-value">{{ booked_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#7c3aed;--c2:#581c87"><span class="crm-stat-label">Potential</span><span class="crm-stat-value">{{ potential_count|default:0 }}</span></div>
+
+                            <div class="crm-stat" style="--c1:#c026d3;--c2:#831843"><span class="crm-stat-label">High Potential</span><span class="crm-stat-value">{{ high_potential_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#15803d;--c2:#365314"><span class="crm-stat-label">Token Lead</span><span class="crm-stat-value">{{ token_lead_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#ea580c;--c2:#991b1b"><span class="crm-stat-label">Booking</span><span class="crm-stat-value">{{ booking_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#f43f5e;--c2:#b91c1c"><span class="crm-stat-label">Registration &amp; Handover</span><span class="crm-stat-value">{{ reg_handover_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#1d4ed8;--c2:#0c4a6e"><span class="crm-stat-label">Exchange</span><span class="crm-stat-value">{{ exchange_count|default:0 }}</span></div>
+
+                            <div class="crm-stat" style="--c1:#b45309;--c2:#713f12"><span class="crm-stat-label">EMI Hold</span><span class="crm-stat-value">{{ emi_hold_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#0f766e;--c2:#064e3b"><span class="crm-stat-label">Hold For Later</span><span class="crm-stat-value">{{ hold_later_count|default:0 }}</span></div>
+                            <div class="crm-stat" style="--c1:#059669;--c2:#166534"><span class="crm-stat-label">Token Hold</span><span class="crm-stat-value">{{ token_hold_count|default:0 }}</span></div>
+                        </div>
+
+                        <!-- TO-DO LIST -->
+                        <div class="crm-card crm-card-pad">
+                            <div class="crm-card-title"><i class="fa-solid fa-list-check"></i><span>To-Do List</span></div>
+                            <div class="crm-todo">
+                                <div class="crm-todo-item"><span class="crm-todo-label">Today's Followup</span><span class="crm-todo-value">{{ todays_followups|default:0 }}</span></div>
+                                <div class="crm-todo-item"><span class="crm-todo-label">Today's Call</span><span class="crm-todo-value">{{ todays_calls|default:0 }}</span></div>
+                                <div class="crm-todo-item"><span class="crm-todo-label">Today's Visit</span><span class="crm-todo-value">{{ todays_visits|default:0 }}</span></div>
+                                <div class="crm-todo-item is-alert"><span class="crm-todo-label">Missed Followup</span><span class="crm-todo-value">{{ missed_followups|default:0 }}</span></div>
+                                <div class="crm-todo-item"><span class="crm-todo-label">Missed Visit</span><span class="crm-todo-value">{{ missed_visits|default:0 }}</span></div>
+                                <div class="crm-todo-item"><span class="crm-todo-label">Next Followup</span><span class="crm-todo-value">{{ next_followups|default:0 }}</span></div>
+                            </div>
+                        </div>
+
+                        <!-- LEAD / FOLLOWUP / TASK COLUMNS -->
+                        <div class="crm-cols">
+
+                            <div class="crm-card">
+                                <div class="crm-col-head">New Lead</div>
+                                <div class="crm-col-body">
+                                    {% for lead in new_leads %}
+                                    <div class="crm-lead-item">
+                                        <div>
+                                            <span class="crm-lead-code">{{ lead.lead_code }}</span>
+                                            <span class="crm-lead-name">Name: {{ lead.customer.customer_name }}</span>
+                                            <span class="crm-lead-sub">Caller: - {{ lead.customer.assign_to_user|default:"Admin" }}</span>
+                                        </div>
+                                        <a href="tel:{{ lead.customer.contact_no }}" class="crm-call"><i class="fa-solid fa-phone"></i></a>
+                                    </div>
+                                    {% empty %}
+                                    <div class="crm-empty">No New Leads</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="crm-card">
+                                <div class="crm-col-head">Followup</div>
+                                <div class="crm-col-body">
+                                    {% for lead in followup_leads %}
+                                    <div class="crm-lead-item">
+                                        <div>
+                                            <span class="crm-lead-code">{{ lead.lead_code }}</span>
+                                            <span class="crm-lead-name">Name: {{ lead.customer.customer_name }}</span>
+                                            <span class="crm-lead-sub">Caller: - {{ lead.customer.assign_to_user|default:"Admin" }}</span>
+                                        </div>
+                                        <a href="tel:{{ lead.customer.contact_no }}" class="crm-call"><i class="fa-solid fa-phone"></i></a>
+                                    </div>
+                                    {% empty %}
+                                    <div class="crm-empty">No Followups</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="crm-card">
+                                <div class="crm-col-head">Task/Visit</div>
+                                <div class="crm-col-body">
+                                    {% for task in tasks_visits %}
+                                    <div class="crm-lead-item">
+                                        <div>
+                                            <span class="crm-lead-code">{{ task.visit_place|default:"Task" }}</span>
+                                            <span class="crm-lead-name">Date: {{ task.task_date }}</span>
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <div class="crm-empty">No Visit</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- SIDE / CALENDAR -->
+                    <aside class="crm-side">
+                        <div class="crm-card crm-card-pad">
+                            <div class="crm-user-row">
+                                <span class="crm-tag">User</span>
+                                <select class="crm-select"><option>Select User</option></select>
+                            </div>
+
+                            <div class="crm-tabs" id="crmTabs">
+                                <button type="button" class="crm-tab is-active">Today</button>
+                                <button type="button" class="crm-tab">Weekly</button>
+                                <button type="button" class="crm-tab">Monthly</button>
+                                <button type="button" class="crm-tab">Yearly</button>
+                                <button type="button" class="crm-tab">All</button>
+                            </div>
+
+                            <div class="crm-cal-head">
+                                <span class="crm-cal-title" id="crmCalTitle"></span>
+                                <div class="crm-cal-nav">
+                                    <button type="button" class="crm-cal-btn crm-cal-today" id="crmCalToday">today</button>
+                                    <button type="button" class="crm-cal-btn" id="crmCalPrev"><i class="fa-solid fa-chevron-left"></i></button>
+                                    <button type="button" class="crm-cal-btn" id="crmCalNext"><i class="fa-solid fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                            <div class="crm-cal-grid" id="crmCalGrid"></div>
+                        </div>
+                    </aside>
+
+                </div>
+            </div>
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+
+<script>
+(function () {
+    // Lead list search (toolbar)
+    var search = document.getElementById('crmSearchInput');
+    if (search) {
+        search.addEventListener('input', function () {
+            var q = search.value.toLowerCase().trim();
+            document.querySelectorAll('.crm-lead-item').forEach(function (el) {
+                el.style.display = el.textContent.toLowerCase().indexOf(q) > -1 ? '' : 'none';
+            });
+        });
+    }
+
+    // Metric card search (navbar)
+    var metric = document.getElementById('crmMetricSearch');
+    if (metric) {
+        metric.addEventListener('input', function () {
+            var q = metric.value.toLowerCase().trim();
+            document.querySelectorAll('.crm-stat').forEach(function (el) {
+                el.style.display = el.textContent.toLowerCase().indexOf(q) > -1 ? '' : 'none';
+            });
+        });
+    }
+
+    // Filter tabs
+    var tabs = document.querySelectorAll('#crmTabs .crm-tab');
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            tabs.forEach(function (t) { t.classList.remove('is-active'); });
+            tab.classList.add('is-active');
+        });
+    });
+
+    // Calendar
+    var grid = document.getElementById('crmCalGrid');
+    var title = document.getElementById('crmCalTitle');
+    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var dows = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var now = new Date();
+    var view = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    function render() {
+        var y = view.getFullYear(), m = view.getMonth();
+        title.textContent = months[m] + ' ' + y;
+        var html = dows.map(function (d) { return '<span class="crm-cal-dow">' + d + '</span>'; }).join('');
+        var first = new Date(y, m, 1).getDay();
+        var days = new Date(y, m + 1, 0).getDate();
+        var prevDays = new Date(y, m, 0).getDate();
+        var i, cls;
+        for (i = first - 1; i >= 0; i--) html += '<span class="crm-cal-day is-muted">' + (prevDays - i) + '</span>';
+        for (i = 1; i <= days; i++) {
+            cls = (i === now.getDate() && m === now.getMonth() && y === now.getFullYear()) ? ' is-today' : '';
+            html += '<span class="crm-cal-day' + cls + '">' + i + '</span>';
+        }
+        var trailing = (7 - ((first + days) % 7)) % 7;
+        for (i = 1; i <= trailing; i++) html += '<span class="crm-cal-day is-muted">' + i + '</span>';
+        grid.innerHTML = html;
+    }
+
+    document.getElementById('crmCalPrev').addEventListener('click', function () { view.setMonth(view.getMonth() - 1); render(); });
+    document.getElementById('crmCalNext').addEventListener('click', function () { view.setMonth(view.getMonth() + 1); render(); });
+    document.getElementById('crmCalToday').addEventListener('click', function () { view = new Date(now.getFullYear(), now.getMonth(), 1); render(); });
+    render();
+})();
+</script>
+{% endblock %}

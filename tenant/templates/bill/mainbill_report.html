@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  /* ====== General Page Styles ====== */
+  body {
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    background-color: #f5f7fb;
+    color: #1e293b;
+  }
+
+  .bill-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 30px 40px;
+  }
+
+  .bill-header {
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  .bill-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0f172a;
+    position: relative;
+    display: inline-block;
+  }
+
+  .bill-header h2::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: #2563eb;
+    margin: 8px auto 0;
+    border-radius: 2px;
+  }
+
+  /* ====== Filter Form ====== */
+  form.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: space-between;
+  }
+
+  .filter-form select,
+  .filter-form input {
+    flex: 1 1 180px;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border 0.2s;
+  }
+
+  .filter-form select:focus,
+  .filter-form input:focus {
+    border-color: #2563eb;
+  }
+
+  .filter-form button {
+    flex: 1 1 120px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 10px 0;
+    cursor: pointer;
+    transition: background 0.25s;
+  }
+
+  .filter-form button:hover {
+    background: #1d4ed8;
+  }
+
+  /* ====== Table Styles ====== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  thead {
+    background-color: #1e293b;
+    color: #fff;
+  }
+
+  thead th {
+    padding: 12px;
+    font-weight: 600;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+
+  tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+
+  tbody tr:hover {
+    background-color: #f1f5f9;
+  }
+
+  /* ====== Subtotal Summary ====== */
+  .subtotal-box {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 25px;
+    font-size: 0.95rem;
+  }
+
+  .subtotal-box strong {
+    color: #1d4ed8;
+  }
+
+  .no-data {
+    text-align: center;
+    color: #64748b;
+    font-style: italic;
+    padding: 20px 0;
+  }
+
+  @media (max-width: 768px) {
+    .bill-container {
+      padding: 20px;
+    }
+    form.filter-form {
+      flex-direction: column;
+    }
+  }
+</style>
+
+<div class="bill-container">
+  <div class="bill-header">
+    <h2>Main Bill Top Sheet</h2>
+  </div>
+
+  <!-- Filter Form -->
+  <form method="get" class="filter-form">
+    <input type="date" name="start_date" value="{{ request.GET.start_date }}" placeholder="Start Date">
+    <input type="date" name="end_date" value="{{ request.GET.end_date }}" placeholder="End Date">
+
+    <select name="tenant">
+      <option value="">All Tenants</option>
+      {% for t in tenants %}
+      <option value="{{ t.id }}" {% if request.GET.tenant == t.id|stringformat:'s' %}selected{% endif %}>
+        {{ t.name }} ({{ t.contact }})
+      </option>
+      {% endfor %}
+    </select>
+
+    <select name="project">
+      <option value="">All Projects</option>
+      {% for p in projects %}
+      <option value="{{ p.id }}" {% if request.GET.project == p.id|stringformat:'s' %}selected{% endif %}>
+        {{ p.name }}
+      </option>
+      {% endfor %}
+    </select>
+
+    <select name="status">
+      <option value="">All Status</option>
+      <option value="Generated" {% if request.GET.status == 'Generated' %}selected{% endif %}>Generated</option>
+      <option value="Approved" {% if request.GET.status == 'Approved' %}selected{% endif %}>Approved</option>
+      <option value="Partial Payment" {% if request.GET.status == 'Partial Payment' %}selected{% endif %}>Partial Payment</option>
+      <option value="Payment Clear" {% if request.GET.status == 'Payment Clear' %}selected{% endif %}>Payment Clear</option>
+    </select>
+
+    <button type="submit">Filter</button>
+  </form>
+
+  <!-- Results Table -->
+  <table>
+    <thead>
+      <tr>
+        <th>Month</th>
+        <th>Project</th>
+        <th>Tenant</th>
+        <th>Status</th>
+        <th>Generated</th>
+        <th>Discount</th>
+        <th>Adjusted</th>
+        <th>Paid</th>        
+        <th>Due</th>
+
+       
+      </tr>
+    </thead>
+    <tbody>
+      {% for bill in bills %}
+      <tr>
+        <td>{{ bill.month|date:"F Y" }}</td>
+        <td>{{ bill.project }}</td>
+        <td>{{ bill.tenant.name }}</td>
+        <td>{{ bill.status }}</td>
+        <td>{{ bill.generated_amount }}</td>
+        <td>{{ bill.discount_amount }}</td>
+        <td>{{ bill.adjusted_amount }}</td>
+        <td>{{ bill.total_paid }}</td>
+        <td>{{ bill.total_due }}</td>
+        
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="10" class="no-data">No records found</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Subtotal Summary -->
+  <div class="subtotal-box">
+    <strong>Subtotal Summary:</strong><br>
+    Total Generated: {{ totals.total_generated|default:"0" }} |
+    Total Discount: {{ totals.total_discount|default:"0" }} |
+    Total Adjusted: {{ totals.total_adjusted|default:"0" }} |
+    Total Paid: {{ totals.total_paid|default:"0" }} |
+    Total Due: {{ totals.total_due|default:"0" }} 
+    
+  </div>
+</div>
+{% endblock %}

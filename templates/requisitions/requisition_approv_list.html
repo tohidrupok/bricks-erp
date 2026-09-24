@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Purchase Item Entry - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    background-color: silver;
+    padding: 20px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 10px 0;
+    text-align: left;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-top: 10px;
+  }
+
+  .table th,
+  .table td {
+    border: 1px solid #ccc;
+    padding: 6px 8px;
+    text-align: left;
+  }
+
+  .btn-print {
+    background-color: #1e3a8a;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 11px;
+  }
+
+  .top-buttons a button {
+    padding: 6px 12px;
+    font-size: 11px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn-refresh {
+    background-color: #1e3a8a;
+    color: white;
+  }
+
+  .btn-confirm {
+    background-color: #84cc16;
+    color: white;
+  }
+
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    body {
+      background: white;
+      padding: 0;
+    }
+    .card {
+      box-shadow: none;
+      border: none;
+      margin: 0;
+      padding: 0;
+    }
+  }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+  {% include 'partials/mobile.html' %}
+  <div class="mt-[4.7rem] flex md:mt-0">
+    {% include 'partials/sidebar_list.html' %}
+    <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+      {% include 'partials/header.html' %}
+      
+      <div class="card mt-10">
+        <!-- Top Buttons -->
+        <div class="top-buttons flex flex-wrap items-center space-x-2 no-print mb-3">
+          <a href="{{ request.get_full_path }}">
+            <button type="button" class="btn-refresh">🔄 Refresh</button>
+          </a>
+          &nbsp;&nbsp;
+          <a href="{% url 'purchase_list' %}">
+            <button type="button" class="btn-refresh" style="background-color:#84cc16">← Back to List</button>
+          </a>
+        </div>
+
+        <div class="max-w-6xl mx-auto bg-white shadow-md rounded-xl p-6 mt-6 print:shadow-none print:p-0">
+          <h1 class="text-xl font-semibold mb-4">{{ project.project_name }}</h1>
+
+          <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            {% for vendor, data in requisitions_by_vendor.items %}
+            <div class="overflow-x-auto border border-gray-300 rounded-md">
+              <table class="min-w-full divide-y divide-gray-200 text-xs">
+                <thead class="bg-gray-100 text-gray-700">
+                  <tr>
+                    <th class="p-2"><input type="checkbox" class="select-all"></th>
+                    <th class="p-2 text-left">Type</th>
+                    <th class="p-2 text-left">Supplier</th>
+                    <th class="p-2 text-left">Item Name</th>
+                    <th class="p-2 text-left">Unit</th>
+                    <th class="p-2 text-left">Qty</th>
+                    <th class="p-2 text-left">Rate</th>
+                    <th class="p-2 text-left">Amount</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 bg-white">
+                  {% for item in data.items %}
+                  <!-- Added class item-row for targeting in JavaScript -->
+                  <tr class="item-row">
+                    <td class="p-2">
+                      <input type="checkbox" name="selected_items" value="{{ item.id }}"
+                             {% if item.purch_appov != 'Yes' %}checked{% endif %}>
+                    </td>
+
+                    <td class="p-2 font-semibold text-blue-600">{{ item.type }}</td>
+                    <td class="p-2">
+                      {% if item.type == "Supplier" %}
+                        <select name="vendor_{{ item.id }}" class="form-select w-full border-gray-300 rounded">
+                          <option value="">-- Select Supplier --</option>
+                          {% for s in supplier_list %}
+                          <option value="{{ s.supplier_name }}" {% if item.vendor_name == s.supplier_name %}selected{% endif %}>{{ s.supplier_name }}</option>
+                          {% endfor %}
+                        </select>
+                      {% elif item.type == "Contructor" %}
+                        <select name="vendor_{{ item.id }}" class="form-select w-full border-gray-300 rounded">
+                          <option value="">-- Select Contractor --</option>
+                          {% for c in contructors_list %}
+                          <option value="{{ c.supervisor_name }}" {% if item.vendor_name == c.supervisor_name %}selected{% endif %}>{{ c.supervisor_name }}</option>
+                          {% endfor %}
+                        </select>
+                      {% elif item.type == "Expense" %}
+                        <select name="vendor_{{ item.id }}" class="form-select w-full border-gray-300 rounded">
+                          <option value="">-- Select Expense --</option>
+                          {% for e in headOfexpense_list %}
+                          <option value="{{ e.head_exp_name }}" {% if item.vendor_name == e.head_exp_name %}selected{% endif %}>{{ e.head_exp_name }}</option>
+                          {% endfor %}
+                        </select>
+                      {% else %}
+                        <span class="text-gray-400 italic">N/A</span>
+                      {% endif %}
+                    </td>
+                    <td class="p-2"><input type="text" name="item_name_{{ item.id }}" class="form-input w-full text-xs border-gray-300 rounded" value="{{ item.item_name }}"></td>
+                    <td class="p-2"><input type="text" name="unit_{{ item.id }}" class="form-input w-full text-xs border-gray-300 rounded" value="{{ item.unit }}"></td>
+                    
+                    <!-- Added input classes for JS targeting -->
+                    <td class="p-2"><input type="number" step="any" name="qty_{{ item.id }}" class="form-input qty-input w-full text-xs border-gray-300 rounded" value="{{ item.qty }}"></td>
+                    <td class="p-2"><input type="number" step="any" name="rate_{{ item.id }}" class="form-input rate-input w-full text-xs border-gray-300 rounded" value="{{ item.rate }}"></td>
+                    <td class="p-2"><input type="number" step="any" name="amount_{{ item.id }}" class="form-input amount-input w-full text-xs border-gray-300 rounded" value="{{ item.amount }}"></td>
+                  </tr>
+                  {% endfor %}
+                  <tr class="bg-gray-50 font-semibold">
+                    <td colspan="7" class="text-right px-4 py-2">Total for {{ vendor }}:</td>
+                    <td class="px-4 py-2">৳<span class="vendor-total">{{ data.total|intcomma }}</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            {% endfor %}          
+
+            <!-- Approval Section -->
+            <div class="space-y-3">
+              <label class="block font-medium text-sm mb-1">Purchase Status</label>
+              <div class="flex gap-4">
+                <label class="inline-flex items-center">
+                  <input type="radio" name="approv_purch_status" value="approved" class="form-radio text-green-600" checked>
+                  <span class="ml-2">Done</span>
+                </label>
+
+                <label class="inline-flex items-center hidden">
+                  <input type="radio" name="approv_purch_status" value="pending" class="form-radio text-yellow-600">
+                  <span class="ml-2">Pending</span>
+                </label>
+              </div>
+              <label for="approv_purch_note" class="block font-medium text-sm mt-3">Note</label>
+              <textarea name="approv_purch_note" rows="3" class="form-textarea w-full border-gray-300 rounded">{{ current_note }}</textarea>
+
+              <div class="flex justify-center mt-4">
+                <button type="submit" style="background-color:#84cc16" class="text-white px-6 py-2 rounded hover:bg-lime-700">
+                  Save
+                </button>
+              </div>
+              <br/>
+            </div>
+          </form>        
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript for Auto Calculation -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Handle "Select All" checkboxes for multiple vendor tables
+        const selectAllInputs = document.querySelectorAll(".select-all");
+        selectAllInputs.forEach(selectAll => {
+          selectAll.addEventListener("change", function () {
+            const table = this.closest("table");
+            const checkboxes = table.querySelectorAll('input[name="selected_items"]');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+          });
+        });
+
+        // Function to calculate Amount and update Vendor Subtotal
+        function calculateRowAndTableTotal(row) {
+          const qtyInput = row.querySelector(".qty-input");
+          const rateInput = row.querySelector(".rate-input");
+          const amountInput = row.querySelector(".amount-input");
+
+          if (!qtyInput || !rateInput || !amountInput) return;
+
+          const qty = parseFloat(qtyInput.value) || 0;
+          const rate = parseFloat(rateInput.value) || 0;
+          
+          // Calculate amount rounded to 2 decimal places
+          const amount = (qty * rate).toFixed(2);
+          amountInput.value = amount;
+
+          // Recalculate Table Subtotal
+          const table = row.closest("tbody");
+          if (table) {
+            let total = 0;
+            table.querySelectorAll(".amount-input").forEach(input => {
+              total += parseFloat(input.value) || 0;
+            });
+
+            const vendorTotalSpan = table.querySelector(".vendor-total");
+            if (vendorTotalSpan) {
+              vendorTotalSpan.textContent = total.toLocaleString("en-IN", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              });
+            }
+          }
+        }
+
+        // Event listener for changes in Qty or Rate
+        document.addEventListener("input", function (event) {
+          if (event.target.classList.contains("qty-input") || event.target.classList.contains("rate-input")) {
+            const row = event.target.closest(".item-row");
+            if (row) {
+              calculateRowAndTableTotal(row);
+            }
+          }
+        });
+      });
+    </script>
+        
+  </div>
+</div>
+{% endblock %}

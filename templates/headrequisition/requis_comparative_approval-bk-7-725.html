@@ -1,0 +1,304 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Requisition Comparative - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+   <!-- this close div is--> <div class="table-container">   <!-- this close div is start --> 
+                <!-- END: Top Bar -->
+               <h2 class="intro-y mt-10 text-2xl font-semibold text-gray-900">Requisition Comparative</h2>
+                <div class="mt-6 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <div class="project-detail">
+                            <h1 class="text-3xl font-semibold text-gray-900 mb-4">
+                                {{ project.project_name }}
+                            </h1>
+                            <style>
+                                body {
+                                  font-family: Arial, sans-serif;
+                                  margin: 20px;
+                                }
+
+                                .table-container {
+                                  overflow-x: auto;
+                                  border: 1px solid #ccc;
+                                }
+
+                                table {
+                                  border-collapse: collapse;
+                                  width: 100%;
+                                  min-width: 800px;
+                                }
+
+                                th, td {
+                                  border: 1px solid #ccc;
+                                  padding: 8px;
+                                  text-align: center;
+                                  white-space: nowrap;
+                                }
+
+                                th {
+                                  background-color: #f3f4f6;
+                                  position: sticky;
+                                  top: 0;
+                                }
+
+                                .total-row {
+                                  font-weight: bold;
+                                  background-color: #e5e7eb;
+                                }
+
+                                .approval-section {
+                                  margin-top: 30px;
+                                }
+
+                                .approval-section label {
+                                  display: block;
+                                  margin-bottom: 5px;
+                                  font-weight: bold;
+                                }
+
+                                .approval-section select, .approval-section textarea {
+                                  width: 100%;
+                                  padding: 8px;
+                                  margin-bottom: 15px;
+                                }
+
+                                .approval-section button {
+                                  background-color: #1e3a8a;
+                                  color: white;
+                                  padding: 10px 15px;
+                                  border: none;
+                                  border-radius: 4px;
+                                  cursor: pointer;
+                                }
+
+                                .approval-section button:hover {
+                                  background-color: #374151;
+                                }
+                                input[type="checkbox"] {
+                                  transform: scale(1.2);
+                                }
+                              </style>
+                           <h2>Requisition Comparative Sheet - Project: {{ project.project_name }}</h2>
+
+                          <div class="table-container">
+                           <form method="POST">
+                              {% csrf_token %}
+                              <input type="hidden" name="project_id" value="{{ project.id }}">
+
+                              <!-- Top select all checkbox -->
+                              <label>
+                                <input type="checkbox" id="select_all_lowest" style="margin-left:10px;accent-color: green;">
+                                Select All Lowest Rate
+                              </label>
+							
+                              <table>
+                                <thead>
+                                  <tr>
+                                    <th rowspan="2">SL</th>
+                                    <th rowspan="2">Item Name</th>
+                                    <th rowspan="2">Unit</th>
+                                    <th rowspan="2">Qty</th>
+                                    {% for vendor in vendor_names %}
+                                      <th colspan="3">{{ vendor }}</th>
+                                    {% endfor %}
+                                  </tr>
+                                  <tr>
+                                    {% for vendor in vendor_names %}
+                                      <th>Rate</th>
+                                      <th>Amount</th>
+                                      <th>Select</th>
+                                    {% endfor %}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {% for item in items %}
+                                    <tr>
+                                      <td>{{ forloop.counter }}</td>
+                                      <td>{{ item.item_name }}</td>
+                                      <td>{{ item.unit }}</td>
+                                      <td>{{ item.qty }}</td>
+
+                                      {% for data in item.vendor_data %}
+                                        <!-- Rate with color -->
+                                        <td style="
+                                          {% if data.is_lowest %}
+                                            color: green; font-weight: bold;
+                                          {% elif data.is_highest %}
+                                            color: red; font-weight: bold;
+                                          {% endif %}
+                                        ">
+                                          {% if data.rate %}{{ data.rate }}{% else %}-{% endif %}
+                                        </td>
+
+                                        <!-- Amount -->
+                                        <td>{% if data.amount %}{{ data.amount }}{% else %}-{% endif %}</td>
+
+                                        <!-- Selection checkbox -->
+                                        <td>
+                                          {% if data.rate and data.id %}
+                                            <input type="checkbox"
+                                                  name="approved_rates"
+                                                  value="{{ data.id }}"
+                                                  class="rate-checkbox"
+                                                  {% if data.is_lowest %}data-lowest="true" style="accent-color: green;"{% endif %}
+                                            >
+                                          {% else %}
+                                            -
+                                          {% endif %}
+                                        </td>
+                                      {% endfor %}
+                                    </tr>
+                                  {% endfor %}
+
+                                  <!-- Vendor totals -->
+                                  <tr class="total-row">
+                                    <td colspan="4">Vendor Totals</td>
+                                    {% for total in vendor_totals %}
+                                      <td colspan="3">{{ total }}</td>
+                                    {% endfor %}
+                                  </tr>
+
+                                  <!-- Final total -->
+                                  <tr class="total-row">
+                                    <td colspan="{{ column_span }}">Final Total: {{ final_total }}</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+<!-- this close div is-->	</div> <!-- this close div is...print div end-->
+                              <!-- Approval section -->
+                              <div class="approval-section">
+                                <label for="approval_status">Approval Status</label>
+                                <select name="approval_status" id="approval_status">
+                                  <option value="">-- Select --</option>
+                                  <option value="approved" {% if current_status == "approved" %}selected{% endif %}>Approved</option>
+                                  <option value="rejected" {% if current_status == "rejected" %}selected{% endif %}>Rejected</option>
+                                </select>
+
+                                <label for="note">Note</label>
+                                <textarea name="note" id="note" rows="4">{{ current_note }}</textarea>
+
+                                <!--<button type="submit" class="mt-8 text-right">Submit</button> -->
+                                <div class="mt-4">
+                                  <button type="submit" style="background-color:#1e3c98" class="w-full text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                                        Update
+                                    </button>
+                                </div>
+                              </div>
+                            </form>
+
+                            <!-- JS: Top checkbox auto-selects all lowest rate boxes -->
+                            <script>
+                              document.getElementById('select_all_lowest').addEventListener('change', function () {
+                                const check = this.checked;
+                                const boxes = document.querySelectorAll('input.rate-checkbox[data-lowest="true"]');
+                                boxes.forEach(cb => cb.checked = check);
+                              });
+                            </script>                           
+
+                          </div>
+                            <!-- End Form -->
+                            <!-- 🔙 Back Button -->
+                            <div class="mt-8 text-center">
+                                <a href="{% url 'requisition_comparative_list' %}" style="background-color:#1e3c98" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                    Back to Requisition List
+                                </a>
+                            </div>
+                            <div class="mt-4 mb-6 no-print">
+							  <button
+								type="button"
+								onclick="window.print()"
+								style="background-color:#1e3c98; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;"
+							  >
+								Print
+							  </button>
+							</div>
+    						<style>
+                              @media print {
+                                @page {
+                                  size: A4 landscape;
+                                  margin: 8mm;
+                                }
+                            
+                                /* Hide everything except the table-container */
+                                body * {
+                                  visibility: hidden !important;
+                                }
+                            
+                                .table-container,
+                                .table-container * {
+                                  visibility: visible !important;
+                                }
+                            
+                                .table-container {
+                                  position: absolute !important;
+                                  top: 0;
+                                  left: 0;
+                                  width: 100% !important;
+                                  padding: 0;
+                                  margin: 0;
+                                  overflow: visible !important;
+                                }
+                            
+                                /* Hide Select column */
+                                .select-column,
+                                input[type="checkbox"],
+                                label[for="select_all_lowest"],
+                                .no-print,
+                                button {
+                                  display: none !important;
+                                }
+                            
+                                /* Table formatting */
+                                table {
+                                  border-collapse: collapse !important;
+                                  width: 100% !important;
+                                  font-size: 10pt;
+                                  table-layout: fixed;
+                                }
+                            
+                                th, td {
+                                  border: 1px solid #000 !important;
+                                  padding: 4px 6px !important;
+                                  background: #fff !important;
+                                  white-space: nowrap;
+                                }
+                            
+                                tr {
+                                  page-break-inside: avoid !important;
+                                  break-inside: avoid !important;
+                                }
+                            
+                                /* Optional: reduce font further if needed */
+                                body {
+                                  zoom: 0.8; /* Shrink to fit more rows on page */
+                                }
+                              }
+                            </style>
+
+
+
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

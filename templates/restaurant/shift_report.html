@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Day Closing Stock Report - {{ shift.user.username }}{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    :root{
+        --kds-bg: #f4f5f7;
+        --kds-surface: #ffffff;
+        --kds-surface-raised: #f8f9fb;
+        --kds-border: #e2e5ea;
+        --kds-text: #1b2129;
+        --kds-text-muted: #6b7480;
+        --kds-accent: #e0611f;      /* order-ticket orange, darkened for light-bg contrast */
+        --kds-accent-dim: #e0611f14;
+        --kds-good: #1a9d6d;
+        --kds-warn: #b8790a;
+        --kds-bad: #d63c3c;
+        --font-display: 'Oswald', sans-serif;
+        --font-body: 'Inter', sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+        --shadow-sm: 0 1px 2px rgba(20,24,29,0.06), 0 1px 1px rgba(20,24,29,0.04);
+        --shadow-md: 0 2px 8px rgba(20,24,29,0.08);
+    }
+
+    .kds-wrap{
+        background: var(--kds-bg);
+        color: var(--kds-text);
+        font-family: var(--font-body);
+        border-radius: 16px;
+        padding: 28px;
+        margin: -1rem;
+    }
+    .kds-wrap h1, .kds-wrap h2, .kds-wrap h5{ font-family: var(--font-display); letter-spacing:0.02em; text-transform:uppercase; }
+
+    .kds-header{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:22px; }
+    .kds-eyebrow{ font-family: var(--font-mono); font-size:0.72rem; color:var(--kds-text-muted); letter-spacing:0.08em; }
+    .kds-header h1{ font-size:1.5rem; margin:6px 0 4px; color: var(--kds-text); }
+    .kds-back{
+        font-family:var(--font-mono); font-size:0.75rem; color:var(--kds-text-muted); text-decoration:none;
+        border:1px solid var(--kds-border); border-radius:8px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;
+        background: var(--kds-surface);
+    }
+    .kds-back:hover{ color:var(--kds-text); background:var(--kds-surface-raised); border-color:#c9ced6; }
+
+    .kds-actions{ display:flex; flex-wrap:wrap; gap:10px; }
+    .btn-kds{
+        font-family:var(--font-display); text-transform:uppercase; letter-spacing:0.03em; font-size:0.8rem;
+        border-radius:8px; padding:10px 18px; border:1px solid transparent; text-decoration:none; display:inline-flex; align-items:center; gap:6px;
+    }
+    .btn-kds-print{ background:var(--kds-accent); color:#fff; box-shadow: var(--shadow-sm); }
+    .btn-kds-print:hover{ background:#c9520f; color:#fff; }
+    .btn-kds-outline{
+        background: var(--kds-surface); color:var(--kds-text); border:1px solid var(--kds-border) !important;
+        font-family:var(--font-display); text-transform:uppercase; letter-spacing:0.03em; font-size:0.8rem;
+        border-radius:8px; padding:10px 18px; text-decoration:none; display:inline-flex; align-items:center;
+    }
+    .btn-kds-outline:hover{ background:var(--kds-surface-raised); border-color:#c9ced6; }
+
+    /* Shift meta strip */
+    .meta-strip{
+        display:grid; grid-template-columns:repeat(4,1fr); gap:0; background:var(--kds-surface);
+        border:1px solid var(--kds-border); border-radius:12px; margin-bottom:22px; overflow:hidden;
+        box-shadow: var(--shadow-sm);
+    }
+    @media (max-width:800px){ .meta-strip{ grid-template-columns:repeat(2,1fr);} }
+    .meta-cell{ padding:18px 20px; border-right:1px solid var(--kds-border); }
+    @media (max-width:800px){ .meta-cell:nth-child(2n){ border-right:none; } }
+    .meta-cell:last-child{ border-right:none; }
+    .meta-label{ font-family:var(--font-mono); font-size:0.68rem; color:var(--kds-text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px; }
+    .meta-value{ font-family:var(--font-display); font-size:1.1rem; color: var(--kds-text); }
+    .meta-value.pos{ color: var(--kds-good); }
+    .meta-value.neg{ color: var(--kds-bad); }
+    .meta-value.neu{ color: var(--kds-text-muted); }
+
+    .kds-panel{ background: var(--kds-surface); border:1px solid var(--kds-border); border-radius:12px; padding:20px; height:100%; box-shadow: var(--shadow-sm); }
+    .kds-panel-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+    .kds-panel-head h5{ font-size:0.85rem; color:var(--kds-text-muted); margin:0; font-weight:600; }
+    .kds-tag{ font-family:var(--font-mono); font-size:0.68rem; padding:3px 9px; border-radius:20px; background:var(--kds-surface-raised); color:var(--kds-text-muted); border:1px solid var(--kds-border); }
+
+    .kds-table-wrap{ background: var(--kds-surface); border:1px solid var(--kds-border); border-radius:12px; overflow:hidden; margin-top:20px; box-shadow: var(--shadow-sm); }
+    .kds-table-head{ display:flex; justify-content:space-between; align-items:center; padding:18px 20px; border-bottom:1px solid var(--kds-border); flex-wrap:wrap; gap:10px; background: var(--kds-surface-raised); }
+    .kds-table-head h5{ margin:0; font-size:1rem; color: var(--kds-text); }
+    #searchInput{
+        background: var(--kds-surface); border:1px solid var(--kds-border); color:var(--kds-text);
+        font-family:var(--font-mono); font-size:0.82rem;
+    }
+    #searchInput::placeholder{ color:var(--kds-text-muted); }
+    #searchInput:focus{ border-color:var(--kds-accent); box-shadow:0 0 0 3px var(--kds-accent-dim); outline:none; }
+
+    table.kds-table{ width:100%; margin:0; color:var(--kds-text); }
+    table.kds-table thead th{
+        font-family:var(--font-mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em;
+        color:var(--kds-text-muted); border-bottom:1px solid var(--kds-border); padding:10px 20px; font-weight:600; white-space:nowrap;
+        background: var(--kds-surface-raised);
+    }
+    table.kds-table tbody tr{ border-bottom:1px solid var(--kds-border); }
+    table.kds-table tbody tr:last-child{ border-bottom:none; }
+    table.kds-table tbody tr:hover{ background: var(--kds-surface-raised); }
+    table.kds-table td{ padding:12px 20px; vertical-align:middle; font-size:0.88rem; }
+    table.kds-table tfoot td{ padding:14px 20px; font-family:var(--font-mono); border-top:2px solid var(--kds-border); background: var(--kds-surface-raised); }
+    .name-cell{ font-weight:600; color: var(--kds-text); }
+    .num-cell{ font-family:var(--font-mono); text-align:center; }
+    .var-pos{ color:var(--kds-good); font-weight:600; }
+    .var-neg{ color:var(--kds-bad); font-weight:600; }
+    .var-zero{ color:var(--kds-text-muted); font-weight:600; }
+    .status-chip{ font-family:var(--font-mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.04em; padding:4px 10px; border-radius:20px; }
+    .chip-good{ background:#1a9d6d18; color:var(--kds-good); }
+    .chip-bad{ background:#d63c3c18; color:var(--kds-bad); }
+    .chip-neu{ background:#6b748018; color:var(--kds-text-muted); }
+    .empty-row{ text-align:center; padding:40px 20px; color:var(--kds-text-muted); font-family:var(--font-mono); font-size:0.85rem; }
+
+    /* Responsive table: card-style rows on narrow screens */
+    @media (max-width:700px){
+        table.kds-table thead{ display:none; }
+        table.kds-table, table.kds-table tbody, table.kds-table tr, table.kds-table td{ display:block; width:100%; }
+        table.kds-table tr{ padding:12px 16px; border-bottom:1px solid var(--kds-border); }
+        table.kds-table td{ display:flex; justify-content:space-between; padding:4px 0; font-size:0.85rem; }
+        table.kds-table td::before{ content: attr(data-label); font-family:var(--font-mono); font-size:0.68rem; color:var(--kds-text-muted); text-transform:uppercase; }
+        table.kds-table tfoot td{ display:flex; justify-content:space-between; }
+    }
+
+    .print-only-header{ display:none; }
+
+    @media print {
+        body{ background:#fff !important; color:#000 !important; }
+        .no-print{ display:none !important; }
+        .kds-wrap{ background:#fff !important; color:#000 !important; padding:0 !important; margin:0 !important; border-radius:0 !important; }
+        .kds-panel, .kds-table-wrap, .meta-strip{ background:#fff !important; border:1px solid #ccc !important; box-shadow:none !important; }
+        .meta-label, .kds-eyebrow{ color:#555 !important; }
+        .print-only-header{ display:block !important; }
+        table.kds-table th, table.kds-table td{ border:1px solid #ddd !important; color:#000 !important; padding:8px !important; display:table-cell !important; }
+        table.kds-table thead{ display:table-header-group !important; background:#fff !important; }
+        table.kds-table td::before{ content:none !important; }
+        .status-chip{ border:1px solid #999 !important; background:#fff !important; color:#000 !important; }
+    }
+</style>
+
+<div class="kds-wrap">
+    <div class="kds-header">
+        <div>
+            <a href="{% url 'shift_dashboard' %}" class="kds-back no-print">&larr; Back to Dashboard</a>
+            <div class="kds-eyebrow mt-2">SHIFT SUMMARY &bull; INVENTORY DRIFT</div>
+            <h1>Day Closing Stock Report</h1>
+            <div class="kds-eyebrow">Opening vs closing comparison and variance audit</div>
+        </div>
+        <div class="kds-actions no-print">
+            <a href="{% url 'restaurant_sales_list' %}" class="btn-kds-outline">POS</a>
+            <button onclick="window.print()" class="btn-kds btn-kds-print" style="cursor:pointer;">🖨 Print / Export PDF</button>
+        </div>
+    </div>
+
+    <!-- Printable-only header -->
+    <div class="print-only-header mb-4">
+        <h2 style="text-transform:none; font-family:'Oswald', sans-serif;">Day Closing Stock Report</h2>
+        <p><strong>Shift User:</strong> {{ shift.user.username }} | <strong>Generated:</strong> {% now "Y-m-d H:i" %}</p>
+        <hr>
+    </div>
+
+    <!-- Shift meta strip -->
+    <div class="meta-strip">
+        <div class="meta-cell">
+            <div class="meta-label">Shift User</div>
+            <div class="meta-value">{{ shift.user.username }}</div>
+        </div>
+        <div class="meta-cell">
+            <div class="meta-label">Shift Start</div>
+            <div class="meta-value">{{ shift.start_time|date:"Y-m-d H:i" }}</div>
+        </div>
+        <div class="meta-cell">
+            <div class="meta-label">Shift End</div>
+            <div class="meta-value">{{ shift.end_time|date:"Y-m-d H:i"|default:"Active Shift" }}</div>
+        </div>
+        <div class="meta-cell">
+            <div class="meta-label">Net Variance</div>
+            <div class="meta-value {% if total_variance < 0 %}neg{% elif total_variance > 0 %}pos{% else %}neu{% endif %}">
+                {% if total_variance > 0 %}+{% endif %}{{ total_variance|default:"0" }}
+            </div>
+        </div>
+    </div>
+
+    {% if snapshot_rows %}
+    <div class="row g-3 no-print">
+        <div class="col-lg-7">
+            <div class="kds-panel">
+                <div class="kds-panel-head">
+                    <h5>Opening vs Closing Stock Level</h5>
+                    <span class="kds-tag">Comparison</span>
+                </div>
+                <canvas id="stockComparisonChart" style="max-height:260px;"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="kds-panel">
+                <div class="kds-panel-head">
+                    <h5>Item Variance Analysis</h5>
+                    <span class="kds-tag">Surplus / Shortage</span>
+                </div>
+                <canvas id="varianceChart" style="max-height:260px;"></canvas>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Snapshot table -->
+    <div class="kds-table-wrap">
+        <div class="kds-table-head">
+            <h5>Stock Snapshot Data</h5>
+            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search item…" class="form-control form-control-sm no-print" style="width:200px;">
+        </div>
+        <div class="table-responsive">
+            <table class="kds-table" id="stockTable">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th class="text-center">Opening</th>
+                        <th class="text-center">Closing</th>
+                        <th class="text-center">Variance</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in snapshot_rows %}
+                    <tr>
+                        <td class="name-cell" data-label="Item">{{ row.item_name }}</td>
+                        <td class="num-cell" data-label="Opening">{{ row.opening_stock }}</td>
+                        <td class="num-cell" data-label="Closing">{{ row.closing_stock|default:"0" }}</td>
+                        <td class="num-cell {% if row.variance < 0 %}var-neg{% elif row.variance > 0 %}var-pos{% else %}var-zero{% endif %}" data-label="Variance">
+                            {% if row.variance > 0 %}+{% endif %}{{ row.variance }}
+                        </td>
+                        <td class="text-center" data-label="Status">
+                            {% if row.variance < 0 %}
+                                <span class="status-chip chip-bad">Shortage</span>
+                            {% elif row.variance > 0 %}
+                                <span class="status-chip chip-good">Surplus</span>
+                            {% else %}
+                                <span class="status-chip chip-neu">Matched</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="empty-row">No stock snapshot items found for this shift.</td></tr>
+                    {% endfor %}
+                </tbody>
+                {% if snapshot_rows %}
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end" style="text-align:right;">Total Variance:</td>
+                        <td class="num-cell {% if total_variance < 0 %}var-neg{% elif total_variance > 0 %}var-pos{% else %}var-zero{% endif %}">
+                            {% if total_variance > 0 %}+{% endif %}{{ total_variance|default:"0" }}
+                        </td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterTable() {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        document.querySelectorAll("#stockTable tbody tr").forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
+        });
+    }
+
+    {% if snapshot_rows %}
+    document.addEventListener("DOMContentLoaded", function() {
+        const itemNames = [{% for row in snapshot_rows %}"{{ row.item_name|escapejs }}",{% endfor %}];
+        const openingStock = [{% for row in snapshot_rows %}{{ row.opening_stock|default:0 }},{% endfor %}];
+        const closingStock = [{% for row in snapshot_rows %}{{ row.closing_stock|default:0 }},{% endfor %}];
+        const variances = [{% for row in snapshot_rows %}{{ row.variance|default:0 }},{% endfor %}];
+
+        const textColor = '#6b7480';
+        const gridColor = '#e2e5ea';
+
+        new Chart(document.getElementById('stockComparisonChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: itemNames,
+                datasets: [
+                    { label: 'Opening Stock', data: openingStock, backgroundColor: '#9aa3ad', borderRadius: 4 },
+                    { label: 'Closing Stock', data: closingStock, backgroundColor: '#e0611f', borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'top', labels: { color: textColor, font: { family: 'Inter', size: 11 } } } },
+                scales: {
+                    x: { ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: gridColor } },
+                    y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } }
+                }
+            }
+        });
+
+        const varianceColors = variances.map(v => v < 0 ? '#d63c3c' : (v > 0 ? '#1a9d6d' : '#9aa3ad'));
+        new Chart(document.getElementById('varianceChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: itemNames,
+                datasets: [{ label: 'Variance', data: variances, backgroundColor: varianceColors, borderRadius: 4 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: gridColor } },
+                    y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } }
+                }
+            }
+        });
+    });
+    {% endif %}
+</script>
+{% endblock %}

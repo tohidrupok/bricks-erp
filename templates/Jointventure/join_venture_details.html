@@ -1,0 +1,224 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Joint Venture Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      background-color: #f1f1f1;
+      padding: 20px;
+    }
+    .logo img {
+      height: 50px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .label-box {
+      background-color: #dbeafe;
+      color: #1e3c98;
+      padding: 4px 12px;
+      font-weight: bold;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 12px;
+    }
+
+    .table th, .table td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .signature-section {
+      margin-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      text-align: center;
+    }
+
+    .signature-box {
+      flex: 1;
+      margin: 0 8px;
+    }
+
+    .signature-line {
+      border-top: 1px solid #000;
+      margin-top: 40px;
+      display: block;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .back-btn {
+      background-color: green;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .print-btn {
+      background-color: #1e3c98;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media print {
+      .no-print { display: none; }
+      body { background: white; padding: 0; }
+      .card { box-shadow: none; border: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <!-- Header -->
+     <div class="card-header">
+      <div class="logo">
+        <img src="{% static '/images/BTP_logo_webp.webp' %}" alt="Company Logo">
+      </div>
+      <div style="text-align: right;">
+        <div class="label-box">Joint Venture Details</div>
+        <p style="font-size: 11px; margin-top: 4px;">Printing Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+      </div>
+    </div>
+   <div class="sub-head">
+      House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br>
+      +880191322203<br>
+      md2bayid@gmail.com
+    </div>
+     <br/>
+     
+    <!-- Details Table -->
+    <table class="table">
+      <tr>
+        <th>Land Purchase</th>
+        <td>{{ joint_venture.land_purchase }}</td>
+        <th>Land Owner</th>
+        <td>{{ joint_venture.land_owner_name }}</td>
+      </tr>
+      <tr>
+        <th>Developer Name</th>
+        <td>{{ joint_venture.developer_name }}</td>
+        <th>JV Status</th>
+        <td>
+          {% if joint_venture.jv_status == "active" %}
+            <span style="color:green;">Active</span>
+          {% elif joint_venture.jv_status == "completed" %}
+            <span style="color:blue;">Completed</span>
+          {% else %}
+            <span style="color:red;">Terminated</span>
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <th>Land Owner %</th>
+        <td>{{ joint_venture.land_owner_percentage }}%</td>
+        <th>Developer %</th>
+        <td>{{ joint_venture.developer_percentage }}%</td>
+      </tr>
+      <tr>
+        <th>Developer Flats</th>
+        <td>{{ joint_venture.developer_flat }}</td>
+        <th>Developer Sqft</th>
+        <td>{{ joint_venture.developer_sqft }}</td>
+      </tr>
+      <tr>
+        <th>Land Owner Flats</th>
+        <td>{{ joint_venture.land_owner_flat }}</td>
+        <th>Land Owner Sqft</th>
+        <td>{{ joint_venture.land_owner_sqft }}</td>
+      </tr>
+      <tr>
+        <th>Profit Share</th>
+        <td>{{ joint_venture.profit_share }}%</td>
+        <th>Revenue Share</th>
+        <td>{{ joint_venture.revenue_share }}%</td>
+      </tr>
+      <tr>
+        <th>Signing Money</th>
+        <td>{{ joint_venture.signing_money|intcomma }}</td>
+        <th>Photo</th>
+        <td>
+          {% if joint_venture.photo %}
+            <img src="{{ joint_venture.photo.url }}" alt="Plan" style="max-height:80px;">
+          {% else %}
+            N/A
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <th>Start Date</th>
+        <td>{{ joint_venture.start_date }}</td>
+        <th>End Date</th>
+        <td>{{ joint_venture.end_date }}</td>
+      </tr>
+    </table>
+
+    <!-- Signature Section -->
+    <div class="signature-section">
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Land Owner
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Developer
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Witness
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer no-print">
+      <button onclick="window.location.href='{% url 'joint_venture_list' %}'" class="back-btn">← Back</button>
+      <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+    </div>
+  </div>
+</body>
+</html>

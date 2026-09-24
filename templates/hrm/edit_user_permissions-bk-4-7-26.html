@@ -1,0 +1,57 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Permission Edit - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+				<div class="mt-5 grid grid-cols-12 gap-6">
+					<div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+						<a href="{% url 'user_permissions_list' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Back</button>
+                        </a>
+
+                        <div class="p-6 bg-white rounded shadow max-w-3xl mx-auto">
+                            <h2 class="text-xl font-bold mb-4">Edit Permissions for {{ user_obj.username }}</h2>
+                            <form method="post">
+                                {% csrf_token %}
+                                <div class="grid grid-cols-2 gap-4 mb-6">
+                                    {% for perm in all_permissions %}
+                                    <div>
+                                        <label class="inline-flex items-center">
+                                            <input type="checkbox" name="permissions" value="{{ perm.id }}"
+                                                {% if perm in user_permissions %}checked{% endif %}
+                                                class="mr-2 rounded border-gray-300">
+                                            {{ perm.name }}
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="flex justify-between">
+                                    <a href="{% url 'user_permissions_list' %}"  style="background-color:#1e3a8a;" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Back</a>
+                                    <button type="submit" style="margin-left:0.5%;background-color:#1e3a8a;"  class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Update Permissions</button>
+                                </div>
+                            </form>
+                        </div>
+						
+					</div>
+				</div>
+            </div>           
+        </div>
+            <!-- END: Content -->
+    </div>
+{% endblock %}

@@ -1,0 +1,265 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Flat/Plot Add Record - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Flat/Plot Add Record</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{% url 'flat_plot_add' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Refresh</button>
+                        </a>
+                        <a href="{% url 'flat_plot_summary' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Record List</button>
+                        </a>
+                        <div class="mx-auto hidden text-slate-500 md:block"> </div>            
+                    </div>
+            
+                  <!-- BEGIN: Property Sales List -->
+					<div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="overflow-auto">
+                                <!-- Project Name Dropdown -->
+                               <div class="mb-4 flex flex-wrap gap-4 items-end">
+                                    <div class="flex-1 min-w-[200px]">
+                                        <label for="project_name" class="block text-sm font-medium text-gray-700 mb-1">Select Project Name</label>
+                                        <select name="project_name" id="project_name" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                        <option value="">-- Select Project --</option>
+                                        {% for project in project_names %}
+                                            <option value="{{ project.id }}">{{ project.project_first_name }}</option>
+                                        {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <div class="flex-1 min-w-[150px]">
+                                        <label for="type_select" class="block text-sm font-medium text-gray-700 mb-1">Select Type</label>
+                                        <select id="type_select" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="toggleTable()" required>
+                                        <option value="flat">Flat</option>
+                                        <option value="plot">Plot</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+
+                               <!-- Add Row Button -->
+                                
+
+                                <!-- Flat Table -->
+                                <div id="flat_table">
+                                    <table id="flatsTable" class="min-w-full table-auto border-collapse border border-gray-300 text-center text-sm">
+                                        <thead class="bg-gray-200">
+                                            <tr>
+                                                <th class="border border-gray-300 p-2">Flat No</th>
+                                                {% for unit in unit_range %}
+                                                    <th class="border border-gray-300 p-2">Unit {{ unit }}</th>
+                                                {% endfor %}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for flat_no in flat_range %}
+                                            <tr class="hover:bg-gray-100">
+                                                <td class="border border-gray-300 p-2 font-semibold">
+                                                    <select name="flat_no[]" class="w-40 border border-gray-300 rounded text-center flat-select">
+                                                        {% for num in flat_number_options %}
+                                                            <option value="{{ num }}" {% if num == flat_no %}selected{% endif %}>Flat {{ num }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </td>
+                                                {% for unit_no in unit_range %}
+                                                    {% with key=flat_no|stringformat:"s"|add:"-"|add:unit_no|stringformat:"s" %}
+                                                    <td class="border border-gray-300 p-2">
+                                                        <input type="checkbox" 
+                                                            name="unit_checkbox" 
+                                                            value="flat-{{ flat_no }}-{{ unit_no }}"
+                                                            {% if "flat-{{ flat_no }}-{{ unit_no }}" in saved_units %}checked{% endif %}>
+                                                    </td>
+                                                    {% endwith %}
+                                                {% endfor %}
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                     <div class="flex justify-end mb-2">
+                                        <button type="button" id="addRowBtn" style="margin-top:5px;background-color:#84CC16"
+                                            class="px-3 py-1 text-white rounded">
+                                            Add Row
+                                        </button>
+                                    </div>
+                                    <script>
+                                        document.addEventListener("DOMContentLoaded", function() {
+                                            const addRowBtn = document.getElementById("addRowBtn");
+                                            const flatsTableBody = document.querySelector("#flatsTable tbody");
+                                            let currentFlatCount = {{ flat_range|length }}; // Start from initial count
+
+                                            // Function to update checkbox values in a row when flat number changes
+                                            function updateCheckboxValues(row, newFlatNo) {
+                                                const checkboxes = row.querySelectorAll("input[type='checkbox']");
+                                                checkboxes.forEach(checkbox => {
+                                                    const parts = checkbox.value.split("-");
+                                                    if (parts.length === 3) {
+                                                        parts[1] = newFlatNo;  // update flat number part
+                                                        checkbox.value = parts.join("-");
+                                                    }
+                                                });
+                                            }
+
+                                            // Attach change listener to a select to update checkbox values dynamically
+                                            function attachFlatSelectChangeListener(select) {
+                                                select.addEventListener("change", function() {
+                                                    const newFlatNo = this.value;
+                                                    const row = this.closest("tr");
+                                                    updateCheckboxValues(row, newFlatNo);
+                                                });
+                                            }
+
+                                            // Attach listeners to existing selects on page load
+                                            flatsTableBody.querySelectorAll("select[name='flat_no[]']").forEach(select => {
+                                                attachFlatSelectChangeListener(select);
+                                            });
+
+                                            addRowBtn.addEventListener("click", function() {
+                                                currentFlatCount++; // Increment flat number
+
+                                                // Create new table row
+                                                let newRow = document.createElement("tr");
+                                                newRow.classList.add("hover:bg-gray-100");
+
+                                                // Create Flat No cell with dropdown select
+                                                let flatCell = document.createElement("td");
+                                                flatCell.className = "border border-gray-300 p-2 font-semibold";
+
+                                                let select = document.createElement("select");
+                                                select.name = "flat_no[]";
+                                                select.className = "w-40 border border-gray-300 rounded text-center flat-select";
+
+                                                // Add options 1 to 20 (same as in template)
+                                                for (let i = 1; i <= 20; i++) {
+                                                    let option = document.createElement("option");
+                                                    option.value = i;
+                                                    option.text = "Flat " + i;
+                                                    if (i === currentFlatCount) {
+                                                        option.selected = true;
+                                                    }
+                                                    select.appendChild(option);
+                                                }
+
+                                                flatCell.appendChild(select);
+                                                newRow.appendChild(flatCell);
+
+                                                // Add unit checkboxes (same as before)
+                                                {% for unit_no in unit_range %}
+                                                    let unitCell{{ unit_no }} = document.createElement("td");
+                                                    unitCell{{ unit_no }}.className = "border border-gray-300 p-2";
+
+                                                    let checkbox{{ unit_no }} = document.createElement("input");
+                                                    checkbox{{ unit_no }}.type = "checkbox";
+                                                    checkbox{{ unit_no }}.name = "unit_checkbox";
+                                                    checkbox{{ unit_no }}.value = "flat-" + currentFlatCount + "-{{ unit_no }}";
+
+                                                    unitCell{{ unit_no }}.appendChild(checkbox{{ unit_no }});
+                                                    newRow.appendChild(unitCell{{ unit_no }});
+                                                {% endfor %}
+
+                                                flatsTableBody.appendChild(newRow);
+
+                                                // Attach change listener for this new select (important!)
+                                                attachFlatSelectChangeListener(select);
+                                            });
+                                        });
+                                        </script>
+
+                                </div>  
+
+                                <!-- Plot Table -->
+                                <div id="plot_table" style="display:none;">
+                                    <table class="min-w-full table-auto border-collapse border border-gray-300 text-center text-sm">
+                                        <thead class="bg-green-200">
+                                            <tr>
+                                                <th class="border border-gray-300 p-2">Plot No</th>
+                                                {% for unit in unit_range %}
+                                                    <th class="border border-gray-300 p-2">Unit {{ unit }}</th>
+                                                {% endfor %}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for plot_no in flat_range %}
+                                            <tr class="hover:bg-gray-100">
+                                                <td class="border border-gray-300 p-2 font-semibold">Plot {{ plot_no }}</td>
+                                                {% for unit_no in unit_range %}
+                                                    {% with key="plot-"|add:plot_no|stringformat:"s"|add:"-"|add:unit_no|stringformat:"s" %}
+                                                    <td class="border border-gray-300 p-2">
+                                                        <input type="checkbox" name="unit_checkbox" value="plot-{{ plot_no }}-{{ unit_no }}" {% if "plot-{{ plot_no }}-{{ unit_no }}" in saved_units %}checked{% endif %}>
+                                                    </td>
+                                                    {% endwith %}
+                                                {% endfor %}
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="mt-6">
+                                <button type="submit" style="margin-left:0.5%;background-color:#1e3c98" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                    Save Selection
+                                </button>
+                            </div>
+                        </form>
+
+                        <script>
+                        function toggleTable() {
+                            const typeSelect = document.getElementById('type_select').value;
+                            document.getElementById('flat_table').style.display = typeSelect === 'flat' ? 'block' : 'none';
+                            document.getElementById('plot_table').style.display = typeSelect === 'plot' ? 'block' : 'none';
+                        }
+                        </script>
+	
+					</div>                    
+                    
+                    <!-- END: Pagination -->
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

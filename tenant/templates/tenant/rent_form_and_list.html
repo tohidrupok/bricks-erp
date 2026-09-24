@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tenant Rent Management</title>
+<style>
+    body {
+        font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+        background: #f5f7fb;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+
+    header {
+        background: linear-gradient(90deg, #1d3557, #457b9d);
+        color: white;
+        padding: 20px 35px;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+
+    .container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+        padding: 30px;
+        max-width: 1400px;
+        margin: auto;
+    }
+
+    /* LEFT LISTING TABLE */
+    .table-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+        transition: 0.3s ease;
+    }
+    .table-card:hover {
+        transform: translateY(-3px);
+    }
+    .table-card h3 {
+        background: linear-gradient(90deg, #2a5298, #1e3c72);
+        color: #fff;
+        padding: 16px 20px;
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    .rent-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .rent-table th {
+        background: #f1f5f9;
+        color: #222;
+        padding: 12px;
+        font-weight: 600;
+        border-bottom: 2px solid #e5eaf0;
+        font-size: 14px;
+        text-align: center;
+    }
+    .rent-table td {
+        padding: 12px;
+        text-align: center;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 14px;
+        color: #444;
+    }
+    .rent-table tr:hover {
+        background: #f8fbff;
+        transition: 0.25s;
+    }
+
+    /* Status Styles */
+    .status-active {
+        background: #d1fae5;
+        color: #065f46;
+        padding: 5px 14px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .status-expired {
+        background: #fee2e2;
+        color: #b91c1c;
+        padding: 5px 14px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .status-other {
+        background: #e5e7eb;
+        color: #374151;
+        padding: 5px 14px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    /* RIGHT FORM CARD */
+    .form-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        padding: 30px;
+        transition: 0.3s ease;
+    }
+    .form-card:hover {
+        transform: translateY(-3px);
+    }
+    .form-card h3 {
+        margin: 0 0 20px 0;
+        font-size: 20px;
+        color: #1e3c72;
+        border-bottom: 2px solid #eef2f7;
+        padding-bottom: 12px;
+        font-weight: 600;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px 25px;
+    }
+    
+    .form-grid > div {
+        display: flex;
+        flex-direction: column;
+    } 
+    label {
+        font-weight: 600;
+        font-size: 13px;
+        color: #333;
+        margin-bottom: 6px;
+    }
+    select, input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ccd4e0;
+        border-radius: 10px;
+        font-size: 14px;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    select:focus, input:focus {
+        border-color: #2f65a1;
+        box-shadow: 0 0 0 3px rgba(47,101,161,0.2);
+        outline: none;
+    }
+
+    .full-width {
+        grid-column: 1 / span 2;
+        margin-top: 12px;
+    }
+
+    button {
+        background: linear-gradient(90deg, #1e3c72, #2a5298);
+        color: #fff;
+        border: none;
+        padding: 14px;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 18px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
+    button:hover {
+        background: linear-gradient(90deg, #16335d, #204a82);
+        transform: translateY(-2px);
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+</head>
+<body>
+
+<style>
+
+/* ===== Bayzid House Header ===== */
+.bh-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    padding:14px 18px;
+    background:#ffffff;
+    border-radius:10px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.05);
+    margin-bottom:20px;
+}
+
+/* Title */
+.bh-header-title{
+    font-size:18px;
+    font-weight:700;
+    color:#1f2937;
+}
+
+/* Buttons container */
+.bh-header-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+/* Base button */
+.bh-btn{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 14px;
+    font-size:14px;
+    font-weight:600;
+    border-radius:8px;
+    text-decoration:none;
+    transition:0.25s;
+    border:1px solid transparent;
+}
+
+/* Back Button */
+.bh-btn-back{
+    background:#f3f4f6;
+    color:#374151;
+}
+
+.bh-btn-back:hover{
+    background:#e5e7eb;
+}
+
+/* Dashboard Button */
+.bh-btn-dashboard{
+    background:#2563eb;
+    color:white;
+}
+
+.bh-btn-dashboard:hover{
+    background:#1d4ed8;
+}
+
+/* Reload Button */
+.bh-btn-reload{
+    background:#10b981;
+    color:white;
+}
+
+.bh-btn-reload:hover{
+    background:#059669;
+}
+
+/* Icon size */
+.bh-btn i{
+    width:16px;
+    height:16px;
+}
+
+</style>
+
+
+<header class="bh-header">
+
+    <div class="bh-header-title">
+        🏠 Bayzid Hossain House – Tenant Accounts
+    </div>
+
+    <div class="bh-header-actions">
+
+        <!-- Back Button -->
+        <a href="javascript:history.back()" class="bh-btn bh-btn-back">
+            <i data-lucide="arrow-left"></i>
+            Back
+        </a>
+
+        <!-- Dashboard Button -->
+        <a href="{% url 'tenant_dashboard' %}" class="bh-btn bh-btn-dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            Dashboard
+        </a>
+
+        <!-- Reload Button -->
+        <a href="javascript:location.reload()" class="bh-btn bh-btn-reload">
+            <i data-lucide="refresh-ccw"></i>
+            Reload
+        </a>
+
+    </div>
+
+</header>
+
+<script>
+lucide.createIcons();
+</script>
+  
+
+<div class="container">
+    <!-- LEFT LISTING TABLE -->
+    <div class="table-card">
+        <h3>Rent Listing</h3>
+        <table class="rent-table">
+            <thead>
+                <tr>
+                    <th>Project</th>
+                    <th>Tenant</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rent in rents %}
+                <tr>
+                    <td>{{ rent.projectref }}-{{ rent.room.flat }}-{{ rent.room.room_name }}</td>
+                    <td>{{ rent.varatiya }}</td>
+                    <td>{{ rent.startmonths }}</td>
+                    <td>{{ rent.endmonths }}</td>
+                    <td>
+                        {% if rent.status == "Active" %}
+                            <span class="status-active">Active</span>
+                        {% elif rent.status == "Expired" %}
+                            <span class="status-expired">Expired</span>
+                        {% else %}
+                            <span class="status-other">{{ rent.status }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">No rent records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- RIGHT FORM -->
+    <div class="form-card">
+        <h3>Rent Form</h3>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div class="form-grid">
+                <div>
+                    <label>ProjectRef</label>
+                    {{ form.projectref }}
+                </div>
+                <div>
+                    <label>Flat</label>
+                    {{ form.flat }}
+                </div>
+                <div>
+                    <label>Room</label>
+                    {{ form.room }}
+                </div>
+
+                <div>
+                    <label>Core Room Rent</label>
+                    <input type="number" id="id_core_room_rent" name="id_core_room_rent" step="0.01">
+                </div>
+                <div>
+                    <label>Parking Cost</label>
+                    <input type="number" id="id_parking_cost" name="id_parking_cost" step="0.01">
+                </div>
+
+                <div>
+                    <label>Service Rent</label>
+                    <input type="number" id="id_service_rent" name="id_service_rent" step="0.01">
+                </div>
+                <div>
+                    <label>Gas Rent</label>
+                    <input type="number" id="id_gas_rent" name="id_gas_rent" step="0.01">
+                </div>
+
+                <div>
+                    <label>Water Rent</label>
+                    <input type="number" id="id_water_rent" name="id_water_rent" step="0.01">
+                </div>
+
+                <div>
+                    <label>Meter Number</label>
+                    <input type="text" id="id_meter_number" name="id_meter_number">
+                </div>
+                <div>
+                    <label>Opening Reading</label>
+                    <input type="number" id="id_opening_reading" name="id_opening_reading" step="0.01">
+                </div>
+
+                <div>
+                    <label>Unit Charge</label>
+                    <input type="number" id="id_unit_charge" name="id_unit_charge" step="0.01">
+                </div>
+                <div>
+                    <label>Tenant</label>
+                    {{ form.varatiya }}
+                </div>
+
+                <div>
+                    <label>Start Month</label>
+                    {{ form.startmonths }}
+                </div>
+
+            <div class="full-width" style="display:flex; gap:12px;">
+                <button type="submit">💾 Save Rent</button>
+                <button type="button" onclick="window.history.back()">⬅️ Back</button>
+            </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function loadRooms() {
+    var projectrefId = $('#id_projectref').val();
+    var flat = $('#id_flat').val();
+    if(projectrefId && flat){
+        $.ajax({
+            url: "{% url 'ajax_load_rooms' %}",
+            data: { 'projectref_id': projectrefId, 'flat': flat },
+            success: function(data){
+                var options = '<option value="">---------</option>';
+                data.rooms.forEach(function(room){
+                    options += `<option value="${room.id}"
+                        data-core="${room.core_room_rent}"
+                        data-parking="${room.parking_cost}"
+                        data-service="${room.service_rent}"
+                        data-gas="${room.gas_rent}"
+                        data-water="${room.water_rent}"
+                        data-electricity="${room.electricity_rent}"
+                        data-other="${room.other_cost}"
+                        data-meter_number="${room.meter_number}"
+                        data-opening_reading="${room.opening_reading}"
+                        data-last_month_reading="${room.last_month_reading}"
+                        data-unit_charge="${room.unit_charge}"
+                    >${room.name}</option>`;
+                });
+                $('#id_room').html(options);
+            }
+        });
+    }
+}
+
+// Populate cost and meter fields when room changes
+$('#id_room').on('change', function(){
+    var selected = $(this).find(':selected');
+
+    $('#id_core_room_rent').val(selected.data('core') || 0);
+    $('#id_parking_cost').val(selected.data('parking') || 0);
+    $('#id_service_rent').val(selected.data('service') || 0);
+    $('#id_gas_rent').val(selected.data('gas') || 0);
+    $('#id_water_rent').val(selected.data('water') || 0);
+    $('#id_electricity_rent').val(selected.data('electricity') || 0);
+    $('#id_other_cost').val(selected.data('other') || 0);
+
+    $('#id_meter_number').val(selected.data('meter_number') || '');
+    $('#id_opening_reading').val(selected.data('opening_reading') || 0);
+    $('#id_last_month_reading').val(selected.data('last_month_reading') || 0);
+    $('#id_unit_charge').val(selected.data('unit_charge') || 0);
+
+    calculateTotal();
+});
+
+// Recalculate total when any cost field changes
+$('#id_core_room_rent, #id_parking_cost, #id_service_rent, #id_gas_rent, #id_water_rent, #id_electricity_rent, #id_other_cost')
+.on('input', calculateTotal);
+
+function calculateTotal(){
+    var total = 0;
+    ['#id_core_room_rent','#id_parking_cost','#id_service_rent','#id_gas_rent','#id_water_rent','#id_electricity_rent','#id_other_cost'].forEach(function(id){
+        total += parseFloat($(id).val() || 0);
+    });
+    $('#id_total_rent').val(total.toFixed(2));
+}
+
+$('#id_projectref, #id_flat').change(loadRooms);
+
+$(function() {
+    $("#id_startmonths, #id_endmonths").datepicker({
+        dateFormat: "yy-mm-dd",
+        changeMonth: true,
+        changeYear: true,
+        showButtonPanel: true
+    });
+});
+</script>
+
+</body>
+</html>

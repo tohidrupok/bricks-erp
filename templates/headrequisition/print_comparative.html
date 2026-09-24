@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Requisition Comparative - {{ project.project_first_name }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 p-8 text-sm">
+
+  <h1 class="text-2xl font-semibold mb-2">Requisition Comparative</h1>
+  <h2 class="text-lg mb-4">Requisition Comparative Sheet - Project: <strong>{{ project.project_first_name }}</strong></h2>
+
+  <div class="overflow-x-auto bg-white border border-gray-300">
+    <table class="min-w-full border-collapse text-center">
+      <thead>
+        <tr class="bg-gray-50">
+          <th class="border px-2 py-2" rowspan="2">SL</th>
+          <th class="border px-2 py-2" rowspan="2">Item Name</th>
+          <th class="border px-2 py-2" rowspan="2">Unit</th>
+          <th class="border px-2 py-2" rowspan="2">Qty</th>
+          {% for vendor in vendor_names %}
+            <th class="border px-2 py-2" colspan="3">{{ vendor }}</th>
+          {% endfor %}
+        </tr>
+        <tr class="bg-gray-100">
+          {% for vendor in vendor_names %}
+            <th class="border px-2 py-1">Rate</th>
+            <th class="border px-2 py-1">Amount</th>
+            <th class="border px-2 py-1">Select</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr class="hover:bg-gray-50">
+            <td class="border px-2 py-1">{{ forloop.counter }}</td>
+            <td class="border px-2 py-1 text-left">{{ item.item_name }}</td>
+            <td class="border px-2 py-1">{{ item.unit }}</td>
+            <td class="border px-2 py-1">{{ item.qty }}</td>
+
+            {% for data in item.vendor_data %}
+              <td class="border px-2 py-1 {% if data.is_lowest %}text-green-600 font-semibold{% elif data.is_highest %}text-red-600 font-semibold{% endif %}">
+                {% if data.rate %}{{ data.rate|floatformat:2 }}{% else %}-{% endif %}
+              </td>
+              <td class="border px-2 py-1">
+                {% if data.amount %}{{ data.amount|floatformat:2 }}{% else %}-{% endif %}
+              </td>
+              <td class="border px-2 py-1">
+                {% if data.rate and data.id %}
+                  <input type="checkbox" {% if data.selected %}checked{% endif %} class="transform scale-125" />
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+
+        <tr class="bg-gray-100 font-semibold text-gray-700">
+          <td class="border px-2 py-1 text-left" colspan="4">Vendor Totals</td>
+          {% for total in vendor_totals %}
+            <td class="border px-2 py-1" colspan="3">{{ total|floatformat:0 }}</td>
+          {% endfor %}
+        </tr>
+        <tr class="bg-white font-bold text-gray-800">
+          <td class="border px-2 py-2 text-right" colspan="{{ 4 + vendor_names|length * 3 }}">Final Total: {{ final_total|floatformat:0 }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    window.onload = function () {
+      window.print();
+    };
+  </script>
+
+</body>
+</html>

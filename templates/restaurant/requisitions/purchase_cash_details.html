@@ -1,0 +1,275 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Purchase Head Cash Details</title>
+  <style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #ccc;
+    padding: 20px;
+    font-size: 11px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 20px;
+    max-width: 960px;
+    margin: auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .logo img {
+    height: 50px;
+  }
+
+  .report-title {
+    background-color: #e2f0d9;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 6px;
+  }
+
+  .header-right p {
+    font-size: 11px;
+    margin: 2px 0;
+    color: #777;
+  }
+
+  .sub-head {
+    font-size: 11px;
+    color: #555;
+    line-height: 1.4;
+    margin-top: -20px;
+    margin-bottom: 5px;
+  }
+
+  .basic-info {
+    font-size: 12px;
+    margin-top: 10px;
+  }
+
+  .basic-info p {
+    margin: 4px 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-top: 12px;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 6px 8px;
+    text-align: center;
+  }
+
+  th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+  }
+
+  td {
+    background-color: #fff;
+  }
+
+  .description {
+    text-align: left;
+  }
+
+  .amount-words {
+    font-weight: bold;
+    font-size: 12px;
+    margin-top: 14px;
+  }
+
+  .signature-section {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+  }
+
+  .signature-box {
+    flex: 1;
+    padding: 8px;
+  }
+
+  .signature-box:not(:last-child) {
+    margin-right: 10px;
+  }
+
+  .signature-line {
+    display: block;
+    margin-top: 10px;
+    border-top: 1px solid #000;
+    width: 100%;
+  }
+
+  .footer {
+    margin-top: 30px;
+    font-size: 11px;
+    text-align: center;
+    color: #777;
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+  }
+
+  /* Unified button style */
+  .btn,
+  .print-btn {
+    background-color: #1f3bb3;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn:hover,
+  .print-btn:hover {
+    background-color: #1d4ed8;
+  }
+
+  @media print {
+    .no-print,
+    .footer {
+      display: none !important;
+    }
+
+    body {
+      background: white;
+      padding: 0;
+    }
+
+    .card {
+      box-shadow: none;
+      margin: 0;
+      padding: 0;
+    }
+  }
+</style>
+
+</head>
+<body>
+  <div class="card">
+
+    <!-- Header -->
+    <div class="header-row">
+      <div class="logo">
+        <img src="{% static 'images/BTP_logo_webp.webp' %}" alt="Company Logo">
+      </div>
+      <div class="header-right" style="text-align: right;">
+        <div class="report-title">Purchase Head Cash Details</div>
+        <p>Voucher No.: {{ voucher.pk }}</p>
+        <p>Printing Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+      </div>
+    </div>
+
+    <!-- Address & Contact -->
+    <div class="sub-head">
+      House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br>
+      +880191322203 | md2bayid@gmail.com
+    </div>
+
+    <hr style="margin: 8px 0; border-color: #ddd;" />
+
+    <!-- Basic Info -->
+    <div class="basic-info">
+      <p><strong>Requisition ID:</strong> {{ requi_uniq_id }}</p>
+	   <p><strong>Received Person:</strong> {{ received_person }}</p>
+    </div>
+
+    <!-- Requisition Table -->
+    <table>
+      <thead>
+        <tr>
+          <th>SL. No.</th>
+          <th>Project</th>
+          <th>Supplier</th>
+          <th>Date</th>
+          <th>Item Name</th>
+          <th>Qty</th>
+          <th>Rate</th>
+          <th>Amount (TK)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in requisitions %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ item.project_name.project_first_name }}</td>
+          <td>{{ item.vendor_name }}</td>
+          <td>{{ item.requisition_date }}</td>
+          <td class="description">{{ item.item_name }}</td>
+          <td class="description">{{ item.qty }}</td>
+          <td class="description">{{ item.rate }}</td>
+          <td style="text-align: right;">{{ item.amount|intcomma }}/-</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" style="text-align: center;">No requisition items found.</td>
+        </tr>
+        {% endfor %}
+        <tr>
+          <td colspan="6" style="text-align: right;"><strong>Total =</strong></td>
+          <td style="text-align: right;"><strong>{{ total_amount|intcomma }}/-</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Amount in Words -->
+    <div class="amount-words">
+      In Words: <em>{{ amount_in_words }}</em> only.
+    </div>
+
+    <!-- Signature Section -->
+    <div class="signature-section">
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Prepared by
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Checked by
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Forwarded by
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Approved by
+      </div>
+    </div>
+	
+    <!-- Footer (Hidden on Print) -->
+    <div class="footer no-print">
+      © 2025 BTP LIMITED. | This is a system-generated document.
+	  <div class="no-print flex items-center gap-4 mb-4">
+	  <a href="{% url 'purchase_list' %}" class="btn">← Back to List</a>
+	  <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+	</div>
+
+    </div>
+
+  </div>
+</body>
+</html>

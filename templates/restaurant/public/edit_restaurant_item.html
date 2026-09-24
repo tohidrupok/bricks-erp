@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Restaurant Item</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#eef2f7;
+    margin:0;
+    padding:0;
+}
+
+.navbar{
+    background:#0d6efd;
+    padding:12px 20px;
+    color:white;
+}
+
+.navbar a{
+    color:white;
+    text-decoration:none;
+}
+
+.container{
+    max-width:800px;
+    margin:20px auto;
+    padding:0 15px;
+}
+
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+}
+
+input, select, textarea{
+    width:100%;
+    padding:10px;
+    margin-bottom:12px;
+    border-radius:6px;
+    border:1px solid #ddd;
+}
+
+.btn{
+    padding:10px 14px;
+    border:none;
+    border-radius:6px;
+    color:white;
+    cursor:pointer;
+}
+
+.btn-blue{background:#0d6efd;}
+.btn-gray{background:#6c757d;}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="navbar">
+    <a href="{% url 'public_restaurant_item_name' %}">Back to List</a>
+</div>
+
+<div class="container">
+
+    <div class="card">
+
+        <h2>Edit Restaurant Item</h2>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button type="submit" class="btn btn-blue">Update</button>
+            <a href="{% url 'public_restaurant_item_name' %}" class="btn btn-gray">Cancel</a>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

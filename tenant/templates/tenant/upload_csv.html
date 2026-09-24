@@ -1,0 +1,246 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Upload - Attendance System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #c0c0c0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 2px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h2 {
+            color: #e0e0e0;
+            font-size: 18px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header .subtitle {
+            color: #808080;
+            font-size: 12px;
+            margin-top: 8px;
+            font-family: monospace;
+        }
+
+        .messages {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+
+        .messages li {
+            background: #252525;
+            border-left: 3px solid #4a4a4a;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .messages li.success {
+            border-left-color: #5c9e5c;
+            background: #1a2e1a;
+        }
+
+        .messages li.error {
+            border-left-color: #9e5c5c;
+            background: #2e1a1a;
+        }
+
+        .upload-form {
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            color: #a0a0a0;
+            font-size: 13px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            background: #252525;
+            border: 1px solid #404040;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-wrapper:hover {
+            border-color: #606060;
+            background: #2a2a2a;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            color: #909090;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .file-input-icon {
+            display: block;
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #505050;
+        }
+
+        .btn-submit {
+            background: #2a2a2a;
+            border: 1px solid #404040;
+            color: #e0e0e0;
+            padding: 12px 30px;
+            font-size: 13px;
+            font-family: 'Consolas', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background: #333;
+            border-color: #555;
+        }
+
+        .btn-submit:active {
+            background: #222;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            text-align: center;
+        }
+
+        .footer .status {
+            color: #606060;
+            font-size: 11px;
+            font-family: monospace;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #5c9e5c;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .file-selected {
+            color: #5c9e5c;
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>CSV Upload Module</h2>
+            <div class="subtitle">Attendance Table Management System</div>
+        </div>
+
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" class="upload-form" id="uploadForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">Select CSV File</label>
+                <div class="file-input-wrapper">
+                    <span class="file-input-icon">📄</span>
+                    <div class="file-input-label">Click to browse or drag file here</div>
+                    <div class="file-selected" id="fileName"></div>
+                    <input type="file" name="csv_file" required id="fileInput" accept=".csv">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Upload to Server</button>
+        </form>
+
+        <div class="footer">
+            <div class="status">
+                <span class="status-indicator"></span>
+                System Online | Ready for Upload
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                fileName.textContent = '✓ ' + this.files[0].name;
+                fileName.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

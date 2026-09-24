@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    body { background: #eef2f7; }
+    .top-header { max-width: 1400px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .dashboard-layout { max-width: 1400px; margin: auto; display: grid; grid-template-columns: 280px 1fr; gap: 20px; padding-bottom: 60px; }
+    
+    /* Project Sidebar Menu */
+    .sidebar-card { background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,.05); height: fit-content; }
+    .sidebar-title { font-size: 14px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px; }
+    .project-nav-link { display: flex; align-items: center; padding: 12px; border-radius: 8px; color: #475569; text-decoration: none; font-weight: 500; font-size: 14px; margin-bottom: 6px; transition: all 0.2s; border: 1px solid transparent; }
+    .project-nav-link:hover { background: #f1f5f9; color: #0d6efd; }
+    .project-nav-link.active { background: #e0f2fe; color: #0369a1; font-weight: bold; border-color: #bae6fd; }
+    
+    /* Content Area Styles */
+    .content-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.05); overflow: hidden; }
+    .content-header { background: #198754; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+    
+    /* Status Badge Elements */
+    .metric-badge { background: rgba(255, 255, 255, 0.2); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+    .summary-bar { background: #f8f9fa; border-bottom: 1px solid #e2e8f0; padding: 15px 20px; display: flex; gap: 30px; }
+    .stat-box { font-size: 14px; color: #475569; }
+    .stat-box strong { font-size: 16px; color: #1e293b; font-family: monospace; }
+
+    /* Inventory Data Table */
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    thead { background: #f8f9fa; border-bottom: 2px solid #e2e8f0; }
+    th, td { padding: 14px; border-bottom: 1px solid #f1f5f9; }
+    tbody tr:hover { background-color: #f8fafc; }
+    
+    .text-right { text-align: right; }
+    .amount-highlight { font-weight: bold; color: #16a34a; font-family: monospace; }
+    
+    @media(max-width: 992px) {
+        .dashboard-layout { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="top-header">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <h2 style="margin: 0; color: #1e293b; font-weight: bold; font-size: 26px;">📦 Restaurant Inventories Dashboard</h2>
+            <div style="color: #64748b; margin-top: 4px;">Real-time stock valuation logs grouped by business operational nodes.</div>
+        </div>
+        <div>
+            <a href="{% url 'restau_requisition_list_public_store' %}" style="background: #0d6efd; color: white; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: bold; display: inline-block;">
+                📦 Back
+            </a>
+            <a href="{% url 'rest_inventory_project_wise' %}" style="background: green; color: white; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: bold; display: inline-block;">
+                🔄 Refresh
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-layout">
+    <div class="sidebar-card">
+        <div class="sidebar-title">🏢 Operational Projects</div>
+        {% for proj in projects %}
+            <a href="{% url 'rest_inventory_project_wise_filtered' proj.id %}" class="project-nav-link {% if selected_project.id == proj.id %}active{% endif %}">
+                🏪 {{ proj.project_first_name }}
+            </a>
+        {% empty %}
+            <div style="color: #94a3b8; font-style: italic; padding: 10px; font-size: 13px;">No project inventory tracks parsed yet.</div>
+        {% endfor %}
+    </div>
+
+    <div class="content-card">
+        {% if selected_project %}
+            <div class="content-header">
+                <h3 style="margin: 0; font-size: 18px; font-weight: bold;">Project: {{ selected_project.project_first_name }}</h3>
+                 <input type="text" id="searchInput" placeholder="🔍 Search table row content..." onkeyup="handleFilter()" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc; flex: 1;">
+            
+                <span class="metric-badge">Tracking Records</span>
+            </div>
+            
+            <div class="summary-bar">
+                <div class="stat-box">Total Stock Investment: <strong>৳{{ grand_total_amount|floatformat:2 }}</strong></div>
+                <div class="stat-box">Total Quantities Transacted: <strong>{{ total_items_count }} Units</strong></div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">SL</th>
+                            <th style="width: 12%;">Req. Date</th>
+                            <th style="width: 20%;">Item Description</th>
+                            <th style="width: 18%;">Assigned Vendor</th>
+                            <!--<th style="width: 15%;">Handled By</th>-->
+                            <th class="text-right">Qty</th>
+                            <th class="text-right">Rate</th>
+                            <th class="text-right">Total Valuation</th>
+                            <th class="text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        {% for row in inventories %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td style="color: #64748b; white-space: nowrap;">{{ row.requisition_date|date:"Y-m-d"|default:"-" }}</td>
+                                <td>
+                                    <span style="font-weight: 600; color: #1e293b; display: block;">{{ row.item_name }}</span>
+                                    {% if row.remark %}
+                                        <small style="color: #94a3b8; display: block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ row.remark }}">📝 {{ row.remark }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if row.vendor_name %}
+                                        <span style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #334155;">🏬 {{ row.vendor_name.rest_supplier_name }}</span>
+                                    {% else %}
+                                        <span style="color: #cbd5e1; font-style: italic;">Direct Purchase</span>
+                                    {% endif %}
+                                </td>
+                                <!--<td style="color: #475569;">{{ row.employee_name }}</td>-->
+                                <td class="text-right" style="font-weight: 500;">{{ row.qty }} <small style="color: #94a3b8;">{{ row.unit }}</small></td>
+                                <td class="text-right" style="font-family: monospace;">৳{{ row.rate|floatformat:2 }}</td>
+                                <td class="text-right amount-highlight">৳{{ row.amount|floatformat:2 }}</td>
+                                <td class="text-right">
+                                    <a href="{% url 'requisition_deduct_inventory_stock' row.id %}" 
+                                       style="background: #dc3545; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: bold; display: inline-block; transition: background 0.2s;"
+                                       onmouseover="this.style.background='#b21f2d'" 
+                                       onmouseout="this.style.background='#dc3545'">
+                                        📉 Deduct Stock
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 50px; color: #94a3b8; font-style: italic; font-size: 14px;">
+                                    No live transaction ledger lines tracked under this node yet.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 80px 20px; color: #64748b;">
+                <span style="font-size: 40px; display: block; margin-bottom: 10px;">🏪</span>
+                <h4 style="margin: 0; font-size: 16px;">No Active Projects Available</h4>
+                <p style="margin: 4px 0 0 0; font-size: 13px; color: #94a3b8;">Please ensure inventory data records exist inside your database storage matrix.</p>
+            </div>
+        {% endif %}
+    </div>
+    <script>
+    function handleFilter(){
+        let searchValue = document.getElementById("searchInput").value.toLowerCase().trim();
+        let rows = document.querySelectorAll("#tableBody tr");
+    
+        rows.forEach(function(row){
+            if (row.cells.length === 1) return; 
+            let rowText = row.textContent.toLowerCase();
+            row.style.display = searchValue === "" || rowText.includes(searchValue) ? "" : "none";
+        });
+    }
+    </script>
+</div>
+{% endblock %}

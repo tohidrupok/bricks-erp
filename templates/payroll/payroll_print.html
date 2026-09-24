@@ -1,0 +1,389 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payroll Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: silver;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 960px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo img {
+      height: 50px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .label-box {
+      background-color: #e2f0d9;
+      color: #000;
+      padding: 4px 10px;
+      font-weight: bold;
+      font-size: 13px;
+      border-radius: 4px;
+    }
+
+    .sub-head {
+      font-size: 11px;
+      color: #555;
+      margin-top: -18px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .section-title {
+      font-weight: bold;
+      font-size: 14px;
+      color: #0A8754;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 10px;
+    }
+
+    .table th,
+    .table td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .table th {
+      background-color: #0A8754;
+      color: white;
+      text-align: center;
+    }
+
+    .table td.text-center {
+      text-align: center;
+    }
+
+    .table td.text-right {
+      text-align: right;
+    }
+
+    .total-row td {
+      font-weight: bold;
+      background-color: #e3f1e6;
+      text-align: right;
+    }
+
+    .amount-in-words {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #0A8754;
+      font-size: 12px;
+    }
+
+    .signature-section {
+      margin-top: 100px;
+      display: flex;
+      justify-content: space-between;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .signature-box {
+      flex: 1;
+      padding: 8px;
+      border-top: 1.5px solid #0A8754;
+      margin: 0 5px;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #333;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+      flex-wrap: wrap;
+    }
+
+    .print-btn {
+      background-color: #1e3c98;
+      color: white;
+      padding: 5px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .btn-back {
+      background-color: #e2e8f0;
+      color: #333;
+      padding: 5px 12px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 11px;
+      border: 1px solid #ccc;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .card {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+    
+    /* =========================
+    FOOTER BUTTON SECTION
+    ========================= */
+    
+    .footer-buttons{
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        gap:15px;
+        margin-top:30px;
+        flex-wrap:wrap;
+    }
+    
+    /* COMMON BUTTON STYLE */
+    .btn-footer{
+        border:none;
+        padding:8px 8px;
+        border-radius:10px;
+        font-size:10px;
+        font-weight:600;
+        cursor:pointer;
+        text-decoration:none;
+        transition:all 0.3s ease;
+        box-shadow:0 4px 10px rgba(0,0,0,0.12);
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+    }
+    
+    /* BACK BUTTON */
+    .btn-back{
+        background:#6c757d;
+        color:white;
+    }
+    
+    .btn-back:hover{
+        background:#5a6268;
+        transform:translateY(-2px);
+    }
+    
+    /* UPDATE SALARY BUTTON */
+    .btn-update{
+        background:linear-gradient(135deg, #00b09b, #96c93d);
+        color:white;
+        font-size:10px;
+        padding:8px 8px;
+        border:1px solid transparent;
+    }
+    
+    .btn-update:hover{
+        transform:translateY(-3px) scale(1.03);
+        box-shadow:0 8px 20px rgba(0,176,155,0.35);
+    }
+    
+    /* PRINT BUTTON */
+    .btn-print{
+        background:#0d6efd;
+        color:white;
+    }
+    
+    .btn-print:hover{
+        background:#0b5ed7;
+        transform:translateY(-2px);
+    }
+    
+    /* MOBILE RESPONSIVE */
+    @media(max-width:768px){
+    
+        .footer-buttons{
+            flex-direction:column;
+        }
+    
+        .btn-footer{
+            width:100%;
+            justify-content:center;
+        }
+    
+    }
+    
+
+  </style>
+</head>
+<body>
+
+  <div class="card">
+
+    <!-- Header -->
+    <div class="card-header">
+      <div class="logo">
+        <img src="{% static 'images/BTP_logo_bricks.webp' %}" alt="Company Logo" />
+      </div>
+      <div style="text-align: right;">
+        <div class="label-box">Payroll Report</div>
+        <p style="font-size: 11px; margin-top: 4px;">Printing Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+      </div>
+    </div>
+
+    <!-- Address or info line (optional, you can customize) -->
+    <div class="sub-head">
+      Bonanai, Dhaka-1216<br>
+      01993005558, 09639246230, 09639246231 <br>
+      bricks@gmail.com, bricks@gmail.com, www.bricks.com
+    </div>
+
+    <hr style="margin: 8px 0;" />
+    
+    {% if selected_project %}
+      <h2 class="text-lg font-semibold mb-4">
+        Payroll Report – {{ selected_project.project_first_name }} ({{ month }})
+      </h2>
+    {% else %}
+      <h2 class="text-lg font-semibold mb-4">
+        Payroll Report – {{ month }}
+      </h2>
+    {% endif %}
+    
+    <table class="table">
+  <thead>
+    <tr>
+      <th>Employee Name</th>
+      <th>Designation</th>
+      <th class="text-right">Salary</th>
+      <th>Total Days</th>
+      <th>Present</th>
+      <th>Leave</th>
+      <th>Off Day</th>
+      <th>Absent</th>
+      <th>Payable Days</th>
+      <th class="text-right">Allowance (+)</th>
+      <th class="text-right">Gross Salary</th>
+      <th class="text-right">Advance (-)</th>
+      <th class="text-right">Loan (-)</th>
+      <th class="text-right">Net Salary</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% if payrolls %}
+      {% for item in payrolls %}
+        <tr>
+          <td>{{ item.employee.rda_emp_name }}</td>
+          <td>{{ item.employee.rda_position }}</td>
+          <td class="text-right">{{ item.employee.rda_salary|floatformat:2 }}</td>
+          <td class="text-center">{{ item.days_in_month }}</td>
+          <td class="text-center">{{ item.present_days }}</td>
+          <td class="text-center">{{ item.leave_days }}</td>
+          <td class="text-center">{{ item.off_days }}</td>
+          <td class="text-center">{{ item.absent_days }}</td>
+          <td class="text-center"><strong>{{ item.working_days }}</strong></td>
+          <td class="text-right">{{ item.allowances|floatformat:2 }}</td>
+          <td class="text-right">{{ item.basic_salary|floatformat:2 }}</td>
+          <td class="text-right">{{ item.advance_amount|floatformat:2 }}</td>
+          <td class="text-right">{{ item.loan_amount|floatformat:2 }}</td>
+          <td class="text-right"><strong>{{ item.net_salary|floatformat:2 }}</strong></td>
+        </tr>
+      {% endfor %}
+
+      <!-- TOTAL ROW -->
+      <tr class="total-row">
+        <td colspan="2" class="text-right">Total</td>
+        <td class="text-right">{{ total_rda_salary|floatformat:2 }}</td>
+        <td colspan="6" class="text-center">-</td>
+        <td class="text-right">{{ total_allowances|floatformat:2 }}</td>
+        <td class="text-right">{{ total_basic_salary|floatformat:2 }}</td>
+        <td class="text-right">{{ total_advance|floatformat:2 }}</td>
+        <td class="text-right">{{ total_loans|floatformat:2 }}</td>
+        <td class="text-right"><strong>{{ total_net_salary|floatformat:2 }}</strong></td>
+      </tr>
+
+    {% else %}
+      <tr>
+        <td colspan="14" class="text-center">
+          No payroll data available for this period.
+        </td>
+      </tr>
+    {% endif %}
+  </tbody>
+</table>
+
+
+
+
+    <!-- Amount in Words -->
+    {% if balance_in_words %}
+      <div class="amount-in-words">
+        Balance in words: "{{ balance_in_words }}"
+      </div>
+    {% endif %}
+    
+    <!-- Signatures -->
+    <div class="signature-section">
+      <div class="signature-box">Prepared by</div>
+      <div class="signature-box">Checked by</div>
+      <div class="signature-box">Forwarded by</div>
+      <div class="signature-box">Approved by</div>
+    </div>
+
+    <!-- Footer with Back & Print buttons -->
+    <div class="footer no-print">
+      <a href="{% url 'payroll_list' %}" class="btn-back">← Back to List</a>
+	   &nbsp;&nbsp;
+
+        <!--<form method="POST" action="{% url 'update_pay_salary' %}" style="display:inline;">-->
+        <!--    {% csrf_token %}-->
+            
+        <!--    <input type="hidden" name="project_id" value="{{ selected_project.id }}">-->
+    
+        <!--    <input type="hidden" name="month" value="{{ month }}">-->
+        <!--    <input type="hidden" name="year" value="{{ year }}">-->
+    
+        <!--    <button type="submit" class="btn-footer btn-update">-->
+        <!--        Update Pay Salary-->
+        <!--    </button>-->
+        <!--</form>-->
+    
+        &nbsp;&nbsp;
+      <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+    </div>
+
+  </div>
+
+</body>
+</html>

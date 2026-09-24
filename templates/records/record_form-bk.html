@@ -1,0 +1,171 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Customer Add - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+            <div class="container mx-auto mt-10">
+
+                <div class="max-w-2xl mx-auto">
+                    <div class="overflow-hidden rounded-lg shadow-lg bg-white">
+
+                        <!-- Card Header -->
+                        <div class="bg-primary px-4 py-3 text-white">
+                            <h4 class="mb-0 text-lg font-semibold">
+                                Create New Record File
+                            </h4>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="p-6">
+                            <form method="POST"
+                                  class="w-full max-w-3xl mx-auto bg-white p-8 shadow-lg rounded-xl border border-slate-200">
+                        
+                                {% csrf_token %}
+                        
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        
+                                    {% for field in form %}
+                                    <div class="{% if field.name == 'remarks' %}md:col-span-2{% endif %}">
+                                        <label for="{{ field.id_for_label }}"
+                                               class="block mb-2 text-sm font-semibold text-slate-700">
+                                            {{ field.label }}
+                        
+                                            {% if field.field.required %}
+                                                <span class="text-red-500">*</span>
+                                            {% endif %}
+                                        </label>
+                        
+                                        {{ field }}
+                        
+                                        {% if field.help_text %}
+                                            <p class="mt-1 text-xs text-slate-500">
+                                                {{ field.help_text }}
+                                            </p>
+                                        {% endif %}
+                        
+                                        {% for error in field.errors %}
+                                            <p class="mt-1 text-sm text-red-600">
+                                                {{ error }}
+                                            </p>
+                                        {% endfor %}
+                                    </div>
+                                    {% endfor %}
+                        
+                                </div>
+                        
+                                <div class="flex justify-center gap-4 mt-8">
+                        
+                                    <a href="{% url 'file_record_list' %}"
+                                       class="inline-flex items-center px-6 py-2.5 rounded-lg bg-slate-500 text-white font-medium shadow hover:bg-slate-600 transition">
+                                        Cancel
+                                    </a>
+                        
+                                    <button type="submit" style="background-color:#1e40ac;color:white"
+                                            class="inline-flex items-center px-6 py-2.5 rounded-lg bg-blue-900 text-white font-medium shadow hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                                        Save Record
+                                    </button>
+                        
+                                </div>
+                        
+                            </form>
+                        </div>
+                        
+                        <!--<script>-->
+                        <!--document.addEventListener('DOMContentLoaded', function () {-->
+                        
+                        <!--    const fileType = document.getElementById('id_file_type');-->
+                        <!--    const fileNo = document.getElementById('id_file_no');-->
+                        
+                        <!--    if (!fileType || !fileNo) {-->
+                        <!--        return;-->
+                        <!--    }-->
+                        
+                        <!--    fileType.addEventListener('change', function () {-->
+                        
+                        <!--        const type = this.value;-->
+                        
+                        <!--        if (!type) {-->
+                        <!--            fileNo.value = '';-->
+                        <!--            fileNo.placeholder = 'Select File Type First';-->
+                        <!--            return;-->
+                        <!--        }-->
+                        
+                        <!--        fetch("{% url 'get_next_file_no' %}?file_type=" + type)-->
+                        <!--            .then(response => response.json())-->
+                        <!--            .then(data => {-->
+                        <!--                fileNo.value = data.file_no;-->
+                        <!--            })-->
+                        <!--            .catch(error => {-->
+                        <!--                console.error(error);-->
+                        <!--                fileNo.value = '';-->
+                        <!--            });-->
+                        <!--    });-->
+                        <!--});-->
+                        <!--</script>-->
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                            
+                                const fileType = document.getElementById('id_file_type');
+                                const fileNo = document.getElementById('id_file_no');
+                            
+                                if (!fileType || !fileNo) {
+                                    return;
+                                }
+                            
+                                fileType.addEventListener('change', function () {
+                            
+                                    const type = this.value;
+                            
+                                    if (!type) {
+                                        fileNo.value = '';
+                                        fileNo.placeholder = 'Select File Type First';
+                                        return;
+                                    }
+                            
+                                    fetch("{% url 'get_next_file_no' %}?file_type=" + type)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            fileNo.value = data.file_no;
+                                        })
+                                        .catch(error => {
+                                            console.error(error);
+                                            fileNo.value = '';
+                                        });
+                                });
+                            });
+                            </script>
+                        <!-- End Card Body -->
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        <!-- END: Content -->
+
+    </div>
+
+</div>
+{% endblock %}

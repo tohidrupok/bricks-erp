@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ tenant.name }} - Ledger</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #333; padding: 6px; text-align: center; }
+        th { background: #eee; }
+        form { margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <h2>{{ tenant.name }} - ({{ tenant.house }})</h2>
+    <p><strong>NID:</strong> {{ tenant.nid }}</p>
+
+    <!-- Filter Form -->
+    <form method="get">
+        <label>Start Date:</label>
+        <input type="date" name="start_date" value="{{ start_date }}">
+
+        <label>End Date:</label>
+        <input type="date" name="end_date" value="{{ end_date }}">
+
+        <label>Include Opening Balance:</label>
+        <select name="include_opening">
+            <option value="yes" {% if include_opening == "yes" %}selected{% endif %}>Yes</option>
+            <option value="no" {% if include_opening == "no" %}selected{% endif %}>No</option>
+        </select>
+
+        <button type="submit">Filter</button>
+        <a href="{% url 'tenant_ledger' tenant.id %}">Reset</a>
+    </form>
+
+    <h3>
+        {% if start_date and end_date %}
+            Ledger ({{ start_date }} to {{ end_date }})
+        {% else %}
+            Full Ledger
+        {% endif %}
+        - {% if include_opening == "yes" %}Including Opening Balance{% else %}Excluding Opening Balance{% endif %}
+    </h3>
+
+    <!-- Ledger Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Bill No.</th>
+                <th>Debit</th>
+                <th>Credit</th>
+                <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.date }}</td>
+                <td>{{ row.description }}</td>
+                <td>{{ row.bill_no|default:"-" }}</td>
+                <td>{{ row.debit }}</td>
+                <td>{{ row.credit }}</td>
+                <td>{{ row.balance }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">No records found</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Totals -->
+    <h3>Totals</h3>
+    <p>Total Debit: {{ total_debit }}</p>
+    <p>Total Credit: {{ total_credit }}</p>
+    <p><strong>Amount Receivable: {{ receivable }}</strong></p>
+</body>
+</html>

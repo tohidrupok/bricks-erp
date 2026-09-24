@@ -1,0 +1,13 @@
+{% load static %}
+
+<nav class="side-nav hidden w-[80px] overflow-x-hidden pb-16 pr-5 md:block xl:w-[230px]">
+    <a class="flex items-center pt-4 pl-5 intro-x" href="">
+        <img src="{% static 'images/Bricks Holdings Logo V2.png' %}" alt="BRICKS ERP">
+    </a>
+    <div class="my-6 side-nav__divider"></div>
+    <ul>
+        {% for item in sidebar_menu %}
+            {% include "partials/menu_item.html" with item=item %}
+        {% endfor %}
+    </ul>
+</nav>

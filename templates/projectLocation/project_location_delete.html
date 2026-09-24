@@ -1,0 +1,48 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Project Location Delete - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <div class="container mx-auto mt-12">
+                    <!-- Delete Confirmation Header -->
+                    <h2 class="text-lg font-bold mb-4">Project Locations Delete</h2>
+                    <div class="mb-6 text-lg text-gray-800 space-y-2">
+                        <p><strong>Location Name:</strong> {{ location.location_name }}</p>
+                        <p><strong>Area:</strong> {{ location.area }}</p>
+                        <p><strong>Created At:</strong> {{ location.create_date }}</p>
+                    </div>
+                
+                    <!-- Delete Confirmation Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="flex justify-center space-x-4">
+                            <button type="submit" style="background-color:#1e3c98" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg">
+                                Yes, Delete
+                            </button>
+                            <a href="{% url 'project_location_list' %}"  style="margin-left:0.5%;background-color:#1e3c98" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

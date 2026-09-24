@@ -1,0 +1,99 @@
+{% extends 'office_inventory/base.html' %}
+{% block header %}Dashboard{% endblock %}
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><div class="card card-stat p-3">
+    <div class="text-muted small">Total Requisitions</div>
+    <div class="num text-primary">{{ total_requisitions }}</div>
+  </div></div>
+  <div class="col-md-3"><div class="card card-stat p-3">
+    <div class="text-muted small">Pending</div>
+    <div class="num text-warning">{{ pending }}</div>
+  </div></div>
+  <div class="col-md-3"><div class="card card-stat p-3">
+    <div class="text-muted small">Completed</div>
+    <div class="num text-success">{{ completed }}</div>
+  </div></div>
+  <div class="col-md-3"><div class="card card-stat p-3">
+    <div class="text-muted small">Low Stock Items</div>
+    <div class="num text-danger">{{ low_stock_items }}</div>
+  </div></div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><div class="card card-stat p-3">
+    <div class="text-muted small">Pending Purchases</div>
+    <div class="num text-info">{{ pending_purchases }}</div>
+  </div></div>
+  <div class="col-md-3"><div class="card card-stat p-3">
+    <div class="text-muted small">Assets Assigned</div>
+    <div class="num" style="color:#6f42c1;">{{ assigned_assets }}</div>
+  </div></div>
+  <div class="col-md-3"><div class="card card-stat p-3">
+    <div class="text-muted small">Open Damage Reports</div>
+    <div class="num text-danger">{{ damage_open }}</div>
+  </div></div>
+  <div class="col-md-3"><div class="card card-stat p-3">
+    <div class="text-muted small">Total Estimated Damage Cost</div>
+    <div class="num" style="color:#c0392b;">{{ damage_total_cost }}</div>
+  </div></div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-6"><div class="card card-stat p-3">
+    <h6>Stock by Category</h6>
+    <table class="table table-sm mb-0">
+      <thead><tr><th>Category</th><th>Items</th><th>Total Stock</th></tr></thead>
+      <tbody>
+      {% for c in category_summary %}
+        <tr><td>{{ c.category__name }}</td><td>{{ c.items }}</td><td>{{ c.stock }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+  <div class="col-md-6"><div class="card card-stat p-3">
+    <h6>Stock by Location</h6>
+    <table class="table table-sm mb-0">
+      <thead><tr><th>Location</th><th>Items</th><th>Total Stock</th></tr></thead>
+      <tbody>
+      {% for l in location_summary %}
+        <tr><td>{{ l.location__name }}</td><td>{{ l.items }}</td><td>{{ l.stock }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-7"><div class="card card-stat p-3">
+    <h6>Recent Requisitions</h6>
+    <table class="table table-sm">
+      <thead><tr><th>Req No</th><th>Employee</th><th>Item</th><th>Qty</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for r in recent_requisitions %}
+        <tr>
+          <td><a href="{% url 'office_inventory:requisition_detail' r.pk %}">{{ r.req_no }}</a></td>
+          <td>{{ r.employee.rda_emp_name }}</td>
+          <td>{{ r.item.item_code }}</td>
+          <td>{{ r.requested_qty }}</td>
+          <td><span class="badge bg-secondary">{{ r.get_status_display }}</span></td>
+        </tr>
+      {% empty %}<tr><td colspan="5" class="text-center text-muted">No requisitions yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+  <div class="col-md-5"><div class="card card-stat p-3">
+    <h6>Low Stock Alerts</h6>
+    <table class="table table-sm">
+      <thead><tr><th>Code</th><th>Item</th><th>Stock</th><th>Min</th></tr></thead>
+      <tbody>
+      {% for i in low_stock_list %}
+        <tr class="table-danger">
+          <td>{{ i.item_code }}</td><td>{{ i.name }}</td><td>{{ i.current_stock }}</td><td>{{ i.min_stock }}</td>
+        </tr>
+      {% empty %}<tr><td colspan="4" class="text-center text-muted">All stock levels healthy.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div>
+{% endblock %}

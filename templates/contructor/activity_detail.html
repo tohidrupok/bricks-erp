@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Activity Details - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+  }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+  {% include 'partials/mobile.html' %}
+  <div class="mt-[4.7rem] flex md:mt-0">
+    {% include 'partials/sidebar_list.html' %}
+    <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+      {% include 'partials/header.html' %}
+
+      <div class="bg-white shadow-md rounded-xl p-6 mt-10 text-sm">
+        <div class="flex justify-between items-center mb-5 no-print">
+          <div class="flex gap-2">
+            <a href="{% url 'activity_list' %}">
+              <button style="background-color:#84cc16" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-xs">🔙 Back</button>
+            </a>
+            <button onclick="location.reload()" style="background-color:#00008b" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded text-xs">🔄 Refresh</button>
+          </div>
+		  &nbsp;
+          <div class="relative w-52">
+            <input id="searchInput" type="text" placeholder="🔍 Search..." class="w-full text-xs py-2 pl-3 pr-8 border rounded-md shadow-sm focus:ring focus:ring-blue-300 focus:outline-none" oninput="handleSearch()">
+          </div>
+        </div>
+
+        <h2 class="text-lg font-semibold mb-4 text-gray-800">Activity Details</h2>
+		<div class="mt-6 grid grid-cols-12 gap-6">
+            <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                <div class="max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+					<div class="space-y-2">
+					  <p><span class="font-medium">Contractor:</span> {{ activity.contractor }}</p>
+					  <p><span class="font-medium">Project:</span> {{ activity.project }}</p>
+					  <p><span class="font-medium">Working Head:</span> {{ activity.working_head }}</p>
+					  <p><span class="font-medium">Create Date:</span> {{ activity.create_date }}</p>
+					  <p><span class="font-medium">Work Start Date:</span> {{ activity.work_start_date }}</p>
+					  <p><span class="font-medium">Work End Date:</span> {{ activity.work_end_date }}</p>
+					  <p><span class="font-medium">Description:</span> {{ activity.work_description }}</p>
+					  <p><span class="font-medium">Amount Paid:</span> {{ activity.amount_paid }}</p>
+					  <p><span class="font-medium">Status:</span> {{ activity.get_status_display }}</p>
+					  <p><span class="font-medium">Remarks:</span> {{ activity.remarks }}</p>
+					</div>
+
+					<div class="mt-6 no-print flex gap-4">
+					   <a href="{% url 'activity_list' %}" style="background-color:#84cc16" class="text-gray-700 hover:underline">📋 Back to List</a>
+					</div>
+				  </div>
+				</div>
+			</div>
+		</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

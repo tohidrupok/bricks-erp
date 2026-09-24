@@ -1,0 +1,64 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Land Head of Expense Name Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-lg font-medium">Land Head of Expense Name</h2>
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                        <form method="POST" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                            {% csrf_token %}
+                            <h2 class="text-xl font-semibold mb-6 text-center text-gray-800">Add Land Head of Expense</h2>
+                            
+                           <!-- head_expense_code Name -->
+                            <div class="mb-4">
+                                <label for="id_head_exp_name" class="font-medium text-lg text-gray-800">Expense Head Name</label>
+                                <input type="text" id="id_head_exp_name" name="head_exp_name"
+                                       class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                       placeholder="Enter Expense Head Name"
+                                       value="{{ form.head_exp_name.value|default_if_none:'' }}">
+                                {% for error in form.head_exp_name.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>                       
+                        
+                            <!-- Submit & Back Buttons -->
+                            <div class="text-center mt-6">
+                                <button type="submit" style="background-color:#1e3c98"
+                                        class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 rounded-md">
+                                    Save Type
+                                </button>
+                                <a href="{% url 'land_expense_head_list' %}"  style="margin-left:0.5%;background-color:#1e3c98"
+                                   class="ml-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md">
+                                    Back to List
+                                </a>
+                            </div>
+                        </form>
+                        
+                        <br>  
+                    </div>
+                    
+                    
+                </div>
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

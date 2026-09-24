@@ -1,0 +1,89 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Information Edit Record - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Information Edit Record</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+               <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible bg-white p-6 rounded-lg shadow">
+                
+                        <!-- Page Title -->
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Edit Property - {{ prop.property_name }}</h2>
+                
+                        <!-- Form -->
+                        <form method="POST" class="space-y-6">
+                            {% csrf_token %}
+                
+                            {% for field in form %}
+                                <div class="flex flex-col">
+                                    <label for="{{ field.id_for_label }}" class="mb-1 font-medium text-gray-700">
+                                        {{ field.label }}
+                                    </label>
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <p class="text-red-600 text-sm mt-1">{{ field.errors|striptags }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                
+                            <!-- Buttons -->
+                            <div class="flex items-center gap-3 mt-4">
+                                <button type="submit" style="background-color:#84cc16"
+                                        class="px-5 py-2 bg-blue-600 text-white font-medium rounded-md shadow hover:bg-blue-700 transition">
+                                    Update
+                                </button>
+                
+                                <a href="{% url 'property_list' %}" style="margin-left:0.5%;background-color:#1e3a8a;color:#FFFFFF"
+                                   class="px-5 py-2 bg-gray-300 text-gray-800 font-medium rounded-md hover:bg-gray-400 transition">
+                                    Back
+                                </a>
+                            </div>
+                        </form>
+                
+                    </div>
+                </div>
+
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,278 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Customer Add - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+            <div class="container mx-auto mt-10">
+
+                <div class="max-w-2xl mx-auto">
+                   <div class="px-6 py-6">
+
+                    <!-- Page Header -->
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-8">
+                
+                        <div>
+                            <h1 class="text-2xl font-bold text-slate-800">
+                                Record Files Dashboard
+                            </h1>
+                
+                            <p class="text-sm text-slate-500 mt-1">
+                                Record File Summary & Statistics
+                            </p>
+                        </div>
+                
+                        <div class="mt-4 md:mt-0 flex flex-wrap items-center gap-2">
+                            <a href="{% url 'file_record_create' %}" style="background-color:#1e40ac;color:white"
+                               class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-800 text-white text-sm font-medium shadow hover:bg-blue-700 transition duration-150">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Add New Record
+                            </a>
+                        
+                            <a href="{% url 'file_record_list' %}"
+                               class="inline-flex items-center px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 text-sm font-medium shadow-sm hover:bg-slate-50 transition duration-150">
+                                Back
+                            </a>
+                        
+                            <a href="{% url 'file_record_dashboard' %}"
+                               class="inline-flex items-center px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 text-sm font-medium shadow-sm hover:bg-slate-50 transition duration-150">
+                                <svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.253 8H18"/>
+                                </svg>
+                                Refresh
+                            </a>
+                        </div>
+                
+                    </div>
+                
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                
+                        <div class="bg-white rounded-xl shadow p-6 border-l-4 border-blue-600">
+                            <h3 class="text-sm font-medium text-slate-500">
+                                Total Files
+                            </h3>
+                
+                            <div class="text-4xl font-bold text-slate-800 mt-3">
+                                {{ total_files }}
+                            </div>
+                        </div>
+                
+                        <div class="bg-white rounded-xl shadow p-6 border-l-4 border-yellow-500">
+                            <h3 class="text-sm font-medium text-slate-500">
+                                Pending
+                            </h3>
+                
+                            <div class="text-4xl font-bold text-yellow-600 mt-3">
+                                {{ pending_files }}
+                            </div>
+                        </div>
+                
+                        <div class="bg-white rounded-xl shadow p-6 border-l-4 border-indigo-500">
+                            <h3 class="text-sm font-medium text-slate-500">
+                                In Progress
+                            </h3>
+                
+                            <div class="text-4xl font-bold text-indigo-600 mt-3">
+                                {{ in_progress_files }}
+                            </div>
+                        </div>
+                
+                        <div class="bg-white rounded-xl shadow p-6 border-l-4 border-green-600">
+                            <h3 class="text-sm font-medium text-slate-500">
+                                Completed
+                            </h3>
+                
+                            <div class="text-4xl font-bold text-green-600 mt-3">
+                                {{ completed_files }}
+                            </div>
+                        </div>
+                
+                    </div>
+                
+                
+                    <!-- File Type Summary -->
+                    <div class="bg-white rounded-xl shadow mb-8">
+                
+                        <div class="px-6 py-4 border-b">
+                            <h3 class="text-lg font-semibold text-slate-700">
+                                File Type Summary
+                            </h3>
+                        </div>
+                
+                        <div class="overflow-x-auto">
+                
+                            <table class="min-w-full">
+                
+                                <thead class="bg-slate-100">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">
+                                            File Type
+                                        </th>
+                
+                                        <th class="px-6 py-3 text-center text-sm font-semibold">
+                                            Total Files
+                                        </th>
+                                    </tr>
+                                </thead>
+                
+                                <tbody>
+                
+                                    {% for item in file_type_summary %}
+                                    <tr class="border-b hover:bg-slate-50">
+                
+                                        <td class="px-6 py-4 font-medium text-slate-700">
+                                            {{ item.file_type }}
+                                        </td>
+                
+                                        <td class="px-6 py-4 text-center font-semibold text-blue-700">
+                                            {{ item.total }}
+                                        </td>
+                
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="2"
+                                            class="text-center py-8 text-slate-500">
+                                            No Records Found
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                
+                                </tbody>
+                
+                            </table>
+                
+                        </div>
+                
+                    </div>
+                
+                
+                    <!-- Latest Records -->
+                    <div class="bg-white rounded-xl shadow">
+                
+                        <div class="flex justify-between items-center px-6 py-4 border-b">
+                
+                            <h3 class="text-lg font-semibold text-slate-700">
+                                Latest Records
+                            </h3>
+                
+                            <a href="{% url 'file_record_list' %}"
+                               class="text-blue-700 font-medium hover:underline">
+                                View All
+                            </a>
+                
+                        </div>
+                
+                        <div class="overflow-x-auto">
+                
+                            <table class="min-w-full">
+                
+                                <thead class="bg-slate-100">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left">Date</th>
+                                        <th class="px-4 py-3 text-left">File No</th>
+                                        <th class="px-4 py-3 text-left">Dag No</th>
+                                        <th class="px-4 py-3 text-left">Client</th>
+                                        <th class="px-4 py-3 text-left">Work Type</th>
+                                        <th class="px-4 py-3 text-center">Status</th>
+                                    </tr>
+                                </thead>
+                
+                                <tbody>
+                
+                                    {% for record in latest_records %}
+                                    <tr class="border-b hover:bg-slate-50">
+                
+                                        <td class="px-4 py-3">
+                                            {{ record.date|date:"d M Y" }}
+                                        </td>
+                
+                                        <td class="px-4 py-3 font-semibold text-blue-700">
+                                            {{ record.file_no }}
+                                        </td>
+                                        
+                                        <td class="px-4 py-3 font-semibold text-blue-700">
+                                            {{ record.dag_no }}
+                                        </td>
+                                        
+                                        <td class="px-4 py-3">
+                                            {{ record.owner_client }}
+                                        </td>
+                
+                                        <td class="px-4 py-3">
+                                            {{ record.work_type }}
+                                        </td>
+                
+                                        <td class="px-4 py-3 text-center">
+                
+                                            {% if record.status == 'Completed' %}
+                                                <span class="px-3 py-1 rounded-full text-xs bg-green-100 text-green-700">
+                                                    {{ record.status }}
+                                                </span>
+                
+                                            {% elif record.status == 'In Progress' %}
+                                                <span class="px-3 py-1 rounded-full text-xs bg-indigo-100 text-indigo-700">
+                                                    {{ record.status }}
+                                                </span>
+                
+                                            {% else %}
+                                                <span class="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">
+                                                    {{ record.status }}
+                                                </span>
+                                            {% endif %}
+                
+                                        </td>
+                
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5"
+                                            class="text-center py-8 text-slate-500">
+                                            No Records Available
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                
+                                </tbody>
+                
+                            </table>
+                
+                        </div>
+                
+                    </div>
+                
+                </div>
+                </div>
+
+            </div>
+
+        </div>
+        <!-- END: Content -->
+
+    </div>
+
+</div>
+{% endblock %}

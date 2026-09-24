@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Public Requisition List</title>
+<style>
+body{
+    background:#eef2f7;
+    font-family:Arial;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+h1{
+    margin:0;
+    font-size:22px;
+}
+
+.filter-box{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+    margin-top:15px;
+    background:#f8f9fa;
+    padding:15px;
+    border-radius:10px;
+}
+
+input,select{
+    padding:10px;
+    border:1px solid #ddd;
+    border-radius:6px;
+}
+
+button{
+    background:#0d6efd;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0b5ed7;
+}
+
+.table-box{
+    margin-top:20px;
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#0d6efd;
+    color:white;
+    padding:10px;
+}
+
+td{
+    padding:10px;
+    border-bottom:1px solid #eee;
+}
+
+tr:hover{
+    background:#f1f5ff;
+}
+
+@media(max-width:768px){
+    .filter-box{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <div class="header">
+            <h1>Restaurant Requisition Report</h1>
+            <div>
+                <a href="{% url 'public_rest_requisition_create' %}{% if project_id or employee_id %}?project={{ project_id }}&employee={{ employee_id }}{% endif %}" 
+                   style="padding:8px 15px; background:#28a745; color:#fff; text-decoration:none; border-radius:5px; margin-right:5px;">
+                    Back
+                </a>
+                <a href="?{% if project_id %}project={{ project_id }}&{% endif %}{% if employee_id %}employee={{ employee_id }}&{% endif %}{% if from_date %}from_date={{ from_date }}&{% endif %}{% if to_date %}to_date={{ to_date }}{% endif %}"
+                   style="padding:8px 12px;background:#198754;color:#fff;text-decoration:none;border-radius:6px;">
+                    🔄 Refresh Current
+                </a>
+            </div>
+        </div>
+
+        <form method="GET" id="filterForm" class="filter-box">
+
+            <select name="project" id="filter_project">
+                <option value="">Project</option>
+                {% for p in projects %}
+                    <option value="{{ p.id }}" {% if p.id|stringformat:"s" == project_id %}selected{% endif %}>
+                        {{ p.project_first_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        
+            <select name="employee" id="filter_employee">
+                <option value="">Employee</option>
+                {% for e in employees %}
+                    <option value="{{ e.id }}" {% if e.id|stringformat:"s" == employee_id %}selected{% endif %}>
+                        {{ e.rda_emp_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        
+            <input type="date" name="from_date" id="filter_from_date" value="{{ from_date }}">
+            <input type="date" name="to_date" id="filter_to_date" value="{{ to_date }}">
+        
+            <button type="submit">Filter</button>
+        </form>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 15px;">
+            <div>
+                <button type="button" onclick="printFilteredRequisitions()"
+                   style="padding: 8px 15px; background: green; color: #fff; border: none; cursor: pointer; border-radius: 5px; font-size: 14px; font-weight: bold; display: inline-flex; align-items: center; gap: 5px;">
+                    🖨️ Print Filtered Requisitions
+                </button>
+            </div>
+        </div>
+        
+        <script>
+        function printFilteredRequisitions() {
+            const project = document.getElementById('filter_project').value;
+            const employee = document.getElementById('filter_employee').value;
+            const fromDate = document.getElementById('filter_from_date').value;
+            const toDate = document.getElementById('filter_to_date').value;
+        
+            let printUrl = "{% url 'print_day_wise_requisitions' %}?";
+            let params = [];
+        
+            if (project) params.push("project=" + encodeURIComponent(project));
+            if (employee) params.push("employee=" + encodeURIComponent(employee));
+            if (fromDate) params.push("from_date=" + encodeURIComponent(fromDate));
+            if (toDate) params.push("to_date=" + encodeURIComponent(toDate));
+        
+            printUrl += params.join("&");
+            window.open(printUrl, '_blank');
+        }
+        </script>
+
+        <div class="table-box">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Project</th>
+                        <th>Employee</th>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                        <th>Vendor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in requisitions %}
+                    <tr>
+                        <td>{{ r.requisition_date }}</td>
+                        <td>{{ r.project_name.project_first_name }}</td>
+                        <td>{{ r.employee_name.rda_emp_name }}</td>
+                        <td>{{ r.item_name.rest_item_name }}</td>
+                        <td>{{ r.qty }}</td>
+                        <td>{{ r.rate }}</td>
+                        <td>{{ r.qty }}</td> <td>{{ r.vendor_name }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align: center;">No data found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

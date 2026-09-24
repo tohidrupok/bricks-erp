@@ -1,0 +1,156 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Share Plot Add Record - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+ <script src="https://cdn.tailwindcss.com"></script>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Share Plot Add Record</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{% url 'share_plot_list' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Refresh</button>
+                        </a>
+                        <a href="{% url 'flat_plot_summary' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Record List</button>
+                        </a>
+                        <div class="mx-auto hidden text-slate-500 md:block"> </div>            
+                    </div>
+            
+                    <div class="bg-white shadow-lg rounded-2xl p-6 w-[900px] mx-auto border">
+                    <h1 class="text-2xl font-bold mb-4">Add Share Plot</h1>
+                
+                    <form method="POST">
+                      {% csrf_token %}
+                
+                      <!-- Plot Details -->
+                      <div class="grid grid-cols-2 gap-4 mb-6">
+                        {{ form.as_p }}
+                      </div>
+                
+                      <!-- Persons Section -->
+                      <h2 class="text-lg font-semibold mb-2">Persons</h2>
+                      <table id="personsTable" class="min-w-full border border-gray-300 mb-4">
+                        <thead class="bg-gray-200">
+                          <tr>
+                            <th class="border border-gray-300 p-2">Person Name</th>
+                            <th class="border border-gray-300 p-2">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {{ formset.management_form }}
+                          {% for person_form in formset %}
+                            <tr>
+                              <td class="border p-2">{{ person_form.name }}</td>
+                              <td class="border p-2 text-center">
+                                <button type="button" class="remove-row bg-red-500 text-white px-2 py-1 rounded">Remove</button>
+                              </td>
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                
+                      <button type="button" id="addRowBtn" class="px-3 py-1 bg-green-500 text-white rounded">+ Add Person</button>
+                
+                      <div class="mt-6">
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
+                      </div>
+                    </form>
+                  </div>
+                
+                  <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                      const addRowBtn = document.getElementById("addRowBtn");
+                      const personsTable = document.querySelector("#personsTable tbody");
+                      let formIdx = {{ formset.total_form_count }};
+                
+                      addRowBtn.addEventListener("click", function() {
+                        let newRow = document.createElement("tr");
+                        newRow.innerHTML = `
+                          <td class="border p-2">
+                            <input type="text" name="persons-${formIdx}-name" class="form-control border p-2 w-full rounded">
+                          </td>
+                          <td class="border p-2 text-center">
+                            <button type="button" class="remove-row bg-red-500 text-white px-2 py-1 rounded">Remove</button>
+                          </td>
+                        `;
+                        personsTable.appendChild(newRow);
+                        formIdx++;
+                        document.getElementById("id_persons-TOTAL_FORMS").value = formIdx;
+                      });
+                
+                      personsTable.addEventListener("click", function(e) {
+                        if (e.target.classList.contains("remove-row")) {
+                          e.target.closest("tr").remove();
+                        }
+                      });
+                    });
+                  </script>   
+                  <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                      function updateCalculatedFields() {
+                        let persionNo = parseFloat(document.getElementById("id_persion_no").value) || 0;
+                        let decimal = parseFloat(document.getElementById("id_decimal").value) || 0;
+                        let value = parseFloat(document.getElementById("id_value").value) || 0;
+                    
+                        if (persionNo > 0) {
+                          document.getElementById("id_area").value = (decimal / persionNo).toFixed(2);
+                          document.getElementById("id_share_val").value = (value / persionNo).toFixed(2);
+                        } else {
+                          document.getElementById("id_area").value = "";
+                          document.getElementById("id_share_val").value = "";
+                        }
+                      }
+                    
+                      ["id_persion_no", "id_decimal", "id_value"].forEach(id => {
+                        let el = document.getElementById(id);
+                        if (el) el.addEventListener("input", updateCalculatedFields);
+                      });
+                    });
+                    </script>
+                    
+                    <!-- END: Pagination -->
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

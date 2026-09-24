@@ -1,0 +1,239 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Room Details - {{ room.room_name }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 12px; background-color: silver; padding: 20px; }
+    .card { background: #fff; border-radius: 6px; padding: 20px; max-width: 960px; margin: auto; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .logo img { height: 50px; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .label-box { background-color: #93c5fd; color: #000; padding: 4px 10px; font-weight: bold; font-size: 13px; border-radius: 4px; }
+    .sub-head { font-size: 11px; color: #555; margin-top: -18px; margin-bottom: 8px; line-height: 1.4; }
+    .voucher-header { display: flex; justify-content: space-between; margin-top: 10px; flex-wrap: wrap; }
+    .project-name { margin: 4px 0; font-size: 12px; }
+    .table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+    .table th, .table td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+    .table th { background: #f0f0f0; }
+    .text-right { text-align: right; }
+    .section { margin-top: 16px; font-size: 11.5px; }
+    .signature-section { margin-top: 30px; display: flex; justify-content: space-between; text-align: center; }
+    .signature-box { flex: 1; padding: 8px; }
+    .signature-line { display: block; margin-top: 10px; border-top: 1px solid #000; width: 100%; }
+    .footer { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #333; margin-top: 20px; padding-top: 10px; border-top: 1px solid #ccc; flex-wrap: wrap; }
+    .back-btn, .print-btn, .qr-btn { padding: 6px 14px; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; color: white; }
+    .back-btn { background-color: green; }
+    .print-btn { background-color: #1e3c98; }
+    .qr-btn { background-color: #f59e0b; }
+    @media print { .no-print { display: none !important; } body { background: white; padding: 0; } .card { box-shadow: none; border: none; margin: 0; padding: 0; } }
+
+    /* QR Modal Overlay */
+    #qrOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 9998;
+    }
+
+    /* QR Popup */
+    #qrPopup {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+      padding: 25px;
+      text-align: center;
+      z-index: 9999;
+      width: 260px;
+      animation: zoomIn 0.2s ease-in-out;
+    }
+
+    #qrPopup h4 { margin-top: 0; margin-bottom: 10px; font-size: 14px; }
+    #qrPopup canvas { margin: 10px 0; }
+    #qrPopup button {
+      margin: 4px;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    #qrPopup .close-btn { background: #dc2626; color: white; }
+    #qrPopup .download-btn { background: #2563eb; color: white; }
+
+    @keyframes zoomIn {
+      from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+      to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Header -->
+  <div class="card-header">
+    <div class="logo">
+      <img src="{% static '/images/BTP_logo_webp.webp' %}" alt="Company Logo">
+    </div>
+    <div style="text-align: right;">
+      <div class="label-box">Room Details</div>
+      <p style="font-size: 11px; margin-top: 4px;">Printed: {{ now|date:"F j, Y, g:i a" }}</p>
+    </div>
+  </div>
+
+  <!-- Address -->
+  <div class="sub-head">
+    House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br>
+    +880191322203, 01993005558, 09639246230, 09639246231 <br>
+    md2bayzid@gmail.com
+  </div>
+
+  <hr style="margin: 8px 0;">
+
+  <!-- Room Info -->
+  <div class="voucher-header">
+      <div class="project-name"><strong>Project:</strong> {{ room.project.name }}</div>
+      <div class="project-name"><strong>Room:</strong> {{ room.room_name }} ({{ room.flat }})</div>
+      <div class="project-name"><strong>Status:</strong> {{ room.status }}</div>
+  </div>
+
+  <!-- Rent Breakdown -->
+  <div class="section">
+    <h4>Rent Distribution</h4>
+    <table class="table">
+      <tr><th>Core Room Rent</th><td class="text-right">{{ room.core_room_rent }}</td></tr>
+      <tr><th>Parking Cost</th><td class="text-right">{{ room.parking_cost }}</td></tr>
+      <tr><th>Service Rent</th><td class="text-right">{{ room.service_rent }}</td></tr>
+      <tr><th>Gas Rent</th><td class="text-right">{{ room.gas_rent }}</td></tr>
+      <tr><th>Water Rent</th><td class="text-right">{{ room.water_rent }}</td></tr>
+      <tr><th>Electricity Rent</th><td class="text-right">{{ room.electricity_rent }}</td></tr>
+      <tr><th>Garbage Rent</th><td class="text-right">{{ room.garbage_rent }}</td></tr>
+      <tr><th>Other Cost</th><td class="text-right">{{ room.other_cost }}</td></tr>
+      <tr style="font-weight: bold; background:#f0f0f0;">
+        <th>Total Monthly Rent</th>
+        <td class="text-right">{{ room.total_monthly_rent }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Active Rent -->
+  {% if request.session.department == "admin" or request.session.department == "purchase"%}
+  <div class="section">
+    <h4>Active Tenant</h4>
+    {% if active_rent %}
+      <table class="table">
+        <tr><th>Tenant</th><td>{{ active_rent.varatiya.name }}</td></tr>
+        <tr><th>Contact</th><td>{{ active_rent.varatiya.contact }}</td></tr>
+        <tr><th>Period</th><td>{{ active_rent.startmonths }} → {{ active_rent.endmonths|default:"Present" }}</td></tr>
+        <tr><th>Status</th><td>{{ active_rent.status }}</td></tr>
+      </table>
+    {% else %}
+      <p>No Active Rent for this room.</p>
+    {% endif %}
+  </div>
+
+  <!-- Rent History -->
+  <div class="section">
+    <h4>Tenant History</h4>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Tenant</th>
+          <th>Contact</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rent in rents %}
+        <tr {% if rent.status == "Active" %} style="background:#d1ffd1;" {% endif %}>
+          <td>{{ rent.varatiya.name }}</td>
+          <td>{{ rent.varatiya.contact }}</td>
+          <td>{{ rent.startmonths }}</td>
+          <td>{{ rent.endmonths|default:"Present" }}</td>
+          <td>{{ rent.status }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No rent history available.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Signatures -->
+  <div class="signature-section">
+    <div class="signature-box">
+      <span class="signature-line"></span>
+      Prepared By
+    </div>
+    <div class="signature-box">
+      <span class="signature-line"></span>
+      Approved By
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="no-print">
+      <button onclick="window.history.back()" class="back-btn">← Back</button>
+      <button onclick="generateQR()" class="qr-btn">📱 Generate QR</button>
+      <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+    </div>
+  </div>
+</div>
+
+  {% else %}
+  {% endif %}
+<!-- Overlay -->
+<div id="qrOverlay" onclick="closeQR()"></div>
+
+<!-- QR Popup -->
+<div id="qrPopup">
+  <h4>QR Code for This Page</h4>
+  <canvas id="qrcode"></canvas><br>
+  <button class="download-btn" onclick="downloadQR()">⬇️ Download</button>
+  <button class="close-btn" onclick="closeQR()">✖ Close</button>
+</div>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+<script>
+let qr;
+
+function generateQR() {
+  const url = window.location.href;
+  const overlay = document.getElementById('qrOverlay');
+  const popup = document.getElementById('qrPopup');
+  overlay.style.display = 'block';
+  popup.style.display = 'block';
+  qr = new QRious({
+    element: document.getElementById('qrcode'),
+    value: url,
+    size: 200
+  });
+}
+
+function closeQR() {
+  document.getElementById('qrOverlay').style.display = 'none';
+  document.getElementById('qrPopup').style.display = 'none';
+}
+
+function downloadQR() {
+  const canvas = document.getElementById('qrcode');
+  const link = document.createElement('a');
+  link.download = 'Room_QR.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+</script>
+
+</body>
+</html>

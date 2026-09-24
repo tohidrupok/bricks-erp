@@ -1,0 +1,127 @@
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-slate-100 flex flex-col">
+        <div class="flex justify-between items-center px-6 py-4 bg-slate-50 border-b border-slate-200">
+            <h3 class="text-base font-bold text-slate-800">Edit Lead — {{ customer.customer_name }}</h3>
+            <button type="button" onclick="document.getElementById('leadEditModalContainer').innerHTML=''"
+                    class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition text-xl font-bold">&times;</button>
+        </div>
+
+        <form method="POST" action="{% url 'lead_update' lead.id %}" class="p-6 space-y-5">
+            {% csrf_token %}
+            <div class="space-y-3">
+                <div class="bg-indigo-50 text-indigo-900 font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider border border-indigo-100">Basic Info</div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3.5 bg-slate-50/60 p-4 rounded-xl border border-slate-200">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Date</label>
+                        <input type="date" name="date" value="{{ customer.date|date:'Y-m-d' }}" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Lead Code</label>
+                        <input type="text" value="{{ lead.lead_code }}" readonly
+                               class="w-full border border-slate-200 rounded-lg p-2 text-xs bg-slate-100 text-slate-500 cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Name <span class="text-rose-500">*</span></label>
+                        <input type="text" name="name" required value="{{ customer.customer_name }}" placeholder="Name" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Phone/Mobile <span class="text-rose-500">*</span></label>
+                        <div class="flex shadow-sm">
+                            <span class="bg-slate-100 border border-r-0 border-slate-300 rounded-l-lg px-2 py-1.5 text-xs flex items-center text-slate-600">🇧🇩 (+880)</span>
+                            <input type="text" name="phone" required value="{{ customer.contact_no }}" placeholder="Enter phone number" class="w-full border border-slate-300 rounded-r-lg p-2 text-xs bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Secondary Number</label>
+                        <input type="text" name="secondary_phone" value="{{ customer.secondary_phone|default:'' }}" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Assign User/SR</label>
+                        <input type="text" name="assign_user" value="{{ customer.assign_to_user|default:'Admin' }}" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">If CR</label>
+                        <input type="text" name="cr" value="{{ lead.cr|default:'' }}" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Lead Stages</label>
+                        <select name="lead_stage" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="">Select Option</option>
+                            {% for value, label in stage_choices %}
+                            <option value="{{ value }}" {% if lead.stage == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <details class="group bg-slate-50/60 rounded-xl overflow-hidden border border-slate-200" open>
+                <summary class="flex justify-between items-center bg-indigo-50 text-indigo-900 font-bold px-4 py-2.5 cursor-pointer text-xs uppercase tracking-wider">
+                    <span>Lead Details</span><span class="transition group-open:rotate-180">▼</span>
+                </summary>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3.5 p-4">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Lead Source</label>
+                        <select name="lead_source" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                            <option value="">Select Source</option>
+                            {% for source in lead_sources %}<option value="{{ source }}" {% if customer.lead_source == source %}selected{% endif %}>{{ source }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Interested Project</label>
+                        <select name="interested_project" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                            <option value="">Select Interested Project</option>
+                            {% for project in projects %}<option value="{{ project.id }}" {% if lead.project_name_id == project.id %}selected{% endif %}>{{ project }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Lead Category</label>
+                        <select name="lead_category" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                            <option value="">Select Category</option>
+                            {% for category in lead_categories %}<option value="{{ category }}" {% if lead.lead_category == category %}selected{% endif %}>{{ category }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Campaign</label>
+                        <select name="campaign" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                            <option value="">Select Campaign</option>
+                            {% for campaign in campaigns %}<option value="{{ campaign.id }}" {% if lead.campaign_id == campaign.id %}selected{% endif %}>{{ campaign.name }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </details>
+
+            <details class="group bg-slate-50/60 rounded-xl overflow-hidden border border-slate-200" open>
+                <summary class="flex justify-between items-center bg-indigo-50 text-indigo-900 font-bold px-4 py-2.5 cursor-pointer text-xs uppercase tracking-wider">
+                    <span>Personal Info</span><span class="transition group-open:rotate-180">▼</span>
+                </summary>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 p-4">
+                    <div><label class="text-xs font-semibold text-slate-600 block mb-1">Organization</label>
+                        <input type="text" name="organization" value="{{ customer.organization|default:'' }}" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none"></div>
+                    <div><label class="text-xs font-semibold text-slate-600 block mb-1">Designation</label>
+                        <input type="text" name="designation" value="{{ customer.designation|default:'' }}" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none"></div>
+                    <div><label class="text-xs font-semibold text-slate-600 block mb-1">Birth Date</label>
+                        <input type="date" name="birth_date" value="{{ customer.birth_date|date:'Y-m-d' }}" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none"></div>
+                    <div><label class="text-xs font-semibold text-slate-600 block mb-1">Anniversary Date</label>
+                        <input type="date" name="anniversary_date" value="{{ customer.anniversary_date|date:'Y-m-d' }}" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none"></div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Profession</label>
+                        <select name="profession" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                            <option value="">Select Profession</option>
+                            {% for profession in professions %}<option value="{{ profession }}" {% if customer.profession == profession %}selected{% endif %}>{{ profession }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div><label class="text-xs font-semibold text-slate-600 block mb-1">Address</label>
+                        <input type="text" name="address" value="{{ customer.address|default:'' }}" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none"></div>
+                    <div class="md:col-span-3"><label class="text-xs font-semibold text-slate-600 block mb-1">Email</label>
+                        <input type="email" name="email" value="{{ customer.email|default:'' }}" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none"></div>
+                </div>
+            </details>
+
+            <div class="flex justify-end space-x-3 pt-4 border-t border-slate-200">
+                <button type="button" onclick="document.getElementById('leadEditModalContainer').innerHTML=''" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition">Close</button>
+                <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 transition">Save changes</button>
+            </div>
+        </form>
+    </div>
+</div>

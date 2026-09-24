@@ -1,0 +1,168 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Share Installment List - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Share Installment List</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{% url 'share_installment_list' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Refresh</button>
+                        </a> 
+                        <a href="{% url 'share_installment_management' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">installment Management</button>
+                        </a>                   
+                        <div class="mx-auto hidden text-slate-500 md:block"></div>
+            
+                        <div class="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">                           
+                            <div class="relative w-56 text-slate-500 mb-4">
+                                <input id="searchInput" type="text" placeholder="Search..." class="w-full p-2 text-sm border rounded-md shadow-sm focus:ring-4 focus:ring-primary" oninput="handleSearch()">
+                                <i class="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4">🔍</i>
+                            </div>
+                        </div>
+                    </div>
+            
+                   <!-- BEGIN: Credit Voucher -->
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <div class="p-6">
+                          <h1 class="text-xl font-bold mb-4">Share Installment List</h1>
+                            <table class="min-w-full border border-gray-300">
+                              <thead class="bg-gray-200">
+                                <tr>
+                                  <th class="border p-2">SL</th>
+                                  <th class="border p-2">Project</th>
+                                  <th class="border p-2">Customer</th>
+                                  <th class="border p-2">Share_Sales</th>
+                                  <th class="border p-2">Share_Amount</th>
+                                  <th class="border p-2">Month</th>
+                                  <th class="border p-2">Amount</th>
+                                  <th class="border p-2">Type</th>
+                                  <th class="border p-2">Action</th>
+                                </tr>
+                              </thead>
+                              <tbody id="tableBody">
+                                {% for installment in installments %}
+                                <tr class="hover:bg-gray-100">
+                                  <td class="border p-2">{{ forloop.counter }}</td>
+                                  <td class="border p-2">{{ installment.project_name.project_first_name }}</td>
+                                  <td class="border p-2">{{ installment.customer_name }}</td>
+                                  <td class="border p-2">{{ installment.share_sales }}</td>
+                                  <td class="border p-2">{{ installment.sales_amount }}</td>
+                                  <td class="border p-2">{{ installment.month|date:"M Y" }}</td>
+                                  <td class="border p-2">{{ installment.amount }}</td>
+                                  <td class="border p-2">{{ installment.payment_type }}</td>
+                                  <td class="border p-2 text-center">
+                                      <select 
+                                          id="status-{{ installment.sl }}" 
+                                          class="border rounded px-2 py-1"
+                                          onchange="updatePayStatus({{ installment.sl }}, this.value)">
+                                        <option value="Pending" {% if installment.pay_status == "Pending" %}selected{% endif %}>Pending</option>
+                                        <option value="Done" {% if installment.pay_status == "Done" %}selected{% endif %}>Done</option>
+                                      </select>
+                                  </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                  <td colspan="8" class="text-center p-4">No installments found.</td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                        </div>
+
+                        <script>
+                            function handleSearch() {
+                                let searchValue = document.getElementById('searchInput').value.toLowerCase();
+                                let rows = document.querySelectorAll("#tableBody tr");
+                    
+                                rows.forEach(row => {
+                                    let columns = row.getElementsByTagName("td");
+                                    let rowText = "";
+                                    
+                                    // Combine text content of all columns in the row for searching
+                                    for (let i = 0; i < columns.length; i++) {
+                                        rowText += columns[i].textContent.toLowerCase(); // Get all text in row
+                                    }
+                    
+                                    // If search term is found in the row's combined text, show the row, else hide it
+                                    if (rowText.includes(searchValue)) {
+                                        row.style.display = ""; // Show row
+                                    } else {
+                                        row.style.display = "none"; // Hide row
+                                    }
+                                });
+                            }
+                        </script>
+                    </div>
+                   
+                    <script>
+                        function updatePayStatus(sl, status) {
+                            fetch("{% url 'update_pay_status' %}", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRFToken": "{{ csrf_token }}"
+                                },
+                                body: JSON.stringify({
+                                    sl: sl,
+                                    status: status
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    console.log("Status updated:", data);
+                                } else {
+                                    alert("Failed to update status!");
+                                }
+                            })
+                            .catch(error => console.error("Error:", error));
+                        }
+                    </script>
+
+                    <!-- END: Pagination -->
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

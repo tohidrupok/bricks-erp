@@ -1,0 +1,115 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Restaurant Item Name Update- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				    {% include 'partials/header.html' %}
+                <div class="container mx-auto mt-10 ml-10"> 
+                <!-- END: Top Bar -->
+                <h1 class="text-3xl font-semibold text-gray-900 mb-6">Edit Restaurant Item  Name Details</h1>
+
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                    <form method="POST" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                        {% csrf_token %}
+                    
+                        <h2 class="text-xl font-semibold mb-4 text-center">Edit Restaurant Item Name</h2>
+                        
+                         <!-- Requisition Category -->
+                            <div class="mb-4">
+                            <label for="id_rest_category" class="font-medium text-lg text-gray-800">
+                                Category Name
+                            </label>
+                            <select
+                                id="id_rest_category"
+                                name="rest_category"
+                                class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                            >
+                                <option value="">Select Category</option>
+                                {% for category in restaurant_category %}
+                                <option
+                                    value="{{ category.id }}"
+                                    {% if form.rest_category.value|stringformat:"s" == category.id|stringformat:"s" %}
+                                    selected
+                                    {% endif %}
+                                >
+                                    {{ category.restu_category_name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% for error in form.rest_category.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                            </div>
+
+                        <!-- Head Name -->
+                        <div class="mb-4">
+                            <label for="rest_item_name" class="font-medium text-lg text-gray-800">Item Name</label>
+                            <input type="text" id="rest_item_name" name="rest_item_name"
+                                   class="w-full text-sm border border-slate-200 shadow-sm rounded-md p-2"
+                                   placeholder="Enter Item Name"
+                                   value="{{ form.rest_item_name.value|default_if_none:'' }}">
+                            {% for error in form.rest_item_name.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                         <!-- Head Type -->
+                          
+                        <div class="mb-4">
+                            <label for="rest_item_type" class="font-medium text-lg text-gray-800">Item Type</label>
+                            <select id="rest_item_type" name="rest_item_type"
+                                    class="w-full text-sm border border-slate-200 shadow-sm rounded-md p-2">
+                                <option value="">-- Select Item Type --</option>
+                                <option value="grocery" {% if form.rest_item_type.value == "grocery" %}selected{% endif %}>Grocery</option>
+                                <option value="soft drinks" {% if form.rest_item_type.value == "soft drinks" %}selected{% endif %}>Soft Drinks</option>
+                            </select>
+                            {% for error in form.rest_item_type.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Code Name -->
+                        <div class="mb-4">
+                            <label for="rest_item_code" class="font-medium text-lg text-gray-800">Code Name</label>
+                            <input type="text" id="rest_item_code" name="rest_item_code"
+                                   class="w-full text-sm border border-slate-200 shadow-sm rounded-md p-2"
+                                   placeholder="Enter Code Name"
+                                   value="{{ form.rest_item_code.value|default_if_none:'' }}" readonly>
+                            {% for error in form.rest_item_code.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Submit and Back Buttons -->
+                        <div class="text-center mt-6">
+                            <button type="submit" style="background-color:#1e3c98"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md">
+                                💾 Update Item
+                            </button>
+                            <a href="{% url 'restaurant_item_name' %}" style="margin-left:0.5%;background-color:#1e3c98"
+                               class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md ml-2">
+                                🔙 Back to List
+                            </a>
+                        </div>
+                    </form>
+                    
+                </div>
+                  </div>    
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

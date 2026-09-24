@@ -1,0 +1,53 @@
+{% extends 'office_inventory/base.html' %}
+
+{% block header %}Locations{% endblock %}
+
+{% block content %}
+<div class="card card-stat p-3">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Locations Management</h2>
+        <a href="{% url 'office_inventory:location_create' %}" class="btn btn-primary">+ Add Location</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Location Code</th>
+                    <th>Location Name</th>
+                    <th>Type</th>
+                    <th>Under</th>
+                    <th>Address</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for loc in locations %}
+                <tr>
+                    <td><strong>{{ loc.code }}</strong></td>
+                    <td>{{ loc.name }}</td>
+                    <td><span class="badge bg-light text-dark border">{{ loc.get_location_type_display }}</span></td>
+                    <td>{{ loc.parent.name|default:"-" }}</td>
+                    <td>{{ loc.address|default:"—"|truncatechars:50 }}</td>
+                    <td class="text-right">
+                        <a href="{% url 'office_inventory:location_detail' loc.pk %}" class="btn btn-sm btn-info">View</a>
+                        <a href="{% url 'office_inventory:location_update' loc.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'office_inventory:location_delete' loc.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted p-4">No locations registered yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

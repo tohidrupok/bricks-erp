@@ -1,0 +1,660 @@
+<!-- templates/dashboard.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tenant - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header_dashboard.html' %}
+
+                <!-- END: Top Bar -->
+                <div class="grid grid-cols-12 gap-6">
+                    <div class="col-span-12 2xl:col-span-9">
+                        <div class="grid grid-cols-12 gap-6">
+                            <!-- BEGIN: General Report -->
+                            <div class="col-span-12 mt-8">
+                                                <div class="intro-y flex h-10 items-center">
+                    <h2 class="mr-5 truncate text-lg font-medium">Bill summary</h2>
+                
+                    <div class="ml-auto flex items-center gap-3">
+                        
+                        <!-- Back Button -->
+                        <a href="javascript:history.back()" class="flex items-center text-primary">
+                            <i data-lucide="arrow-left" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Back
+                        </a>
+                
+                        <!-- Dashboard Button -->
+                        <a href="{% url 'tenant_dashboard' %}" class="flex items-center text-primary">
+                            <i data-lucide="layout-dashboard" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Dashboard
+                        </a>
+                
+                        <!-- Reload Button -->
+                        <a class="flex items-center text-primary" href="">
+                            <i data-lucide="refresh-ccw" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Reload Data
+                        </a>
+                
+                    </div>
+                </div>
+                                
+
+<head>
+<meta charset="UTF-8" />
+<title>Bill Summary & Receive Voucher</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+/* ====== Page wrapper ====== */
+.rv-page {
+  max-width: 1200px;
+  margin: 32px auto;
+  padding: 16px;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  color: #1f2937;
+  box-sizing: border-box;
+}
+
+/* ====== Top area: two columns ====== */
+.rv-top {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+@media (max-width: 900px) {
+  .rv-top { grid-template-columns: 1fr; }
+}
+
+/* ====== Card ====== */
+.rv-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid #e6e9ee;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+}
+
+/* ====== Headers ====== */
+.rv-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.rv-title {
+  margin: 0;
+  font-size: 18px;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* small description */
+.rv-sub {
+  font-size: 13px;
+  color: #475569;
+}
+
+/* ====== Inputs ====== */
+.rv-label { display:block; font-weight:600; margin-bottom:6px; color:#334155; font-size:13px; }
+.rv-input, .rv-select, .rv-textarea {
+  width:100%;
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid #d1d5db;
+  background:#fbfdff;
+  font-size:14px;
+  margin-bottom:12px;
+  box-sizing:border-box;
+}
+.rv-input:focus, .rv-select:focus, .rv-textarea:focus {
+  outline:none; border-color:#2563eb; box-shadow:0 0 0 4px rgba(37,99,235,0.08);
+}
+.rv-btn {
+  display:inline-block;
+  padding:10px 12px;
+  background:linear-gradient(90deg,#2563eb,#1d4ed8);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-weight:700;
+  cursor:pointer;
+}
+.rv-btn:active { transform: translateY(1px); }
+
+/* ====== Summary memo & list ====== */
+.rv-memo {
+  display:grid;
+  grid-template-columns: repeat(2,1fr);
+  gap:8px 20px;
+  margin-bottom:12px;
+  font-size:14px;
+  color:#374151;
+}
+@media (max-width:900px){ .rv-memo{ grid-template-columns: 1fr; } }
+
+.rv-bill-list { list-style:none; padding:0; margin:0 0 10px 0; font-family: 'Courier New', monospace; }
+.rv-bill-list li {
+  position:relative;
+  padding:8px 12px 8px 36px;
+  border-bottom:1px dashed #e6e9ee;
+  background:#fbfdff;
+  margin-bottom:6px;
+  font-size:14px;
+}
+.rv-bill-list li::before {
+  content: counter(rvcount) ".";
+  counter-increment: rvcount;
+  position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#6b7280; font-weight:700;
+}
+
+/* ====== total ====== */
+.rv-total {
+  text-align:right;
+  font-size:15px;
+  font-weight:700;
+  color:#92400e;
+  padding-top:8px;
+  border-top:1px solid #f1f5f9;
+}
+
+/* ====== Message (success/error) ====== */
+.rv-msg {
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:8px;
+  text-align:center;
+  font-weight:700;
+}
+.rv-msg.success { background:#ecfdf5; color:#065f46; border:1px solid #34d399; }
+.rv-msg.error { background:#fff1f2; color:#9f1239; border:1px solid #f472b6; }
+
+/* ====== Bottom voucher card layout (full width) ====== */
+.rv-bottom { margin-top: 6px; }
+
+/* compact two-column fields inside voucher form on wider screens */
+.rv-form-grid {
+  display:grid;
+  grid-template-columns: repeat(2,1fr);
+  gap:12px 14px;
+}
+@media (max-width:900px){ .rv-form-grid { grid-template-columns: 1fr; } }
+
+/* small helper */
+.rv-note { font-size:13px; color:#475569; margin-bottom:8px; }
+
+/* tiny labels for hidden info */
+.rv-small-muted { font-size:12px; color:#6b7280; }
+
+/* badges for headings */
+.rv-badge {
+  background:#eef2ff; color:#3730a3; padding:6px 8px; border-radius:8px; font-weight:700; font-size:13px;
+}
+</style>
+</head>
+<body>
+<div class="rv-page">
+
+  <!-- TOP: left Filter, right Summary -->
+  <div class="rv-top">
+
+    <!-- LEFT: Filter Bills -->
+    <div class="rv-card" id="rv-filter">
+      <div class="rv-card-header">
+        <h3 class="rv-title">Filter Bills</h3>
+        <div class="rv-badge">Step 1</div>
+      </div>
+
+      <div>
+        <label class="rv-label">Project</label>
+        <select id="project_select" class="rv-select">
+          <option value="">Select Project</option>
+          {% for project in projects %}
+            <option value="{{ project.id }}">{{ project.name }}</option>
+          {% endfor %}
+        </select>
+
+        <label class="rv-label">Varatiya</label>
+        <select id="varatiya_select" class="rv-select">
+          <option value="">Select Varatiya</option>
+        </select>
+
+        <label class="rv-label">Month</label>
+        <input type="month" id="bill_month" class="rv-input">
+
+        <div style="display:flex; gap:10px;">
+          <button id="fetch_summary" class="rv-btn" style="flex:1;">Show Summary</button>
+          <button id="clear_summary" type="button" class="rv-btn" style="background:#6b7280;border:none;flex:0 0 120px;">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Monthly Bill Summary -->
+    <div class="rv-card" id="rv-summary">
+      <div class="rv-card-header">
+        <h3 class="rv-title">Monthly Bill Summary</h3>
+        <div class="rv-badge">Step 2</div>
+      </div>
+
+      <div class="rv-memo">
+        <p><strong>Project:</strong> <span id="project_name" class="rv-small-muted"></span></p>
+        <p><strong>Room:</strong> <span id="room_name" class="rv-small-muted"></span></p>
+        <p><strong>Tenant:</strong> <span id="tenant_name" class="rv-small-muted"></span></p>
+        <p><strong>Month:</strong> <span id="bill_month_text" class="rv-small-muted"></span></p>
+      </div>
+
+      <ul class="rv-bill-list" id="bills_list"></ul>
+ 
+      <div class="rv-total">Total: <span id="total_amount">0</span></div>
+      <button id="view_bill_details" class="rv-btn" style="margin-left:12px; flex:0 0 auto;">View</button>
+
+    </div>
+
+  </div> <!-- /.rv-top -->
+
+  <!-- BOTTOM: full width Create Receive Voucher -->
+  <div class="rv-bottom rv-card">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;">
+      <h3 class="rv-title" style="font-size:18px;margin:0;">Create Receive Voucher</h3>
+      <div class="rv-note">This form will be pre-filled (hidden) with selected project/tenant/month totals.</div>
+    </div>
+
+    <form id="voucher_form">
+
+      <!-- HIDDEN values filled by JS -->
+      <input type="hidden" name="project_id" id="voucher_project_id">
+      <input type="hidden" name="tenant_id" id="voucher_tenant_id">
+      <input type="hidden" name="voucher_date" id="voucher_date">
+      <input type="hidden" name="generated_amount" id="voucher_generated_amount">
+      <input type="hidden" name="rent_bill_id" id="voucher_rent_bill">
+      <input type="hidden" name="service_bill_id" id="voucher_service_bill">
+      <input type="hidden" name="gas_bill_id" id="voucher_gas_bill">
+      <input type="hidden" name="water_bill_id" id="voucher_water_bill">
+      <input type="hidden" name="parking_bill_id" id="voucher_parking_bill">
+      <input type="hidden" name="electricity_bill_id" id="voucher_electricity_bill">
+      <!-- HIDDEN values filled by JS -->
+      <input type="hidden" name="mainbill_id" id="voucher_mainbill_id">
+
+      <!-- Voucher Form Section -->
+      <div class="rv-form-section">
+        <div class="rv-form-grid">         
+          <!-- Cash Type -->
+          <div class="rv-form-group">
+            <label class="rv-label">Cash Type <span class="rv-required">*</span></label>
+            <select id="cash_type_id" name="cash_type_id" class="rv-select" required>
+              <option value="">-- Select Cash Type --</option>
+              {% for ct in cash_types %}
+                <option value="{{ ct.id }}">{{ ct.account_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Cheque Number -->
+          <div class="rv-form-group">
+            <label class="rv-label">Cheque Number <span class="rv-optional">(Optional)</span></label>
+            <select id="cheque_number" name="cheque_number" class="rv-select">
+              <option value="">-- Select Cheque --</option>
+            </select>
+          </div>
+
+          <!-- Amount -->
+          <div class="rv-form-group">
+            <label class="rv-label">Amount (Received) <span class="rv-required">*</span></label>
+            <input type="number" step="0.01" name="amount" class="rv-input" placeholder="Enter amount" required>
+            <div class="rv-small-muted">Auto total (generated): <span id="generated_amount_show">0</span></div>
+          </div>
+          
+            <!-- Bill Date -->
+          <div class="rv-form-group">
+            <label class="rv-label">Bill Date *</label>
+            <input type="date" id="bill_date" name="bill_date" class="rv-input" required>
+          </div>
+
+          <!-- Carrier -->
+          <div class="rv-form-group">
+            <label class="rv-label">Carrier <span class="rv-optional">(Optional)</span></label>
+            <input type="text" name="carrier" class="rv-input" placeholder="Carrier or reference">
+          </div>
+
+          <!-- Particulars -->
+          <div class="rv-form-group rv-form-full">
+            <label class="rv-label">Particulars</label>
+            <textarea name="particulars" class="rv-textarea" rows="3" placeholder="Describe payment purpose"></textarea>
+          </div>
+
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="rv-form-actions">
+          <button type="submit" class="rv-btn rv-btn-primary">💾 Create Voucher</button>
+          <div id="voucher_msg" class="rv-msg" style="display:none"></div>
+          <div class="rv-hint">
+            💡 Hint: Fill <strong>Amount</strong> manually; Generated total is shown above.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- JS -->
+      <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const cashTypeSelect = document.getElementById("cash_type_id");
+        const chequeSelect = document.getElementById("cheque_number");
+
+        cashTypeSelect.addEventListener("change", function() {
+          const cashTypeId = this.value;
+          chequeSelect.innerHTML = '<option value="">Loading...</option>';
+
+          if (cashTypeId) {
+            fetch(`/tenant/get-cheques/${cashTypeId}/`)
+              .then(response => response.json())
+              .then(data => {
+                chequeSelect.innerHTML = '<option value="">-- Select Cheque --</option>';
+                if (data.length === 0) {
+                  chequeSelect.innerHTML = '<option value="">No unused cheques available</option>';
+                } else {
+                  data.forEach(cheque => {
+                    const option = document.createElement("option");
+                    option.value = cheque.id;
+                    option.textContent = cheque.cheque_number;
+                    chequeSelect.appendChild(option);
+                  });
+                }
+              })
+              .catch(error => {
+                chequeSelect.innerHTML = '<option value="">Error loading cheques</option>';
+                console.error(error);
+              });
+          } else {
+            chequeSelect.innerHTML = '<option value="">-- Select Cheque --</option>';
+          }
+        });
+      });
+      </script>
+
+      <!-- CSS -->
+      <style>
+      .rv-form-section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px 28px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        transition: 0.3s ease;
+      }
+      .rv-form-section:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      }
+      .rv-form-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 4px;
+      }
+      .rv-form-subtitle {
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin-bottom: 20px;
+      }
+      .rv-form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 18px 22px;
+      }
+      .rv-form-group {
+        display: flex;
+        flex-direction: column;
+      }
+      .rv-form-full {
+        grid-column: 1 / -1;
+      }
+      .rv-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 6px;
+      }
+      .rv-required { color: #ef4444; }
+      .rv-optional { color: #9ca3af; font-size: 0.85rem; }
+
+      .rv-input, .rv-select, .rv-textarea {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 0.95rem;
+        background-color: #f9fafb;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .rv-input:focus, .rv-select:focus, .rv-textarea:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
+        background: #fff;
+      }
+      .rv-small-muted {
+        font-size: 0.8rem;
+        color: #6b7280;
+        margin-top: 4px;
+      }
+
+      .rv-form-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-top: 22px;
+      }
+      .rv-btn-primary {
+        background: linear-gradient(90deg, #2563eb, #1d4ed8);
+        color: #fff;
+        font-weight: 600;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 22px;
+        cursor: pointer;
+        transition: background 0.3s ease, transform 0.1s ease;
+      }
+      .rv-btn-primary:hover {
+        background: linear-gradient(90deg, #1e40af, #1d4ed8);
+        transform: translateY(-1px);
+      }
+      .rv-hint {
+        margin-left: auto;
+        font-size: 0.85rem;
+        color: #6b7280;
+      }
+      </style>
+
+
+    </form>
+  </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // === Select DOM elements ===
+  const projectSelect = document.getElementById('project_select');
+  const varatiyaSelect = document.getElementById('varatiya_select');
+  const fetchBtn = document.getElementById('fetch_summary');
+  const clearBtn = document.getElementById('clear_summary');
+  const viewBtn = document.getElementById('view_bill_details');
+
+  // Hidden fields
+  const v_project = document.getElementById('voucher_project_id');
+  const v_tenant = document.getElementById('voucher_tenant_id');
+  const v_date = document.getElementById('voucher_date');
+  const v_generated = document.getElementById('voucher_generated_amount');
+  const v_rent = document.getElementById('voucher_rent_bill');
+  const v_service = document.getElementById('voucher_service_bill');
+  const v_gas = document.getElementById('voucher_gas_bill');
+  const v_water = document.getElementById('voucher_water_bill');
+  const v_parking = document.getElementById('voucher_parking_bill');
+  const v_elec = document.getElementById('voucher_electricity_bill');
+
+  // Display nodes
+  const projectName = document.getElementById('project_name');
+  const roomName = document.getElementById('room_name');
+  const tenantName = document.getElementById('tenant_name');
+  const monthText = document.getElementById('bill_month_text');
+  const billsList = document.getElementById('bills_list');
+  const totalAmount = document.getElementById('total_amount');
+  const generatedShow = document.getElementById('generated_amount_show');
+
+  // === Load varatiyas when project changes ===
+  projectSelect.addEventListener('change', function () {
+    const project_id = this.value;
+    varatiyaSelect.innerHTML = '<option value="">Select Varatiya</option>';
+    if (!project_id) return;
+    fetch(`/tenant/ajax/get_varatiyas/${project_id}/`)
+      .then(r => r.json())
+      .then(data => {
+        data.varatiyas.forEach(v => {
+          const opt = document.createElement('option');
+          opt.value = v.varatiya_id;
+          opt.textContent = v.varatiya_name;
+          varatiyaSelect.appendChild(opt);
+        });
+      })
+      .catch(err => console.error('get_varatiyas error', err));
+  });
+
+  // === Clear summary ===
+  clearBtn.addEventListener('click', function () {
+    projectSelect.value = '';
+    varatiyaSelect.innerHTML = '<option value="">Select Varatiya</option>';
+    document.getElementById('bill_month').value = '';
+    projectName.textContent = roomName.textContent = tenantName.textContent = monthText.textContent = '';
+    billsList.innerHTML = '';
+    totalAmount.textContent = '0';
+    generatedShow.textContent = '0';
+    // Clear hidden fields
+    v_project.value = v_tenant.value = v_date.value = v_generated.value = '';
+    v_rent.value = v_service.value = v_gas.value = v_water.value = v_parking.value = v_elec.value = '';
+    document.getElementById('voucher_msg').style.display = 'none';
+  });
+
+  // === Fetch and show summary ===
+  fetchBtn.addEventListener('click', function () {
+    const project_id = projectSelect.value;
+    const varatiya_id = varatiyaSelect.value;
+    const bill_month = document.getElementById('bill_month').value;
+    if (!project_id || !varatiya_id || !bill_month) {
+      alert('Please select project, varatiya and month.');
+      return;
+    }
+    const params = new URLSearchParams({ project_id, varatiya_id, bill_month });
+    fetch(`/tenant/ajax/bill_summary/?${params.toString()}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) { alert(data.error); return; }
+
+        // Update display
+        projectName.textContent = data.project_name || '';
+        roomName.textContent = data.room_name || '';
+        tenantName.textContent = data.tenant_name || '';
+        monthText.textContent = new Date(bill_month + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
+
+        // Update bills list
+        billsList.innerHTML = '';
+        billsList.style.counterReset = 'rvcount';
+        Object.entries(data.bills || {}).forEach(([k, v]) => {
+          const li = document.createElement('li');
+          li.textContent = `${k}: ${v}`;
+          billsList.appendChild(li);
+        });
+
+        totalAmount.textContent = data.total_amount ?? 0;
+        generatedShow.textContent = data.total_amount ?? 0;
+
+        // Fill hidden fields
+        v_project.value = project_id;
+        v_tenant.value = varatiya_id;
+        v_date.value = bill_month + '-01';
+        v_generated.value = data.total_amount ?? 0;
+        v_rent.value = data.bills_ids?.rent_bill_id ?? '';
+        v_service.value = data.bills_ids?.service_bill_id ?? '';
+        v_gas.value = data.bills_ids?.gas_bill_id ?? '';
+        v_water.value = data.bills_ids?.water_bill_id ?? '';
+        v_parking.value = data.bills_ids?.parking_bill_id ?? '';
+        v_elec.value = data.bills_ids?.electricity_bill_id ?? '';
+        
+        document.getElementById('voucher_mainbill_id').value = data.main_bill_id ?? '';
+      })
+      .catch(err => { console.error(err); alert('Could not fetch summary'); });
+  });
+
+  // === View button: open detailed bill page ===
+  viewBtn.addEventListener('click', function () {
+    const project_id = projectSelect.value;
+    const varatiya_id = varatiyaSelect.value;
+    const bill_month = document.getElementById('bill_month').value;
+
+    if (!project_id || !varatiya_id || !bill_month) {
+      alert('Please select project, varatiya and month first.');
+      return;
+    }
+
+    const params = new URLSearchParams({ project_id, varatiya_id, bill_month });
+    window.open(`/tenant/bill_view/?${params.toString()}`, '_blank');
+  });
+
+  // === Submit receive voucher ===
+  document.getElementById('voucher_form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const msgEl = document.getElementById('voucher_msg');
+    const fd = new FormData(this);
+
+    fetch("{% url 'create_receive_voucher' %}", {
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+      body: fd
+    })
+      .then(r => r.json())
+      .then(data => {
+        msgEl.style.display = 'block';
+        if (data.success) {
+          msgEl.textContent = '✅ Receive Voucher created successfully!';
+          msgEl.className = 'rv-msg success';
+          this.reset();
+        } else {
+          msgEl.textContent = '❌ Error: ' + (data.error || 'Try again');
+          msgEl.className = 'rv-msg error';
+        }
+      })
+      .catch(err => {
+        msgEl.style.display = 'block';
+        msgEl.textContent = '❌ Network error';
+        msgEl.className = 'rv-msg error';
+      });
+  });
+
+});
+</script>
+
+
+
+
+
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}
+
+ 
+
+

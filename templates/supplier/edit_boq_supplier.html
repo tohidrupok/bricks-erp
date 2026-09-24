@@ -1,0 +1,126 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Supplier Name Update- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				    {% include 'partials/header.html' %}
+                <div class="container mx-auto mt-10 ml-10"> 
+                <!-- END: Top Bar -->
+                <h1 class="text-3xl font-semibold text-gray-900 mb-6">Edit Project: {{ project.project_first_name }}</h1>
+
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                    <form method="POST" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                        {% csrf_token %}
+                    
+                        <h2 class="text-xl font-semibold mb-4 text-center">Edit BoQ Supplier</h2>                                          
+                    
+                        <!-- Supplier Name -->
+                        <div class="mb-4">
+                            <label for="supplier_name" class="font-medium text-lg text-gray-800">Supplier Name</label>
+                            <input type="text" id="supplier_name" name="supplier_name"
+                                   class="w-full text-sm border-slate-200 shadow-sm rounded-md"
+                                   placeholder="Enter Supplier Name"
+                                   value="{{ form.supplier_name.value|default_if_none:'' }}">
+                            {% for error in form.supplier_name.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Address -->
+                        <div class="mb-4">
+                            <label for="address" class="font-medium text-lg text-gray-800">Address</label>
+                            <input type="text" id="address" name="address"
+                                   class="w-full text-sm border-slate-200 shadow-sm rounded-md"
+                                   placeholder="Enter Address"
+                                   value="{{ form.address.value|default_if_none:'' }}">
+                            {% for error in form.address.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Phone -->
+                        <div class="mb-4">
+                            <label for="phone" class="font-medium text-lg text-gray-800">Phone</label>
+                            <input type="text" id="phone" name="phone"
+                                   class="w-full text-sm border-slate-200 shadow-sm rounded-md"
+                                   placeholder="Enter Phone Number"
+                                   value="{{ form.phone.value|default_if_none:'' }}">
+                            {% for error in form.phone.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Email -->
+                        <div class="mb-4">
+                            <label for="email" class="font-medium text-lg text-gray-800">Email</label>
+                            <input type="email" id="email" name="email"
+                                   class="w-full text-sm border-slate-200 shadow-sm rounded-md"
+                                   placeholder="Enter Email"
+                                   value="{{ form.email.value|default_if_none:'' }}">
+                            {% for error in form.email.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label for="description" class="font-medium text-lg text-gray-800">Description</label>
+                            <textarea id="description" name="description" rows="3"
+                                      class="w-full text-sm border-slate-200 shadow-sm rounded-md"
+                                      placeholder="Enter Description">{{ form.description.value|default_if_none:'' }}</textarea>
+                            {% for error in form.description.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Active Status (Radio Buttons) -->
+                        <div class="mb-4">
+                            <label class="font-medium text-lg text-gray-800">Active Status</label>
+                            <div class="flex items-center mt-2">
+                                <input type="radio" id="active_yes" name="active" value="True"
+                                       class="mr-2" {% if form.active.value == True %}checked{% endif %}>
+                                <label for="active_yes" class="mr-4">Yes</label>
+                    
+                                <input type="radio" id="active_no" name="active" value="False"
+                                       class="mr-2" {% if form.active.value == False %}checked{% endif %}>
+                                <label for="active_no">No</label>
+                            </div>
+                            {% for error in form.active.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Submit and Back Buttons -->
+                        <div class="text-center mt-6">
+                            <button type="submit" style="background-color:#1e3c98"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md">
+                                💾 Update Supplier
+                            </button>
+                            <a href="{% url 'boq_supplier_list' %}" style="margin-left:0.5%;background-color:#1e3c98"
+                               class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md ml-2">
+                                🔙 Back to List
+                            </a>
+                        </div>
+                    </form>
+                    
+                    
+                </div>
+                  </div>    
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

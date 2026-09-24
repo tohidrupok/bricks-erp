@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ form.instance.pk|yesno:"Update,Create" }} Room - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    {% include 'partials/mobile.html' %}
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+
+            {% include 'partials/header.html' %}
+
+            <div class="mt-6 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 p-5">
+                    <div class="w-full max-w-3xl mx-auto bg-white dark:bg-darkmode-600 p-8 shadow-lg rounded-xl">
+                        <h2 class="text-2xl font-semibold text-center text-gray-800 dark:text-white mb-8">
+                            {{ form.instance.pk|yesno:"Update,Create" }} Update Room Info
+                        </h2>
+
+                        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                            {% csrf_token %}
+                            
+                            {% for field in form %}
+                                <div>
+                                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        {{ field.label }}
+                                    </label>
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <p class="text-sm text-red-600 mt-1">{{ field.errors|striptags }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding:15px;background:#1e40af;color:#fff;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,0.1);">
+                                <button type="submit" 
+                                    style="padding:8px 20px;background:#fff;color:#1e40af;font-weight:600;border:none;border-radius:6px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+                                    Save Edit
+                                </button>
+                                <a href="{% url 'room_list' %}" 
+                                style="font-size:14px;color:#fff;text-decoration:underline;">
+                                ← Back to Room List
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

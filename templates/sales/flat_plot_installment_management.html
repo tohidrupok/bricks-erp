@@ -1,0 +1,536 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sales Add Record - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Sales Add Record</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{{ request.get_full_path }}">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">
+                                Refresh
+                            </button>
+                        </a>
+                        <a href="{% url 'flat_plot_sales' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Sales List</button>
+                        </a>
+                        <div class="mx-auto hidden text-slate-500 md:block"> </div>            
+                    </div>
+            
+                  <!-- BEGIN: Property Sales List -->
+					<div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                         <div class="mt-5 grid grid-cols-12 gap-6">
+                            <div class="intro-y col-span-12">
+                                <!-- Filter Form (GET) -->
+                               <form method="get" class="flex flex-wrap gap-4 items-end mb-4">
+                                <div class="flex-1 min-w-[200px]">
+                                    <label for="customer">Select Customer Name</label>
+                                    <select name="customer_id" id="customer" class="form-select w-full" onchange="this.form.submit()">
+                                        <option value="">-- Select Customer --</option>
+                                        {% for cust in customers %}
+                                            <option value="{{ cust.id }}" {% if cust.id == selected_customer_id %}selected{% endif %}>
+                                                {{ cust.customer_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="flex-1 min-w-[200px]">
+                                    <label for="property">Select Floor/Plot-A</label>
+                                    <select name="property_id" id="property" class="form-select w-full" {% if not selected_customer_id %}disabled{% endif %}>
+                                        <option value="">-- Select Property --</option>
+                                        {% for plot in plots %}
+                                            <option value="{{ plot.id }}" {% if plot.id == selected_property_id %}selected{% endif %}>
+                                                {{ plot.type|capfirst }}-{{ plot.flat_no }} / A-{{ plot.unit_no }} / Status : {{ plot.status }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <button type="submit" style="background-color:#1e3c98"
+                                        class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">
+                                        Filter
+                                    </button>
+                                </div>
+                            </form>
+                            </div>
+
+                            {% if plots %}
+                            <div class="intro-y col-span-12 overflow-auto mt-5">
+                                <h2 class="text-xl font-semibold mb-4">Flat/Plot Sales Details</h2>
+                                <table class="min-w-full text-sm border border-gray-300">
+                                    <thead class="bg-gray-100">
+                                        <tr>
+                                            <th class="border p-2">Floor/Plot</th>
+                                            <th class="border p-2">A No</th>
+                                            <th class="border p-2">Property Name</th>
+                                            <th class="border p-2">Property Code</th>
+                                            <th class="border p-2">Sq. Ft</th>
+                                            <th class="border p-2">Rate/Sqft</th>
+                                            <th class="border p-2">Sales Amount</th>
+                                            <th class="border p-2">Pay Status</th>
+                                            <th class="border p-2">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for plot in plots %}
+                                        <tr>
+                                            <td class="border p-2">
+                                                {% if plot.type == "flat" %}
+                                                    Floor-{{ plot.flat_no }}
+                                                {% elif plot.type == "plot" %}
+                                                    Plot-{{ plot.flat_no }}
+                                                {% else %}
+                                                    {{ plot.flat_no }}
+                                                {% endif %}
+                                            </td>
+                                            <td width="80" class="border p-2">A-{{ plot.unit_no }}</td>
+                                            <td class="border p-2">{{ plot.property_name }}</td>
+                                            <td class="border p-2">{{ plot.property_code }}</td>
+                                            <td class="border p-2">{{ plot.square_fit }}</td>
+                                            <td class="border p-2">{{ plot.per_square_rate }}</td>
+                                            <td class="border p-2">{{ plot.sales_amount }}</td>
+                                            <td class="border p-2">{{ plot.pay_last_status }}</td>
+                                            <td class="border p-2 text-left">
+                                                {% if plot.status == "Pending" %}
+                                                    {% if selected_property_id %}
+                                                    <button
+                                                        type="button"
+                                                        style="background-color:red;"
+                                                        class="bg-red-600 text-white px-3 py-1 rounded"
+                                                        onclick="document.getElementById('form-{{ plot.id }}').classList.toggle('hidden')"
+                                                    >
+                                                        Pending
+                                                    </button>
+                                                    {% else %}
+                                                    <div class="text-sm text-gray-600 italic">
+                                                        Please select a flat/plot and filter.
+                                                    </div>
+                                                {% endif %}
+
+                                                {% elif plot.status == "Done" %}
+                                                <button
+                                                        type="button"
+                                                        style="background-color:red;"
+                                                        class="bg-red-600 text-white px-3 py-1 rounded"
+                                                        onclick="document.getElementById('form-{{ plot.id }}').classList.toggle('hidden')"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    &nbsp;&nbsp;
+                                                   <button 
+                                                        type="button"
+                                                        style="background-color:green;"
+                                                        class="bg-green-600 text-white px-3 py-1 rounded"
+                                                        onclick="window.location.href='{% url 'installment_list' plot.id %}'"
+                                                    >
+                                                        View
+                                                    </button>
+
+                                                {% else %}
+                                                    {{ plot.status }}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+
+                                        <!-- Hidden installment payment form toggled by button -->
+                                                <tr id="form-{{ plot.id }}" class="hidden bg-gray-50">
+                                                    <td colspan="8" class="p-4">
+                                                        <div class="max-w-3xl mx-auto p-4 bg-white rounded shadow">
+                                                
+                                                            <!-- Input form -->
+                                                            <form id="installmentForm-{{ plot.id }}" class="mb-4" onsubmit="return false;">
+                                                
+                                                                <!-- Row 1 -->
+                                                                <div class="flex space-x-4 mb-2 items-center">
+                                                
+                                                                    <!-- Month -->
+                                                                    <div>
+                                                                        <label class="block text-sm font-semibold">Month</label>
+                                                                        <input type="month"
+                                                                               id="monthInput-{{ plot.id }}"
+                                                                               name="month"
+                                                                               class="border rounded px-2 py-1 w-32"
+                                                                               required>
+                                                                    </div>
+                                                
+                                                                    <!-- Installment Head -->
+                                                                    <div class="flex-1">
+                                                                        <label class="block text-sm font-semibold">Installment Head</label>
+                                                                        <select id="installmentHeadInput-{{ plot.id }}"
+                                                                                name="payment_type"
+                                                                                class="border rounded px-2 py-1 w-full"
+                                                                                required>
+                                                                            <option value="">Select Installment Head</option>
+                                                                            {% for key, label in form.fields.payment_type.choices %}
+                                                                                <option value="{{ key }}">{{ label }}</option>
+                                                                            {% endfor %}
+                                                                        </select>
+                                                                    </div>
+                                                
+                                                                    <!-- Amount -->
+                                                                    <div>
+                                                                        <label class="block text-sm font-semibold">Amount</label>
+                                                                        <input type="number"
+                                                                               id="amountInput-{{ plot.id }}"
+                                                                               name="amount"
+                                                                               step="0.01"
+                                                                               min="0"
+                                                                               class="border rounded px-2 py-1 w-32"
+                                                                               required>
+                                                                    </div>
+                                                                </div>
+                                                
+                                                                <!-- Row 2 -->
+                                                                <div class="flex space-x-4 mb-2 items-center">
+                                                
+                                                                    <!-- Note -->
+                                                                    <div>
+                                                                        <label class="block text-sm font-semibold">Note</label>
+                                                                        <input type="text"
+                                                                               id="noteInput-{{ plot.id }}"
+                                                                               name="pay_note"
+                                                                               class="border rounded px-2 py-1 w-32">
+                                                                    </div>
+                                                
+                                                                    <!-- Cheque Posted -->
+                                                                    <div class="flex-1 flex items-center space-x-2">
+                                                                        <input type="checkbox"
+                                                                               id="chequePostedInput-{{ plot.id }}"
+                                                                               name="cheque_posted">
+                                                                        <label for="chequePostedInput-{{ plot.id }}" class="text-sm font-semibold mb-0">
+                                                                            Cheque Posted
+                                                                        </label>
+                                                                    </div>
+                                                
+                                                                    <!-- Cheque Date -->
+                                                                    <div>
+                                                                        <label class="block text-sm font-semibold">Cheque Date</label>
+                                                                        <input type="date"
+                                                                               id="chequeDateInput-{{ plot.id }}"
+                                                                               name="cheque_date"
+                                                                               value="{{ today|date:'Y-m-d' }}"
+                                                                               class="border rounded px-2 py-1 w-40"
+                                                                               disabled>
+                                                                    </div>
+                                                
+                                                                    <!-- Cheque No -->
+                                                                    <div>
+                                                                        <label class="block text-sm font-semibold">Cheque No.</label>
+                                                                        <input type="text"
+                                                                               id="chequeNoInput-{{ plot.id }}"
+                                                                               name="cheque_no"
+                                                                               class="border rounded px-2 py-1 w-32"
+                                                                               disabled>
+                                                                    </div>
+                                                
+                                                                    <!-- Payment Method -->
+                                                                    <div class="flex-1">
+                                                                        <label class="block text-sm font-semibold">Payment Method</label>
+                                                                        <select id="cashTypeInput-{{ plot.id }}"
+                                                                                name="cash_type"
+                                                                                class="border rounded px-2 py-1 w-full"
+                                                                                required>
+                                                                            <option value="">Select Method</option>
+                                                                            {% for key, label in form.fields.cash_type.choices %}
+                                                                                <option value="{{ key }}">{{ label }}</option>
+                                                                            {% endfor %}
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                
+                                                                <!-- Buttons -->
+                                                                <div class="flex justify-end space-x-2">
+                                                                    <button type="button"
+                                                                            id="addRowBtn-{{ plot.id }}"
+                                                                            style="background-color:#1e3c98"
+                                                                            class="text-white px-4 py-1 rounded hover:bg-indigo-700">
+                                                                        Add
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                
+                                                            <!-- Table -->
+                                                            <table class="w-full border border-gray-300 text-sm">
+                                                                <thead class="bg-gray-100">
+                                                                <tr>
+                                                                    <th class="border p-1 text-center">#</th>
+                                                                    <th class="border p-1">Month</th>
+                                                                    <th class="border p-1">Installment Head</th>
+                                                                    <th class="border p-1 text-right">Amount</th>
+                                                                    <th class="border p-1">Reference</th>
+                                                                    <th class="border p-1 text-center">Date</th>
+                                                                    <th class="border p-1 text-center">Action</th>
+                                                                </tr>
+                                                                </thead>
+                                                
+                                                                <tbody id="installmentTableBody-{{ plot.id }}"></tbody>
+                                                            </table>
+                                                
+                                                            <!-- Save/Delete Buttons -->
+                                                            <div class="flex justify-end space-x-2 mt-4">
+                                                                <button type="button" style="background-color:#84cc16"
+                                                                        id="saveBtn-{{ plot.id }}"
+                                                                        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                                                                    Save
+                                                                </button>
+                                                
+                                                                <button type="button"
+                                                                        id="deleteBtn-{{ plot.id }}" style="margin-left:0.5%;background-color:#1e3c98"
+                                                                        class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                                                                    Delete All
+                                                                </button>
+                                                            </div>
+                                                
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <script>
+                                                document.addEventListener('DOMContentLoaded', () => {
+                                                    const plotId = "{{ plot.id }}";
+                                                
+                                                    const addRowBtn = document.getElementById(`addRowBtn-${plotId}`);
+                                                    const saveBtn = document.getElementById(`saveBtn-${plotId}`);
+                                                    const deleteBtn = document.getElementById(`deleteBtn-${plotId}`);
+                                                    const tableBody = document.getElementById(`installmentTableBody-${plotId}`);
+                                                
+                                                    const monthInput = document.getElementById(`monthInput-${plotId}`);
+                                                    const amountInput = document.getElementById(`amountInput-${plotId}`);
+                                                    const installmentHeadInput = document.getElementById(`installmentHeadInput-${plotId}`);
+                                                    const chequePostedInput = document.getElementById(`chequePostedInput-${plotId}`);
+                                                    const chequeDateInput = document.getElementById(`chequeDateInput-${plotId}`);
+                                                    const chequeNoInput = document.getElementById(`chequeNoInput-${plotId}`);
+                                                    const cashTypeInput = document.getElementById(`cashTypeInput-${plotId}`);
+                                                    const payNoteInput = document.getElementById(`noteInput-${plotId}`);
+                                                
+                                                    let rowCount = 0;
+                                                
+                                                    if (chequePostedInput) {
+                                                        chequePostedInput.addEventListener('change', () => {
+                                                            const checked = chequePostedInput.checked;
+                                                            chequeDateInput.disabled = !checked;
+                                                            chequeNoInput.disabled = !checked;
+                                                            if (!checked) {
+                                                                chequeDateInput.value = '';
+                                                                chequeNoInput.value = '';
+                                                            }
+                                                        });
+                                                    }
+                                                
+                                                    function formatMonthDisplay(monthValue) {
+                                                        const [year, month] = monthValue.split('-');
+                                                        const date = new Date(year, month - 1, 1);
+                                                        return date.toLocaleString('default', { month: 'short', year: '2-digit' });
+                                                    }
+                                                
+                                                    // ADD ROW
+                                                    if (addRowBtn) {
+                                                        addRowBtn.addEventListener('click', () => {
+                                                            const month = monthInput.value; // yyyy-mm
+                                                            const amount = amountInput.value;
+                                                            const installmentHead = installmentHeadInput.value;
+                                                            const chequePostedChecked = chequePostedInput.checked;
+                                                            const chequeNo = chequeNoInput.value;
+                                                            const chequeDate = chequeDateInput.value;
+                                                            const cashTypeVal = cashTypeInput ? cashTypeInput.value : '';
+                                                            const payNoteVal = payNoteInput?.value?.trim() || '';
+                                                
+                                                            if (!month || !amount || !installmentHead) {
+                                                                alert('Please fill all required fields.');
+                                                                return;
+                                                            }
+                                                
+                                                            rowCount++;
+                                                
+                                                            const tr = document.createElement('tr');
+                                                            tr.dataset.monthValue = month; // store exact month for saving
+                                                
+                                                            tr.innerHTML = `
+                                                                <td class="border p-1 text-center">${rowCount}</td>
+                                                                <td class="border p-1">${formatMonthDisplay(month)}</td>
+                                                                <td class="border p-1">${installmentHead}</td>
+                                                                <td class="border p-1 text-right">${parseFloat(amount).toFixed(2)}</td>
+                                                                <td class="border p-1">
+                                                                    ${chequePostedChecked ? 'Cheque Posted' + (chequeNo ? ' (No: ' + chequeNo + ')' : '') : 'No Cheque'}
+                                                                </td>
+                                                                <td class="border p-1 text-center">${chequePostedChecked ? chequeDate || new Date().toLocaleDateString() : 'N/A'}</td>
+                                                                <td class="border p-1 text-center">${cashTypeVal}</td>
+                                                                <td class="border p-1 text-center">${payNoteVal}</td>
+                                                                <td class="border p-1 text-center">
+                                                                    <button type="button" class="removeBtn text-red-600 hover:underline">Delete</button>
+                                                                </td>
+                                                            `;
+                                                            tableBody.appendChild(tr);
+                                                
+                                                            tr.querySelector('.removeBtn').addEventListener('click', () => {
+                                                                tr.remove();
+                                                                rowCount = 0;
+                                                                [...tableBody.children].forEach((row) => {
+                                                                    rowCount++;
+                                                                    row.cells[0].textContent = rowCount;
+                                                                });
+                                                            });
+                                                
+                                                            document.getElementById(`installmentForm-${plotId}`).reset();
+                                                            chequeDateInput.disabled = true;
+                                                            chequeNoInput.disabled = true;
+                                                
+                                                            const now = new Date();
+                                                            monthInput.value = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}`;
+                                                        });
+                                                    }
+                                                
+                                                    // DELETE ALL
+                                                    if (deleteBtn) {
+                                                        deleteBtn.addEventListener('click', () => {
+                                                            if (confirm('Are you sure you want to delete all rows?')) {
+                                                                tableBody.innerHTML = '';
+                                                                rowCount = 0;
+                                                            }
+                                                        });
+                                                    }
+                                                
+                                                    // SAVE BUTTON
+                                                    if (saveBtn) {
+                                                        saveBtn.addEventListener('click', () => {
+                                                            if (tableBody.children.length === 0) {
+                                                                alert('Please add at least one row before saving.');
+                                                                return;
+                                                            }
+                                                            if (!confirm('Are you sure you want to save the data?')) return;
+                                                
+                                                            const form = document.createElement('form');
+                                                            form.method = 'POST';
+                                                            form.action = window.location.href;
+                                                
+                                                            // CSRF token
+                                                            function getCookie(name) {
+                                                                let cookieValue = null;
+                                                                if (document.cookie && document.cookie !== '') {
+                                                                    document.cookie.split(';').forEach(cookie => {
+                                                                        cookie = cookie.trim();
+                                                                        if (cookie.startsWith(name + '=')) {
+                                                                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                                                        }
+                                                                    });
+                                                                }
+                                                                return cookieValue;
+                                                            }
+                                                            const csrfToken = getCookie('csrftoken');
+                                                            if (csrfToken) {
+                                                                const csrfInput = document.createElement('input');
+                                                                csrfInput.type = 'hidden';
+                                                                csrfInput.name = 'csrfmiddlewaretoken';
+                                                                csrfInput.value = csrfToken;
+                                                                form.appendChild(csrfInput);
+                                                            }
+                                                
+                                                            // Fixed hidden inputs
+                                                            function addHidden(name, value) {
+                                                                const input = document.createElement('input');
+                                                                input.type = 'hidden';
+                                                                input.name = name;
+                                                                input.value = value;
+                                                                form.appendChild(input);
+                                                            }
+                                                
+                                                            addHidden('property_sales_id', "{{ selected_property_id|default:'' }}");
+                                                            addHidden('project_id', "{{ plots.first.project_name.id|default:'' }}");
+                                                            addHidden('customer_id', "{{ selected_customer_id|default:'' }}");
+                                                            addHidden('sales_amount', "{{ plots.first.sales_amount|default:'0.00' }}");
+                                                
+                                                            // Loop rows
+                                                            [...tableBody.children].forEach(row => {
+                                                                addHidden('payment_type[]', row.cells[2].textContent.trim());
+                                                                addHidden('month[]', row.dataset.monthValue); // exact month value
+                                                                addHidden('amount[]', row.cells[3].textContent.trim());
+                                                
+                                                                const refText = row.cells[4].textContent.trim();
+                                                                addHidden('cheque_posted[]', refText.startsWith('Cheque Posted') ? 'on' : '');
+                                                
+                                                                const dateText = row.cells[5].textContent.trim();
+                                                                const chequeDateVal = (refText.startsWith('Cheque Posted') && dateText !== 'N/A') 
+                                                                                    ? new Date(dateText).toISOString().slice(0,10)
+                                                                                    : '';
+                                                                addHidden('cheque_posted_date[]', chequeDateVal);
+                                                
+                                                                let chequeNoVal = '';
+                                                                const match = refText.match(/\(No: (.+)\)/);
+                                                                if (match) chequeNoVal = match[1];
+                                                                addHidden('cheque_no[]', chequeNoVal);
+                                                
+                                                                addHidden('cash_type[]', row.cells[6].textContent.trim());
+                                                                addHidden('pay_note[]', row.cells[7]?.textContent?.trim() || '');
+                                                            });
+                                                
+                                                            document.body.appendChild(form);
+                                                            form.submit();
+                                                        });
+                                                    }
+                                                });
+                                                </script>
+
+
+
+
+
+
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% endif %}
+
+
+
+    
+	
+					</div>                    
+                    
+                    <!-- END: Pagination -->
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

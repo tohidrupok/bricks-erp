@@ -1,0 +1,362 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Electricity Bill Generator - BM ERP{% endblock %}
+
+{% block content %} 
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    {% include 'partials/mobile.html' %}
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+
+        <div class="flex-1 min-h-screen px-4 pb-10 md:px-[22px] bg-slate-100 dark:bg-darkmode-700 rounded-[30px]">
+
+            {% include 'partials/header.html' %}
+
+                <div class="intro-y flex h-10 items-center">
+                    <h2 class="mr-5 truncate text-lg font-medium">Electricity Bill Generatorr</h2>
+                
+                    <div class="ml-auto flex items-center gap-3">
+                        
+                        <!-- Back Button -->
+                        <a href="javascript:history.back()" class="flex items-center text-primary">
+                            <i data-lucide="arrow-left" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Back
+                        </a>
+                
+                        <!-- Dashboard Button -->
+                        <a href="{% url 'tenant_dashboard' %}" class="flex items-center text-primary">
+                            <i data-lucide="layout-dashboard" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Dashboard
+                        </a>
+                
+                        <!-- Reload Button -->
+                        <a class="flex items-center text-primary" href="">
+                            <i data-lucide="refresh-ccw" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Reload Data
+                        </a>
+                
+                    </div>
+                </div>
+            <!-- Responsive Left-Right Grid -->
+            <div class="grid-container">
+
+                <!-- Left Panel: Form -->
+                <div class="card">
+                    <h2 class="section-title">Select Project & Tenant</h2>
+
+                    <!-- Project -->
+                    <div class="form-group">
+                        <label>Project</label>
+                        <select id="projectSelect">
+                            <option value="">-- Select --</option>
+                            {% for project in projects %}
+                                <option value="{{ project.id }}">{{ project.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Tenant -->
+                    <div class="form-group">
+                        <label>Tenant</label>
+                        <select id="rentSelect"></select>
+                    </div>
+
+                    <!-- Meter Details -->
+                    <div id="rentDetails" class="rent-details hidden">
+                        <h3 class="section-subtitle">Meter & Reading</h3>
+
+                        <div class="details-grid">
+                            <div><span class="label">Meter Number:</span> <span id="meter_number"></span></div>
+                            <div><span class="label">Opening Reading:</span> <span id="opening_reading"></span></div>
+                            <div><span class="label">Last Month Reading:</span> <span id="last_month_reading"></span></div>
+                            <div><span class="label">Unit Charge:</span>
+                                <input type="number" id="unit_charge" step="0.01">
+                            </div>
+                            <div><span class="label">Current Reading:</span>
+                                <input type="number" id="current_month_reading" step="0.01">
+                            </div>
+                            <div><span class="label">Bill Month:</span>
+                                <input type="month" id="bill_month" value="{{ current_month }}">
+                            </div>
+                        </div>
+
+                        <button id="generateBillBtn" class="btn-primary">Generate Bill</button>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Result -->
+                <div class="card">
+                    <h2 class="section-title">Electricity Bill Report</h2>
+                    <div id="result" class="result-box"></div>
+                </div>
+
+            </div>
+            <!-- End Grid -->
+
+            <style>
+            /* Main Grid */
+            /* Main Grid */
+            .grid-container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 28px;
+                max-width: 1200px;
+                margin: 30px auto;
+                padding: 10px;
+            }
+            @media (max-width: 992px) {
+                .grid-container {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            /* Card */
+            .card {
+                background: #ffffff;
+                padding: 26px;
+                border: 1px solid #e2e8f0;
+                border-radius: 18px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+            .card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+            }
+
+            /* Titles */
+            .section-title {
+                font-size: 20px;
+                font-weight: 700;
+                margin-bottom: 18px;
+                color: #1e293b;
+                border-left: 4px solid #2563eb; /* refined blue */
+                padding-left: 10px;
+            }
+            .section-subtitle {
+                font-size: 16px;
+                font-weight: 600;
+                margin-bottom: 14px;
+                border-bottom: 1px dashed #d4d4d8;
+                padding-bottom: 6px;
+                color: #334155;
+            }
+
+            /* Form elements */
+            .form-group {
+                margin-bottom: 16px;
+            }
+            .form-group label {
+                display: block;
+                font-weight: 600;
+                margin-bottom: 6px;
+                color: #374151;
+            }
+            .form-group select,
+            .form-group input {
+                width: 100%;
+                padding: 10px 12px;
+                border: 1px solid #cbd5e1;
+                border-radius: 10px;
+                font-size: 14px;
+                background: #f9fafb;
+                transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            }
+            .form-group select:focus,
+            .form-group input:focus {
+                border-color: #2563eb; /* professional blue */
+                box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+                outline: none;
+                background: #ffffff;
+            }
+
+            /* Meter details */
+            .rent-details {
+                margin-top: 22px;
+                background: #f8fafc;
+                border: 1px solid #e5e7eb;
+                border-radius: 14px;
+                padding: 18px;
+            }
+            .details-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 14px 22px;
+                font-size: 14px;
+                color: #1e293b;
+            }
+            .label {
+                font-weight: 600;
+                color: #0f172a;
+            }
+
+            /* Button */
+            .btn-primary {
+                display: block;
+                width: 100%;
+                background: linear-gradient(90deg, #2563eb, #2563eb); /* professional blue gradient */
+                color: #ffffff;
+                font-weight: 600;
+                padding: 12px 16px;
+                border-radius: 12px;
+                border: none;
+                cursor: pointer;
+                margin-top: 18px;
+                transition: background 0.3s ease, transform 0.2s ease;
+            }
+            .btn-primary:hover {
+                background: linear-gradient(90deg, #2563eb, #2563eb);
+                transform: translateY(-1px);
+            }
+
+            /* Result box */
+            .result-box {
+                font-size: 15px;
+                color: #1f2937;
+                margin-top: 12px;
+                line-height: 1.6;
+            }
+
+            </style>
+
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedRent = null;
+
+// Project dropdown change
+document.getElementById("projectSelect").addEventListener("change", function(event){
+    let pid = event.target.value;
+    if(!pid) return;
+
+    fetch(`/tenant/electricity/get-rents/${pid}/`)
+    .then(res => res.json())
+    .then(data => {
+        let options = "<option value=''>-- Select Tenant --</option>";
+        data.rents.forEach(r=>{
+            options += `<option value="${r.rent_id}"
+                data-meter="${r.meter_number}"
+                data-opening="${r.opening_reading}"
+                data-last="${r.last_month_reading}"
+                data-unit="${r.unit_charge}"
+                data-project="${r.project_name || ''}"
+                data-flat="${r.flat}"
+                data-room="${r.room_name}"
+                data-varatiya="${r.varatiya}">${r.varatiya} (${r.flat}-${r.room_name})</option>`;
+        });
+        document.getElementById("rentSelect").innerHTML = options;
+        document.getElementById("rentDetails").classList.add("hidden");
+        document.getElementById("result").innerHTML = "";
+    })
+    .catch(err => console.error(err));
+});
+
+// Tenant dropdown change
+document.getElementById("rentSelect").addEventListener("change", function(event){
+    let opt = event.target.selectedOptions[0];
+    if(!opt.value) return;
+    selectedRent = opt.value;
+
+    document.getElementById("meter_number").textContent = opt.dataset.meter;
+    document.getElementById("opening_reading").textContent = opt.dataset.opening;
+    document.getElementById("last_month_reading").textContent = opt.dataset.last;
+    document.getElementById("unit_charge").value = opt.dataset.unit;
+    document.getElementById("current_month_reading").value = "";
+
+    document.getElementById("rentDetails").classList.remove("hidden");
+    document.getElementById("result").innerHTML = "";
+});
+
+// Generate bill button
+document.getElementById("generateBillBtn").addEventListener("click", function(){
+    let last = parseFloat(document.getElementById("last_month_reading").textContent);
+    let current = parseFloat(document.getElementById("current_month_reading").value);
+    let unit_charge = parseFloat(document.getElementById("unit_charge").value);
+
+    if(isNaN(current) || current <= last){
+        document.getElementById("result").innerHTML = `<div style="background-color:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:10px 14px;border-radius:10px;">❌ Current reading must be greater than last month's reading.</div>`;
+        return;
+    }
+
+    let used_unit = current - last;
+
+    let payload = {
+        rent_id: selectedRent,
+        current_month_reading: current,
+        unit_charge: unit_charge,
+        bill_month: document.getElementById("bill_month").value
+    };
+
+    fetch("/tenant/electricity/save/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(res => {
+        if(res.success){
+            let b = res.bill;
+            let html = `
+            <div style="background-color:#ffffff;padding:24px;border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,0.1);border:1px solid #e5e7eb;max-width:480px;margin:0 auto;font-size:15px;color:#1f2937;line-height:1.6;">
+                <h3 style="font-size:20px;font-weight:600;color:#111827;border-bottom:1px solid #e5e7eb;padding-bottom:8px;margin-bottom:16px;">Electricity Bill</h3>
+                <div style="margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-weight:500;">Project:</span><span>${b.project_name}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-weight:500;">Tenant:</span><span>${b.varatiya}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-weight:500;">Flat / Room:</span><span>${b.flat} / ${b.room_name}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-weight:500;">Meter Number:</span><span>${b.meter_number}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-weight:500;">Opening Reading:</span><span>${b.opening_reading}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-weight:500;">Last Month Reading:</span><span>${b.last_month_reading}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-weight:500;">Current Reading:</span><span>${b.current_reading}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-weight:500;">Used Unit:</span><span>${used_unit}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-weight:500;">Unit Charge:</span><span>${b.unit_charge}</span></div>
+                    <div style="display:flex;justify-content:space-between;font-weight:600;border-top:1px solid #e5e7eb;padding-top:6px;margin-top:6px;"><span>Amount:</span><span>${b.amount}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-top:6px;"><span style="font-weight:500;">Status:</span><span>${b.status}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-top:6px;"><span style="font-weight:500;">Bill Month:</span><span>${b.bill_month}</span></div>
+                </div>
+                <div style="background-color:#f9fafb;border:1px solid #e5e7eb;padding:12px 16px;border-radius:12px;color:#1f2937;font-weight:500;margin-top:12px;">
+                    ${res.message}
+                </div>
+                <button 
+                onclick="window.location.href='/tenant/electricity-bill/print/?bill_id=${b.id}'" 
+                style="
+                    display:block;
+                    width:100%;
+                    background:linear-gradient(90deg, #2563eb, #1d4ed8); 
+                    color:#ffffff;
+                    font-weight:600;
+                    padding:12px 16px;
+                    border-radius:12px;
+                    border:none;
+                    cursor:pointer;
+                    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+                    margin-top:16px;
+                    transition:background 0.3s ease, transform 0.2s ease;
+                "
+                onmouseover="this.style.background='linear-gradient(90deg, #1d4ed8, #1e40af)'; this.style.transform='translateY(-1px)'"
+                onmouseout="this.style.background='linear-gradient(90deg, #2563eb, #1d4ed8)'; this.style.transform='translateY(0)'"
+            >
+                View Bill
+            </button>
+
+            </div>`;
+            document.getElementById("result").innerHTML = html;
+        } else {
+            document.getElementById("result").innerHTML = `<div style="background-color:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:10px 14px;border-radius:10px;">❌ ${res.message}</div>`;
+        }
+    })
+    .catch(err => {
+        document.getElementById("result").innerHTML = `<div style="background-color:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:10px 14px;border-radius:10px;">❌ Something went wrong!</div>`;
+        console.error(err);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Requisition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --panel-white: #ffffff;
+            --primary-blue: #0d6efd;
+            --primary-hover: #0b5ed7;
+            --border-color: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --amber: #f59e0b;
+            --amber-dark: #d97706;
+            --green: #10b981;
+            --green-dark: #059669;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        body {
+            background: var(--bg-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px;
+        }
+        .container { max-width: 1300px; margin: auto; }
+
+        .card {
+            background: var(--panel-white);
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,.05), 0 2px 4px -2px rgba(0,0,0,.05);
+            margin-bottom: 25px;
+        }
+
+        .row { display: flex; gap: 24px; margin-bottom: 20px; }
+        .col { flex: 1; }
+
+        label { display:block; margin-bottom:8px; font-weight:600; font-size:.9rem; color:#334155; }
+
+        input, select {
+            width: 100%; padding: 11px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-sizing: border-box; font-family: inherit;
+            font-size: .95rem; color: var(--text-main);
+            background: #fff; transition: all .2s ease;
+        }
+        input:focus, select:focus {
+            outline: none; border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(13,110,253,.15);
+        }
+
+        /* ---------- Category image buttons ---------- */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+        .category-tile {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            background: #fff;
+            padding: 18px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s ease;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+        .category-tile:hover {
+            border-color: var(--primary-blue);
+            box-shadow: 0 6px 14px -4px rgba(13,110,253,.25);
+            transform: translateY(-2px);
+        }
+        .category-tile.active {
+            border-color: var(--primary-blue);
+            background: #eff6ff;
+            box-shadow: 0 0 0 3px rgba(13,110,253,.15);
+        }
+        .category-tile img {
+            width: 64px; height: 64px; object-fit: cover;
+            border-radius: 50%; border: 2px solid var(--border-color);
+        }
+        .category-tile .cat-icon {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: linear-gradient(135deg, #dbeafe, #eff6ff);
+            color: var(--primary-blue);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.7rem;
+        }
+        .category-tile.all-tile .cat-icon {
+            background: linear-gradient(135deg, #fef3c7, #fffbeb);
+            color: var(--amber-dark);
+        }
+        .category-tile .cat-name { font-weight: 600; font-size: .92rem; }
+
+        /* ---------- Item table ---------- */
+        table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            margin-top: 20px; border-radius: var(--radius-md);
+            overflow: hidden; border: 1px solid var(--border-color);
+        }
+        table th {
+            background:#f1f5f9; color:#475569; font-weight:600;
+            font-size:.88rem; text-transform:uppercase; letter-spacing:.05em; text-align:left;
+        }
+        table th, table td {
+            border-bottom:1px solid var(--border-color);
+            border-right:1px solid var(--border-color);
+            padding:12px 14px;
+        }
+        table th:last-child, table td:last-child { border-right:none; }
+        table tr:last-child td { border-bottom:none; }
+        table tbody tr:hover { background:#f8fafc; }
+
+        .stock-badge {
+            display:inline-block; padding:4px 12px; border-radius:20px;
+            font-weight:700; font-size:.85rem;
+            background:#ecfdf5; color:var(--green-dark);
+        }
+        .stock-badge.low { background:#fef2f2; color:#dc2626; }
+
+        .cat-pill {
+            display:inline-block; padding:3px 10px; border-radius:20px;
+            font-size:.78rem; font-weight:600;
+            background:#eff6ff; color:var(--primary-blue);
+        }
+
+        .row-status { font-size:.82rem; font-weight:600; }
+        .row-status.saved   { color: var(--green-dark); }
+        .row-status.saving  { color: var(--amber-dark); }
+        .row-status.error   { color: #dc2626; }
+        .row-status.approved{ color: var(--primary-blue); }
+
+        /* ---------- Store approval button ---------- */
+        .store-btn {
+            display:inline-flex; align-items:center; gap:10px;
+            border:none; color:#fff; padding:14px 28px;
+            border-radius:var(--radius-md); cursor:pointer;
+            font-weight:700; font-size:1rem; font-family:inherit;
+            transition:all .2s ease;
+        }
+        .store-btn.pending  { background:var(--amber); }
+        .store-btn.pending:hover { background:var(--amber-dark); }
+        .store-btn.approved { background:var(--green); cursor:default; }
+        .store-btn:disabled { opacity:.6; cursor:not-allowed; }
+
+        .header-card {
+            padding:24px; border-radius:var(--radius-lg); background:#fff;
+            border:1px solid var(--border-color); margin-bottom:25px;
+        }
+        .header-row { display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; }
+        .header-title { margin:0; font-size:24px; font-weight:700; display:flex; align-items:center; gap:10px; }
+
+        /* Date filter highlight */
+        .date-badge {
+            display:inline-flex; align-items:center; gap:6px;
+            margin-top:6px; font-size:.8rem; font-weight:600;
+            color: var(--primary-blue);
+        }
+
+        #toast-container { position:fixed; top:24px; right:24px; z-index:9999; }
+        .toast-message {
+            background:#1e293b; color:#fff; padding:14px 24px;
+            border-radius:var(--radius-md); margin-bottom:12px;
+            box-shadow:0 10px 15px -3px rgba(0,0,0,.1);
+            font-weight:500; font-size:.9rem;
+            display:flex; align-items:center; gap:10px;
+            animation:slideIn .3s cubic-bezier(.16,1,.3,1) forwards;
+        }
+        .toast-success { border-left:4px solid var(--green); }
+        .toast-error   { border-left:4px solid #ef4444; }
+        @keyframes slideIn { from{transform:translateX(120%);opacity:0} to{transform:translateX(0);opacity:1} }
+        @keyframes fadeOut { from{opacity:1} to{opacity:0} }
+
+        .empty-hint { text-align:center; color:var(--text-muted); padding:40px 20px; }
+
+        @media(max-width:991px){
+            .row { flex-direction:column; gap:16px; }
+            table { display:block; overflow-x:auto; }
+            body { padding:15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+{% csrf_token %}
+
+<div class="container">
+
+    <div class="header-card">
+        <div class="header-row">
+            <h1 class="header-title">
+                <i class="bi bi-grid-3x3-gap-fill" style="color:var(--primary-blue)"></i>
+                Category Requisition
+            </h1>
+            <div class="action-button-group">
+                <!-- Home Button -->
+                <a href="{% url 'public_restaurant_home' %}" class="btn-action btn-home">
+                    <i class="bi bi-house-door-fill"></i> Home
+                </a>
+
+                <!-- Refresh Button -->
+                <a href="" id="refresh-btn-link" class="btn-action btn-secondary">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </a>
+                <a href="{% url 'public_restaurant_item_name' %}" class="btn-action btn-item">Item List</a>
+
+                <!-- Requisition View Button (Primary) with Static Project ID -->
+                <a href="{% url 'public_rest_requisition_list' %}?project=36" id="public-view-link" class="btn-action btn-primary">
+                    <i class="bi bi-globe"></i> Requisition View
+                </a>
+            </div>
+
+            <style>
+                .action-button-group {
+                    display: flex;
+                    gap: 12px;
+                    align-items: center;
+                    font-family: system-ui, -apple-system, sans-serif;
+                }
+                .btn-action {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 10px 20px;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    text-decoration: none;
+                    border-radius: 8px;
+                    transition: all 0.2s ease-in-out;
+                    cursor: pointer;
+                }
+                .btn-home {
+                    background-color: #f8fafc;
+                    color: #0f172a;
+                    border: 1px solid #e2e8f0;
+                }
+                .btn-home:hover {
+                    background-color: #f1f5f9;
+                    border-color: #cbd5e1;
+                    transform: translateY(-1px);
+                }
+                .btn-secondary {
+                    background-color: #ffffff;
+                    color: #475569;
+                    border: 1px solid #e2e8f0;
+                }
+                .btn-secondary:hover {
+                    background-color: #f8fafc;
+                    color: #1e293b;
+                    transform: translateY(-1px);
+                }
+                .btn-primary {
+                    background-color: #4f46e5;
+                    color: #ffffff;
+                    border: 1px solid #4f46e5;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                }
+                .btn-primary:hover {
+                    background-color: #4338ca;
+                    border-color: #4338ca;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+                }
+                .btn-action i {
+                    font-size: 1.05rem;
+                    line-height: 1;
+                }
+                
+                .btn-item {
+                    background-color: green;
+                    color: #ffffff;
+                    border: 1px solid #4f46e5;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                }
+            </style>
+        </div>
+    </div>
+
+    <!-- Project / Employee / Date selection -->
+    <div class="card">
+        <div class="row">
+            <div class="col">
+                <label>Project Workspace</label>
+                <select id="project_id" onchange="filterEmployees(this.value)">
+                    <option value="">Select Project</option>
+                    {% for p in projects_firts %}
+                    <option value="{{ p.id }}" {% if selected_project_id|slugify == p.id|slugify %}selected{% endif %}>
+                        {{ p.project_first_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col">
+                <label>Assigned Employee</label>
+                <select id="employee_id" onchange="onEmployeeChange()">
+                    <option value="">Select Employee</option>
+                    {% for emp in employees %}
+                    <option value="{{ emp.id }}" {% if selected_employee_id|slugify == emp.id|slugify %}selected{% endif %}>
+                        {{ emp.rda_emp_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col">
+                <label><i class="bi bi-calendar3" style="color:var(--primary-blue)"></i> Requisition Date</label>
+                <input type="date" id="req_date"
+                       value="{{ selected_date|date:'Y-m-d' }}"
+                       onchange="onDateChange()">
+                <span class="date-badge" id="date-hint">
+                    <i class="bi bi-info-circle"></i> Entries save under this date
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category image buttons -->
+    <div class="card">
+        <h3 style="margin-top:0; margin-bottom:20px; font-size:1.2rem; font-weight:700;">
+            <i class="bi bi-tags-fill" style="color:var(--primary-blue)"></i> Select a Category
+        </h3>
+        <div class="category-grid">
+            <!-- All Category tile -->
+            <div class="category-tile all-tile" id="cat-tile-all" onclick="loadCategoryItems('all')">
+                <div class="cat-icon"><i class="bi bi-collection-fill"></i></div>
+                <span class="cat-name">All Category</span>
+            </div>
+            {% for cat in categories %}
+            <div class="category-tile" id="cat-tile-{{ cat.id }}" onclick="loadCategoryItems({{ cat.id }})">
+                {% if cat.restu_category_image %}
+                    <img src="{{ cat.restu_category_image.url }}" alt="{{ cat.restu_category_name }}">
+                {% else %}
+                    <div class="cat-icon"><i class="bi bi-basket2-fill"></i></div>
+                {% endif %}
+                <span class="cat-name">{{ cat.restu_category_name }}</span>
+            </div>
+            {% empty %}
+            <div class="empty-hint">No categories configured yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Items of the selected category -->
+    <div class="card" id="items-card" style="display:none;">
+        <h3 style="margin-top:0; margin-bottom:4px; font-size:1.2rem; font-weight:700;">
+            <i class="bi bi-list-check" style="color:var(--primary-blue)"></i>
+            Items — <span id="active-cat-name"></span>
+        </h3>
+        <p style="margin:0; color:var(--text-muted); font-size:.88rem;">
+            Type a quantity — each row saves automatically under the selected date.
+        </p>
+         <div class="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">
+                            <div class="relative w-56 text-slate-500 mb-4">
+                                <input id="searchInput" type="text" placeholder="Search..." class="w-full p-2 text-sm border rounded-md shadow-sm focus:ring-4 focus:ring-primary" oninput="handleSearch()">
+                                <i class="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4">🔍</i>
+                            </div>
+                        </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width:50px;">SL</th>
+                                        <th>Item Name</th>
+                                        <th style="width:140px;">Category</th>
+                                        <th style="width:100px;">Stock</th>
+                                        <th style="width:120px;">Qty</th>
+                                        <th style="width:110px;">Amount</th>
+                                        <th style="width:140px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="item-body">
+                                </tbody>
+                            </table>
+                            <script>
+                            function handleSearch() {
+                                let searchValue = document.getElementById('searchInput').value.toLowerCase();
+                                let rows = document.querySelectorAll("#item-body tr");
+
+                                rows.forEach(row => {
+                                    let columns = row.getElementsByTagName("td");
+                                    let rowText = "";
+                                    for (let i = 0; i < columns.length; i++) {
+                                        rowText += columns[i].textContent.toLowerCase();
+                                    }
+                                    if (rowText.includes(searchValue)) {
+                                        row.style.display = "";
+                                    } else {
+                                        row.style.display = "none";
+                                    }
+                                });
+                            }
+                        </script>
+                <!-- Approvals -->
+                <div style="margin-top:26px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                    <button type="button" id="store-approve-btn"
+                            class="store-btn {% if pending_count > 0 or approved_count == 0 %}pending{% else %}approved{% endif %}"
+                            onclick="storeApprove()">
+                        {% if pending_count > 0 or approved_count == 0 %}
+                            <i class="bi bi-hourglass-split"></i> Store Approval Pending
+                        {% else %}
+                            <i class="bi bi-patch-check-fill"></i> Store Approved
+                        {% endif %}
+                    </button>
+
+                    <span id="pending-info" style="color:var(--text-muted); font-size:.9rem;">
+                        {% if pending_count > 0 %}{{ pending_count }} item(s) waiting for store approval on this date.{% endif %}
+                    </span>
+                </div>
+            </div>
+        
+        </div>
+        
+        <script>
+        const PAGE_URL = "{% url 'public_rest_requisition_create' %}";
+        let activeCategoryId = null;
+        const saveTimers = {};   // per-item debounce timers
+        
+        function csrf() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+        
+        /* Selected requisition date (falls back to today) */
+        function reqDate() {
+            const el = document.getElementById('req_date');
+            return (el && el.value) ? el.value : new Date().toISOString().slice(0, 10);
+        }
+        
+        function showToast(message, type = "success") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast-message toast-${type}`;
+            toast.innerHTML = (type === 'success'
+                ? `<i class="bi bi-check-circle-fill"></i> ${message}`
+                : `<i class="bi bi-exclamation-triangle-fill"></i> ${message}`);
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = "fadeOut .4s ease forwards";
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+        
+        /* ---------------- Date change -> reload page for that date ------------ */
+        function onDateChange() {
+            const projId = document.getElementById('project_id').value;
+            const empId = document.getElementById('employee_id').value;
+        
+            // Reload the page so approval button states / counts are rebuilt
+            // for the selected date, keeping the current project & employee.
+            const params = new URLSearchParams();
+            if (projId) params.set('project', projId);
+            if (empId) params.set('employee', empId);
+            params.set('req_date', reqDate());
+            window.location.search = params.toString();
+        }
+        
+        /* ---------------- Project -> Employee filter ---------------- */
+        function filterEmployees(projectId) {
+            const employeeSelect = document.getElementById('employee_id');
+            employeeSelect.innerHTML = '<option value="">Loading Employees...</option>';
+        
+            fetch(`${PAGE_URL}?project_id=${projectId || ''}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                employeeSelect.innerHTML = '<option value="">Select Employee</option>';
+                (data.employees || []).forEach(emp => {
+                    const opt = document.createElement('option');
+                    opt.value = emp.id;
+                    opt.textContent = emp.name;
+                    employeeSelect.appendChild(opt);
+                });
+                // Reload the open category since prefills depend on project/employee
+                if (activeCategoryId) loadCategoryItems(activeCategoryId);
+            })
+            .catch(() => {
+                employeeSelect.innerHTML = '<option value="">Error loading employees</option>';
+            });
+        }
+        
+        function onEmployeeChange() {
+            if (activeCategoryId) loadCategoryItems(activeCategoryId);
+        }
+        
+        /* ---------------- Category click -> load items ---------------- */
+        function loadCategoryItems(catId) {
+            activeCategoryId = catId;
+        
+            document.querySelectorAll('.category-tile').forEach(t => t.classList.remove('active'));
+            const tile = document.getElementById(`cat-tile-${catId}`);
+            if (tile) {
+                tile.classList.add('active');
+                document.getElementById('active-cat-name').textContent =
+                    tile.querySelector('.cat-name').textContent;
+            }
+        
+            const projId = document.getElementById('project_id').value;
+            const empId = document.getElementById('employee_id').value;
+        
+            fetch(`${PAGE_URL}?category_id=${catId}&project_id=${projId}&employee_id=${empId}&req_date=${reqDate()}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(async r => {
+                const text = await r.text();
+                let data;
+                try { data = JSON.parse(text); }
+                catch (e) {
+                    showToast(`Server error ${r.status}: ${text.substring(0, 120)}`, 'error');
+                    throw e;
+                }
+                if (data.status !== 'success') {
+                    showToast(data.message || `Unexpected response (HTTP ${r.status}).`, 'error');
+                    return;
+                }
+                renderItemRows(data.items);
+                document.getElementById('items-card').style.display = 'block';
+                document.getElementById('items-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            })
+            .catch(err => console.error('Category load error:', err));
+        }
+        
+        function renderItemRows(items) {
+            const tbody = document.getElementById('item-body');
+            tbody.innerHTML = '';
+        
+            if (!items.length) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-hint">No items in this category.</td></tr>`;
+                return;
+            }
+        
+            items.forEach((it, idx) => {
+                const approved = it.approv_store === 'approved' || it.approv_purch === 'approved';
+                const hasSaved = it.saved_qty !== "" && it.saved_qty !== null;
+                const row = document.createElement('tr');
+                row.id = `item-row-${it.id}`;
+                row.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td><strong>${it.name}</strong>
+                        ${it.code ? `<div style="font-size:.78rem;color:var(--text-muted);">${it.code}</div>` : ''}
+                    </td>
+                    <td><span class="cat-pill">${it.category_name || ''}</span></td>
+                    <td>
+                        <span class="stock-badge ${it.stock <= 0 ? 'low' : ''}">${it.stock}</span>
+                    </td>
+                    <td>
+                        <input type="number" class="qty-input" min="0" step="0.01"
+                               value="${hasSaved ? it.saved_qty : ''}" placeholder="0.00"
+                               ${approved ? 'disabled' : ''}
+                               oninput="recalcAmount(${it.id}); scheduleSave(${it.id});">
+                    </td>
+                    <td><strong class="amount-label" id="amount-${it.id}">৳${Number(it.saved_amount || 0).toFixed(2)}</strong></td>
+                    <td>
+                        <span class="row-status ${approved ? 'approved' : (hasSaved ? 'saved' : '')}" id="status-${it.id}">
+                            ${it.approv_purch === 'approved'
+                                ? '<i class="bi bi-patch-check-fill"></i> Purchase Approved'
+                                : (it.approv_store === 'approved'
+                                    ? '<i class="bi bi-patch-check-fill"></i> Store Approved'
+                                    : (hasSaved ? '<i class="bi bi-check2-circle"></i> Saved' : '—'))}
+                        </span>
+                    </td>`;
+                tbody.appendChild(row);
+            });
+        }
+        
+        /* Amount now simply mirrors the quantity (rate is fixed at 1 server-side) */
+        function recalcAmount(itemId) {
+            const row = document.getElementById(`item-row-${itemId}`);
+            if (!row) return;
+            const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+            document.getElementById(`amount-${itemId}`).innerText = "৳" + qty.toFixed(2);
+        }
+        
+        /* ---------------- Auto-save (debounced per row) ---------------- */
+        function scheduleSave(itemId) {
+            clearTimeout(saveTimers[itemId]);
+            setRowStatus(itemId, 'saving', '<i class="bi bi-arrow-repeat"></i> Saving...');
+            saveTimers[itemId] = setTimeout(() => saveItemRow(itemId), 600);
+        }
+        
+        function setRowStatus(itemId, cls, html) {
+            const el = document.getElementById(`status-${itemId}`);
+            if (!el) return;
+            el.className = `row-status ${cls}`;
+            el.innerHTML = html;
+        }
+        
+        function saveItemRow(itemId) {
+            const projId = document.getElementById('project_id').value;
+            const empId = document.getElementById('employee_id').value;
+        
+            if (!projId || !empId) {
+                setRowStatus(itemId, 'error', '<i class="bi bi-exclamation-circle"></i> Pick project & employee');
+                showToast('Select a Project and Employee first.', 'error');
+                return;
+            }
+        
+            const row = document.getElementById(`item-row-${itemId}`);
+            const qty = row.querySelector('.qty-input').value;
+        
+            fetch(PAGE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrf()
+                },
+                body: JSON.stringify({
+                    action: 'save_item',
+                    project_id: projId,
+                    employee_id: empId,
+                    item_id: itemId,
+                    qty: qty,
+                    req_date: reqDate()
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if (data.saved) {
+                        setRowStatus(itemId, 'saved', '<i class="bi bi-check2-circle"></i> Saved');
+                        if (data.amount !== undefined) {
+                            const amtEl = document.getElementById(`amount-${itemId}`);
+                            if (amtEl) amtEl.innerText = "৳" + Number(data.amount).toFixed(2);
+                        }
+                        markApprovalPending();
+                    } else {
+                        setRowStatus(itemId, '', '—');
+                        const amtEl = document.getElementById(`amount-${itemId}`);
+                        if (amtEl) amtEl.innerText = "৳0.00";
+                    }
+                } else {
+                    setRowStatus(itemId, 'error', '<i class="bi bi-exclamation-circle"></i> Failed');
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(() => {
+                setRowStatus(itemId, 'error', '<i class="bi bi-wifi-off"></i> Network error');
+            });
+        }
+        
+        /* ---------------- Store approval ---------------- */
+        function markApprovalPending() {
+            const storeBtn = document.getElementById('store-approve-btn');
+            storeBtn.className = 'store-btn pending';
+            storeBtn.disabled = false;
+            storeBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Store Approval Pending';
+        }
+        
+        function runApproval(action, btn, approvedLabel) {
+            if (btn.classList.contains('approved')) return;
+        
+            const projId = document.getElementById('project_id').value;
+            const empId = document.getElementById('employee_id').value;
+        
+            if (!projId || !empId) {
+                showToast('Select a Project and Employee first.', 'error');
+                return;
+            }
+            if (!confirm(`Approve all requisition items of ${reqDate()} for store?`)) return;
+        
+            btn.disabled = true;
+        
+            fetch(PAGE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrf()
+                },
+                body: JSON.stringify({
+                    action: action,
+                    project_id: projId,
+                    employee_id: empId,
+                    req_date: reqDate()
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false;
+                if (data.status === 'success' && data.updated > 0) {
+                    btn.className = 'store-btn approved';
+                    btn.innerHTML = `<i class="bi bi-patch-check-fill"></i> ${approvedLabel}`;
+                    document.getElementById('pending-info').textContent = '';
+                    showToast(data.message, 'success');
+                    if (activeCategoryId) loadCategoryItems(activeCategoryId); // lock approved rows
+                } else if (data.status === 'success') {
+                    showToast('No pending items found for this date.', 'error');
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                showToast('Network error during approval.', 'error');
+            });
+        }
+        
+        function storeApprove() {
+            runApproval('store_approve',
+                document.getElementById('store-approve-btn'),
+                'Store Approved');
+        }
+        </script>
+</body>
+</html>

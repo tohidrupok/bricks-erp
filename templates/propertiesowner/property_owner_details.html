@@ -1,0 +1,102 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Propertiy Owner Details- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-2xl font-semibold text-gray-900">Property Owner Details</h2>
+                <div class="mt-6 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <div class="property-detail p-8 bg-white rounded-lg shadow-lg border border-gray-200">
+                            <!-- Property Header -->
+                            <h1 class="text-3xl font-semibold text-gray-900 mb-4">
+                                Property Owner: {{ owner.owner_name }}
+                            </h1>
+                            
+                            <!-- Owner Details -->
+                            <div class="step mt-6">
+                                <h2 class="text-2xl font-semibold text-gray-900">Owner Name</h2>
+                                <p class="text-lg text-gray-700">{{ owner.owner_name }}</p>
+                            </div>
+                            
+                            <div class="step mt-6">
+                                <h2 class="text-2xl font-semibold text-gray-900">Contact Information</h2>
+                                <p class="text-lg text-gray-700">{{ owner.contact_information }}</p>
+                            </div>
+                            
+                            <div class="step mt-6">
+                                <h2 class="text-2xl font-semibold text-gray-900">Owner Type</h2>
+                                <p class="text-lg text-gray-700">{{ owner.owner_type }}</p>
+                            </div>
+                            
+                            <div class="step mt-6">
+                                <h2 class="text-2xl font-semibold text-gray-900">Ownership Type</h2>
+                                <p class="text-lg text-gray-700">{{ owner.ownership_type }}</p>
+                            </div>
+                            
+                                                       
+                            <!-- Telephone Number -->
+                            <div class="step mt-6">
+                                <h2 class="text-2xl font-semibold text-gray-900">Telephone Number</h2>
+                                <p class="text-lg text-gray-700">{{ owner.telephone_number }}</p>
+                            </div>
+                            
+                            <!-- Current Address -->
+                            <div class="step mt-6">
+                                <h2 class="text-2xl font-semibold text-gray-900">Current Address</h2>
+                                <p class="text-lg text-gray-700">{{ owner.current_address }}</p>
+                            </div>
+                            <!-- NID Card -->
+                            {% if owner.nid_card_details %}
+                                <div class="step mt-6">
+                                    <h2 class="text-2xl font-semibold text-gray-900">NID Card</h2>
+                                    <a href="{{ owner.nid_card_details.url }}" class="text-blue-600 hover:underline" target="_blank">Download NID Card</a>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Utility Bill -->
+                            {% if owner.utility_bill %}
+                                <div class="step mt-6">
+                                    <h2 class="text-2xl font-semibold text-gray-900">Utility Bill</h2>
+                                    <a href="{{ owner.utility_bill.url }}" class="text-blue-600 hover:underline" target="_blank">Download Utility Bill</a>
+                                </div>
+                            {% endif %}
+                            <!-- Photo -->
+                            {% if owner.photo %}
+                                <div class="step mt-6">
+                                    <h2 class="text-2xl font-semibold text-gray-900">Owner Photo</h2>
+                                    <img src="{{ owner.photo.url }}" alt="Owner Photo" class="w-32 h-32 object-cover rounded-full">
+                                </div>
+                            {% endif %}
+
+                            <div class="mt-8 text-center">
+                                <a href="{% url 'property_owner_list' %}" style="background-color:#1e3c98" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                    Back to Property Owner List
+                                </a>
+                            </div>        
+                            
+                            
+                        </div>                        
+                    </div>
+                </div>
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

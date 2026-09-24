@@ -1,0 +1,247 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Balance Transfer Voucher</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: silver;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 960px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo img {
+      height: 50px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .label-box {
+      background-color: #e2f0d9;
+      color: #000;
+      padding: 4px 10px;
+      font-weight: bold;
+      font-size: 13px;
+      border-radius: 4px;
+    }
+
+    .sub-head {
+      font-size: 11px;
+      color: #555;
+	  margin-top: -18px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .voucher-header {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .project-name {
+      margin: 4px 0;
+      font-size: 12px;
+	  margin-bottom: 1px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 10px;
+    }
+
+    .table th,
+    .table td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .section {
+      margin-top: 12px;
+      font-size: 11.5px;
+    }
+
+    .signature-section {
+      margin-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      text-align: center;
+    }
+
+    .signature-box {
+      flex: 1;
+      padding: 8px;
+    }
+
+    .signature-box:not(:last-child) {
+      margin-right: 10px;
+    }
+
+    .signature-line {
+      display: block;
+      margin-top: 10px;
+      border-top: 1px solid #000;
+      width: 100%;
+    }
+
+    .bm-property {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #333;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+      flex-wrap: wrap;
+    }
+
+    .print-btn {
+      background-color: #1e3c98;
+      color: white;
+      padding: 5px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .card {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+
+    <div class="card-header">
+      <div class="logo">
+        <img src="{% static 'images/BTP_logo_bricks.webp' %}" alt="Company Logo" />
+      </div>
+      <div style="text-align: right;">
+        <div class="label-box">Balance Transfer Voucher</div>
+        <p style="font-size: 11px; margin-top: 4px;">Printing Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+      </div>
+    </div>
+
+    <div class="sub-head">
+      Bonanai, Dhaka-1216<br>
+      01993005558, 09639246230, 09639246231 <br>
+      bricks@gmail.com, bricks@gmail.com, www.bricks.com
+    </div>
+
+    <hr style="margin: 8px 0;" />
+
+    <div class="voucher-header">
+      <div class="project-name"><strong>Project:</strong> {{ transfer.project_name }}</div>
+      <div class="project-name"><strong>Date:</strong> {{ transfer.transfer_date }}</div>
+    </div>
+
+    <table class="table">
+      <tr>
+        <td>
+          <strong>From:</strong><hr style="margin: 3px 0;" />
+          {{ transfer.source_type }}
+        </td>
+        <td>
+          <strong>To:</strong><hr style="margin: 3px 0;" />
+          {{ transfer.destination_type }}
+        </td>
+        <td>
+          <strong>Carrier</strong><hr style="margin: 3px 0;" />
+          {{ transfer.carrier|default:"N/A" }}
+        </td>
+        <td>
+          <strong>Cheque / Receipt No.</strong><hr style="margin: 3px 0;" />
+          {{ transfer.cheque_number|default:"N/A" }}
+        </td>
+        <td>
+          <strong>Amount</strong><hr style="margin: 3px 0;" />
+          {{ transfer.transfer_amount|intcomma }}
+        </td>
+      </tr>
+    </table>
+
+    <div class="section">
+      <strong>Amount In Words:</strong> "{{ amount_in_words }}"
+    </div>
+
+    <div class="section">
+      <strong>Note:</strong> {{ transfer.note|default:"-" }}
+    </div>
+
+    <div class="signature-section">
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Received By
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Paid By
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Prepared By
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Accountant
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="no-print">
+        <a href="{% url 'transfer_list' %}" class="btn">← Back to List</a>
+      </div>
+      <div class="no-print">
+        <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

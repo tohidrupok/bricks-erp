@@ -1,0 +1,201 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Salary Payment Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+				<h2 class="intro-y mt-10 text-lg font-semibold text-gray-900">Salary Payment Entry</h2>
+
+				<div class="mt-5 grid grid-cols-12 gap-6">
+				  <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+					<div class="mt-5 grid grid-cols-12 gap-6">
+				  <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+					<form method="POST" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+					  {% csrf_token %}
+					    <div class="mb-4">
+						  <label class="font-medium text-lg text-gray-800">Head of Account</label>
+						  <select class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2" disabled>
+							{% for head in head_of_accounts %}
+							  <option selected>{{ head.head_name }}</option>
+							{% endfor %}
+						  </select>
+						  <!-- Hidden input to actually submit value -->
+						  <input type="hidden" name="head_of_account" value="{{ head_of_accounts.0.id }}">
+						</div>
+						<div class="mb-4">
+                            <label for="id_project" class="font-medium text-lg text-gray-800">Project Name</label>
+                            <select id="id_project" name="project_name"
+                                    class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                <option value="">--- Select Project ---</option>
+                                {% for project in projects %}
+                                    <option value="{{ project.id }}"
+                                        {% if form.data.project_name %}selected{% endif %}>
+                                        {{ project.project_first_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.project_name.errors %}
+                                {% for error in form.project_name.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+					  <!-- Employee -->
+					  <div class="mb-6">
+						<label for="id_employee" class="block mb-2 font-semibold text-gray-700">Employee</label>
+						{{ form.employee }}
+						{% for error in form.employee.errors %}
+						  <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+						{% endfor %}
+					  </div>
+					  <!-- Date -->
+						<div class="mb-6">
+						  <label for="id_date" class="block mb-2 font-semibold text-gray-700">Date</label>
+						  <input type="date" id="id_date" name="date"
+								 class="w-full border border-slate-300 shadow-sm rounded-md p-2 text-sm"
+								 value="{{ form.date.value|default:today|date:'Y-m-d' }}">
+						  {% for error in form.date.errors %}
+							<p class="text-red-600 text-sm mt-1">{{ error }}</p>
+						  {% endfor %}
+						</div>
+
+						 <!-- Cash Type -->
+                           <div class="mb-4">
+                            <label for="id_cash_type" class="font-medium text-lg text-gray-800">Cash Type</label>
+                            <select id="id_cash_type"
+                                name="cash_type"
+                                class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-blue-500 focus:border-blue-500 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+                                <option value="" disabled {% if not form.type.value %} selected {% endif %}>Select Cash Type</option>
+                                {% for value, label in form.cash_type.field.choices %}
+                                    <option value="{{ value }}" {% if value == form.cash_type.value %} selected {% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            {% for error in form.cash_type.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Cheque Number -->
+                        <div id="chequeNumberField" class="mb-4 hidden">
+                            <label for="id_cheque_number" class="font-medium text-lg text-gray-800">Cheque Number</label>
+                            <input type="text" step="0.01" id="id_cheque_number" name="cheque_number"
+                                   class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                   placeholder="Enter Cheque Numbere"
+                                   value="{{ form.cheque_number.value }}">
+                            {% for error in form.cheque_number.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Month of Salary -->
+    					  <div class="mb-6">
+                            <label for="id_monthofsalary" class="block mb-2 font-semibold text-gray-700">Month of Salary</label>
+                            <select id="id_monthofsalary" name="monthofsalary"
+                                    class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                            </select>
+                            
+                            {% if form.monthofsalary.errors %}
+                                {% for error in form.monthofsalary.errors %}
+                                    <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+					
+					  <!-- Amount -->
+					  <div class="mb-6">
+						<label for="id_amount" class="block mb-2 font-semibold text-gray-700">Amount</label>
+						{{ form.amount }}
+						{% for error in form.amount.errors %}
+						  <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+						{% endfor %}
+					  </div>
+
+					  <!-- Reason -->
+					  <div class="mb-6">
+						<label for="id_reason" class="block mb-2 font-semibold text-gray-700">Reason</label>
+						{{ form.reason }}
+						{% for error in form.reason.errors %}
+						  <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+						{% endfor %}
+					  </div>
+
+					  <!-- Buttons -->
+					  <div class="flex justify-center space-x-4 mt-8">
+						<button type="submit" style="background-color:#1e3c98" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-semibold">
+						  Save sales Payment
+						</button>
+						<a href="{% url 'rest_salary_list' %}" style="margin-left:0.5%;background-color:#1e3c98" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md font-semibold">
+						   Back to List
+						</a>
+					  </div>
+					</form>
+					
+					<script>
+                        const monthSelect = document.getElementById('id_monthofsalary');
+                        const monthNames = [
+                            "January", "February", "March", "April", "May", "June",
+                            "July", "August", "September", "October", "November", "December"
+                        ];
+                    
+                        // Create and append options
+                        monthNames.forEach((month) => {
+                            const option = document.createElement('option');
+                            option.value = month; // ✅ Set value as month name
+                            option.textContent = month;
+                            monthSelect.appendChild(option);
+                        });
+                    
+                        // ✅ Preserve selected value from form data (month name)
+                        const selectedValue = "{{ form.data.monthofsalary|default:'' }}";
+                        if (selectedValue) {
+                            monthSelect.value = selectedValue;
+                        }
+                    </script>
+
+
+					<!-- Cash Type Fields -->
+                        <script>
+                            function toggleChequeField() {
+                                const cashTypeSelect = document.getElementById('id_cash_type');
+                                const chequeField = document.getElementById('chequeNumberField');
+                                const selectedValue = cashTypeSelect.value;
+                                
+                                //console.log("Selected value:", cashTypeSelect.value);
+
+                                if (selectedValue === '1' || !selectedValue) {
+                                    chequeField.classList.add('hidden');
+                                } else {
+                                    chequeField.classList.remove('hidden');
+                                }
+                            }
+                        
+                            document.addEventListener('DOMContentLoaded', function () {
+                                toggleChequeField();
+                                document.getElementById('id_cash_type').addEventListener('change', toggleChequeField);
+                            });
+                        </script> 
+				  </div>
+				</div>
+
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

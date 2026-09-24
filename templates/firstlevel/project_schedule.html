@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Project Details - BM ERP{% endblock %}
+
+{% block content %}
+
+<!-- ===================== ICON SPRITE (inline SVG, no library needed) ===================== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-building" viewBox="0 0 24 24"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M12.59 2.59A2 2 0 0 0 11.17 2H4a2 2 0 0 0-2 2v7.17a2 2 0 0 0 .59 1.41l8.7 8.7a2.43 2.43 0 0 0 3.42 0l6.58-6.58a2.43 2.43 0 0 0 0-3.42Z"/><circle cx="7.5" cy="7.5" r="1" fill="currentColor"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m10 8 6 4-6 4Z"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1Z"/><path d="M4 22v-7"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M5 3h14"/><path d="m18 13-6-6-6 6"/><path d="M12 7v14"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></symbol>
+    <symbol id="i-tasks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8M13 12h8M13 18h8"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+</svg>
+
+<style>
+    /* ---------- Original helper styles (kept) ---------- */
+    .detail-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+    .dark .detail-card { background: #232a3b; }
+    .detail-label { font-size: 12px; color: #64748b; margin-bottom: 5px; }
+    .detail-value { font-size: 14px; font-weight: 500; color: #1e293b; }
+    .dark .detail-value { color: #f8fafc; }
+    .status-completed { color: #16a34a; background: #dcfce7; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: 500; }
+    .status-pending { color: #dc2626; background: #fee2e2; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: 500; }
+
+    /* ---------- Dashboard ---------- */
+    .pd {
+        --pd-brand: #1e3c98;
+        --pd-brand-2: #3557d1;
+        --pd-ink: #0f172a;
+        --pd-muted: #64748b;
+        --pd-line: #e2e8f0;
+        --pd-card: #ffffff;
+        --pd-soft: #f8fafc;
+        width: 100%;
+        color: var(--pd-ink);
+    }
+    .dark .pd { --pd-ink: #e2e8f0; --pd-muted: #94a3b8; --pd-line: #334155; --pd-card: #1e293b; --pd-soft: #0f172a; }
+
+    .pd-i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+    /* ---------- Hero ---------- */
+    .pd-hero { position: relative; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 22px 28px; color: #fff; background: linear-gradient(120deg, var(--pd-brand) 0%, var(--pd-brand-2) 100%); border-radius: 18px; box-shadow: 0 10px 30px -14px rgba(30, 60, 152, .55); overflow: hidden; }
+    .pd-hero::after { content: ""; position: absolute; right: -40px; top: -70px; width: 220px; height: 220px; border-radius: 50%; background: rgba(255, 255, 255, .09); }
+    .pd-hero::before { content: ""; position: absolute; right: 110px; bottom: -90px; width: 150px; height: 150px; border-radius: 50%; background: rgba(255, 255, 255, .06); }
+    .pd-hero > * { position: relative; z-index: 1; }
+    .pd-hero-ico { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 14px; background: rgba(255, 255, 255, .18); border: 1px solid rgba(255, 255, 255, .25); }
+    .pd-hero-ico .pd-i { width: 26px; height: 26px; }
+    .pd-hero-text { min-width: 0; }
+    .pd-title { font-size: 21px; font-weight: 700; line-height: 1.25; margin: 0; letter-spacing: -.01em; }
+    .pd-sub { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 13px; opacity: .9; overflow-wrap: anywhere; }
+    .pd-sub .pd-i { width: 14px; height: 14px; }
+    .pd-hero-side { margin-left: auto; }
+    .pd-back { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 13px; font-size: 13px; font-weight: 600; color: #fff; text-decoration: none; border-radius: 9px; background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .28); transition: background-color .15s; }
+    .pd-back:hover { background: rgba(255, 255, 255, .28); color: #fff; }
+    .pd-back .pd-i { width: 15px; height: 15px; }
+    @media (max-width: 640px) { .pd-hero { padding: 18px 16px; } }
+
+    /* ---------- KPI cards ---------- */
+    .pd-kpi { --a: #3557d1; position: relative; display: flex; align-items: center; gap: 14px; padding: 18px 20px; background: var(--pd-card); border: 1px solid var(--pd-line); border-radius: 16px; box-shadow: 0 1px 2px rgba(15, 23, 42, .04); overflow: hidden; }
+    .pd-kpi::before { content: ""; position: absolute; left: 0; top: 16px; bottom: 16px; width: 3px; border-radius: 0 3px 3px 0; background: var(--a); }
+    .pd-mini { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 13px; color: var(--a); background: color-mix(in srgb, var(--a) 13%, transparent); flex-shrink: 0; }
+    .pd-mini .pd-i { width: 22px; height: 22px; }
+    .pd-kpi-label { font-size: 13px; color: var(--pd-muted); line-height: 1.2; }
+    .pd-kpi-value { margin-top: 4px; font-size: 20px; font-weight: 700; line-height: 1.2; letter-spacing: -.01em; color: var(--pd-ink); }
+
+    /* ---------- Panel ---------- */
+    .pd-panel { background: var(--pd-card); border: 1px solid var(--pd-line); border-radius: 18px; box-shadow: 0 10px 30px -14px rgba(15, 23, 42, .18); overflow: hidden; }
+    .pd-panel-head { display: flex; align-items: center; gap: 12px; padding: 16px 22px; border-bottom: 1px solid var(--pd-line); }
+    .pd-panel-ico { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; color: var(--pd-brand-2); background: color-mix(in srgb, var(--pd-brand-2) 12%, transparent); }
+    .dark .pd-panel-ico { color: #93a8ff; }
+    .pd-panel-ico .pd-i { width: 17px; height: 17px; }
+    .pd-panel-head h3 { font-size: 16px; font-weight: 650; margin: 0; }
+    .pd-count { margin-left: auto; padding: 3px 11px; font-size: 12px; font-weight: 600; border-radius: 999px; color: var(--pd-brand-2); background: color-mix(in srgb, var(--pd-brand-2) 12%, transparent); }
+    .dark .pd-count { color: #93a8ff; }
+    .pd-panel-body { padding: 8px 10px 12px; }
+    @media (max-width: 640px) { .pd-panel-head { padding: 14px 16px; } }
+
+    /* ---------- Empty state ---------- */
+    .pd-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 44px 16px; text-align: center; color: var(--pd-muted); }
+    .pd-empty-ico { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; color: var(--pd-brand-2); background: color-mix(in srgb, var(--pd-brand-2) 12%, transparent); }
+    .dark .pd-empty-ico { color: #93a8ff; }
+    .pd-empty-ico .pd-i { width: 26px; height: 26px; }
+
+    /* accent colors */
+    .a-blue { --a: #2563eb; }
+    .a-amber { --a: #d97706; }
+    .a-emerald { --a: #059669; }
+    .a-red { --a: #dc2626; }
+    .a-green { --a: #16a34a; }
+
+    /* ---------- Gantt ---------- */
+    .pd-legend { display: flex; flex-wrap: wrap; gap: 18px; padding: 14px 22px; border-bottom: 1px solid var(--pd-line); }
+    .pd-legend-item { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; color: var(--pd-muted); }
+    .pd-legend-dot { width: 10px; height: 10px; border-radius: 3px; background: var(--a); }
+    .pd-legend-sep { width: 1px; align-self: stretch; background: var(--pd-line); }
+
+    .pd-gantt-scroll { overflow-x: auto; }
+    .pd-gantt-row { display: grid; grid-template-columns: 200px repeat({{ gantt_total_months|default:1 }}, minmax(64px, 1fr)); align-items: center; min-width: max-content; }
+    .pd-gantt-head { background: var(--pd-soft); border-bottom: 1px solid var(--pd-line); }
+    .pd-gantt-label-cell, .pd-gantt-item-label { padding: 12px 16px; position: sticky; left: 0; z-index: 2; border-right: 1px solid var(--pd-line); }
+    .pd-gantt-label-cell { font-size: 12.5px; font-weight: 650; color: var(--pd-muted); background: var(--pd-soft); }
+    .pd-gantt-item-label { font-size: 13px; font-weight: 650; color: var(--pd-ink); background: var(--pd-card); display: flex; align-items: center; gap: 8px; overflow: hidden; text-overflow: ellipsis; }
+    .pd-gantt-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--a); flex-shrink: 0; }
+    .pd-gantt-month-cell { padding: 10px 6px; text-align: center; font-size: 11px; font-weight: 650; color: var(--pd-muted); border-right: 1px dashed var(--pd-line); }
+    .pd-gantt-month-cell .yr { display: block; font-size: 9.5px; font-weight: 700; color: var(--pd-brand-2); margin-top: 1px; }
+    .pd-gantt-month-cell.is-current { color: var(--pd-brand-2); background: color-mix(in srgb, var(--pd-brand-2) 8%, transparent); }
+
+    .pd-gantt-body-row { grid-template-rows: 26px 26px; border-bottom: 1px solid var(--pd-line); padding: 7px 0; }
+    .pd-gantt-body-row:last-child { border-bottom: 0; }
+    .pd-gantt-body-row:hover .pd-gantt-item-label,
+    .pd-gantt-body-row:hover .pd-gantt-cell { background: var(--pd-soft); }
+    .pd-gantt-body-row .pd-gantt-item-label { grid-row: 1 / 3; }
+    .pd-gantt-cell { grid-row: 1 / 3; align-self: stretch; border-right: 1px dashed var(--pd-line); }
+    .pd-gantt-cell.is-current { background: color-mix(in srgb, var(--pd-brand-2) 6%, transparent); }
+
+    .pd-gantt-bar { --a: #3557d1; grid-row: 1; position: relative; z-index: 3; display: flex; align-items: center; gap: 6px; height: 22px; margin: 0 3px; padding: 0 9px; border-radius: 7px; font-size: 11px; font-weight: 650; color: #fff; background: linear-gradient(120deg, var(--a), color-mix(in srgb, var(--a) 70%, #fff 12%)); box-shadow: 0 4px 10px -4px color-mix(in srgb, var(--a) 60%, transparent); white-space: nowrap; overflow: hidden; }
+    .pd-gantt-bar .pd-i { width: 12px; height: 12px; flex-shrink: 0; stroke: #fff; }
+    .pd-gantt-bar-actual { grid-row: 2; }
+    .pd-gantt-bar-actual.a-green { background: linear-gradient(120deg, #16a34a, #22c55e); box-shadow: 0 4px 10px -4px rgba(22, 163, 74, .5); }
+    .pd-gantt-bar-actual.a-red { background: linear-gradient(120deg, #dc2626, #ef4444); box-shadow: 0 4px 10px -4px rgba(220, 38, 38, .5); }
+</style>
+
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+            <div class="content pd">
+
+                <div class="pd-hero mt-8 mb-6">
+                    <span class="pd-hero-ico"><svg class="pd-i"><use href="#i-calendar"/></svg></span>
+                    <div class="pd-hero-text">
+                        <h2 class="pd-title">Project Schedule</h2>
+                        <div class="pd-sub">
+                            <svg class="pd-i"><use href="#i-building"/></svg>
+                            {{ project.project_first_name }}
+                        </div>
+                    </div>
+
+                    <div class="pd-hero-side" style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <a href="{% url 'project_schedule_crud' project.pk %}" class="pd-back">
+                            <svg class="pd-i"><use href="#i-tasks"/></svg>
+                            Manage Schedule
+                        </a>
+
+                        <a href="{% url 'first_level_details' project.id %}" class="pd-back">
+                            <svg class="pd-i"><use href="#i-back"/></svg>
+                            Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Schedule Summary -->
+                <!-- Schedule Summary (Automated) -->
+                {% if schedule_items %}
+                <div class="grid grid-cols-12 gap-6 mb-6">
+
+                    <div class="col-span-12 md:col-span-4">
+                        <div class="pd-kpi a-blue">
+                            <span class="pd-mini"><svg class="pd-i"><use href="#i-down"/></svg></span>
+                            <div>
+                                <div class="pd-kpi-label">Sub Structure</div>
+                                <div class="pd-kpi-value">{{ sub_structure.scheduled_months }} Months</div>
+                                <div class="detail-label" style="margin-top:4px;">{{ sub_structure.progress }}% complete &middot; {{ sub_structure.remaining_months }} Months left</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-12 md:col-span-4">
+                        <div class="pd-kpi a-amber">
+                            <span class="pd-mini"><svg class="pd-i"><use href="#i-up"/></svg></span>
+                            <div>
+                                <div class="pd-kpi-label">Super Structure</div>
+                                <div class="pd-kpi-value">{{ super_structure.scheduled_months }} Months</div>
+                                <div class="detail-label" style="margin-top:4px;">{{ super_structure.progress }}% complete &middot; {{ super_structure.remaining_months }} Months left</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-12 md:col-span-4">
+                        <div class="pd-kpi a-emerald">
+                            <span class="pd-mini"><svg class="pd-i"><use href="#i-sparkle"/></svg></span>
+                            <div>
+                                <div class="pd-kpi-label">Finishing</div>
+                                <div class="pd-kpi-value">{{ finishing.scheduled_months }} Months</div>
+                                <div class="detail-label" style="margin-top:4px;">{{ finishing.progress }}% complete &middot; {{ finishing.remaining_months }} Months left</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                {% endif %}
+
+                <!-- Schedule Items (Plan + Actual, month/year wise) -->
+                <div class="pd-panel">
+
+                    <div class="pd-panel-head">
+                        <span class="pd-panel-ico"><svg class="pd-i"><use href="#i-tasks"/></svg></span>
+                        <h3>Schedule Items</h3>
+                        {% if schedule_items %}<span class="pd-count">{{ schedule_items|length }}</span>{% endif %}
+                    </div>
+
+                    {% if schedule_items %}
+
+                    <div class="pd-legend">
+                        <span class="pd-legend-item"><span class="pd-legend-dot a-blue"></span>Sub Structure</span>
+                        <span class="pd-legend-item"><span class="pd-legend-dot a-amber"></span>Super Structure</span>
+                        <span class="pd-legend-item"><span class="pd-legend-dot a-emerald"></span>Finishing</span>
+                        <span class="pd-legend-sep"></span>
+                        <span class="pd-legend-item"><span class="pd-legend-dot a-green"></span>Actual: On Time</span>
+                        <span class="pd-legend-item"><span class="pd-legend-dot a-red"></span>Actual: Delayed</span>
+                    </div>
+
+                    <div class="pd-gantt-scroll">
+
+                        <div class="pd-gantt-row pd-gantt-head">
+                            <div class="pd-gantt-label-cell">Schedule Item</div>
+                            {% for m in gantt_months %}
+                            <div class="pd-gantt-month-cell{% if m.is_current %} is-current{% endif %}">
+                                {{ m.label }}
+                                {% if m.show_year %}<span class="yr">{{ m.year }}</span>{% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        {% for item in gantt_items %}
+                        <div class="pd-gantt-row pd-gantt-body-row">
+
+                            <div class="pd-gantt-item-label">
+                                <span class="pd-gantt-dot {% if item.obj.schedule_type == 'sub_structure' %}a-blue{% elif item.obj.schedule_type == 'super_structure' %}a-amber{% elif item.obj.schedule_type == 'finishing' %}a-emerald{% endif %}"></span>
+                                {{ item.obj.subject_name }}
+                            </div>
+
+                            {% for m in gantt_months %}
+                            <div class="pd-gantt-cell{% if m.is_current %} is-current{% endif %}"></div>
+                            {% endfor %}
+
+                            <div class="pd-gantt-bar {% if item.obj.schedule_type == 'sub_structure' %}a-blue{% elif item.obj.schedule_type == 'super_structure' %}a-amber{% elif item.obj.schedule_type == 'finishing' %}a-emerald{% endif %}"
+                                 style="grid-column: {{ item.col_start }} / {{ item.col_end }};">
+                                {% if item.obj.schedule_type == 'sub_structure' %}<svg class="pd-i"><use href="#i-down"/></svg>{% elif item.obj.schedule_type == 'super_structure' %}<svg class="pd-i"><use href="#i-up"/></svg>{% elif item.obj.schedule_type == 'finishing' %}<svg class="pd-i"><use href="#i-sparkle"/></svg>{% endif %}
+                                <span>{{ item.span }}{% if item.span == 1 %} Month{% else %} Months{% endif %}</span>
+                            </div>
+
+                            {% if item.actual %}
+                            <div class="pd-gantt-bar pd-gantt-bar-actual {% if item.actual.overdue %}a-red{% else %}a-green{% endif %}"
+                                 style="grid-column: {{ item.actual.col_start }} / {{ item.actual.col_end }};">
+                                {% if item.actual.is_ongoing %}<svg class="pd-i"><use href="#i-clock"/></svg>{% else %}<svg class="pd-i"><use href="#i-check"/></svg>{% endif %}
+                                <span>{{ item.actual.span }}{% if item.actual.span == 1 %} Month{% else %} Months{% endif %}{% if item.actual.is_ongoing %} (ongoing){% endif %}</span>
+                            </div>
+                            {% endif %}
+
+                        </div>
+                        {% endfor %}
+
+                    </div>
+
+                    {% else %}
+
+                    <div class="pd-empty">
+                        <span class="pd-empty-ico"><svg class="pd-i"><use href="#i-calendar"/></svg></span>
+                        <div>No schedule items found for this project.</div>
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        </div>
+        <!-- END: Content -->
+
+    </div>
+
+</div>
+
+{% endblock %}

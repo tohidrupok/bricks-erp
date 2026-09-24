@@ -1,0 +1,368 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+
+body{
+    background:#eef2f7;
+}
+
+/* HEADER */
+
+.top-header{
+    max-width:1200px;
+    margin:20px auto;
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.header-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:15px;
+}
+
+.page-title{
+    margin:0;
+    color:#198754;
+    font-size:28px;
+    font-weight:bold;
+}
+
+.page-subtitle{
+    color:#6c757d;
+    margin-top:5px;
+}
+
+.nav-links{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.nav-btn{
+    text-decoration:none;
+    color:#fff;
+    padding:10px 16px;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:bold;
+    transition:.3s;
+}
+
+.nav-btn:hover{
+    opacity:.9;
+}
+
+.home-btn{background:#0d6efd;}
+.expense-btn{background:#198754;}
+.supplier-btn{background:#fd7e14;}
+.category-btn{background:#6f42c1;}
+.refresh-btn{background:#6c757d;}
+
+
+/* CARD */
+
+.container-box{
+    max-width:1200px;
+    margin:auto;
+}
+
+.card{
+    background:#fff;
+    border:none;
+    border-radius:15px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    overflow:hidden;
+}
+
+.card-header{
+    background:#198754;
+    color:white;
+    padding:20px;
+}
+
+.card-header h3{
+    margin:0;
+}
+
+/* FILTER */
+
+.filter{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    flex-wrap:wrap;
+    padding:20px;
+}
+
+.search-box{
+    flex:1;
+}
+
+.search-box input{
+    width:100%;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:8px;
+}
+
+.add-btn{
+    background:#198754;
+    color:white;
+    text-decoration:none;
+    padding:12px 20px;
+    border-radius:8px;
+    font-weight:bold;
+}
+
+/* TABLE */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+thead{
+    background:#0d6efd;
+    color:white;
+}
+
+th{
+    padding:14px;
+}
+
+td{
+    padding:14px;
+    border-bottom:1px solid #eee;
+}
+
+tbody tr:hover{
+    background:#f7fbff;
+}
+
+.amount{
+    background:#e8fff0;
+    color:#198754;
+    padding:5px 12px;
+    border-radius:20px;
+    font-weight:bold;
+}
+
+.btn{
+    padding:7px 12px;
+    border-radius:6px;
+    color:white;
+    text-decoration:none;
+    font-size:14px;
+}
+
+.btn-edit{
+    background:#0d6efd;
+}
+
+.btn-delete{
+    background:#dc3545;
+}
+
+.no-data{
+    text-align:center;
+    color:#999;
+}
+
+@media(max-width:768px){
+
+    .header-row{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .filter{
+        flex-direction:column;
+    }
+
+    table{
+        font-size:13px;
+    }
+
+}
+
+</style>
+
+
+<!-- HEADER -->
+
+<div class="top-header">
+
+    <div class="header-row">
+
+        <div>
+            <h2 class="page-title">
+                🍽 Restaurant Purchase
+            </h2>
+
+            <div class="page-subtitle">
+                Public Restaurant Purchase Management
+            </div>
+        </div>
+
+        <div class="nav-links">
+
+            <a href="{% url 'public_restaurant_home' %}" class="nav-btn home-btn">
+                🏠 Home
+            </a>
+            
+            <a href="{% url 'restau_requisition_list_public' %}" class="nav-btn refresh-btn">
+                🍽 Back
+            </a>
+
+            <a href="{% url 'restaurant_expense_public_list' %}" class="nav-btn expense-btn">
+                💰 Expense
+            </a>
+
+            <a href="{% url 'public_restaurant_supplier_list' %}" class="nav-btn supplier-btn">
+                🏢 Supplier
+            </a>
+
+            <a href="{% url 'public_restaurant_requisition_category' %}" class="nav-btn category-btn">
+                📂 Category
+            </a>
+
+            <a href="{% url 'requisition_jewel_purchase_list' %}" class="nav-btn refresh-btn">
+                🔄 Refresh
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="container-box">
+
+    <div class="card">
+
+        <div class="card-header">
+            <h3>Purchase Approval List</h3>
+        </div>
+
+
+        <!-- SEARCH + ADD -->
+
+        <div class="filter">
+
+            <div class="search-box">
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="🔍 Search expense..."
+                    onkeyup="searchTable()">
+            </div>
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div class="table-responsive">
+
+          <table class="w-full border-collapse text-left text-xs text-slate-600 dark:text-slate-300">
+            <thead class="bg-slate-50 text-slate-700 dark:bg-darkmode-800 dark:text-slate-400">
+              <tr class="border-b border-slate-200 dark:border-darkmode-400">
+                <th class="px-5 py-3 font-semibold text-center">ID</th>
+                <th class="px-5 py-3 font-semibold">Purchase</th>
+                <th class="px-5 py-3 font-semibold">Verify</th>
+                <th class="px-5 py-3 font-semibold">Project</th>
+                <th class="px-5 py-3 font-semibold">Employee</th>
+                <th class="px-5 py-3 font-semibold">Cash Employee</th>
+                <th class="px-5 py-3 font-semibold text-right">Total Amount</th>
+                <th class="px-5 py-3 font-semibold text-right">Action</th>
+              </tr>
+            </thead>
+
+            <tbody id="purchaseTable" class="divide-y divide-slate-100 dark:divide-darkmode-400">
+            {% for row in histories %}
+              <tr class="transition-all hover:bg-slate-50/80 dark:hover:bg-darkmode-700/50">
+                <td class="px-5 py-3.5 text-center font-medium text-slate-500">{{ row.id }}</td>
+                <td class="px-5 py-3.5">
+                  <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 dark:bg-blue-400/10 dark:text-blue-400 dark:ring-blue-400/20">
+                    {{ row.purch_appov }}
+                  </span>
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap">
+                    {% if row.pur_verify == "Yes" %}
+                        <button type="button" style="background-color:green"
+                            class="px-3 py-1 text-xs font-semibold text-white bg-green-600 rounded-lg cursor-default">
+                            ✓ Verified
+                        </button>
+                    {% else %}
+                        <button type="button" style="background-color:red"
+                            class="px-3 py-1 text-xs font-semibold text-white bg-red-600 rounded-lg cursor-default">
+                            ✗ Pending
+                        </button>
+                    {% endif %}
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap">{{ row.project_name }}</td>
+                <td class="px-5 py-3.5 whitespace-nowrap">{{ row.employee_name }}</td>
+                <td class="px-5 py-3.5 whitespace-nowrap text-slate-500">{{ row.cash_empl|default:"-" }}</td>
+                <td class="px-5 py-3.5 text-right font-semibold text-slate-900 dark:text-white">
+                  ৳{{ row.total_amount|floatformat:2 }}
+                </td>
+                <td class="px-5 py-3.5 text-right font-semibold">
+                  <a href="{% url 'edit_purch_requisition_jewel' row.purch_appov %}" class="btn btn-edit inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-white text-xs font-bold transition">
+                    👁️ View
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="11" class="px-5 py-10 text-center text-sm text-slate-400 dark:text-slate-500">
+                  <div class="flex flex-col items-center justify-center gap-2">
+                    <span class="text-2xl">📁</span>
+                    <p>No requisition histories found.</p>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+function searchTable(){
+
+    let input = document.getElementById("searchInput").value.toLowerCase();
+
+    let rows = document.querySelectorAll("#purchaseTable tr");
+
+    rows.forEach(function(row){
+
+        let text = row.innerText.toLowerCase();
+
+        if(text.indexOf(input) > -1){
+            row.style.display="";
+        }
+        else{
+            row.style.display="none";
+        }
+
+    });
+
+}
+
+</script>
+
+{% endblock %}

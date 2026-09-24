@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Dashboard - Somikoron IT</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased">
+
+    <div class="min-h-screen flex flex-col justify-between">
+        
+        <!-- MAIN CONTAINER -->
+        <div class="flex flex-col flex-1">
+
+            <!-- TOP NAVBAR -->
+            <header class="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center justify-between shadow-sm">
+                <div class="flex items-center space-x-6">
+                    <!-- Logo / Brand -->
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">S</div>
+                        <span class="text-xs font-bold text-slate-700 tracking-wider">SOMIKORON</span>
+                    </div>
+
+                    <!-- Navigation Links -->
+                    <nav class="hidden lg:flex items-center space-x-1 text-xs font-semibold text-slate-600">
+                        <a href="#" class="flex items-center space-x-1 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg"><i class="fa-solid fa-chart-pie"></i><span>CRM</span></a>
+                        <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-gear"></i><span>Configuration</span></a>
+                        <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-user-plus"></i><span>Lead</span></a>
+                        <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-headset"></i><span>Call Center</span></a>
+                        <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-car"></i><span>Task/Visit</span></a>
+                        <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-building"></i><span>Property</span></a>
+                        <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-chart-line"></i><span>Reports</span></a>
+                        <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-gauge"></i><span>KPI</span></a>
+                    </nav>
+                </div>
+
+                <!-- Right Search & User Settings -->
+                <div class="flex items-center space-x-3">
+                    <div class="relative hidden sm:block">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-search text-xs"></i>
+                        </span>
+                        <input type="text" placeholder="Search Metrics..." class="pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48">
+                    </div>
+                    <button class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"><i class="fa-solid fa-gear text-xs"></i></button>
+                    <button class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"><i class="fa-solid fa-bell text-xs"></i></button>
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">A</div>
+                </div>
+            </header>
+
+            <!-- DASHBOARD CONTENT AREA -->
+            <div class="p-4 grid grid-cols-1 xl:grid-cols-12 gap-4">
+
+                <!-- LEFT / MAIN STATS & LISTS (8 Cols on XL) -->
+                <div class="xl:col-span-8 space-y-4">
+                    
+                    <!-- TOP METRICS GRID (20 Cards Matrix) -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
+                        <!-- Stat Item template (Repeated with distinct background gradient look) -->
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-orange-500 to-rose-600">
+                            <span class="text-[11px] font-medium opacity-90">Total Leads</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-emerald-600 to-teal-800">
+                            <span class="text-[11px] font-medium opacity-90">Junk Leads</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-blue-600 to-indigo-900">
+                            <span class="text-[11px] font-medium opacity-90">Sold</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-emerald-700 to-green-900">
+                            <span class="text-[11px] font-medium opacity-90">High Prospect</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-amber-600 to-yellow-800">
+                            <span class="text-[11px] font-medium opacity-90">Priority</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+
+                        <!-- Row 2 -->
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-purple-500 to-fuchsia-700">
+                            <span class="text-[11px] font-medium opacity-90">Lost</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-lime-600 to-emerald-700">
+                            <span class="text-[11px] font-medium opacity-90">Closed</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-amber-800 to-yellow-950">
+                            <span class="text-[11px] font-medium opacity-90">Negotiation</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-red-500 to-orange-600">
+                            <span class="text-[11px] font-medium opacity-90">Hot</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-cyan-700 to-blue-900">
+                            <span class="text-[11px] font-medium opacity-90">Query</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+
+                        <!-- Row 3 -->
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-teal-500 to-cyan-700">
+                            <span class="text-[11px] font-medium opacity-90">Follow Up</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-emerald-500 to-teal-700">
+                            <span class="text-[11px] font-medium opacity-90">Lead</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-yellow-600 to-amber-800">
+                            <span class="text-[11px] font-medium opacity-90">Booked</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-teal-600 to-cyan-800">
+                            <span class="text-[11px] font-medium opacity-90">Potential</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-fuchsia-600 to-purple-900">
+                            <span class="text-[11px] font-medium opacity-90">High Potential</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+
+                        <!-- Row 4 -->
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-emerald-600 to-green-800">
+                            <span class="text-[11px] font-medium opacity-90">Booking</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-rose-500 to-red-700">
+                            <span class="text-[11px] font-medium opacity-90">Registration & Handover</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-blue-700 to-sky-900">
+                            <span class="text-[11px] font-medium opacity-90">Exchange</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-yellow-700 to-amber-900">
+                            <span class="text-[11px] font-medium opacity-90">EMI Hold</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-teal-700 to-emerald-900">
+                            <span class="text-[11px] font-medium opacity-90">Token Hold</span>
+                            <span class="text-lg font-bold text-right">0</span>
+                        </div>
+                    </div>
+
+                    <!-- TO-DO LIST BANNER -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-3">
+                        <div class="text-xs font-bold text-slate-700 mb-2.5 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-list-check text-indigo-600"></i>
+                            <span>To-Do List</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-center">
+                            <div class="p-2 border border-slate-100 rounded-lg bg-slate-50">
+                                <span class="block text-[10px] text-slate-500 font-medium">Today's Followup</span>
+                                <span class="text-sm font-bold text-slate-700">0</span>
+                            </div>
+                            <div class="p-2 border border-slate-100 rounded-lg bg-slate-50">
+                                <span class="block text-[10px] text-slate-500 font-medium">Today's Call</span>
+                                <span class="text-sm font-bold text-slate-700">0</span>
+                            </div>
+                            <div class="p-2 border border-slate-100 rounded-lg bg-slate-50">
+                                <span class="block text-[10px] text-slate-500 font-medium">Today's Visit</span>
+                                <span class="text-sm font-bold text-slate-700">0</span>
+                            </div>
+                            <div class="p-2 border border-slate-100 rounded-lg bg-rose-50 border-rose-100">
+                                <span class="block text-[10px] text-rose-600 font-medium">Missed Followup</span>
+                                <span class="text-sm font-bold text-rose-600">3</span>
+                            </div>
+                            <div class="p-2 border border-slate-100 rounded-lg bg-slate-50">
+                                <span class="block text-[10px] text-slate-500 font-medium">Missed Visit</span>
+                                <span class="text-sm font-bold text-slate-700">0</span>
+                            </div>
+                            <div class="p-2 border border-slate-100 rounded-lg bg-slate-50">
+                                <span class="block text-[10px] text-slate-500 font-medium">Next Followup</span>
+                                <span class="text-sm font-bold text-slate-700">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- THREE COLUMN LEAD/FOLLOWUP/TASK TABLES -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        
+                        <!-- New Lead Column -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div class="bg-indigo-100 text-indigo-900 font-bold text-xs py-2 px-3 text-center border-b border-indigo-200">New Lead</div>
+                            <div class="p-3 space-y-3 text-xs max-h-72 overflow-y-auto">
+                                <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                                    <div>
+                                        <span class="text-indigo-600 font-semibold">ID-L260903-0000</span><br>
+                                        <span class="text-slate-600 font-medium">Name: shamile</span><br>
+                                        <span class="text-[10px] text-slate-400">Caller: - Sarma</span>
+                                    </div>
+                                    <button class="w-7 h-7 bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-emerald-600 rounded-full flex items-center justify-center transition"><i class="fa-solid fa-phone text-[10px]"></i></button>
+                                </div>
+                                <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                                    <div>
+                                        <span class="text-indigo-600 font-semibold">ID-L260829-0010</span><br>
+                                        <span class="text-slate-600 font-medium">Name: A Arqo</span><br>
+                                        <span class="text-[10px] text-slate-400">Caller: - Admin</span>
+                                    </div>
+                                    <button class="w-7 h-7 bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-emerald-600 rounded-full flex items-center justify-center transition"><i class="fa-solid fa-phone text-[10px]"></i></button>
+                                </div>
+                                <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                                    <div>
+                                        <span class="text-indigo-600 font-semibold">ID-L260830-0018</span><br>
+                                        <span class="text-slate-600 font-medium">Name: Rifa Islam</span><br>
+                                        <span class="text-[10px] text-slate-400">Caller: - Admin</span>
+                                    </div>
+                                    <button class="w-7 h-7 bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-emerald-600 rounded-full flex items-center justify-center transition"><i class="fa-solid fa-phone text-[10px]"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Followup Column -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div class="bg-indigo-100 text-indigo-900 font-bold text-xs py-2 px-3 text-center border-b border-indigo-200">Followup</div>
+                            <div class="p-3 space-y-3 text-xs max-h-72 overflow-y-auto">
+                                <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                                    <div>
+                                        <span class="text-indigo-600 font-semibold">ID-L260829-0017</span><br>
+                                        <span class="text-slate-600 font-medium">Name: Mr. Zaki Hossain</span><br>
+                                        <span class="text-[10px] text-slate-400">Caller: - Tazmul Reza</span>
+                                    </div>
+                                    <button class="w-7 h-7 bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-emerald-600 rounded-full flex items-center justify-center transition"><i class="fa-solid fa-phone text-[10px]"></i></button>
+                                </div>
+                                <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                                    <div>
+                                        <span class="text-indigo-600 font-semibold">ID-L260827-0021</span><br>
+                                        <span class="text-slate-600 font-medium">Name: -</span><br>
+                                        <span class="text-[10px] text-slate-400">Caller: - Admin</span>
+                                    </div>
+                                    <button class="w-7 h-7 bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-emerald-600 rounded-full flex items-center justify-center transition"><i class="fa-solid fa-phone text-[10px]"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Task/Visit Column -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div class="bg-indigo-100 text-indigo-900 font-bold text-xs py-2 px-3 text-center border-b border-indigo-200">Task/Visit</div>
+                            <div class="p-6 text-center text-slate-400 text-xs italic">
+                                No Visit
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- RIGHT / CALENDAR & GRAPH SIDEBAR (4 Cols on XL) -->
+                <div class="xl:col-span-4 space-y-4">
+                    
+                    <!-- Calendar Widget Wrapper -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md">User</span>
+                                <select class="text-xs border border-slate-200 rounded-lg p-1 bg-white outline-none font-medium text-slate-600">
+                                    <option>Select User</option>
+                                </select>
+                            </div>
+                            <!-- Date filter buttons -->
+                            <div class="flex space-x-1 text-[10px] font-bold">
+                                <button class="px-2 py-1 bg-indigo-600 text-white rounded-md">Today</button>
+                                <button class="px-2 py-1 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-md">Weekly</button>
+                                <button class="px-2 py-1 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-md">Monthly</button>
+                                <button class="px-2 py-1 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-md">Yearly</button>
+                                <button class="px-2 py-1 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-md">All</button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2 pb-3 border-b border-slate-100">
+                            <span class="text-sm font-bold text-slate-800">September 2026</span>
+                            <div class="flex items-center space-x-1">
+                                <button class="px-2 py-0.5 text-xs bg-indigo-50 text-indigo-600 font-semibold rounded">today</button>
+                                <button class="w-6 h-6 bg-indigo-600 text-white rounded flex items-center justify-center text-xs"><i class="fa-solid fa-chevron-left"></i></button>
+                                <button class="w-6 h-6 bg-indigo-600 text-white rounded flex items-center justify-center text-xs"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Calendar Grid Header -->
+                        <div class="grid grid-cols-7 text-center text-[10px] font-bold text-slate-400 py-2">
+                            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                        </div>
+
+                        <!-- Calendar Grid Days -->
+                        <div class="grid grid-cols-7 text-center text-xs gap-y-1 text-slate-600">
+                            <!-- Week 1 -->
+                            <span class="p-2 text-slate-300">30</span>
+                            <span class="p-2 text-slate-300">31</span>
+                            <span class="p-2">1</span>
+                            <span class="p-2">2</span>
+                            <span class="p-2">3</span>
+                            <span class="p-2">4</span>
+                            <span class="p-2">5</span>
+                            <!-- Week 2 -->
+                            <span class="p-2">6</span>
+                            <span class="p-2">7</span>
+                            <span class="p-2">8</span>
+                            <span class="p-2">9</span>
+                            <span class="p-2">10</span>
+                            <span class="p-2">11</span>
+                            <span class="p-2">12</span>
+                            <!-- Week 3 -->
+                            <span class="p-2">13</span>
+                            <span class="p-2">14</span>
+                            <span class="p-2">15</span>
+                            <span class="p-2">16</span>
+                            <span class="p-2 bg-indigo-100 text-indigo-700 font-bold rounded-lg">17</span>
+                            <span class="p-2">18</span>
+                            <span class="p-2">19</span>
+                            <!-- Week 4 -->
+                            <span class="p-2">20</span>
+                            <span class="p-2">21</span>
+                            <span class="p-2">22</span>
+                            <span class="p-2">23</span>
+                            <span class="p-2">24</span>
+                            <span class="p-2">25</span>
+                            <span class="p-2">26</span>
+                            <!-- Week 5 -->
+                            <span class="p-2">27</span>
+                            <span class="p-2">28</span>
+                            <span class="p-2">29</span>
+                            <span class="p-2">30</span>
+                            <span class="p-2 text-slate-300">1</span>
+                            <span class="p-2 text-slate-300">2</span>
+                            <span class="p-2 text-slate-300">3</span>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Chart Placeholder Panel -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 h-48 flex flex-col justify-between">
+                        <div class="flex justify-between items-center text-xs text-slate-400 border-b border-slate-100 pb-2">
+                            <span>1.0</span>
+                            <span>0.8</span>
+                            <span>0.6</span>
+                            <span>0.4</span>
+                            <span>0.2</span>
+                        </div>
+                        <div class="flex-1 flex items-end justify-between px-2">
+                            <!-- Visual chart line simulation grid lines -->
+                            <div class="w-full border-b border-dashed border-slate-100 h-full"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="bg-white border-t border-slate-200 px-6 py-2.5 flex justify-between items-center text-[11px] text-slate-500">
+            <span>2026 © Somikoron IT LTD</span>
+            <span>Design & Developed by Somikoron IT LTD</span>
+        </footer>
+
+    </div>
+
+</body>
+</html>

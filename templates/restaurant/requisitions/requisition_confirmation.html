@@ -1,0 +1,375 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Rastuarant Requisition Details- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+               <h2 class="intro-y mt-10 text-2xl font-semibold text-gray-900">Rastuarant Requisition Details</h2>
+                <div class="mt-6 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <button onclick="location.reload()" 
+                            class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">
+                            Refresh
+                        </button>
+
+                        <div class="project-detail">
+                            <h1 class="text-3xl font-semibold text-gray-900 mb-4">
+                                {{ project.project_name }}
+                            </h1>
+                            
+                            <!-- 📝 Begin Form Here -->
+                            <form method="POST" action="">
+                                {% csrf_token %}
+                               {% for employee, data in requisitions_by_employee.items %}
+                                 <div class="flex items-center justify-between mb-4">
+                                      <!-- Employee name aligned left -->
+                                      <h4 class="text-lg font-medium text-gray-700">
+                                        Employee Name: {{ employee }}
+                                      </h4>
+                                    
+                                      <!-- Message centered horizontally -->
+                                      <div id="update-message" style="color:green" class="hidden text-green-800 font-bold bg-green-100 border border-green-400 px-6 py-2 rounded shadow-lg mx-auto">
+                                        Data updated successfully!
+                                      </div>
+                                </div>
+
+                                
+                                  {% for requisition_date, items in data.items_by_date.items %}
+                                    <h5 class="text-md font-semibold text-gray-600 mt-4 mb-1">Date: {{ requisition_date }}</h5>
+                                
+                                    <table class="min-w-full table-auto border-collapse border border-gray-300">
+                                      <thead>
+                                        <tr class="bg-gray-200">
+                                          <th align="left" class="border-b px-2 py-2 text-sm font-medium text-gray-600">Sl No</th>
+                                          <th class="border-b px-4 py-2 text-sm font-medium text-gray-600 text-center">
+                                            <input type="hidden" id="select-all-{{ employee|slugify }}-{{ requisition_date }}">
+                                            <input type="checkbox" id="select-all">
+                                          </th>
+                                          <th align="left" class="border-b px-4 py-2 text-sm font-medium text-gray-600">Supplier/Contractor</th>
+                                          <th align="left" class="border-b px-4 py-2 text-sm font-medium text-gray-600">Item Name</th>
+                                          <th align="left" class="border-b px-4 py-2 text-sm font-medium text-gray-600">Unit</th>
+                                          <th align="left" class="border-b px-4 py-2 text-sm font-medium text-gray-600">Quantity</th>
+                                          <th align="left" class="border-b px-4 py-2 text-sm font-medium text-gray-600">Rate</th>
+                                          <th align="left" class="border-b px-4 py-2 text-sm font-medium text-gray-600">Amount</th>
+                                          <th align="left" class="border-b px-4 py-2 text-sm font-medium text-gray-600">Discount</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                          {% for item in items %}
+                                          <tr class="bg-white hover:bg-gray-100" data-item-id="{{ item.id }}">
+                                            <td class="border-b px-4 py-2 text-sm text-gray-700">{{ forloop.counter }}</td>
+                                            <td class="border-b px-4 py-2 text-sm text-center">
+                                              <input type="checkbox" name="selected_items" value="{{ item.id }}">
+                                            </td>
+                                            <td class="border-b px-4 py-2 text-sm text-gray-700">{{ item.vendor_name }}</td>
+                                            <td class="border-b px-4 py-2 text-sm text-gray-700">
+                                              <a href="javascript:void(0);" onclick="fetchStock({{ item.item_name.id }}, {{ item.project_name.id }})" class="text-blue-600 hover:underline">
+                                                {{ item.item_name }}
+                                              </a>
+                                            </td>
+                                            <td class="border-b px-4 py-2 text-sm text-gray-700">{{ item.unit }}</td>
+                                            <!-- Editable Qty -->
+                                            <td class="border-b px-4 py-2 text-sm text-gray-700">
+                                              <input type="number" style="width:100px" class="qty-input" value="{{ item.qty }}" min="0" step="any" />
+                                            </td>
+                                        
+                                            <!-- Editable Rate with +/- steppers -->
+                                            <td class="border-b px-4 py-2 text-sm text-gray-700">
+                                              <div class="flex items-center gap-1">
+                                                <button type="button" class="step-btn bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-sm font-bold leading-none" onclick="stepValue(this, -1)">−</button>
+                                                <input type="number" style="width:80px" class="rate-input text-center" value="{{ item.rate }}" min="0" step="0.01" />
+                                                <button type="button" class="step-btn bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-sm font-bold leading-none" onclick="stepValue(this, 1)">+</button>
+                                              </div>
+                                            </td>
+                                        
+                                            <!-- Amount -->
+                                            <td class="border-b px-4 py-2 text-sm text-gray-700 amount-cell">৳{{ item.amount|floatformat:2 }}</td>
+                                            
+                                            <!-- Editable Discount with +/- steppers -->
+                                            <td class="border-b px-4 py-2 text-sm text-gray-700">
+                                              <div class="flex items-center gap-1">
+                                                <button type="button" class="step-btn bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-sm font-bold leading-none" onclick="stepValue(this, -1)">−</button>
+                                                <input type="number" style="width:80px" class="discount-input text-center" value="{{ item.discount }}" min="0" step="0.01" />
+                                                <button type="button" class="step-btn bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-sm font-bold leading-none" onclick="stepValue(this, 1)">+</button>
+                                              </div>
+                                            </td>
+                                          </tr>
+                                          {% endfor %}
+                                        </tbody>
+                                    </table>
+                                
+                                    {# Show total for this employee and date by looping totals_by_date and matching date #}
+                                    {% for total_date, total_amount in data.totals_by_date.items %}
+                                      {% if total_date == requisition_date %}
+                                        <div class="mt-2 text-right text-md font-semibold text-gray-800">
+                                          <span>Total : </span>
+                                          <span class="text-primary">৳{{ total_amount|floatformat:2 }}</span>
+                                        </div>
+                                      {% endif %}
+                                    {% endfor %}
+                                
+                                    <hr class="my-4">
+                                  {% endfor %}
+                                
+                                  <div class="mt-2 text-right text-md font-bold text-black">
+                                    <span>Total for {{ employee }}: ৳{{ data.total|floatformat:2 }}</span>
+                                  </div>
+                                
+                                  <hr class="my-6 border-dashed border-gray-400">
+                                {% endfor %}
+
+
+                                <!-- 🧾 Summary Section -->
+                                <div class="flex justify-end">
+                                    <div class="bg-gray-50 p-4 rounded-lg shadow-md mt-6 w-full max-w-xs">
+                                        <h4 class="text-xl font-semibold text-gray-800">Summary</h4>
+                                        <ul class="mt-4">
+                                            {% for employee, data in requisitions_by_employee.items %}
+                                            <li class="flex justify-between py-2 text-sm text-gray-700">
+                                                <span>{{ employee }}</span>
+                                                <span class="font-semibold">৳{{ data.total|floatformat:2 }}</span>
+                                            </li>
+                                            {% endfor %}
+                                            <hr class="my-2">
+                                            <li class="flex justify-between py-2 text-lg font-semibold text-gray-800">
+                                                <span>Final Total</span>
+                                                <span class="text-primary">৳{{ final_total|floatformat:2 }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- 🚦 Approval Status + Note -->
+                                <div class="flex justify-end">
+                                    <div class="bg-gray-50 p-4 rounded-lg shadow-md mt-0 w-full max-w-xs">
+                                        <div class="mt-4">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Approval Status</label>
+                                            <select name="approval_status" class="w-full px-3 py-2 border rounded-md">
+                                                <option value="">-- Select Status --</option>
+                                                <option value="approved" {% if current_status == 'approved' %}selected{% endif %}>Approved</option>
+                                                <option value="rejected" {% if current_status == 'rejected' %}selected{% endif %}>Rejected</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mt-4">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Note</label>
+                                            <textarea name="note" rows="3" class="w-full px-3 py-2 border rounded-md" placeholder="Write a note...">{{ current_note }}</textarea>
+                                        </div>
+
+                                        <div class="mt-4">
+                                            <button type="submit" style="background-color:#1e3c98" class="w-full text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                                                Update
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            <!-- End Form -->
+                            <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                // ✅ Select all checkbox
+                                const selectAllCheckbox = document.getElementById("select-all");
+                                const itemCheckboxes = document.querySelectorAll('input[name="selected_items"]');
+                            
+                                if (selectAllCheckbox) {
+                                    selectAllCheckbox.addEventListener("change", function () {
+                                        itemCheckboxes.forEach(cb => cb.checked = this.checked);
+                                    });
+                                }
+                            });
+
+                            // ✅ Increase / Decrease stepper for Rate & Discount inputs
+                            function stepValue(btn, delta) {
+                                // The button's sibling input inside the same flex wrapper
+                                const wrapper = btn.parentElement;
+                                const input = wrapper.querySelector('input[type="number"]');
+                                if (!input) return;
+
+                                const current = parseFloat(input.value) || 0;
+                                const stepAttr = parseFloat(input.step);
+                                const stepAmount = (!isNaN(stepAttr) && input.step !== "any") ? stepAttr : 1;
+
+                                let newValue = current + (delta * stepAmount);
+                                if (newValue < 0) newValue = 0;
+
+                                // Round to 2 decimals to avoid floating point drift
+                                input.value = Math.round(newValue * 100) / 100;
+
+                                // 🔥 Fire "change" so the existing amount recalculation + AJAX save runs
+                                input.dispatchEvent(new Event("change"));
+                            }
+                            
+                            
+                            // ✅ Update fields (qty, rate, discount)
+                            document.addEventListener("DOMContentLoaded", function() {
+                                // Helper to get CSRF token from cookie
+                                function getCookie(name) {
+                                    let cookieValue = null;
+                                    if (document.cookie && document.cookie !== '') {
+                                        const cookies = document.cookie.split(';');
+                                        for (let cookie of cookies) {
+                                            cookie = cookie.trim();
+                                            if (cookie.startsWith(name + '=')) {
+                                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    return cookieValue;
+                                }
+                                const csrftoken = getCookie('csrftoken');
+                            
+                                // Attach event listeners for each row
+                                document.querySelectorAll("tr[data-item-id]").forEach(row => {
+                                    const qtyInput = row.querySelector(".qty-input");
+                                    const rateInput = row.querySelector(".rate-input");
+                                    const discountInput = row.querySelector(".discount-input");
+                                    const amountCell = row.querySelector(".amount-cell");
+                                    const itemId = row.getAttribute("data-item-id");
+                            
+                                    function updateAmountAndSave() {
+                                        const qty = parseFloat(qtyInput.value) || 0;
+                                        const rate = parseFloat(rateInput.value) || 0;
+                                        const discount = parseFloat(discountInput.value) || 0;
+                            
+                                        // ✅ Amount = qty * rate - discount
+                                        let amount = (qty * rate) - discount;
+                                        if (amount < 0) amount = 0; // Prevent negative amounts
+                            
+                                        // Update UI
+                                        amountCell.textContent = "৳" + amount.toFixed(2);
+                            
+                                        // Prepare data to send
+                                        const data = {
+                                            id: itemId,
+                                            qty: qty,
+                                            rate: rate,
+                                            discount: discount,
+                                            amount: amount
+                                        };
+                            
+                                        // Send AJAX POST to update item
+                                        fetch("/restu_requisition_update_ajax/", {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json",
+                                                "X-CSRFToken": csrftoken
+                                            },
+                                            body: JSON.stringify(data)
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.success) {
+                                                console.log("Item " + itemId + " updated successfully.");
+                            
+                                                const messageDiv = document.getElementById("update-message");
+                                                if (messageDiv) {
+                                                    messageDiv.classList.remove("hidden");
+                                                    setTimeout(() => {
+                                                        messageDiv.classList.add("hidden");
+                                                    }, 3000);
+                                                }
+                                            } else {
+                                                alert("Update failed: " + data.error);
+                                            }
+                                        })
+                                        .catch(error => {
+                                            alert("AJAX error: " + error);
+                                        });
+                                    }
+                            
+                                    // ✅ Listen to changes in qty, rate, discount
+                                    qtyInput.addEventListener("change", updateAmountAndSave);
+                                    rateInput.addEventListener("change", updateAmountAndSave);
+                                    discountInput.addEventListener("change", updateAmountAndSave);
+                                });
+                            });
+                            </script>
+
+                            
+                            <!-- 🔙 Back Button -->
+                            <div class="mt-8 text-center">
+                                <a href="{% url 'restau_requisition_list' %}" style="background-color:#1e3c98" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                    Back 
+                                    </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Stock Modal -->
+                <style>
+                    @keyframes fade-in {
+                      from { opacity: 0; transform: translateY(10px); }
+                      to { opacity: 1; transform: translateY(0); }
+                    }
+                    .animate-fade-in {
+                      animation: fade-in 0.3s ease-out;
+                    }
+                </style>
+                <!-- Stock Modal -->
+                <div id="stockModal" class="hidden fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+                  <div class="bg-white border-2 border-blue-600 rounded-2xl shadow-xl w-[300px] p-[5px] relative animate-fade-in">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center justify-center">
+                      <svg class="w-6 h-6 text-blue-600 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h18M9 3v18m6-18v18M4 21h16" />
+                      </svg>
+                      &nbsp;&nbsp; Inventory Stock &nbsp;&nbsp;
+                    </h2>
+                
+                    <p id="stockContent" class="text-lg text-gray-700 text-center py-4 border border-gray-300 rounded bg-gray-50 shadow-inner">
+                      Loading...
+                    </p>
+                
+                    <div class="mt-6 text-center">
+                      <button onclick="closeModal()" style="background-color:#1e3c98" class="px-5 py-2 text-white rounded-lg hover:bg-blue-800 transition">
+                        Close
+                      </button>
+                    </div>
+                    <br/>
+                  </div>
+                </div>
+
+
+                <script>
+                    function fetchStock(itemId, projectId) {
+                        fetch(`/restuarant-get-stock-qty/?item_id=${itemId}&project_id=${projectId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementById("stockContent").innerText = 
+                                  `Available Stock: ${data.qtysub}`;
+                                document.getElementById("stockModal").classList.remove("hidden");
+                            })
+                            .catch(err => {
+                                alert("Error fetching stock.");
+                                console.error(err);
+                            });
+                    }
+                    
+                    function closeModal() {
+                        document.getElementById("stockModal").classList.add("hidden");
+                    }
+
+                </script>
+
+
+
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

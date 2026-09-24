@@ -1,0 +1,68 @@
+{% extends 'office_inventory/base.html' %}
+{% block header %}Assignments{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <form class="d-flex gap-2 flex-wrap" method="get">
+    <select name="type" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">All Assign Types</option>
+      {% for t in assignment_types %}<option value="{{ t.id }}" {% if selected_type == t.id|stringformat:'s' %}selected{% endif %}>{{ t.name }}</option>{% endfor %}
+    </select>
+    <select name="location" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">All Locations</option>
+      {% for l in locations %}<option value="{{ l.id }}" {% if selected_location == l.id|stringformat:'s' %}selected{% endif %}>{{ l.name }}</option>{% endfor %}
+    </select>
+    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">All Status</option>
+      {% for value, label in status_choices %}<option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </form>
+  <div class="d-flex gap-2">
+    <a href="{% url 'office_inventory:my_assignments' %}" class="btn btn-sm btn-outline-success"><i class="bi bi-person-check"></i> My Assignments</a>
+    <a href="{% url 'office_inventory:assignment_type_list' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-tags"></i> Assign Types</a>
+    <a href="{% url 'office_inventory:assignment_create' %}" class="btn btn-sm btn-primary"><i class="bi bi-plus"></i> Assign Item</a>
+  </div>
+</div>
+
+<div class="card card-stat p-3">
+<table class="table table-hover align-middle">
+<thead><tr>
+  <th>Assign Type</th><th>Assigned To</th><th>Location</th><th>Item</th><th>Qty</th>
+  <th>Assigned</th><th>Returned</th><th>Status</th><th class="text-end">Actions</th>
+</tr></thead>
+<tbody>
+{% for a in assignments %}
+<tr>
+  <td><span class="badge bg-light text-dark border">{{ a.assignment_type.name|default:"-" }}</span></td>
+  <td>
+    {% if a.employee %}
+      <a href="{% url 'office_inventory:employee_asset_profile' a.employee.pk %}">{{ a.employee }}</a>
+    {% elif a.restaurant_employee %}
+      {{ a.restaurant_employee }} <span class="badge bg-info text-dark">Restaurant</span>
+    {% else %}
+      {{ a.assignee_label }}
+    {% endif %}
+  </td>
+  <td>{{ a.location.full_path|default:"-" }}</td>
+  <td>{{ a.item }}</td><td>{{ a.qty }} {{ a.unit|default:"" }}</td>
+  <td>{{ a.assigned_date }}</td><td>{{ a.return_date|default:"-" }}</td>
+  <td><span class="badge {% if a.status == 'ASSIGNED' %}bg-warning{% else %}bg-success{% endif %}">{{ a.get_status_display }}</span></td>
+  <td>
+    <div class="d-flex gap-1 justify-content-end">
+     {% if a.status == 'ASSIGNED' and is_admin %}
+        <form method="post" action="{% url 'office_inventory:assignment_return' a.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-outline-secondary" onclick="return confirm('Are you sure you want to return this item?');">
+            Mark Returned
+          </button>
+        </form>
+     {% endif %}
+      <a href="{% url 'office_inventory:assignment_update' a.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+      <a href="{% url 'office_inventory:assignment_delete' a.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+    </div>
+  </td>
+</tr>
+{% empty %}<tr><td colspan="9" class="text-center text-muted">No assignments.</td></tr>{% endfor %}
+</tbody></table>
+</div>
+{% endblock %}

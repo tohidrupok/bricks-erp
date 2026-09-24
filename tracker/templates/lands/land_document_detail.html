@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if is_edit %}ভূমি দলিল তথ্য সংশোধন (Edit Document){% else %}ভূমি দলিল তথ্য ফরম{% endif %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Hind Siliguri', 'Inter', sans-serif;
+        }
+        /* Extra fix to make Django's native file input field look clean in Tailwind */
+        input[type="file"] {
+            padding: 0.375rem 0.75rem;
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="max-w-4xl mx-auto my-10 p-8 bg-white rounded-lg shadow-md border border-gray-200">
+        <h2 class="text-2xl font-bold text-center text-indigo-700 mb-6 border-b pb-4">
+            {% if is_edit %}
+                📝 ভূমি দলিল তথ্য সংশোধন (Edit Document)
+            {% else %}
+                🏠 ভূমি দলিল ডাটা এন্ট্রি ফরম
+            {% endif %}
+        </h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded text-white bg-green-500 font-semibold shadow-sm">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+       <div class="min-h-screen bg-gray-100 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-200/60 overflow-hidden">
+        
+        <div class="bg-gradient-to-r from-slate-900 to-indigo-950 px-6 py-6 sm:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <span class="px-2.5 py-1 text-xs font-bold tracking-wider uppercase rounded bg-indigo-500 text-white shadow-sm">
+                        ID: #{{ document.sl_no }}
+                    </span>
+                    <span class="px-2.5 py-1 text-xs font-bold tracking-wider uppercase rounded bg-slate-700 text-slate-200">
+                        {{ document.get_file_code_display }}
+                    </span>
+                </div>
+                <h1 class="text-2xl font-extrabold text-white mt-2 tracking-tight">
+                    দলিল নম্বর: <span class="text-indigo-400 font-mono">{{ document.doc_no }}</span>
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <a href="{% url 'land_document_edit' document.pk %}" class="w-full sm:w-auto text-center bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold py-2.5 px-5 rounded-lg shadow-md transition duration-150">
+                    ✏️ তথ্য পরিবর্তন করুন
+                </a>
+            </div>
+        </div>
+
+        <div class="divide-y divide-gray-100">
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 p-5 sm:p-6 hover:bg-slate-50/50 transition">
+                <div class="text-sm font-bold text-slate-500 flex items-center gap-2 md:mb-0 mb-1">
+                    📂 দলিলের সাধারণ তথ্য
+                </div>
+                <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                    <div>
+                        <span class="block text-xs font-semibold text-gray-400 uppercase">দলিলের ধরন</span>
+                        <span class="text-sm font-medium text-slate-800">{{ document.doc_type }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-semibold text-gray-400 uppercase">দলিলের তারিখ</span>
+                        <span class="text-sm font-mono font-medium text-slate-800">{{ document.doc_date|date:"d-m-Y" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 p-5 sm:p-6 hover:bg-slate-50/50 transition">
+                <div class="text-sm font-bold text-slate-500 flex items-center gap-2 md:mb-0 mb-1">
+                    👥 মালিকানা তথ্য (Parties)
+                </div>
+                <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-amber-50/60 p-3 rounded-lg border border-amber-100">
+                        <span class="block text-xs font-bold text-amber-700 uppercase mb-0.5">বিক্রেতা (Seller)</span>
+                        <span class="text-sm font-semibold text-slate-900">{{ document.seller }}</span>
+                    </div>
+                    <div class="bg-emerald-50/60 p-3 rounded-lg border border-emerald-100">
+                        <span class="block text-xs font-bold text-emerald-700 uppercase mb-0.5">ক্রেতা (Buyer)</span>
+                        <span class="text-sm font-semibold text-slate-900">{{ document.buyer }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 p-5 sm:p-6 hover:bg-slate-50/50 transition">
+                <div class="text-sm font-bold text-slate-500 flex items-center gap-2 md:mb-0 mb-1">
+                    🗺️ জমির বিবরণ ও পরিমাপ
+                </div>
+                <div class="md:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div>
+                        <span class="block text-xs font-semibold text-gray-400">মৌজা</span>
+                        <span class="text-sm font-medium text-slate-800">{{ document.mouza }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-semibold text-gray-400">খতিয়ান নং</span>
+                        <span class="text-sm font-mono font-medium text-slate-800">{{ document.khatian }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-semibold text-gray-400">দাগ নং</span>
+                        <span class="text-sm font-mono font-medium text-slate-800">{{ document.dag_no }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-semibold text-indigo-500 font-bold">জমির পরিমাণ</span>
+                        <span class="text-sm font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded inline-block mt-0.5">{{ document.land_amount }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 p-5 sm:p-6 hover:bg-slate-50/50 transition">
+                <div class="text-sm font-bold text-slate-500 flex items-center gap-2 md:mb-0 mb-1">
+                    🏢 প্রকল্প বা ব্লক অবস্থান
+                </div>
+                <div class="md:col-span-2">
+                    <span class="text-sm font-semibold text-slate-800">{{ document.project_block }}</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 p-5 sm:p-6 hover:bg-slate-50/50 transition">
+                <div class="text-sm font-bold text-slate-500 flex items-center gap-2 md:mb-0 mb-1">
+                    ⚙️ দাপ্তরিক তথ্য ও ট্র্যাকিং
+                </div>
+                <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <span class="block text-xs font-semibold text-gray-400">ফাইল লোকেশন</span>
+                        <span class="text-sm font-medium text-slate-800">
+                            {% if document.file_location %}{{ document.file_location }}{% else %}<span class="text-gray-400 italic">ট্যাগ করা হয়নি</span>{% endif %}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-semibold text-gray-400">দায়িত্বপ্রাপ্ত ব্যক্তি</span>
+                        <span class="text-sm font-medium text-slate-800">{{ document.assigned_person }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-semibold text-gray-400 mb-0.5">বর্তমান অবস্থা</span>
+                        <span class="inline-flex text-xs font-bold px-2.5 py-1 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                            {{ document.current_status }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 p-5 sm:p-6 hover:bg-slate-50/50 transition">
+                <div class="text-sm font-bold text-slate-500 flex items-center gap-2 md:mb-0 mb-1">
+                    📄 সংযুক্ত ফাইল (Attachment)
+                </div>
+                <div class="md:col-span-2">
+                    {% if document.scanned_copy %}
+                        <a href="{{ document.scanned_copy.url }}" target="_blank" class="inline-flex items-center gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100/80 px-4 py-2 rounded-lg transition duration-150">
+                            📥 স্ক্যান কপি নামিয়ে নিন (Download Document)
+                        </a>
+                    {% else %}
+                        <span class="text-sm text-gray-400 italic bg-gray-50 border px-3 py-1.5 rounded-lg inline-block">কোন ফাইল স্ক্যান করা নেই</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if document.comments %}
+            <div class="grid grid-cols-1 md:grid-cols-3 p-5 sm:p-6 hover:bg-slate-50/50 transition">
+                <div class="text-sm font-bold text-slate-500 flex items-center gap-2 md:mb-0 mb-1">
+                    💡 অতিরিক্ত মন্তব্য (Comments)
+                </div>
+                <div class="md:col-span-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200/60">
+                    <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{{ document.comments }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="bg-slate-50 border-t border-gray-100 px-6 py-4 sm:px-8 flex items-center justify-between">
+            <p class="text-xs text-slate-400">সর্বশেষ পরিবর্তন: {{ document.last_update|date:"d M, Y - h:i A" }}</p>
+            <a href="#" class="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition flex items-center gap-1">
+                ← তালিকায় ফিরুন
+            </a>
+        </div>
+    </div>
+</div>
+    </div>
+
+</body>
+</html>

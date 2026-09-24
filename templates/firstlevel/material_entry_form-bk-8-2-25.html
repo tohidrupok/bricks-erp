@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Material Comparison Report</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .highlight {
+      background-color: #ffe5b4;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body class="p-6 bg-gray-50 text-gray-800 font-sans">
+  <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md">
+
+    <div class="mb-6">
+      <h2 class="text-2xl font-bold mb-2">Project: {{ project.name }}</h2>
+      <h3 class="text-xl mb-1">Client: {{ client_name }}</h3>
+      <p><strong>Date:</strong> {{ date }}</p>
+      <p><strong>Document type:</strong> Price difference of the requester materials between <strong>BTP</strong> & <strong>Client {{ client_name }}</strong></p>
+    </div>
+
+    <div class="overflow-auto">
+      <table class="min-w-full border border-gray-300 text-sm text-center">
+        <thead class="bg-gray-200">
+          <tr>
+            <th colspan="6" class="border border-gray-300 py-2">BTP</th>
+            <th class="border border-gray-300 py-2">Difference</th>
+            <th colspan="6" class="border border-gray-300 py-2">Client: {{ client_name }}</th>
+          </tr>
+          <tr class="bg-gray-100">
+            <th class="border border-gray-300 px-2 py-1">SL</th>
+            <th class="border border-gray-300 px-2 py-1">Description</th>
+            <th class="border border-gray-300 px-2 py-1">Band</th>
+            <th class="border border-gray-300 px-2 py-1">Qty</th>
+            <th class="border border-gray-300 px-2 py-1">Rate</th>
+            <th class="border border-gray-300 px-2 py-1">Amount</th>
+            <th class="border border-gray-300 px-2 py-1"></th>
+            <th class="border border-gray-300 px-2 py-1">SL</th>
+            <th class="border border-gray-300 px-2 py-1">Description</th>
+            <th class="border border-gray-300 px-2 py-1">Band</th>
+            <th class="border border-gray-300 px-2 py-1">Qty</th>
+            <th class="border border-gray-300 px-2 py-1">Rate</th>
+            <th class="border border-gray-300 px-2 py-1">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in paired_data %}
+          <tr>
+            <td class="border px-2 py-1">{{ row.btp.sl }}</td>
+            <td class="border px-2 py-1">{{ row.btp.description }}</td>
+            <td class="border px-2 py-1">{{ row.btp.band }}</td>
+            <td class="border px-2 py-1">{{ row.btp.quantity }}</td>
+            <td class="border px-2 py-1">{{ row.btp.rate }}</td>
+            <td class="border px-2 py-1">{{ row.btp.amount|floatformat:0 }}</td>
+            <td class="border px-2 py-1 highlight">{{ row.difference|floatformat:0 }}</td>
+            <td class="border px-2 py-1">{{ row.client.sl }}</td>
+            <td class="border px-2 py-1">{{ row.client.description }}</td>
+            <td class="border px-2 py-1">{{ row.client.band }}</td>
+            <td class="border px-2 py-1">{{ row.client.quantity }}</td>
+            <td class="border px-2 py-1">{{ row.client.rate }}</td>
+            <td class="border px-2 py-1">{{ row.client.amount|floatformat:0 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot class="bg-gray-100 font-bold">
+          <tr>
+            <td colspan="5" class="border px-2 py-1 text-right">Total</td>
+            <td class="border px-2 py-1">{{ total_btp|floatformat:0 }}</td>
+            <td class="border px-2 py-1 highlight">{{ total_diff|floatformat:0 }}</td>
+            <td colspan="5" class="border px-2 py-1"></td>
+            <td class="border px-2 py-1">{{ total_client|floatformat:0 }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <p class="mt-6 font-semibold text-red-600">SIR, this chart only includes main materials.</p>
+
+  </div>
+</body>
+</html>

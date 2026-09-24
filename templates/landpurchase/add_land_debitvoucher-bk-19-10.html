@@ -1,0 +1,195 @@
+<!-- templates/CreditVoucher.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Land Payment Voucher Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-lg font-medium">Land Payment Voucher Name</h2>
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+
+                         <!-- Type Fields -->
+                      <form method="POST" class="w-full max-w-4xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                        {% csrf_token %}
+                        <input type="hidden" name="create_dr_by" value="{{ request.user.get_full_name }}" />
+                    
+                        <table class="w-full border-collapse border border-slate-300 dark:border-darkmode-400 text-sm">
+                            <tbody>
+                                <!-- Land Purchase -->
+                                <tr class="bg-gray-50 dark:bg-darkmode-700">
+                                    <td class="p-3 font-medium w-1/4 border dark:border-darkmode-400">Land Purchase</td>
+                                    <td class="p-3 border dark:border-darkmode-400">
+                                        <select id="id_land_purchase" name="land_purchase"
+                                                class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                            <option value="">---------</option>
+                                            {% for obj in landDebits %}
+                                                <option value="{{ obj.pk }}"
+                                                    {% if obj.pk|stringformat:"s" == form.land_purchase.value|stringformat:"s" %}selected{% endif %}>
+                                                    {{ obj.land_supplier.owner_name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        {% for error in form.land_purchase.errors %}
+                                            <p class="text-red-600 text-sm">{{ error }}</p>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+
+                    
+                                <!-- Head of Account -->
+                                <tr class="bg-gray-50 dark:bg-darkmode-700">
+                                    <td class="p-3 font-medium w-1/4 border dark:border-darkmode-400">Head of Account</td>
+                                    <td class="p-3 border dark:border-darkmode-400">
+                                        {{ form.head_of_account }}
+                                        {% for error in form.head_of_account.errors %}
+                                            <p class="text-red-600 text-sm">{{ error }}</p>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                    
+                                <!-- Owner -->
+                                <tr>
+                                    <td class="p-3 font-medium border dark:border-darkmode-400">Owner</td>
+                                    <td class="p-3 border dark:border-darkmode-400">
+                                        {{ form.owner }}
+                                        {% for error in form.owner.errors %}
+                                            <p class="text-red-600 text-sm">{{ error }}</p>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                    
+                                <!-- Cash Type -->
+                                <tr class="bg-gray-50 dark:bg-darkmode-700">
+                                    <td class="p-3 font-medium border dark:border-darkmode-400">Cash Type</td>
+                                    <td class="p-3 border dark:border-darkmode-400">
+                                        <select id="id_cash_type" name="cash_type"
+                                                class="w-full text-sm border-slate-200 shadow-sm rounded-md p-2">
+                                            <option value="" disabled {% if not form.cash_type.value %} selected {% endif %}>Select Cash Type</option>
+                                            {% for value, label in form.cash_type.field.choices %}
+                                                <option value="{{ value }}" {% if value|stringformat:"s" == form.cash_type.value|stringformat:"s" %} selected {% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        {% for error in form.cash_type.errors %}
+                                            <p class="text-red-600 text-sm">{{ error }}</p>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                    
+                                <!-- Cheque Number -->
+                                <tr>
+                                    <td class="p-3 font-medium border dark:border-darkmode-400">Cheque Number</td>
+                                    <td class="p-3 border dark:border-darkmode-400">
+                                        <input type="text" step="0.01" id="id_cheque_number" name="cheque_number"
+                                               class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                               placeholder="Enter Cheque Number"
+                                               value="{{ form.cheque_number.value }}">
+                                        {% for error in form.cheque_number.errors %}
+                                            <p class="text-red-600 text-sm">{{ error }}</p>
+                                        {% endfor %}
+                                        <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Auto-fetched based on Cash Type</p>
+                                    </td>
+                                </tr>
+                    
+                                <!-- M.R / Bill No -->
+                                <tr class="bg-gray-50 dark:bg-darkmode-700">
+                                    <td class="p-3 font-medium border dark:border-darkmode-400">M.R / Bill No</td>
+                                    <td class="p-3 border dark:border-darkmode-400">{{ form.mr_or_bill_no }}
+                                        {% for error in form.mr_or_bill_no.errors %}
+                                            <p class="text-red-600 text-sm">{{ error }}</p>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                    
+                                <!-- Date -->
+                                <tr>
+                                    <td class="p-3 font-medium border dark:border-darkmode-400">Date</td>
+                                    <td class="p-3 border dark:border-darkmode-400">{{ form.date }}
+                                        {% for error in form.date.errors %}
+                                            <p class="text-red-600 text-sm">{{ error }}</p>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                    
+                                <!-- Amount -->
+                                <tr class="bg-gray-50 dark:bg-darkmode-700">
+                                    <td class="p-3 font-medium border dark:border-darkmode-400">Amount</td>
+                                    <td class="p-3 border dark:border-darkmode-400">{{ form.amount }}
+                                        {% for error in form.amount.errors %}
+                                            <p class="text-red-600 text-sm">{{ error }}</p>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                    
+                                <!-- Remark -->
+                                <tr>
+                                    <td class="p-3 font-medium border dark:border-darkmode-400">Remark / Particulars</td>
+                                    <td class="p-3 border dark:border-darkmode-400">{{ form.remark }}
+                                        {% for error in form.remark.errors %}
+                                            <p class="text-red-600 text-sm">{{ error }}</p>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                    
+                                <!-- Carrier -->
+                                <tr class="bg-gray-50 dark:bg-darkmode-700">
+                                    <td class="p-3 font-medium border dark:border-darkmode-400">Carrier</td>
+                                    <td class="p-3 border dark:border-darkmode-400">{{ form.carrier }}
+                                        {% for error in form.carrier.errors %}
+                                            <p class="text-red-600 text-sm">{{ error }}</p>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    
+                        <div class="text-center mt-6">
+                            <button type="submit" class="bg-[#1e3c99] hover:bg-blue-800 text-white px-6 py-2 rounded-md">Save Voucher</button>
+                            <a href="{% url 'land_debitvoucher_list' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md ml-2">Back to List</a>
+                        </div>
+                    </form>
+                    
+                    <!-- JS: Show/Hide Cheque Number -->
+                    <script>
+                    function toggleChequeField() {
+                        const cashTypeSelect = document.getElementById('id_cash_type');
+                        const chequeField = document.getElementById('id_cheque_number').closest('tr');
+                        const selectedValue = cashTypeSelect.value;
+                    
+                        // Hide Cheque Number if Cash Type = 'Cash' (adjust value according to your DB)
+                        if (selectedValue === 'Cash' || !selectedValue) {
+                            chequeField.style.display = 'none';
+                        } else {
+                            chequeField.style.display = '';
+                        }
+                    }
+                    
+                    document.addEventListener('DOMContentLoaded', function () {
+                        toggleChequeField();
+                        document.getElementById('id_cash_type').addEventListener('change', toggleChequeField);
+                    });
+                    </script>
+
+        
+                        <br>  
+                    </div>
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

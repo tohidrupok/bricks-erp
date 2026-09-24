@@ -1,0 +1,214 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profit Ledger Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      background-color: #f7f7f7;
+      padding: 20px;
+      color: #000;
+    }
+    .invoice-box {
+      background: #fff;
+      max-width: 960px;
+      margin: auto;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+    h2, h3 {
+      margin: 8px 0;
+    }
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .header-row img {
+      height: 50px;
+    }
+    .header-info {
+      text-align: right;
+      font-size: 11px;
+    }
+    .sub-head {
+      font-size: 11px;
+      margin-bottom: 10px;
+      color: #555;
+    }
+    hr {
+      margin: 10px 0;
+      border-color: #ccc;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 11px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    th {
+      background-color: #e0e0e0;
+      font-weight: bold;
+    }
+    td.description {
+      text-align: left;
+    }
+    .profit-row {
+      background-color: #f1f5f9;
+      font-weight: bold;
+    }
+    .project-title {
+      background-color: #007b83;
+      color: white;
+      padding: 8px 10px;
+      font-size: 14px;
+      font-weight: bold;
+      margin-top: 20px;
+      border-radius: 4px;
+    }
+    .amount-words {
+      font-style: italic;
+      font-size: 12px;
+      text-align: right;
+      margin-top: 5px;
+    }
+    .no-record {
+      text-align: center;
+      color: #999;
+      font-style: italic;
+      padding: 10px 0;
+    }
+    tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    @media print {
+      body {
+        background-color: white;
+        padding: 0;
+      }
+      .invoice-box {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        max-width: 100%;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="invoice-box">
+  <!-- Header -->
+  <div class="header-row">
+    <div class="logo">
+      <img src="{% static 'images/BTP_logo_webp.webp' %}" alt="Company Logo">
+    </div>
+    <div class="header-info">
+      <div style="font-weight:bold; background-color:#e2f0d9; font-size:16px;">Profit & Donation Ledger</div>
+      <div>Print Date: {{ print_time|date:"F j, Y, g:i a" }}</div>
+      {% if selected_filters.from_date %}
+        <div>Date From: {{ selected_filters.from_date|date:"d M Y" }}</div>
+      {% endif %}
+      {% if selected_filters.to_date %}
+        <div>To: {{ selected_filters.to_date|date:"d M Y" }}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="sub-head">
+    House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br>
+    01993005558, 09639246230, 09639246231<br>
+    md2bayid@gmail.com, thebtplimited@gmail.com, www.btplimited.com
+  </div>
+
+  <hr>
+
+ {% if report_data %}
+    {% for block in report_data %}
+        <!-- Project Header -->
+        <div class="project-title">{{ block.project.project_first_name }}</div>
+
+        <!-- Profit Summary as Single Row -->
+        <table>
+            <tbody>
+                <tr class="profit-row">
+                    <td style="text-align:left;">Final Profit</td>
+                    <td>{{ block.final_profit|floatformat:2 }}</td>
+                    <td>Credit</td>
+                    <td>{{ block.final_profit|floatformat:2 }}</td>
+                    <td>Balance</td>
+                    <td>{{ block.final_profit|floatformat:2 }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Donation Ledger -->
+        <h3 style="margin-top:15px;">Donation Ledger</h3>
+        {% if block.donations %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Donation Name</th>
+                        <th>Description</th>
+                        <th>Debit</th>
+                        <th>Credit</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in block.donations %}
+                        <tr>
+                            <td>{{ d.date|date:"d M Y" }}</td>
+                            <td style="text-align:left;">{{ d.donation_name }}</td>
+                            <td class="description">{{ d.description }}</td>
+                            <td>{{ d.debit|floatformat:2 }}</td>
+                            <td>{{ d.credit|floatformat:2 }}</td>
+                            <td>{{ d.balance|floatformat:2 }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="no-record">No donation entries found.</p>
+        {% endif %}
+
+        <hr style="margin:20px 0;">
+    {% endfor %}
+{% else %}
+    <p class="no-record">No records found for the selected filters.</p>
+{% endif %}
+
+
+
+
+ <div class="no-print" style="text-align:center; margin-top:20px;">
+  <button onclick="window.history.back()" 
+          style="background-color:#6c757d;color:white;padding:6px 12px;margin-right:10px;border:none;border-radius:4px;cursor:pointer;font-weight:bold;">
+    ← Back
+  </button>
+  <button onclick="window.print()" 
+          style="background-color:#38c172;color:white;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;font-weight:bold;">
+    🖨️ Print
+  </button>
+</div>
+
+</div>
+
+</body>
+</html>

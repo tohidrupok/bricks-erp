@@ -1,0 +1,541 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+  .transfer-wrapper {
+    background-color: #f5f5f5;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+  }
+
+  .transfer-card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 18px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+
+  .card-title-bar {
+    background-color: #0A8754;
+    color: #fff;
+    padding: 6px 12px;
+    font-weight: bold;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 10px;
+  }
+
+  .card-title-bar.from {
+    background-color: #c0392b;
+  }
+
+  .project-label {
+    font-weight: bold;
+    color: #0A8754;
+    margin-bottom: 6px;
+  }
+
+  .transfer-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+
+  .transfer-table th, .transfer-table td {
+    border: 1px solid #ccc;
+    padding: 6px 8px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .transfer-table th {
+    background-color: #0A8754;
+    color: white;
+  }
+
+  .from-table th {
+    background-color: #c0392b;
+  }
+
+  .transfer-table td.text-left {
+    text-align: left;
+  }
+
+  .transfer-table input.qty-input,
+  .transfer-table input.num-input {
+    width: 90px;
+    padding: 4px;
+    border: 1px solid #bbb;
+    border-radius: 3px;
+    text-align: center;
+  }
+
+  .empty-row td {
+    color: #999;
+    font-style: italic;
+    padding: 14px;
+  }
+
+  .null-row td {
+    background-color: #fff8e1;
+    color: #b26a00;
+    font-style: italic;
+  }
+
+  .transfer-btn {
+    background-color: #1e3c98;
+    color: #fff;
+    padding: 8px 24px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 13px;
+  }
+
+  .transfer-btn:hover {
+    background-color: #17428b;
+  }
+
+  .badge-info {
+    background: #e2f0d9;
+    color: #0A8754;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+  }
+</style>
+
+<div class="transfer-wrapper">
+
+  <form method="POST" id="transferForm">
+    {% csrf_token %}
+
+    <!-- ============ Django Messages ============ -->
+    {% if messages %}
+      <div style="margin-bottom: 12px;">
+        {% for message in messages %}
+          <div style="padding:8px 12px;border-radius:4px;
+                      background:{% if message.tags == 'error' %}#fdecea{% elif message.tags == 'success' %}#e6f4ea{% else %}#fff3cd{% endif %};
+                      color:{% if message.tags == 'error' %}#a32f2c{% elif message.tags == 'success' %}#1e7e34{% else %}#856404{% endif %};
+                      margin-bottom:6px;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="row g-3">
+
+      <!-- =================================================== -->
+      <!-- ================== FROM PROJECT =================== -->
+      <!-- =================================================== -->
+      <div class="col-md-6">
+        <div class="transfer-card">
+
+          <div class="card-title-bar from">FROM PROJECT</div>
+
+          <label class="form-label" style="display:block;margin-top:6px;">Select Project</label>
+          <select class="form-select" id="from_project" name="from_project" readonly required>
+            <option value="">-- Select From Project --</option>
+            {% for p in projects %}
+              <option value="{{ p.id }}"
+                {% if url_from_project and url_from_project|add:"0" == p.id %}selected{% endif %}>
+                {{ p.project_first_name }}
+              </option>
+            {% endfor %}
+          </select>
+
+          <div class="project-label" id="from_project_label" style="margin-top:10px;">
+            {% if url_from_project %}Project items loaded from URL{% endif %}
+          </div>
+
+          <table class="transfer-table from-table">
+            <thead>
+              <tr>
+                <th style="width:40px;">SL</th>
+                <th>Item Name</th>
+                <th style="width:80px;">Rate</th>
+                <th style="width:110px;">Available Qty</th>
+                <th style="width:110px;">Unit</th>
+                <th style="width:120px;">Transfer Qty</th>
+              </tr>
+            </thead>
+            <tbody id="from_items_body">
+              {% if from_items %}
+                {% for item in from_items %}
+                  <tr data-id="{{ item.id }}" data-master="{{ item.item_name_id }}">
+                    <td>{{ forloop.counter }}</td>
+                    <td class="text-left">
+                      {{ item.item_name.head_requi_name }}
+                      <input type="hidden" name="item_id[]" value="{{ item.id }}">
+                    </td>
+                    <td>{{ item.rate|default:"0" }}</td>
+                    <td>
+                      <span class="badge-info">
+                        {{ item.qtysub|default:"0" }}
+                      </span>
+                    </td>
+                     <td>
+                      <span class="badge-info">
+                        {{ item.unit }}
+                      </span>
+                    </td>
+                    <td>
+                      <input type="number"
+                             name="transfer_qty[]"
+                             class="qty-input"
+                             min="0"
+                             step="any"
+                             max="{{ item.qtysub|default:0 }}"
+                             value="0">
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr class="empty-row">
+                  <td colspan="5">Please select a From Project to load items</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+
+      <!-- =================================================== -->
+      <!-- =================== TO PROJECT ==================== -->
+      <!-- =================================================== -->
+      <div class="col-md-6">
+        <div class="transfer-card">
+
+          <div class="card-title-bar">TO PROJECT</div>
+
+          <label class="form-label" style="display:block;margin-top:6px;">Select Project</label>
+          <select class="form-select" id="to_project" name="to_project" readonly required>
+            <option value="">-- Select To Project --</option>
+            {% for p in projects %}
+              <option value="{{ p.id }}"
+                {% if url_to_project and url_to_project|add:"0" == p.id %}selected{% endif %}>
+                {{ p.project_first_name }}
+              </option>
+            {% endfor %}
+          </select>
+
+          <div class="project-label" id="to_project_label" style="margin-top:10px;">
+            {% if url_to_project %}Project items loaded from URL{% endif %}
+          </div>
+
+          <table class="transfer-table">
+            <thead>
+              <tr>
+                <th style="width:40px;">SL</th>
+                <th>Item Name</th>
+                <th style="width:80px;">Rate</th>
+                <th style="width:130px;"Unit</th>
+                <th style="width:130px;">Current Qty</th>
+              </tr>
+            </thead>
+            <tbody id="to_items_body">
+              {% if to_items %}
+                {% for item in to_items %}
+                  <tr data-id="{{ item.id }}">
+                    <td>{{ forloop.counter }}</td>
+                    <td class="text-left">{{ item.item_name.head_requi_name }}</td>
+                    <td>{{ item.rate|default:"0" }}</td>
+                    <td>
+                      <span class="badge-info">
+                        {{ item.unit }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge-info">
+                        {{ item.qtysub|default:"0" }}
+                      </span>
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% elif highlight_item %}
+                <!-- Item id passed in URL but not yet in destination -->
+                <tr class="null-row">
+                  <td>1</td>
+                  <td class="text-left">⚠ Item not yet in destination project (will be created on transfer)</td>
+                  <td>NULL</td>
+                  <td>NULL</td>
+                </tr>
+              {% else %}
+                <tr class="empty-row">
+                  <td colspan="4">Please select a To Project to load items</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================ Transfer Button ================ -->
+    <style>
+    .action-bar {
+          display: flex;
+          justify-content: center;
+          gap: 14px;
+          margin-top: 20px;
+          flex-wrap: wrap;
+        }
+        
+        /* Base button style */
+        .btn {
+          padding: 10px 18px;
+          border-radius: 10px;
+          font-size: 14px;
+          font-weight: 600;
+          text-decoration: none;
+          border: none;
+          cursor: pointer;
+          transition: all 0.25s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+        
+        /* Back button */
+        .btn-back {
+          background: #f3f4f6;
+          color: #374151;
+        }
+        
+        .btn-back:hover {
+          background: #e5e7eb;
+          transform: translateY(-2px);
+        }
+        
+        /* Refresh button */
+        .btn-refresh {
+          background: #e0f2fe;
+          color: #0369a1;
+        }
+        
+        .btn-refresh:hover {
+          background: #bae6fd;
+          transform: translateY(-2px);
+        }
+        
+        /* Transfer button (primary action) */
+        .btn-transfer {
+          background: linear-gradient(135deg, #22c55e, #16a34a);
+          color: white;
+        }
+        
+        .btn-transfer:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 18px rgba(34,197,94,0.3);
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 480px) {
+          .btn {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+    </style>
+   <div class="action-bar">
+    
+      <a href="{% url 'inventory_stock_summary' %}" class="btn btn-back">
+        ← Back
+      </a>
+    
+      <button type="button" class="btn btn-refresh" onclick="window.location.reload();">
+        🔄 Refresh
+      </button>
+    
+      <button type="submit" class="btn btn-transfer">
+        🚀 Transfer Stock
+      </button>
+    
+    </div>
+
+  </form>
+
+</div>
+
+
+<!-- ====================== JS ====================== -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+(function () {
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlItemId = urlParams.get('item_id');
+
+  // ---------- LOAD ITEMS FOR A PROJECT ----------
+  function loadProjectItems(projectId, targetBody, isFrom) {
+
+    if (!projectId) {
+      const cols = isFrom ? 5 : 4;
+      $(targetBody).html(
+        `<tr class="empty-row"><td colspan="${cols}">Please select a project</td></tr>`
+      );
+      return;
+    }
+
+    let ajaxUrl = "/get-project-items/" + projectId + "/";
+    if (urlItemId) {
+      ajaxUrl += "?item_id=" + urlItemId;
+    }
+
+    $.ajax({
+      url: ajaxUrl,
+      type: "GET",
+      success: function (data) {
+
+        let html = "";
+
+        if (!data || data.length === 0) {
+
+          if (isFrom) {
+            html = `<tr class="empty-row"><td colspan="5">No items found in this project</td></tr>`;
+          } else {
+            if (urlItemId) {
+              html = `
+                <tr class="null-row">
+                  <td>1</td>
+                  <td class="text-left">⚠ Item not in destination (will be created on transfer)</td>
+                  <td>NULL</td>
+                  <td>NULL</td>
+                </tr>`;
+            } else {
+              html = `<tr class="empty-row"><td colspan="4">No items found in this project</td></tr>`;
+            }
+          }
+
+        } else {
+
+          data.forEach(function (item, idx) {
+
+            if (isFrom) {
+              html += `
+                <tr data-id="${item.id}" data-master="${item.item_master_id}">
+                  <td>${idx + 1}</td>
+                  <td class="text-left">
+                    ${item.item_name}
+                    <input type="hidden" name="item_id[]" value="${item.id}">
+                  </td>
+                  <td>${item.rate}</td>
+                  <td>
+                    <span class="badge-info">${item.qtysub} ${item.unit}</span>
+                  </td>
+                  <td>
+                    <input type="number"
+                           name="transfer_qty[]"
+                           class="qty-input"
+                           min="0"
+                           step="any"
+                           max="${item.qtysub}"
+                           value="0">
+                  </td>
+                </tr>`;
+            } else {
+              html += `
+                <tr data-id="${item.id}">
+                  <td>${idx + 1}</td>
+                  <td class="text-left">${item.item_name}</td>
+                  <td>${item.rate}</td>
+                  <td>
+                    <span class="badge-info">${item.qtysub} ${item.unit}</span>
+                  </td>
+                </tr>`;
+            }
+          });
+        }
+
+        $(targetBody).html(html);
+      },
+      error: function () {
+        const cols = isFrom ? 5 : 4;
+        $(targetBody).html(
+          `<tr class="empty-row"><td colspan="${cols}" style="color:red;">Failed to load items</td></tr>`
+        );
+      }
+    });
+  }
+
+  // ---------- CHANGE EVENTS ----------
+  $('#from_project').on('change', function () {
+    loadProjectItems(this.value, "#from_items_body", true);
+  });
+
+  $('#to_project').on('change', function () {
+    loadProjectItems(this.value, "#to_items_body", false);
+  });
+
+  // ---------- AUTO LOAD ----------
+  $(document).ready(function () {
+
+    const fromProject = $('#from_project').val();
+    const toProject   = $('#to_project').val();
+
+    const fromHasRows = $('#from_items_body tr[data-id]').length > 0;
+    const toHasRows   = $('#to_items_body tr[data-id]').length > 0 ||
+                        $('#to_items_body tr.null-row').length > 0;
+
+    if (fromProject && !fromHasRows) {
+      loadProjectItems(fromProject, "#from_items_body", true);
+    }
+
+    if (toProject && !toHasRows) {
+      loadProjectItems(toProject, "#to_items_body", false);
+    }
+  });
+
+  // ---------- FORM VALIDATION (FIXED) ----------
+  $('#transferForm').on('submit', function (e) {
+
+    const from = $('#from_project').val();
+    const to   = $('#to_project').val();
+
+    if (!from || !to) {
+      e.preventDefault();
+      alert("Please select both From and To project.");
+      return false;
+    }
+
+    if (from === to) {
+      e.preventDefault();
+      alert("From and To project cannot be the same.");
+      return false;
+    }
+
+    // check at least one valid transfer qty
+    let hasQty = false;
+
+    $('input[name="transfer_qty[]"]').each(function () {
+      if (parseFloat($(this).val() || 0) > 0) {
+        hasQty = true;
+        return false;
+      }
+    });
+
+    if (!hasQty) {
+      e.preventDefault();
+      alert("Please enter a transfer quantity greater than 0 for at least one item.");
+      return false;
+    }
+
+    return true;
+  });
+
+})();
+</script>
+
+{% endblock %}

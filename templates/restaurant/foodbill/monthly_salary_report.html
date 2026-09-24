@@ -1,0 +1,114 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Monthly Salary Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 11px; background-color: silver; padding: 20px; }
+    .card { background: #fff; border-radius: 6px; padding: 20px; max-width: 960px; margin: auto; box-shadow: 0 2px 6px rgba(0,0,0,.1); }
+    .logo img { height: 50px; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .label-box { background: #e2f0d9; padding: 4px 10px; font-weight: bold; font-size: 13px; border-radius: 4px; }
+    .sub-head { font-size: 11px; color: #555; margin-top: -18px; margin-bottom: 8px; line-height: 1.4; }
+    .table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+    .table th, .table td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+    .signature-section { margin-top: 30px; display: flex; justify-content: space-between; text-align: center; }
+    .signature-box { flex: 1; padding: 8px; }
+    .footer { display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-top: 20px; padding-top: 10px; border-top: 1px solid #ccc; flex-wrap: wrap; }
+    .print-btn { background: #1e3c98; color: white; padding: 5px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
+    @media print { .no-print { display: none !important; } body { background: white; padding: 0; } .card { box-shadow: none; border: none; margin: 0; padding: 0; } }
+  </style>
+</head>
+<body>
+<div class="card">
+  <!-- Header -->
+  <div class="card-header">
+    <div class="logo">
+      <img src="{% static '/images/BTP_logo_webp.webp' %}" alt="Company Logo">
+    </div>
+    <div style="text-align: right;">
+      <div class="label-box">Salary Generate Voucher</div>
+      <p style="font-size: 11px; margin-top: 4px;">Printing Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+    </div>
+  </div>
+  <br/>
+  <!-- Address -->
+  <div class="sub-head">
+    House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br>
+    +880191322203, 01993005558, 09639246230, 09639246231 <br>
+    md2bayid@gmail.com, thebtplimited@gmail.com, www.btplimited.com
+  </div>
+  <hr style="margin: 8px 0;">
+  <h2 style="font-size: 14px;"><strong>Project :</strong> {{ project_name }}</h2>
+  <h2 style="font-size: 14px;"><strong>Month :</strong> {{ month_name }}</h2>
+
+  {% for emp_type, data in employee_groups.items %}
+    <h2 class="text-lg font-semibold mb-2 mt-6">{{ emp_type|title }} Employees</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>#</th><th>Employee Name</th><th>Employee ID</th><th>Phone</th><th class="text-right">Salary (৳)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for emp in data.employees %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ emp.rda_emp_name }}</td>
+          <td>E-0{{ emp.id }}</td>
+          <td>{{ emp.rda_phone }}</td>
+          <td class="text-right">{{ emp.rda_salary|floatformat:2|intcomma }}</td>
+        </tr>
+        {% endfor %}
+        <tr class="font-bold bg-gray-200">
+          <td colspan="4" class="text-right">Total {{ emp_type|title }}</td>
+          <td class="text-right">৳ {{ data.total_salary|floatformat:2|intcomma }}</td>
+        </tr>
+      </tbody>
+    </table>
+  {% endfor %}
+
+  <!-- Grand total -->
+  <table class="table" style="margin-top:20px;">
+    <tr class="font-bold bg-gray-300">
+      <td class="text-right">Grand Total Salary</td>
+      <td class="text-right">৳ {{ grand_total_salary|floatformat:2|intcomma }}</td>
+    </tr>
+  </table>
+
+  <br/>
+  <div class="signature-section">
+    <div class="signature-box">Prepared by</div>
+    <div class="signature-box">Checked by</div>
+    <div class="signature-box">Approved by</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div>
+    {% if voucher and voucher.approval_salary_status == "Approved" %}
+      <span style="color: green; font-weight: bold;">✔ Approved</span>
+    {% else %}
+        {% if request.session.department == "admin" %}
+          <a href="{% url 'approve_salary_generate' project_id month_name %}"
+             style="background: #e2e8f0; padding: 4px 8px; border-radius: 4px; text-decoration: none;">
+             ⏳ Pending
+          </a>
+      {% else %}
+           ⏳ Pending
+      {% endif %}
+    {% endif %}
+    </div>
+    <div class="no-print">
+      <button onclick="window.location.href='{% url 'employee_details' %}'" class="back-btn">← Back to List</button>
+    </div>
+    &nbsp;&nbsp;
+    <div class="no-print">
+      <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

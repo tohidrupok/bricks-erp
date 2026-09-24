@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Activity Details - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+  }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+  {% include 'partials/mobile.html' %}
+  <div class="mt-[4.7rem] flex md:mt-0">
+    {% include 'partials/sidebar_list.html' %}
+    <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+      {% include 'partials/header.html' %}
+
+      <div class="bg-white shadow-md rounded-xl p-6 mt-10 text-sm">
+        <div class="flex justify-between items-center mb-5 no-print">
+          <div class="flex gap-2">
+            <a href="{% url 'activity_list' %}">
+              <button style="background-color:#84cc16" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-xs">🔙 Back</button>
+            </a>
+            <button onclick="location.reload()" style="background-color:#00008b" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded text-xs">🔄 Refresh</button>
+          </div>
+        </div>
+		   <div class="flex items-center justify-center min-h-screen bg-gray-100 px-4">
+			  <div class="bg-white rounded-xl shadow-lg p-8 max-w-md w-full">
+				<h1 class="text-xl font-semibold text-red-600 mb-4">⚠️ Confirm Deletion</h1>
+				<p class="mb-6 text-gray-700">Are you sure you want to delete the activity:  
+				  <span class="font-semibold text-black">"{{ activity }}"</span>?</p>
+
+				<form method="post" class="flex justify-between items-center">
+				  {% csrf_token %}
+				  <button type="submit" style="background-color:#00008b" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
+					✅ Yes, Delete
+				  </button>
+				  <a href="{% url 'activity_list'%}"  style="margin-left:0.5%;background-color:#84cc16;font-size:20px"
+					 class="text-gray-600 hover:text-blue-600 text-sm underline">
+					❌ Cancel
+				  </a>
+				</form>
+			  </div>
+			</div>
+		</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

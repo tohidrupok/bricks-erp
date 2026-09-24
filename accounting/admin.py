@@ -1,0 +1,23 @@
+from django.contrib import admin
+from .models import CapitalAccount,CashType, HeadOfAccount,CreditVoucher,DebitVoucher,JournalVoucher,ContraVoucher,LedgerEntry,ProjectBalanceTransfer,TransactionHistory,BalanceTransfer,LoanVoucher,OpenBlanceVoucher,BankStatementTransaction,AccountReconciliation,BalanceItem,BalanceSheetHead,MainChequeBook,MainCheque,ProjectProfitRecord
+
+admin.site.register(CashType)
+admin.site.register(HeadOfAccount)
+admin.site.register(CreditVoucher)
+admin.site.register(DebitVoucher)
+admin.site.register(JournalVoucher)
+admin.site.register(ContraVoucher)
+admin.site.register(LedgerEntry)
+admin.site.register(TransactionHistory)
+admin.site.register(BalanceTransfer)
+admin.site.register(LoanVoucher)
+admin.site.register(OpenBlanceVoucher)
+admin.site.register(BankStatementTransaction)
+admin.site.register(AccountReconciliation)
+admin.site.register(CapitalAccount)
+admin.site.register(BalanceItem)
+admin.site.register(BalanceSheetHead)
+admin.site.register(MainChequeBook)
+admin.site.register(MainCheque)
+admin.site.register(ProjectProfitRecord)
+admin.site.register(ProjectBalanceTransfer)

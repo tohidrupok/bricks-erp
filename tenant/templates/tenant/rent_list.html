@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Rent List - BM ERP{% endblock %}
+
+{% block content %} 
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] 
+            before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 
+            dark:before:from-darkmode-800 dark:before:to-darkmode-800 
+            before:fixed before:inset-0 before:z-[-1]">
+
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 
+                    rounded-[30px] bg-slate-100 px-4 pb-10 
+                    before:block before:h-px before:w-full before:content-[''] 
+                    dark:bg-darkmode-700 md:px-[22px]">
+            
+            <!-- BEGIN: Top Bar -->  
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+            <!-- Page Title -->
+            <div class="intro-y mt-10 p-6 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-800 dark:to-indigo-900 rounded-2xl shadow-xl flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    🏠 Rent List
+                </h2>
+                <a href="{% url 'rent_create' %}" 
+                class="inline-flex items-center bg-gradient-to-r from-blue-500 to-indigo-600 
+                        hover:from-blue-600 hover:to-indigo-700 text-black font-semibold 
+                        py-2 px-6 rounded-xl shadow-lg transition duration-300 transform hover:-translate-y-1 ml-4">
+                    🏠 Add New Rent
+                </a>
+            </div>
+
+            <div class="mt-6 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+
+                    <!-- Table -->
+                    <div class="intro-y box p-5 bg-white dark:bg-darkmode-600 shadow-lg rounded-lg">
+                        <div class="overflow-x-auto">
+                            <table class="table-auto w-full border-collapse border border-slate-300 dark:border-darkmode-400">
+                                <thead>
+                                    <tr class="bg-slate-200 dark:bg-darkmode-500 text-gray-700 dark:text-gray-100">
+                                        <th class="px-4 py-2 border">Project</th>
+                                        <th class="px-4 py-2 border">Flat</th>
+                                        <th class="px-4 py-2 border">Room</th>
+                                        <th class="px-4 py-2 border">Tenant</th>
+                                        <th class="px-4 py-2 border">Start</th>
+                                        <th class="px-4 py-2 border">End</th>
+                                        <th class="px-4 py-2 border">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for rent in rents %}
+                                    <tr class="text-center hover:bg-slate-100 dark:hover:bg-darkmode-700">
+                                        <td class="px-4 py-2 border">{{ rent.projectref }}</td>
+                                        <td class="px-4 py-2 border">{{ rent.room.flat }}</td>
+                                        <td class="px-4 py-2 border">{{ rent.room.room_name }}</td>
+                                        <td class="px-4 py-2 border">{{ rent.varatiya }}</td>
+                                        <td class="px-4 py-2 border">{{ rent.startmonths }}</td>
+                                        <td class="px-4 py-2 border">{{ rent.endmonths }}</td>
+                                        <td class="px-4 py-2 border">
+                                            {% if rent.status == "Active" %}
+                                                <span class="px-3 py-1 rounded-full bg-green-200 text-green-800 text-sm">Active</span>
+                                            {% elif rent.status == "Expired" %}
+                                                <span class="px-3 py-1 rounded-full bg-red-200 text-red-800 text-sm">Expired</span>
+                                            {% else %}
+                                                <span class="px-3 py-1 rounded-full bg-gray-200 text-gray-800 text-sm">{{ rent.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4 text-gray-500 dark:text-gray-300">
+                                            No rent records found.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- END: Table -->
+
+                </div>
+            </div>
+
+        <!-- END: Content -->
+        </div>
+    </div>
+</div>
+{% endblock %}

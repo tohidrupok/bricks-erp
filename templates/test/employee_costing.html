@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dynamic Employee Costing</title>
+    <style>
+        table, th, td { border: 1px solid black; border-collapse: collapse; padding: 6px; }
+        input { width: 120px; }
+    </style>
+</head>
+<body>
+
+<h2>Employee Costing Based on Project Duration</h2>
+
+<label>Project Duration (in months): </label>
+<input type="number" id="projectDuration" value="24" min="1" onchange="rebuildTable()" />
+
+<br><br>
+<label>Project Name: </label>
+<input type="text" id="projectName" placeholder="Enter project name" />
+<br><br>
+<form id="saveForm" method="POST">
+    {% csrf_token %}
+    <table id="costTable">
+        <thead>
+            <tr id="headerRow">
+                <th>Employee Name</th>
+                <th>First Month Salary</th>
+                <th>First Year Salary</th>
+                <!-- Dynamic increment/year salary pairs go here -->
+                <th>Total Salary</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+
+    <br>
+    <button type="button" onclick="addRow()">Add Employee</button>
+    <button type="button" onclick="submitData()">Save Employees</button>
+</form>
+
+<script>
+    function getYearsFromDuration() {
+        const months = parseInt(document.getElementById('projectDuration').value) || 12;
+        return Math.ceil(months / 12);
+    }
+
+    function rebuildTable() {
+        updateHeader();
+        const rows = document.querySelectorAll('#tableBody tr');
+        rows.forEach(row => {
+            rebuildRow(row);
+            calculateRow(row);
+        });
+    }
+
+    function updateHeader() {
+        const header = document.getElementById('headerRow');
+        while (header.children.length > 3) {
+            header.removeChild(header.children[3]);
+        }
+
+        const years = getYearsFromDuration();
+        for (let i = 2; i <= years; i++) {
+            const incTh = document.createElement('th');
+            incTh.textContent = `Year ${i} Increment`;
+            header.appendChild(incTh);
+
+            const salTh = document.createElement('th');
+            salTh.textContent = `Year ${i} Salary`;
+            header.appendChild(salTh);
+        }
+
+        const totalTh = document.createElement('th');
+        totalTh.textContent = "Total Salary";
+        header.appendChild(totalTh);
+
+        const actionTh = document.createElement('th');
+        actionTh.textContent = "Action";
+        header.appendChild(actionTh);
+    }
+
+    function rebuildRow(row) {
+        while (row.children.length > 3) {
+            row.removeChild(row.children[3]);
+        }
+
+        const years = getYearsFromDuration();
+
+        for (let i = 2; i <= years; i++) {
+            const incTd = document.createElement('td');
+            incTd.innerHTML = `<input type="number" class="increment" onchange="calculateRow(this.closest('tr'))" />`;
+            row.appendChild(incTd);
+
+            const salTd = document.createElement('td');
+            salTd.innerHTML = `<input type="number" class="yearSalary" readonly />`;
+            row.appendChild(salTd);
+        }
+
+        const totalTd = document.createElement('td');
+        totalTd.innerHTML = `<input type="number" class="totalSalary" readonly />`;
+        row.appendChild(totalTd);
+
+        const actionTd = document.createElement('td');
+        actionTd.innerHTML = `<button type="button" onclick="deleteRow(this)">Delete</button>`;
+        row.appendChild(actionTd);
+    }
+
+    function addRow() {
+        const tbody = document.getElementById('tableBody');
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td><input type="text" class="empName" /></td>
+            <td><input type="number" class="monthSalary" onchange="calculateRow(this.closest('tr'))" /></td>
+            <td><input type="number" class="firstYearSalary" readonly /></td>
+        `;
+
+        tbody.appendChild(row);
+        rebuildRow(row);
+    }
+
+    function deleteRow(btn) {
+        btn.closest('tr').remove();
+    }
+
+    function calculateRow(row) {
+        const monthSalary = parseFloat(row.querySelector('.monthSalary')?.value) || 0;
+        const years = getYearsFromDuration();
+
+        const firstYearSalary = monthSalary * 12;
+        row.querySelector('.firstYearSalary').value = firstYearSalary.toFixed(2);
+
+        let total = firstYearSalary;
+        let baseSalary = monthSalary;
+
+        const incrementInputs = row.querySelectorAll('.increment');
+        const yearSalaryInputs = row.querySelectorAll('.yearSalary');
+
+        for (let i = 0; i < incrementInputs.length; i++) {
+            const increment = parseFloat(incrementInputs[i].value) || 0;
+            baseSalary += increment;
+            const yearSalary = baseSalary * 12;
+            yearSalaryInputs[i].value = yearSalary.toFixed(2);
+            total += yearSalary;
+        }
+
+        row.querySelector('.totalSalary').value = total.toFixed(2);
+    }
+  
+    function submitData() {
+    const projectName = document.getElementById('projectName').value.trim();
+    const rows = document.querySelectorAll('#tableBody tr');
+    const employees = [];
+
+    rows.forEach(row => {
+        const name = row.querySelector('.empName')?.value;
+        const firstMonthSalary = parseFloat(row.querySelector('.monthSalary')?.value) || 0;
+        const projectDuration = parseInt(document.getElementById('projectDuration').value) || 12;
+        const totalSalary = parseFloat(row.querySelector('.totalSalary')?.value) || 0;
+
+        const yearlyData = [];
+        const incrementInputs = row.querySelectorAll('.increment');
+        const salaryInputs = row.querySelectorAll('.yearSalary');
+
+        for (let i = 0; i < incrementInputs.length; i++) {
+            const increment = parseFloat(incrementInputs[i].value) || 0;
+            const yearSalary = parseFloat(salaryInputs[i].value) || 0;
+            yearlyData.push({ year: i + 2, increment, salary: yearSalary });
+        }
+
+        if (name && firstMonthSalary) {
+            employees.push({
+                project_name: projectName,
+                employee_name: name,
+                first_month_salary: firstMonthSalary,
+                project_duration_months: projectDuration,
+                total_salary: totalSalary,
+                yearly_data: yearlyData
+            });
+        }
+    });
+
+    fetch("{% url 'save_employees' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({ employees: employees })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message || "Employees saved successfully!");
+        setTimeout(() => {
+                    window.location.href = "{% url 'first_level_list' %}";
+        }, 1000);
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Error saving employees.");
+    });
+    }
+
+    window.onload = function () {
+        updateHeader();
+        addRow();
+    };
+</script>
+
+</body>
+</html>

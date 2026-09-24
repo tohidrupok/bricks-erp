@@ -1,0 +1,437 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IOM List - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">IOM Applications</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{% url 'iom_apply' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Add IOM Apply</button>
+                        </a>
+                        <a href="{% url 'iom_list' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Refresh</button>
+                        </a> 
+						<a href="javascript:void(0);" onclick="openPopupSummary()">
+							<button
+								class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer
+								focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50
+								bg-primary border-primary text-white mr-2 shadow-md">
+								Employee IOM Summary
+							</button>
+						</a>
+                        <div class="mx-auto hidden text-slate-500 md:block">                             </div>
+            
+                        <div class="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">                           
+                            <div class="relative w-56 text-slate-500 mb-4">
+                                <input id="searchInput" type="text" placeholder="Search..." class="w-full p-2 text-sm border rounded-md shadow-sm focus:ring-4 focus:ring-primary" oninput="handleSearch()">
+                                <i class="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4">🔍</i>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- BEGIN: Property Owners List -->
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">						
+						<table class="w-full text-left border-separate border-spacing-y-[0px]">
+							<thead>
+								<tr>
+									<th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Employee</th>
+									<th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Start Date</th>
+									<th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">End Date</th>
+									<th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">check_in</th>
+									<th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">check_out</th>
+									{% if request.session.department == "admin" %}
+									<th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Reason</th>
+									 {% else %}
+									 {% endif %}
+									<th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Approved</th>
+									<th class="font-medium px-5 py-3 border-b text-center dark:border-darkmode-300">Actions</th>
+								</tr>
+							</thead>
+							<tbody id="tableBody">
+								{% for iom in ioms %}
+								<tr class="bg-white shadow-sm rounded-md hover:bg-gray-50 transition">
+									<td class="px-5 py-3 border-b">{{ iom.employee }}</td>
+									<td class="px-5 py-3 border-b">{{ iom.start_date }}</td>
+									<td class="px-5 py-3 border-b">{{ iom.end_date }}</td>
+									<td class="px-5 py-3 border-b">{{ iom.check_in }}</td>
+									<td class="px-5 py-3 border-b">{{ iom.check_out }}</td>
+									{% if request.session.department == "admin" %}
+									<td class="px-5 py-3 border-b">{{ iom.reason|truncatechars:50 }}</td>
+									 {% else %}
+									 {% endif %}
+									<td class="px-5 py-3 border-b">
+										{% if iom.approved %}
+											<span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">✔️ Approved</span>
+										{% else %}
+											<span class="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded">❌ Pending</span>
+										{% endif %}
+									</td>
+									<td class="px-5 py-3 border-b text-center">
+									    {% if iom.approved %}
+									    {% if request.session.department == "admin" %}
+									     <a href="{% url 'iom_approval' iom.pk %}" class="text-blue-600 hover:text-blue-800 font-medium">Approval</a> |
+										<a href="{% url 'iom_edit' iom.pk %}" class="text-blue-600 hover:text-blue-800 font-medium">✏️ Edit</a> |
+										<a href="{% url 'iom_delete' iom.pk %}" class="text-red-600 hover:text-red-800 font-medium"
+											onclick="return confirm('Are you sure you want to delete this iom record?');">🗑️ Delete</a>
+									    {% else %}
+									    <span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">✔️ Approved</span>
+									    {% endif %}
+										{% else %}
+										{% if request.session.department == "admin" %}
+									     <a href="{% url 'iom_approval' iom.pk %}" class="text-blue-600 hover:text-blue-800 font-medium">Approval</a> |
+										<a href="{% url 'iom_edit' iom.pk %}" class="text-blue-600 hover:text-blue-800 font-medium">✏️ Edit</a> |
+										<a href="{% url 'iom_delete' iom.pk %}" class="text-red-600 hover:text-red-800 font-medium"
+											onclick="return confirm('Are you sure you want to delete this iom record?');">🗑️ Delete</a>
+									    {% else %}
+									     <a href="{% url 'iom_approval' iom.pk %}" class="text-blue-600 hover:text-blue-800 font-medium">Approval</a> |
+										<a href="{% url 'iom_delete' iom.pk %}" class="text-red-600 hover:text-red-800 font-medium"
+											onclick="return confirm('Are you sure you want to delete this iom record?');">🗑️ Delete</a>
+									    {% endif %}
+										{% endif %}
+									</td>
+								</tr>
+								{% empty %}
+								<tr>
+									<td colspan="6" class="text-center py-4 text-gray-500">No iom records found.</td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+						<script>
+                            function handleSearch() {
+                                let searchValue = document.getElementById('searchInput').value.toLowerCase();
+                                let rows = document.querySelectorAll("#tableBody tr");
+                    
+                                rows.forEach(row => {
+                                    let columns = row.getElementsByTagName("td");
+                                    let rowText = "";
+                                    
+                                    // Combine text content of all columns in the row for searching
+                                    for (let i = 0; i < columns.length; i++) {
+                                        rowText += columns[i].textContent.toLowerCase(); // Get all text in row
+                                    }
+                    
+                                    // If search term is found in the row's combined text, show the row, else hide it
+                                    if (rowText.includes(searchValue)) {
+                                        row.style.display = ""; // Show row
+                                    } else {
+                                        row.style.display = "none"; // Hide row
+                                    }
+                                });
+                            }
+                        </script>
+					</div>
+                    
+                    <!-- END: Balance Transfer List -->
+					
+					<!-- Popup -->
+					<div id="popupsummary" style="display: none;">
+						<div class="popup-content">
+							<h3>IOM Summary</h3>
+							<form id="popup-form" onsubmit="return false;">
+								<!-- Employee Name Input -->
+								<label for="employee-select-summary" class="form-label">Employee Name:</label>
+								<select id="employee-select-summary" class="form-select" required>
+									<option value="">Select an Employee</option>
+									{% for employee in employees %}
+									<option value="{{ employee.id }}">{{ employee.rda_emp_name }}</option>
+									{% endfor %}
+								</select>							
+
+								<!-- Month Dropdown -->
+								<label for="month-select-summary" class="form-label mt-4">Select Month:</label>
+								<select id="month-select-summary" class="form-select" required>
+									<option value="">Select a Month</option>
+									<option value="01">January</option>
+									<option value="02">February</option>
+									<option value="03">March</option>
+									<option value="04">April</option>
+									<option value="05">May</option>
+									<option value="06">June</option>
+									<option value="07">July</option>
+									<option value="08">August</option>
+									<option value="09">September</option>
+									<option value="10">October</option>
+									<option value="11">November</option>
+									<option value="12">December</option>
+								</select>
+								
+								<!-- Year Dropdown -->
+								<label for="year-select-summary" class="form-label mt-4">Select Year:</label>
+								<select id="year-select-summary" class="form-select" required>
+									<option value="">Select a Year</option>
+								</select>
+								
+								<div class="popup-actions mt-4">
+									<!-- Cancel Button -->
+									<button type="button" class="cancel-btn" onclick="closePopupSummary()">Cancel</button>
+
+									<!-- Submit Button -->
+									<button type="button" class="submit-btn" onclick="submitPopupSummary()">Submit</button>
+								</div>
+							</form>
+						</div>
+					</div>
+
+					<style>
+						#popupsummary{
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background: rgba(0, 0, 0, 0.5);
+                            display: none;
+                            justify-content: center;
+                            align-items: center;
+                            z-index: 1000;
+                        }
+                    
+                        .popup-content {
+                            background: white;
+                            padding: 30px;
+                            border-radius: 10px;
+                            width: 400px;
+                            text-align: center;
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        }
+                    
+                        .popup-content h3 {
+                            margin-bottom: 20px;
+                            font-size: 20px;
+                            font-weight: bold;
+                            color: #333;
+                        }
+                    
+                        .form-label {
+                            display: block;
+                            margin-bottom: 8px;
+                            text-align: left;
+                            font-size: 14px;
+                            color: #555;
+                        }
+                    
+                        .form-select {
+                            width: 100%;
+                            padding: 10px;
+                            margin-bottom: 15px;
+                            border: 1px solid #ddd;
+                            border-radius: 5px;
+                            font-size: 14px;
+                            transition: border 0.3s;
+                        }
+                    
+                        .form-select:focus {
+                            border-color: #4caf50;
+                            outline: none;
+                        }
+                    
+                        .popup-actions {
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                    
+                        .popup-actions button {
+                            padding: 10px 20px;
+                            border: none;
+                            border-radius: 5px;
+                            font-size: 14px;
+                            cursor: pointer;
+                            transition: background 0.3s;
+                            width: 45%;
+                        }
+                    
+                        .cancel-btn {
+                            background-color: #f44336;
+                            color: white;
+                        }
+                    
+                        .submit-btn {
+                            background-color: #4caf50;
+                            color: white;
+                        }
+                    
+                        .cancel-btn:hover {
+                            background-color: #d32f2f;
+                        }
+                    
+                        .submit-btn:hover {
+                            background-color: #45a049;
+                        }
+                    
+                        @media (max-width: 600px) {
+                            .popup-content {
+                                width: 90%;
+                            }
+                        }
+                    </style>
+
+					<script>
+						// Populate years dropdown on page load
+						document.addEventListener('DOMContentLoaded', function() {
+							const yearSelect = document.getElementById('year-select-summary');
+							const currentYear = new Date().getFullYear();
+							const startYear = currentYear - 5;
+							const endYear = currentYear + 5;
+
+							for (let year = startYear; year <= endYear; year++) {
+								const option = document.createElement('option');
+								option.value = year;
+								option.textContent = year;
+								if (year === currentYear) {
+									option.selected = true;  // Default select current year
+								}
+								yearSelect.appendChild(option);
+							}
+						});
+
+						function openPopupSummary() {
+							document.getElementById('popupsummary').style.display = 'flex';
+						}
+
+						function closePopupSummary() {
+							document.getElementById('popupsummary').style.display = 'none';
+						}
+
+						function submitPopupSummary() {
+							const employee_id = document.getElementById('employee-select-summary').value;
+							const year_id = document.getElementById('year-select-summary').value;
+							const month_id = document.getElementById('month-select-summary').value;
+
+							if (!employee_id) {
+								alert('Please select an employee!');
+								return;
+							}
+							if (!year_id) {
+								alert('Please select a year!');
+								return;
+							}
+							if (!month_id) {
+								alert('Please select a month!');
+								return;
+							}
+
+							const url = "{% url 'employee_leave_summary' %}?employee_id=" + encodeURIComponent(employee_id) + 
+										"&year_id=" + encodeURIComponent(year_id) + 
+										"&month_id=" + encodeURIComponent(month_id);
+
+							window.open(url, '_blank');
+							closePopupSummary();
+						}
+					</script>
+                    <!-- End of Popup for selecting Project for Attendance Summary -->
+					
+                    <!-- BEGIN: Pagination -->
+                    <div class="intro-y col-span-12 flex flex-wrap items-center sm:flex-row sm:flex-nowrap">
+                        <!-- Showing entries text -->
+                        <div class="mx-auto hidden text-slate-500 md:block">
+                            Showing {{ tenants.start_index }} to {{ tenants.end_index }} of {{ tenants.paginator.count }} entries
+                        </div>
+                    
+                        <!-- Pagination navigation -->
+                        <nav class="w-full sm:mr-auto sm:w-auto">
+                            <ul class="flex w-full mr-0 sm:mr-auto sm:w-auto">
+                                <!-- Previous Page -->
+                                {% if tenants.has_previous %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <a href="?page={{ tenants.previous_page_number }}&page_size={{ tenants.paginator.per_page }}" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer">
+                                            <i class="chevrons-left h-4 w-4"></i> <!-- Left Chevron icon -->
+                                            Previous
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <span class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-not-allowed">
+                                            <i class="chevrons-left h-4 w-4"></i>
+                                            Previous
+                                        </span>
+                                    </li>
+                                {% endif %}
+                    
+                                <!-- Page Numbers -->
+                                {% for num in tenants.paginator.page_range %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        {% if num == tenants.number %}
+                                            <a href="#" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer bg-primary text-white">{{ num }}</a>
+                                        {% else %}
+                                            <a href="?page={{ num }}&page_size={{ tenants.paginator.per_page }}" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer">{{ num }}</a>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                    
+                                <!-- Next Page -->
+                                {% if tenants.has_next %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <a href="?page={{ tenants.next_page_number }}&page_size={{ tenants.paginator.per_page }}" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer">
+                                            Next
+                                            <i class="chevron-right h-4 w-4"></i> <!-- Right Chevron icon -->
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <span class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-not-allowed">
+                                            Next
+                                            <i class="chevron-right h-4 w-4"></i>
+                                        </span>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    
+                        <!-- Page Size Selector -->
+                        <form method="get" action="" class="inline-block">
+                            <select name="page_size" onchange="this.form.submit()" class="transition duration-200 ease-in-out text-sm border-slate-200 shadow-sm rounded-md py-2 px-3 pr-8 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+                                <option value="10" {% if tenants.paginator.per_page == 10 %}selected{% endif %}>10</option>
+                                <option value="25" {% if tenants.paginator.per_page == 25 %}selected{% endif %}>25</option>
+                                <option value="50" {% if tenants.paginator.per_page == 50 %}selected{% endif %}>50</option>
+                            </select>
+                        </form>
+                    </div>
+                    
+                    <!-- END: Pagination -->
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

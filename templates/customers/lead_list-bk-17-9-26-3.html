@@ -1,0 +1,410 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM - Lead Accounts | Bricks Holdings Limited</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', system-ui, sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased">
+
+<div class="flex min-h-screen">
+
+    <!-- ============ MAIN ============ -->
+    <div class="flex-1 flex flex-col">
+
+        <!-- Topbar -->
+        <header class="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center justify-between shadow-sm">
+            <div class="flex items-center space-x-6">
+                <!-- Logo / Brand -->
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">BE</div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="hidden lg:flex items-center space-x-1 text-xs font-semibold text-slate-600">
+                    <a href="{% url 'crm_dashboard' %}" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-house"></i><span>Home</span></a>
+                    <a href="{% url 'crm_dashboard' %}" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-chart-pie"></i><span>CRM</span></a>
+                    <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-gear"></i><span>Configuration</span></a>
+                    <a href="{% url 'lead_list' %}" class="flex items-center space-x-1 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg"><i class="fa-solid fa-user-plus"></i><span>Lead</span></a>
+                    <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-headset"></i><span>Call Center</span></a>
+                    <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-car"></i><span>Task/Visit</span></a>
+                    <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-building"></i><span>Property</span></a>
+                    <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-chart-line"></i><span>Reports</span></a>
+                    <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-gauge"></i><span>KPI</span></a>
+                </nav>
+            </div>
+
+            <!-- Right Search & User Settings -->
+            <div class="flex items-center space-x-3">
+                <div class="relative hidden sm:block">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-search text-xs"></i>
+                    </span>
+                    <input type="text" placeholder="Search Metrics..." class="pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48">
+                </div>
+                <button class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"><i class="fa-solid fa-gear text-xs"></i></button>
+                <button class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"><i class="fa-solid fa-bell text-xs"></i></button>
+                <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">{{ request.user.username|slice:":1"|upper|default:"U" }}</div>
+
+                <!-- Logout Button -->
+                <form action="{% url 'logout' %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" title="Logout" class="w-8 h-8 rounded-full bg-rose-50 hover:bg-rose-100 flex items-center justify-center text-rose-600 transition">
+                        <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        <main class="p-6">
+
+            <!-- Top Action Navigation Bar -->
+            <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl shadow-sm mb-6 border border-slate-200">
+                <form method="GET" class="w-full md:w-80">
+                    {% if show_junk %}<input type="hidden" name="view" value="junk">{% endif %}
+                    <div class="relative w-full">
+                        <input type="text" name="q" value="{{ search_query }}" placeholder="Search by Name, Mobile, or Address"
+                               class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-xl text-xs bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-search text-xs"></i>
+                        </span>
+                    </div>
+                </form>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" onclick="toggleModal('leadAddModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold shadow-sm transition">
+                        + New Lead
+                    </button>
+                    <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-2 rounded-lg text-xs font-semibold shadow-sm transition">Call Assign</button>
+                    <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-2 rounded-lg text-xs font-semibold shadow-sm transition">Bulk Import</button>
+                    <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-2 rounded-lg text-xs font-semibold shadow-sm transition">Send SMS</button>
+
+                    <form id="convertForm" method="POST" action="{% url 'convert_to_customer' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-2 rounded-lg text-xs font-semibold shadow-sm transition">
+                            + Convert To Customer
+                        </button>
+                    </form>
+
+                    <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-2 rounded-lg text-xs font-semibold shadow-sm transition">Transfer</button>
+                    <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-2 rounded-lg text-xs font-semibold shadow-sm transition">Wish SMS</button>
+
+                    <a href="{% if show_junk %}{% url 'lead_list' %}{% else %}?view=junk{% endif %}"
+                       class="{% if show_junk %}bg-rose-600 hover:bg-rose-700{% else %}bg-slate-800 hover:bg-slate-900{% endif %} text-white px-3 py-2 rounded-lg text-xs font-semibold shadow-sm transition">
+                        {% if show_junk %}&larr; Back to Active{% else %}Junk{% endif %}
+                    </a>
+                </div>
+            </div>
+
+            {% if messages %}
+            <div class="mb-4 space-y-2">
+                {% for message in messages %}
+                <div class="px-4 py-2 rounded-lg text-xs font-semibold {% if message.tags == 'success' %}bg-emerald-50 text-emerald-700 border border-emerald-200{% else %}bg-amber-50 text-amber-700 border border-amber-200{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Lead Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <form id="bulkForm">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead class="bg-slate-900 text-white uppercase text-[11px] tracking-wider">
+                                <tr>
+                                    <th class="p-3 text-center border-r border-slate-800 w-12 font-bold">SL</th>
+                                    <th class="p-3 text-center border-r border-slate-800 w-10">
+                                        <input type="checkbox" id="selectAll" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                    </th>
+                                    <th class="p-3 border-r border-slate-800 font-bold">Name</th>
+                                    <th class="p-3 border-r border-slate-800 font-bold">Mobile</th>
+                                    <th class="p-3 border-r border-slate-800 font-bold">SR/Officer</th>
+                                    <th class="p-3 border-r border-slate-800 font-bold">CR</th>
+                                    <th class="p-3 border-r border-slate-800 font-bold">Last Activity</th>
+                                    <th class="p-3 border-r border-slate-800 font-bold">Next Activity</th>
+                                    <th class="p-3 text-center font-bold">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-slate-700">
+                                {% for lead in leads %}
+                                <tr class="hover:bg-slate-50/80 transition">
+                                    <td class="p-3 text-center font-medium text-slate-500">{{ forloop.counter }}</td>
+                                    <td class="p-3 text-center">
+                                        <input type="checkbox" name="selected_leads" value="{{ lead.id }}" class="lead-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                    </td>
+                                    <td class="p-3 leading-relaxed">
+                                        <div class="text-indigo-600 font-bold">ID: {{ lead.lead_code }}</div>
+                                        <div class="font-semibold text-slate-900">Name: {{ lead.customer.customer_name }}</div>
+                                        <div class="text-slate-500 text-[11px]">Address: {{ lead.customer.address|default:"-" }}</div>
+                                        <div class="text-indigo-500 text-[11px]">Project: {{ lead.project_name|default:"-" }}</div>
+                                        <div class="text-slate-400 text-[11px]">Source: {{ lead.customer.lead_source|default:"-" }}</div>
+                                    </td>
+                                    <td class="p-3 font-semibold text-slate-800 whitespace-nowrap">{{ lead.customer.contact_no }}</td>
+                                    <td class="p-3 font-medium text-slate-700 whitespace-nowrap">{{ lead.customer.assign_to_user|default:"Admin" }}</td>
+                                    <td class="p-3 text-slate-500 whitespace-nowrap">{{ lead.cr|default:"-" }}</td>
+                                    <td class="p-3 leading-relaxed min-w-[160px]">
+                                        {% if lead.last_activity %}
+                                            <div class="font-semibold text-slate-800">{{ lead.last_activity.get_activity_type_display }}</div>
+                                            <div class="text-[11px] text-slate-600">Date: {{ lead.last_activity.create_date|date:"d-m-Y" }}</div>
+                                            <div class="text-[11px] text-slate-600">Status: {{ lead.last_activity.communication_status|default:lead.last_activity.task_status|default:"-" }}</div>
+                                            <div class="text-slate-500 italic text-[11px] truncate max-w-xs">Comment: {{ lead.last_activity.followup_note|default:lead.last_activity.comment|default:"-" }}</div>
+                                        {% else %}
+                                            <span class="text-slate-400">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="p-3 leading-relaxed min-w-[140px]">
+                                        {% if lead.next_activity and lead.next_activity.next_followup_date %}
+                                            <div class="font-semibold text-slate-800">{{ lead.next_activity.get_next_activity_type_display }}</div>
+                                            <div class="text-[11px] text-slate-600">Date: {{ lead.next_activity.next_followup_date|date:"d-m-Y" }}</div>
+                                        {% else %}
+                                            <span class="text-slate-400">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="p-3 text-center whitespace-nowrap">
+                                        <div class="flex items-center justify-center space-x-1">
+                                            <span class="px-2 py-1 rounded-full text-[10px] font-bold
+                                                {% if lead.stage == 'Sold' %}bg-emerald-600 text-white
+                                                {% elif lead.stage == 'Junk' %}bg-rose-500 text-white
+                                                {% elif lead.stage == 'Booked' %}bg-slate-900 text-white
+                                                {% else %}bg-slate-200 text-slate-700{% endif %}">
+                                                {{ lead.stage }}
+                                            </span>
+                                            <button type="button" onclick="openActivityModal('{{ lead.id }}')" title="Edit Activity"
+                                                    class="p-1.5 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition shadow-sm">✎</button>
+                                            <button type="button" class="open-lead-modal p-2.5 bg-sky-100 text-sky-600 rounded-full hover:bg-sky-200 transition shadow-sm" data-lead-id="{{ lead.id }}" title="Call">
+                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                            </button>
+                                            <a href="https://wa.me/{{ lead.customer.contact_no }}" target="_blank" title="WhatsApp"
+                                               class="p-1.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition shadow-sm">💬</a>
+                                            <a href="{% url 'lead_delete' lead.id %}" onclick="return confirm('Delete this lead?');" title="Delete"
+                                               class="p-1.5 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition shadow-sm">🗑</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="9" class="p-8 text-center text-slate-400">No lead entries found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- ================= LEAD ADD MODAL ================= -->
+<div id="leadAddModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-slate-100 flex flex-col">
+        <div class="flex justify-between items-center px-6 py-4 bg-slate-50 border-b border-slate-200">
+            <h3 class="text-base font-bold text-slate-800">Lead Accounts</h3>
+            <button type="button" onclick="toggleModal('leadAddModal')" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition text-xl font-bold">&times;</button>
+        </div>
+
+        <form method="POST" action="{% url 'lead_create' %}" class="p-6 space-y-5">
+            {% csrf_token %}
+            <div class="space-y-3">
+                <div class="bg-indigo-50 text-indigo-900 font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider border border-indigo-100">Basic Info</div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3.5 bg-slate-50/60 p-4 rounded-xl border border-slate-200">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Date</label>
+                        <input type="date" name="date" value="{% now 'Y-m-d' %}" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Lead Code</label>
+                        <input type="text" value="{{ next_lead_code }}" readonly
+                               class="w-full border border-slate-200 rounded-lg p-2 text-xs bg-slate-100 text-slate-500 cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Name <span class="text-rose-500">*</span></label>
+                        <input type="text" name="name" required placeholder="Name" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Phone/Mobile <span class="text-rose-500">*</span></label>
+                        <div class="flex shadow-sm">
+                            <span class="bg-slate-100 border border-r-0 border-slate-300 rounded-l-lg px-2 py-1.5 text-xs flex items-center text-slate-600">🇧🇩 (+880)</span>
+                            <input type="text" name="phone" required placeholder="Enter phone number" class="w-full border border-slate-300 rounded-r-lg p-2 text-xs bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Secondary Number</label>
+                        <input type="text" name="secondary_phone" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Assign User/SR</label>
+                        <input type="text" name="assign_user" value="Admin" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">If CR</label>
+                        <input type="text" name="cr" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Lead Stages</label>
+                        <select name="lead_stage" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="">Select Option</option>
+                            {% for value, label in stage_choices %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <details class="group bg-slate-50/60 rounded-xl overflow-hidden border border-slate-200" open>
+                <summary class="flex justify-between items-center bg-indigo-50 text-indigo-900 font-bold px-4 py-2.5 cursor-pointer text-xs uppercase tracking-wider">
+                    <span>Lead Details</span><span class="transition group-open:rotate-180">▼</span>
+                </summary>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3.5 p-4">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Lead Source</label>
+                        <select name="lead_source" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                            <option value="">Select Source</option>
+                            {% for source in lead_sources %}<option value="{{ source }}">{{ source }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Interested Project</label>
+                        <select name="interested_project" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                            <option value="">Select Interested Project</option>
+                            {% for project in projects %}<option value="{{ project.id }}">{{ project }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Lead Category</label>
+                        <select name="lead_category" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                            <option value="">Select Category</option>
+                            {% for category in lead_categories %}<option value="{{ category }}">{{ category }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Campaign</label>
+                        <select name="campaign" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                            <option value="">Select Campaign</option>
+                            {% for campaign in campaigns %}<option value="{{ campaign.id }}">{{ campaign.name }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </details>
+
+            <details class="group bg-slate-50/60 rounded-xl overflow-hidden border border-slate-200" open>
+                <summary class="flex justify-between items-center bg-indigo-50 text-indigo-900 font-bold px-4 py-2.5 cursor-pointer text-xs uppercase tracking-wider">
+                    <span>Personal Info</span><span class="transition group-open:rotate-180">▼</span>
+                </summary>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 p-4">
+                    <div><label class="text-xs font-semibold text-slate-600 block mb-1">Organization</label>
+                        <input type="text" name="organization" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none"></div>
+                    <div><label class="text-xs font-semibold text-slate-600 block mb-1">Designation</label>
+                        <input type="text" name="designation" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none"></div>
+                    <div><label class="text-xs font-semibold text-slate-600 block mb-1">Birth Date</label>
+                        <input type="date" name="birth_date" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none"></div>
+                    <div><label class="text-xs font-semibold text-slate-600 block mb-1">Anniversary Date</label>
+                        <input type="date" name="anniversary_date" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none"></div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Profession</label>
+                        <select name="profession" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none">
+                            <option value="">Select Profession</option>
+                            {% for profession in professions %}<option value="{{ profession }}">{{ profession }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div><label class="text-xs font-semibold text-slate-600 block mb-1">Address</label>
+                        <input type="text" name="address" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none"></div>
+                    <div class="md:col-span-3"><label class="text-xs font-semibold text-slate-600 block mb-1">Email</label>
+                        <input type="email" name="email" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white shadow-sm outline-none"></div>
+                </div>
+            </details>
+
+            <div class="flex justify-end space-x-3 pt-4 border-t border-slate-200">
+                <button type="button" onclick="toggleModal('leadAddModal')" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition">Close</button>
+                <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 transition">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="activityModalContainer"></div>
+
+<!-- JavaScript to handle modal and selection interactions -->
+<script>
+function toggleModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.toggle('hidden');
+        modal.classList.toggle('flex');
+    }
+}
+
+// Master Checkbox Toggle
+const selectAllCheckbox = document.getElementById('selectAll');
+if (selectAllCheckbox) {
+    selectAllCheckbox.addEventListener('change', function() {
+        document.querySelectorAll('.lead-checkbox').forEach(cb => cb.checked = this.checked);
+    });
+}
+
+function openActivityModal(leadId) {
+    fetch(`/leads/${leadId}/activity/`)
+        .then(response => response.text())
+        .then(html => { document.getElementById('activityModalContainer').innerHTML = html; })
+        .catch(error => console.error('Error loading activity modal:', error));
+}
+
+// Global click event listener for dynamic phone call / modal triggers
+document.addEventListener('click', function(event) {
+    const trigger = event.target.closest('.open-lead-modal');
+    if (!trigger) return;
+
+    const leadId = trigger.getAttribute('data-lead-id');
+
+    fetch(`/lead-modal/${leadId}/`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('activityModalContainer').innerHTML = html;
+        })
+        .catch(error => console.error('Error loading modal:', error));
+});
+
+/* ============================================================
+   ACTIVITY MODAL — Followup vs Task/Visit toggle
+   These live HERE (in the parent page), not inside the modal
+   fragment, because the modal is injected via innerHTML and
+   <script> tags inside injected HTML never execute. Using
+   event delegation on `document` means this works no matter
+   how many times the modal fragment gets swapped in.
+   ============================================================ */
+document.addEventListener('change', function (e) {
+    if (e.target.name === 'activity_type') {
+        toggleActivitySection(e.target.value, 'followupSection', 'taskSection');
+    }
+    if (e.target.name === 'next_activity_type') {
+        toggleActivitySection(e.target.value, 'nextFollowupSection', 'nextTaskSection');
+    }
+});
+
+function toggleActivitySection(value, followupId, taskId) {
+    const followupEl = document.getElementById(followupId);
+    const taskEl = document.getElementById(taskId);
+    if (!followupEl || !taskEl) return; // modal not currently open
+
+    if (value === 'followup') {
+        followupEl.classList.remove('hidden');
+        taskEl.classList.add('hidden');
+    } else {
+        followupEl.classList.add('hidden');
+        taskEl.classList.remove('hidden');
+    }
+}
+</script>
+
+</body>
+</html>

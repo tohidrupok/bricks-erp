@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Project Balance Transfer Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+
+                <h2 class="intro-y mt-10 text-lg font-medium">Add Project-to-Project Balance Transfer</h2>
+                
+                {% if messages %}
+                  {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show my-3" role="alert" style="text-align:center;font-size:18px;background-color:red;color:#FFFFFF; height:50px; line-height: 50px;">
+                      {{ message }}
+                    </div>
+                  {% endfor %}
+                {% endif %}
+
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                        <form method="POST" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                          {% csrf_token %}
+                          
+                           <!-- Transfer Date -->
+                           <div class="mb-4">
+                              <label for="id_transfer_date" class="font-medium text-lg text-gray-800">Transfer Date</label>
+                              <input type="date" id="id_transfer_date" name="transfer_date"
+                                     class="w-full text-sm border-slate-200 shadow-sm rounded-md p-2 border"
+                                     value="{% if form.transfer_date.value %}{{ form.transfer_date.value|date:'Y-m-d' }}{% else %}{{ today|date:'Y-m-d' }}{% endif %}">
+                              {% for error in form.transfer_date.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                              {% endfor %}
+                           </div>
+
+                           <!-- Source Project & Source Cash Type Grid -->
+                           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                               <!-- Source Project -->
+                               <div class="mb-4">
+                                   <label for="id_source_project" class="font-medium text-lg text-gray-800">Source Project (Debit)</label>
+                                   <select id="id_source_project" name="source_project" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                       <option value="">-- Select Source Project --</option>
+                                       {% for choice in form.source_project.field.choices %}
+                                           {% if choice.0 %}
+                                               <option value="{{ choice.0 }}" {% if choice.0|stringformat:"s" == form.source_project.value|stringformat:"s" %}selected{% endif %}>{{ choice.1 }}</option>
+                                           {% endif %}
+                                       {% endfor %}
+                                   </select>
+                                   {% for error in form.source_project.errors %}
+                                       <p class="text-red-600 text-sm">{{ error }}</p>
+                                   {% endfor %}
+                               </div>
+
+                               <!-- Source Cash/Bank Type -->
+                               <div class="mb-4">
+                                   <label for="id_source_cash_type" class="font-medium text-lg text-gray-800">Source Cash/Bank Type</label>
+                                   <select id="id_source_cash_type" name="source_cash_type" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                       <option value="">-- Select Source Cash Type --</option>
+                                       {% for choice in form.source_cash_type.field.choices %}
+                                           {% if choice.0 %}
+                                               <option value="{{ choice.0 }}" {% if choice.0|stringformat:"s" == form.source_cash_type.value|stringformat:"s" %}selected{% endif %}>{{ choice.1 }}</option>
+                                           {% endif %}
+                                       {% endfor %}
+                                   </select>
+                                   {% for error in form.source_cash_type.errors %}
+                                       <p class="text-red-600 text-sm">{{ error }}</p>
+                                   {% endfor %}
+                               </div>
+                           </div>
+
+                           <!-- Destination Project & Destination Cash Type Grid -->
+                           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                               <!-- Destination Project -->
+                               <div class="mb-4">
+                                   <label for="id_destination_project" class="font-medium text-lg text-gray-800">Destination Project (Credit)</label>
+                                   <select id="id_destination_project" name="destination_project" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                       <option value="">-- Select Destination Project --</option>
+                                       {% for choice in form.destination_project.field.choices %}
+                                           {% if choice.0 %}
+                                               <option value="{{ choice.0 }}" {% if choice.0|stringformat:"s" == form.destination_project.value|stringformat:"s" %}selected{% endif %}>{{ choice.1 }}</option>
+                                           {% endif %}
+                                       {% endfor %}
+                                   </select>
+                                   {% for error in form.destination_project.errors %}
+                                       <p class="text-red-600 text-sm">{{ error }}</p>
+                                   {% endfor %}
+                               </div>
+
+                               <!-- Destination Cash/Bank Type -->
+                               <div class="mb-4">
+                                   <label for="id_destination_cash_type" class="font-medium text-lg text-gray-800">Destination Cash/Bank Type</label>
+                                   <select id="id_destination_cash_type" name="destination_cash_type" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                       <option value="">-- Select Dest Cash Type --</option>
+                                       {% for choice in form.destination_cash_type.field.choices %}
+                                           {% if choice.0 %}
+                                               <option value="{{ choice.0 }}" {% if choice.0|stringformat:"s" == form.destination_cash_type.value|stringformat:"s" %}selected{% endif %}>{{ choice.1 }}</option>
+                                           {% endif %}
+                                       {% endfor %}
+                                   </select>
+                                   {% for error in form.destination_cash_type.errors %}
+                                       <p class="text-red-600 text-sm">{{ error }}</p>
+                                   {% endfor %}
+                               </div>
+                           </div>
+
+                           <!-- Cheque Number Field (Dynamically loaded when bank/cheque-based source cash is selected) -->
+                           <div id="chequeNumberField" class="mb-4 hidden">
+                              <label for="cheque_number" class="font-medium text-lg text-gray-800">Cheque Number</label>
+                              <select id="cheque_number" name="cheque_number" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                <option value="">-- Select Cheque --</option>
+                              </select>
+                           </div>
+
+                           <!-- Transfer Amount -->
+                           <div class="mb-4">
+                              <label for="id_transfer_amount" class="font-medium text-lg text-gray-800">Transfer Amount</label>
+                              <input type="number" step="0.01" id="id_transfer_amount" name="transfer_amount"
+                                     class="w-full text-sm border border-slate-200 shadow-sm rounded-md p-2"
+                                     placeholder="Enter Transfer Amount"
+                                     value="{{ form.transfer_amount.value|default_if_none:'' }}">
+                              {% for error in form.transfer_amount.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                              {% endfor %}
+                           </div>
+                          
+                           <!-- Carrier -->
+                           <div class="mb-4">
+                               <label for="id_carrier" class="font-medium text-lg text-gray-800">Carrier</label>
+                               <input type="text" id="id_carrier" name="carrier"
+                                      class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                      placeholder="Enter Carrier Name"
+                                      value="{{ form.carrier.value|default_if_none:'' }}">
+                               {% for error in form.carrier.errors %}
+                                   <p class="text-red-600 text-sm">{{ error }}</p>
+                               {% endfor %}
+                           </div>
+                          
+                           <!-- Note -->
+                           <div class="mb-4">
+                              <label for="id_note" class="font-medium text-lg text-gray-800">Note</label>
+                              <textarea id="id_note" name="note" rows="3"
+                                      class="w-full text-sm border border-slate-200 shadow-sm rounded-md p-2"
+                                      placeholder="Enter Note">{{ form.note.value|default_if_none:'' }}</textarea>
+                              {% for error in form.note.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                              {% endfor %}
+                           </div>
+                          
+                           <!-- Submit & Back Buttons -->
+                           <div class="text-center mt-6">
+                              <button type="submit" style="background-color:#1e3c98" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md">
+                                Save Transfer
+                              </button>
+                              <a href="{% url 'project_transfer_list' %}" style="margin-left:0.5%;background-color:#1e3c98" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md ml-2">
+                                Back to List
+                              </a>
+                           </div>
+                        </form>
+
+                        <!-- JS for Cheque Loading & Toggle -->
+                        <script>
+                            function toggleChequeField() {
+                                const cashTypeSelect = document.getElementById('id_source_cash_type');
+                                const chequeField = document.getElementById('chequeNumberField');
+                                const selectedValue = cashTypeSelect.value;
+                                
+                                // Assuming '1' represents Cash or non-cheque accounts, adjust condition as per your database ID setup
+                                if (selectedValue === '1' || !selectedValue) {
+                                    chequeField.classList.add('hidden');
+                                } else {
+                                    chequeField.classList.remove('hidden');
+                                }
+                            }
+
+                            document.addEventListener("DOMContentLoaded", function() {
+                                toggleChequeField();
+                                const cashTypeSelect = document.getElementById("id_source_cash_type");
+                                const chequeSelect = document.getElementById("cheque_number");
+                            
+                                cashTypeSelect.addEventListener("change", function() {
+                                    toggleChequeField();
+                                    const cashTypeId = this.value;
+                                    chequeSelect.innerHTML = '<option value="">Loading...</option>';
+                                
+                                    if (cashTypeId && cashTypeId !== '1') {
+                                        fetch(`/dashboard/get-cheques/${cashTypeId}/`)
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                chequeSelect.innerHTML = '<option value="">-- Select Cheque --</option>';
+                                
+                                                if (data.length === 0) {
+                                                    chequeSelect.innerHTML = '<option value="">No unused cheques available</option>';
+                                                } else {
+                                                    data.sort((a, b) => {
+                                                        const numA = parseInt(a.cheque_number, 10);
+                                                        const numB = parseInt(b.cheque_number, 10);
+                                                        return numA - numB;
+                                                    });
+                                
+                                                    data.forEach(cheque => {
+                                                        const option = document.createElement("option");
+                                                        option.value = cheque.id;
+                                                        option.textContent = cheque.cheque_number;
+                                                        chequeSelect.appendChild(option);
+                                                    });
+                                                }
+                                            })
+                                            .catch(error => {
+                                                chequeSelect.innerHTML = '<option value="">Error loading cheques</option>';
+                                                console.error(error);
+                                            });
+                                    } else {
+                                        chequeSelect.innerHTML = '<option value="">-- Select Cheque --</option>';
+                                    }
+                                });
+                            });
+                        </script>
+                        <br>
+                    </div>
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

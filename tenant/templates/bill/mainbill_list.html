@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="mbill-page-wrapper">
+
+  <!-- Sticky Header -->
+  <div class="sticky-header">
+    <div class="header-content">
+      <div class="nav-left">
+        <a href="{% url 'dashboard' %}" class="nav-btn primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          Dashboard
+        </a>
+        <button onclick="history.back()" class="nav-btn secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          Back
+        </button>
+      </div>
+      <h1 class="page-title">Main Bills – Discount Management</h1>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content-area">
+    <div class="content-card">
+      <div class="table-container">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tenant</th>
+              <th>Month</th>
+              <th class="amount-col">Generated</th>
+              <th class="amount-col">Discount</th>
+              <th class="amount-col highlight-col">Adjusted</th>
+              <th class="amount-col">Paid</th>
+              <th class="amount-col">Due</th>
+              <th>Status</th>
+              <th class="action-col">Apply Discount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for bill in bills %}
+            <tr>
+              <td class="row-num">{{ forloop.counter }}</td>
+              <td class="tenant-name">{{ bill.tenant }}</td>
+              <td>{{ bill.month|date:"M Y" }}</td>
+              <td class="amount">{{ bill.generated_amount|floatformat:2 }}</td>
+              <td class="amount">{{ bill.discount_amount|floatformat:2 }}</td>
+              <td class="amount highlight-amount">{{ bill.adjusted_amount|floatformat:2 }}</td>
+              <td class="amount">{{ bill.total_paid|floatformat:2 }}</td>
+              <td class="amount due-amount {% if bill.total_due > 0 %}text-red{% endif %}">
+                {{ bill.total_due|floatformat:2 }}
+              </td>
+              <td>
+                <span class="status-badge status-{{ bill.status|lower }}">
+                  {{ bill.status }}
+                </span>
+              </td>
+              <td class="action-cell">
+                <form method="POST" action="{% url 'apply_discount_to_mainbill' bill.pk %}" class="discount-form">
+                  {% csrf_token %}
+                  <input 
+                    type="number" 
+                    step="0.01" 
+                    min="0" 
+                    name="discount_amount" 
+                    placeholder="0.00" 
+                    value="{{ bill.discount_amount|default:0 }}" 
+                    class="discount-input"
+                  >
+                  <button type="submit" class="apply-btn">Apply</button>
+                </form>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="10" class="empty-state">
+                <div class="empty-icon">📊</div>
+                <p>No main bills found for discount management.</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ───────────────────────────────────────────────
+   Updated: Sticky header + tighter side spacing
+─────────────────────────────────────────────── */
+
+.mbill-page-wrapper {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Sticky Header */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.header-content {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 0.94rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.nav-btn.primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.nav-btn.primary:hover { background: #2563eb; }
+
+.nav-btn.secondary {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.nav-btn.secondary:hover { background: #e2e8f0; }
+
+.page-title {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+/* Content Area – reduced side padding */
+.content-area {
+  padding: 24px 16px 40px;
+  max-width: 100%;
+}
+
+/* Card */
+.content-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+/* Table – slightly more compact */
+.modern-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.93rem;
+  color: #334155;
+}
+
+.modern-table thead {
+  background: #f8fafc;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.modern-table th {
+  padding: 12px 10px;
+  font-weight: 600;
+  font-size: 0.81rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #475569;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.modern-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.modern-table tr:hover {
+  background: #f8fafc;
+}
+
+/* Keep your existing column & status & form styles */
+.row-num { color: #64748b; font-weight: 500; width: 50px; }
+.tenant-name { text-align: left; font-weight: 500; color: #1e293b; }
+.amount-col { font-variant-numeric: tabular-nums; min-width: 90px; }
+.highlight-col { font-weight: 600; color: #1e40af; }
+.highlight-amount { color: #1d4ed8; font-weight: 600; }
+.due-amount { font-weight: 600; }
+.text-red { color: #dc2626; }
+
+.status-badge {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.81rem;
+  font-weight: 600;
+  min-width: 78px;
+  display: inline-block;
+}
+
+.status-paid    { background: #ecfdf5; color: #065f46; }
+.status-due     { background: #fef2f2; color: #991b1b; }
+.status-pending { background: #fffbeb; color: #92400e; }
+
+.discount-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.discount-input {
+  width: 108px;
+  padding: 7px 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.94rem;
+}
+
+.discount-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+
+.apply-btn {
+  padding: 7px 13px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.apply-btn:hover { background: #2563eb; }
+
+/* Empty state */
+.empty-state {
+  padding: 70px 20px;
+  color: #64748b;
+  text-align: center;
+  font-size: 1.05rem;
+}
+
+.empty-icon {
+  font-size: 3.5rem;
+  margin-bottom: 14px;
+  opacity: 0.65;
+}
+
+/* Mobile adjustments */
+@media (max-width: 1024px) {
+  .header-content { padding: 12px 16px; }
+  .page-title { font-size: 1.4rem; }
+}
+
+@media (max-width: 768px) {
+  .content-area { padding: 16px 10px; }
+  .discount-form { flex-direction: column; gap: 10px; }
+  .discount-input { width: 140px; }
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    body { background: #eef2f7; }
+    .top-header { max-width: 1350px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+    .page-title { margin: 0; color: #198754; font-size: 24px; font-weight: bold; }
+    .container-box { max-width: 1350px; margin: auto; padding-bottom: 50px; }
+    .card { background: #fff; border: none; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,.08); overflow: hidden; }
+    .card-header { background: #0d6efd; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: #f8f9fa; color: #333; border-bottom: 2px solid #ddd; }
+    th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; vertical-align: middle; }
+
+    .form-control-input { width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; transition: border-color 0.2s; }
+    .form-control-input:focus { border-color: #0d6efd; outline: none; }
+    .readonly-input { background-color: #f1f5f9; color: #475569; font-weight: bold; }
+
+    .rate-cell-container { display: flex; align-items: center; gap: 6px; }
+    .toggle-calc-btn { padding: 6px 12px; border: 1px solid #0d6efd; background: #fff; color: #0d6efd; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .toggle-calc-btn.mode-whole { background: #6f42c1; color: white; border-color: #6f42c1; }
+
+    /* Group Sorting UI Elements */
+    .filter-actions { display: flex; gap: 10px; margin: 15px 20px; flex-wrap: wrap; align-items: center; }
+    .filter-btn { padding: 8px 16px; font-size: 13px; font-weight: bold; color: white; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+    .filter-btn.active { outline: 2px solid #333; transform: scale(1.02); opacity: 1 !important; }
+    .filter-btn:not(.active) { opacity: 0.65; }
+
+    .group-header-row { background-color: #e2e8f0 !important; font-weight: bold; color: #334155; }
+    .group-header-row td { padding: 12px 10px; font-size: 14px; border-bottom: 2px solid #cbd5e1; }
+    .group-subtotal-row { background-color: #f8fafc !important; font-weight: bold; color: #0f172a; border-bottom: 2px dashed #cbd5e1; }
+    .group-subtotal-row td { padding: 10px; text-align: right; font-size: 13px; }
+
+    .row-total-box { font-weight: bold; color: #198754; font-family: monospace; font-size: 14px; }
+    .footer-actions { background: #f8f9fa; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #eee; }
+    .grand-total-display { font-size: 18px; font-weight: bold; color: #0d6efd; }
+</style>
+
+<div class="top-header">
+    <div class="header-row">
+        <div>
+            <h2 class="page-title">🍽️ Process & Edit Purchase Requisition Items</h2>
+            <div style="color:#6c757d; margin-top: 4px;">Requisition Token Ref: <span style="background: #e2e8f0; font-family: monospace; padding: 3px 8px; border-radius: 4px; color: #334155; font-weight: bold;">{{ purch_appov }}</span></div>
+        </div>
+        <div>
+            <a href="{% url 'requisition_jewel_purchase_list' %}" class="inline-block bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded text-sm transition text-decoration-none" style="background: #6c757d; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                ⬅️ Back to History
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container-box">
+    <form method="POST" id="requisitionForm">
+        {% csrf_token %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="m-0 text-white font-bold text-lg" style="color: white; margin: 0;">Items Allocation Framework</h3>
+                <span style="background: rgba(255,255,255,0.2); color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: bold;">Project: {{ history_record.project_name }}</span>
+            </div>
+
+            <div class="filter-actions">
+                <button type="button" id="btnAll" class="filter-btn active" style="background-color: #6c757d;" onclick="applySortingGroup('all')">📋 Standard Order</button>
+                <button type="button" id="btnItem" class="filter-btn" style="background-color: #6f42c1;" onclick="applySortingGroup('item')">📦 Item Wise Groups</button>
+                <button type="button" id="btnSupplier" class="filter-btn" style="background-color: #198754;" onclick="applySortingGroup('supplier')">🏢 Supplier Wise Groups</button>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">SL</th>
+                            <th style="width: 20%;">Item Name / Details</th>
+                            <th style="width: 12%;">Quantity</th>
+                            <th style="width: 18%;">Rate Engine</th>
+                            <th style="width: 12%;">Discount (৳)</th>
+                            <th style="width: 15%;">Calculated Amount</th>
+                            <th>Operational Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        {% for item in requisitions %}
+                        <tr class="requisition-row" data-id="{{ item.id }}" data-calc-mode="{{ item.calc_mode|default:'unit' }}" data-item="{{ item.item_name|default:'' }}" data-supplier="{{ item.vendor_name|default:'No Supplier Assigned' }}">
+                            <td class="row-sl">{{ forloop.counter }}</td>
+                            <td>
+                                <span style="font-weight: 600; color: #1e293b; display: block;">{{ item.item_name }}</span>
+                                <small style="color: #64748b; font-family: monospace;">Unit: {{ item.unit|default:"Pcs" }}</small>
+                            </td>
+                            <td>
+                                <input type="number" step="0.01" name="qty_{{ item.id }}" value="{{ item.qty }}" class="form-control-input qty-field" required>
+                            </td>
+                            <td>
+                                <div class="rate-cell-container">
+                                    <input type="number" step="0.01" name="rate_{{ item.id }}" value="{{ item.rate }}" class="form-control-input rate-field" required>
+
+                                    <input type="hidden" name="calc_mode_{{ item.id }}" class="calc-mode-hidden-field" value="{{ item.calc_mode|default:'unit' }}">
+
+                                    <button type="button" class="toggle-calc-btn {% if item.calc_mode == 'whole' %}mode-whole{% endif %}" onclick="toggleRowCalculationMode(this)">
+                                        {% if item.calc_mode == 'whole' %}Whole{% else %}Unit{% endif %}
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                <input type="number" step="0.01" name="discount_{{ item.id }}" value="{{ item.discount|default:'0.00' }}" class="form-control-input discount-field" required>
+                            </td>
+                            <td>
+                                <div class="row-total-box">৳<span class="row-amount-text">{{ item.amount|floatformat:2 }}</span></div>
+                            </td>
+                            <td>
+                                <input type="text" name="remark_{{ item.id }}" value="{{ item.remark|default:'' }}" placeholder="Write item notes..." class="form-control-input">
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr class="empty-row">
+                            <td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8; font-style: italic;">No items loaded for this reference key parameter.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="footer-actions">
+                <div class="grand-total-display">
+                    Grand Total summary: ৳<span id="grandTotalDisplay">{{ history_record.total_amount|floatformat:2 }}</span>
+                </div>
+                <div>
+                    <button type="submit" style="background-color: #198754; border: none; color: white; padding: 12px 24px; font-size: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        💾 Save Changes & Synchronize Ledger
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+let currentSortMode = 'all';
+let initialRowElements = [];
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Preserve initial row nodes
+    let rowNodes = document.querySelectorAll("#tableBody tr.requisition-row");
+    rowNodes.forEach(node => initialRowElements.push(node));
+
+    // Bind layout calculations
+    initialRowElements.forEach(row => {
+        row.querySelector(".qty-field").addEventListener("input", calculateFormTotals);
+        row.querySelector(".rate-field").addEventListener("input", calculateFormTotals);
+        row.querySelector(".discount-field").addEventListener("input", calculateFormTotals);
+    });
+
+    calculateFormTotals();
+});
+
+function calculateFormTotals() {
+    let grandTotal = 0;
+    const rows = initialRowElements;
+
+    rows.forEach(row => {
+        const mode = row.getAttribute("data-calc-mode") || "unit";
+        const qty = parseFloat(row.querySelector(".qty-field").value) || 0;
+        const rate = parseFloat(row.querySelector(".rate-field").value) || 0;
+        const discount = parseFloat(row.querySelector(".discount-field").value) || 0;
+
+        let rowAmount = 0;
+        if (mode === "whole") {
+            rowAmount = rate - discount;
+        } else {
+            rowAmount = (qty * rate) - discount;
+        }
+
+        if (rowAmount < 0) { rowAmount = 0; }
+        row.querySelector(".row-amount-text").textContent = rowAmount.toFixed(2);
+        grandTotal += rowAmount;
+    });
+
+    document.getElementById("grandTotalDisplay").textContent = grandTotal.toFixed(2);
+}
+
+function runTableVisibilityAndGroupingEngine() {
+    let tableBody = document.getElementById("tableBody");
+    
+    // Wipe layout header/subtotal injections
+    document.querySelectorAll(".group-header-row, .group-subtotal-row").forEach(el => el.remove());
+
+    let sortedRows = [...initialRowElements];
+    if (currentSortMode === 'item') {
+        sortedRows.sort((a, b) => (a.getAttribute('data-item') || "").localeCompare(b.getAttribute('data-item') || ""));
+    } else if (currentSortMode === 'supplier') {
+        sortedRows.sort((a, b) => (a.getAttribute('data-supplier') || "").localeCompare(b.getAttribute('data-supplier') || ""));
+    }
+
+    let visualCounter = 1;
+    let lastSeenHeadingText = "";
+    let currentGroupRows = [];
+
+    function insertSubtotalRow(groupTitle) {
+        if (currentGroupRows.length === 0) return;
+        let subtotalValue = 0;
+        currentGroupRows.forEach(r => {
+            let mode = r.getAttribute("data-calc-mode") || "unit";
+            let qty = parseFloat(r.querySelector('.qty-field').value) || 0;
+            let rate = parseFloat(r.querySelector('.rate-field').value) || 0;
+            let discount = parseFloat(r.querySelector('.discount-field').value) || 0;
+            let amt = mode === "whole" ? (rate - discount) : ((qty * rate) - discount);
+            subtotalValue += amt < 0 ? 0 : amt;
+        });
+
+        let subRow = document.createElement('tr');
+        subRow.className = "group-subtotal-row";
+        subRow.innerHTML = `
+            <td colspan="5" style="text-align: right;">Subtotal for (${groupTitle}):</td>
+            <td style="color: #0d6efd; font-weight: bold;">৳${subtotalValue.toFixed(2)}</td>
+            <td></td>
+        `;
+        tableBody.appendChild(subRow);
+        currentGroupRows = []; 
+    }
+
+    sortedRows.forEach(function(row) {
+        let slCell = row.querySelector('.row-sl');
+        if (slCell) slCell.innerText = visualCounter++;
+
+        if (currentSortMode === 'item') {
+            let currentItemName = row.getAttribute('data-item') || "Unassigned Item";
+            if (currentItemName !== lastSeenHeadingText) {
+                if (lastSeenHeadingText !== "") insertSubtotalRow(lastSeenHeadingText);
+                lastSeenHeadingText = currentItemName;
+                let headingRow = document.createElement('tr');
+                headingRow.className = "group-header-row";
+                headingRow.innerHTML = `<td colspan="7">📦 Item: ${currentItemName}</td>`;
+                tableBody.appendChild(headingRow);
+            }
+            currentGroupRows.push(row);
+        } else if (currentSortMode === 'supplier') {
+            let currentSupplierName = row.getAttribute('data-supplier') || "No Supplier Assigned";
+            if (currentSupplierName !== lastSeenHeadingText) {
+                if (lastSeenHeadingText !== "") insertSubtotalRow(lastSeenHeadingText);
+                lastSeenHeadingText = currentSupplierName;
+                let headingRow = document.createElement('tr');
+                headingRow.className = "group-header-row";
+                headingRow.innerHTML = `<td colspan="7">🏢 Supplier: ${currentSupplierName}</td>`;
+                tableBody.appendChild(headingRow);
+            }
+            currentGroupRows.push(row);
+        }
+        tableBody.appendChild(row);
+    });
+
+    if ((currentSortMode === 'item' || currentSortMode === 'supplier') && lastSeenHeadingText !== "") {
+        insertSubtotalRow(lastSeenHeadingText);
+    }
+}
+
+function applySortingGroup(mode) {
+    currentSortMode = mode;
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    
+    if (mode === 'all') document.getElementById('btnAll').classList.add('active');
+    if (mode === 'item') document.getElementById('btnItem').classList.add('active');
+    if (mode === 'supplier') document.getElementById('btnSupplier').classList.add('active');
+    
+    runTableVisibilityAndGroupingEngine();
+}
+
+function toggleRowCalculationMode(btnElement) {
+    const row = btnElement.closest("tr");
+    const hiddenField = row.querySelector(".calc-mode-hidden-field");
+    const currentMode = row.getAttribute("data-calc-mode") || "unit";
+
+    const targetMode = (currentMode === "whole") ? "unit" : "whole";
+    row.setAttribute("data-calc-mode", targetMode);
+    hiddenField.value = targetMode;
+
+    if (targetMode === "whole") {
+        btnElement.innerText = "Whole";
+        btnElement.classList.add("mode-whole");
+    } else {
+        btnElement.innerText = "Unit";
+        btnElement.classList.remove("mode-whole");
+    }
+
+    calculateFormTotals();
+    if (currentSortMode !== 'all') {
+        runTableVisibilityAndGroupingEngine(); // recalculate group subtitles dynamically
+    }
+}
+</script>
+{% endblock %}

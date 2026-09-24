@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Requisition</title>
+<style>
+body{font-family:Arial;background:#eef2f7;margin:0;padding:0;}
+.navbar{background:#198754;padding:12px 20px;color:white;}
+.navbar a{color:white;text-decoration:none;}
+.container{max-width:600px;margin:20px auto;padding:0 15px;}
+.card{background:#fff;padding:25px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.08);}
+.form-group{margin-bottom:12px;}
+label{display:block;margin-bottom:5px;font-weight:bold;color:#444;}
+input, select, textarea{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:13px;box-sizing:border-box;}
+.btn{padding:10px 20px;border-radius:6px;text-decoration:none;color:white;font-size:13px;border:none;cursor:pointer;display:inline-block;}
+.btn-green{background:#28a745;}
+.btn-gray{background:#6c757d;}
+.messages{list-style:none;padding:0;margin-bottom:10px;}
+.messages li.success{color:green;}
+.messages li.error{color:red;}
+.actions{display:flex;gap:10px;margin-top:15px;}
+h2{margin:0;}
+</style>
+</head>
+<body>
+<div class="navbar">
+    <a href="{% url 'restau_requisition_list_public' %}">Requisitions</a>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>Edit Requisition</h2>
+
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                        {% csrf_token %}
+
+                        <div class="mb-6">
+                            <label for="project_name" class="block text-sm font-medium text-gray-700">Project Name</label>
+                            <select id="project_name" name="project_name" class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                                {% for project in projects_firts %}
+                                    <option value="{{ project.id }}" {% if form.instance.project_name.id == project.id %}selected{% endif %}>
+                                        {{ project.project_first_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.project_name.errors %}
+                                <ul class="text-red-600 mt-1 text-xs">
+                                    {% for error in form.project_name.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                         <div class="mb-6">
+                            <label for="employee_name" class="block text-sm font-medium text-gray-700">Employee Name</label>
+                            <select id="employee_name" name="employee_name" class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                                <option value="">Select Employee Name</option>
+                                {% for emp in employee_names %}
+                                    <option value="{{ emp.id }}" {% if form.instance.employee_name.id == emp.id %}selected{% endif %}>
+                                        {{ emp.rda_emp_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-6">
+                            <label for="id_type" class="block text-sm font-medium text-gray-700">Type</label>
+                            <select id="id_type" name="type" class="w-full text-sm border-slate-200 shadow-sm rounded-md" onchange="updateVendorOptions()">
+                                <option value="">Select Type</option>
+                                <option value="Supplier" {% if form.type.value == "Supplier" or form.instance.type == "Supplier" %}selected{% endif %}>Supplier</option>
+                            </select>
+                            {% if form.type.errors %}
+                                <ul class="text-red-600 mt-1 text-xs">
+                                    {% for error in form.type.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-6">
+                            <label for="vendor_name" class="block text-sm font-medium text-gray-700">Supplier / Contractor</label>
+                            <select id="vendor_name" name="vendor_name" class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                                </select>
+                            {% if form.vendor_name.errors %}
+                                <ul class="text-red-600 mt-1 text-xs">
+                                    {% for error in form.vendor_name.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="item_name" class="block text-sm font-medium text-gray-700">Item Name</label>
+                            <select id="item_name" name="item_name" class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                                <option value="">Select Item Name</option>
+                                {% for item in requisition_list %}
+                                    <option value="{{ item.id }}" 
+                                        {% if form.instance.item_name.id == item.id %}selected{% endif %}>
+                                        {{ item.rest_item_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            
+                            {% if form.item_name.errors %}
+                                <ul class="text-red-600 mt-1 text-xs">
+                                    {% for error in form.item_name.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                        <div class="mb-6">
+                            <label for="requisition_date" class="block text-sm font-medium text-gray-700">Requisition Date</label>
+                            <input type="date" id="requisition_date" name="requisition_date" value="{{ form.instance.requisition_date|date:'Y-m-d' }}" class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                            {% if form.requisition_date.errors %}
+                                <ul class="text-red-600 mt-1 text-xs">
+                                    {% for error in form.requisition_date.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-6">
+                            <label for="unit" class="block text-sm font-medium text-gray-700">Unit</label>
+                            <input type="text" id="unit" name="unit" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.unit.value|default_if_none:'' }}" placeholder="Enter Unit (e.g., pcs, kg)">
+                            {% if form.unit.errors %}
+                                <ul class="text-red-600 mt-1 text-xs">
+                                    {% for error in form.unit.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-6">
+                            <label for="id_qty" class="block text-sm font-medium text-gray-700">Quantity</label>
+                            <input type="number" id="id_qty" name="qty" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.qty.value|default_if_none:'' }}" min="1">
+                            {% if form.qty.errors %}
+                                <ul class="text-red-600 mt-1 text-xs">
+                                    {% for error in form.qty.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-6">
+                            <label for="id_rate" class="block text-sm font-medium text-gray-700">Rate</label>
+                            <input type="number" step="0.01" id="id_rate" name="rate" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.rate.value|default_if_none:'' }}">
+                            {% if form.rate.errors %}
+                                <ul class="text-red-600 mt-1 text-xs">
+                                    {% for error in form.rate.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-6">
+                            <label for="id_amount" class="block text-sm font-medium text-gray-700">Amount</label>
+                            <input type="text" id="id_amount" name="amount" readonly class="w-full text-sm bg-gray-100 border-slate-200 shadow-sm rounded-md" value="{{ form.amount.value|default_if_none:'' }}">
+                            {% if form.amount.errors %}
+                                <ul class="text-red-600 mt-1 text-xs">
+                                    {% for error in form.amount.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="id_discount" class="block text-sm font-medium text-gray-700">Discount</label>
+                            <input type="number" step="0.01" id="id_discount" name="discount" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.discount.value|default_if_none:'' }}">
+                            {% if form.discount.errors %}
+                                <ul class="text-red-600 mt-1 text-xs">
+                                    {% for error in form.discount.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-6">
+                            <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                            <textarea id="description" name="description" class="w-full text-sm border-slate-200 shadow-sm rounded-md" placeholder="Enter Description">{{ form.description.value|default_if_none:'' }}</textarea>
+                            {% if form.description.errors %}
+                                <ul class="text-red-600 mt-1 text-xs">
+                                    {% for error in form.description.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-6">
+                            <label for="remark" class="block text-sm font-medium text-gray-700">Remark</label>
+                            <textarea id="remark" name="remark" class="w-full text-sm border-slate-200 shadow-sm rounded-md" placeholder="Enter any remarks">{{ form.remark.value|default_if_none:'' }}</textarea>
+                            {% if form.remark.errors %}
+                                <ul class="text-red-600 mt-1 text-xs">
+                                    {% for error in form.remark.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <div class="mt-8 text-center flex justify-center space-x-4">
+                            <button type="submit" style="background-color:#1e3c98" class="px-8 py-3 text-white rounded-lg hover:opacity-90 transition duration-300 ease-in-out shadow-md focus:outline-none">
+                                Update Requisition
+                            </button>
+                            <a href="{% url 'restau_requisition_list_public_store' %}" style="background-color:#6c757d" class="px-8 py-3 text-white rounded-lg hover:opacity-90 transition duration-300 ease-in-out shadow-md">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+
+                    <script>
+                        const suppliers = [
+                            {% for supl in supplier_list %}
+                            { id: "{{ supl.rest_supplier_name|escapejs }}", name: "{{ supl.rest_supplier_name|escapejs }}" },
+                            {% endfor %}
+                        ];
+
+                        const contractors = [
+                            // Configured fallback in case contructor_list context payload isn't active
+                            {% if contructor_list %}
+                                {% for const in contructor_list %}
+                                { id: "{{ const.supervisor_name|escapejs }}", name: "{{ const.supervisor_name|escapejs }}" },
+                                {% endfor %}
+                            {% endif %}
+                        ];
+                    
+                        function updateVendorOptions() {
+                            const type = document.getElementById('id_type').value;
+                            const vendorSelect = document.getElementById('vendor_name');
+                    
+                            // Clear existing values
+                            vendorSelect.innerHTML = '';
+                    
+                            // Create standard placeholder option item
+                            const placeholderOption = document.createElement('option');
+                            placeholderOption.value = '';
+                            placeholderOption.text = 'Select Name';
+                            placeholderOption.disabled = true;
+                            
+                            {% if not form.instance.vendor_name %}
+                            placeholderOption.selected = true;
+                            {% endif %}
+                            vendorSelect.appendChild(placeholderOption);
+                    
+                            let optionsList = [];
+                            if (type === 'Supplier') {
+                                optionsList = suppliers;
+                            } else if (type === 'Contructor') {
+                                optionsList = contractors;
+                            }
+                    
+                            optionsList.forEach(item => {
+                                const option = document.createElement('option');
+                                option.value = item.id;
+                                option.text = item.name;
+                                vendorSelect.appendChild(option);
+                            });
+                    
+                            {% if form.instance.vendor_name %}
+                            const savedVendorName = "{{ form.instance.vendor_name|escapejs }}";
+                            setTimeout(() => {
+                                vendorSelect.value = savedVendorName;
+                            }, 10);
+                            {% endif %}
+                        }
+                    
+                        document.addEventListener('DOMContentLoaded', updateVendorOptions);
+                    </script>
+
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            const qtyField = document.getElementById("id_qty");
+                            const rateField = document.getElementById("id_rate");
+                            const amountField = document.getElementById("id_amount");
+                            const discountField = document.getElementById("id_discount");
+                        
+                            function updateAmount() {
+                                const qty = parseFloat(qtyField.value) || 0;
+                                const rate = parseFloat(rateField.value) || 0;
+                                const discount = parseFloat(discountField.value) || 0;
+                        
+                                let amount = qty * rate;
+                                amount = amount - discount;
+                        
+                                if (amount < 0) amount = 0;
+                                amountField.value = amount.toFixed(2);
+                            }
+                        
+                            qtyField.addEventListener("input", updateAmount);
+                            rateField.addEventListener("input", updateAmount);
+                            discountField.addEventListener("input", updateAmount);
+                        
+                            // Perform baseline run on load to align field states
+                            updateAmount();
+                        });
+                    </script>
+    </div>
+</div>
+</body>
+</html>

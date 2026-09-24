@@ -1,0 +1,214 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Contractor Payment Summary</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      background-color: #f3f4f6;
+      padding: 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 25px;
+      max-width: 1100px;
+      margin: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .label {
+      background-color: #10b981;
+      color: #fff;
+      padding: 6px 14px;
+      font-weight: bold;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 12px;
+    }
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f9fafb;
+      font-weight: bold;
+    }
+    tr:nth-child(even) {
+      background-color: #f9fafb;
+    }
+    tr:hover {
+      background-color: #d1fae5;
+    }
+    .summary {
+      margin-top: 25px;
+      background-color: #f1f5f9;
+      padding: 15px;
+      border-radius: 6px;
+    }
+    .summary p {
+      margin: 6px 0;
+      font-size: 13px;
+    }
+    .status-badge {
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: bold;
+      color: #fff;
+    }
+    .Receivable { background-color: #10b981; }
+    .Payable { background-color: #ef4444; }
+    .Balanced { background-color: #6b7280; }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 25px;
+      align-items: center;
+    }
+    .print-btn, .back-btn {
+      padding: 7px 14px;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .print-btn { background-color: #1e3a8a; }
+    .back-btn { background-color: #10b981; }
+    input#searchInput {
+      padding: 6px 10px;
+      width: 250px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+    }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white; padding: 0; }
+      .card { box-shadow: none; border: none; margin: 0; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <div class="logo">
+      <img src="{% static 'images/BTP_logo_webp.png' %}" height="50" alt="Logo">
+    </div>
+    <div>
+      <div class="label">Contractor Payment Summary</div>
+      <p style="margin-top: 6px; font-size: 12px;">Printing Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+    </div>
+  </div>
+
+  <h3>Contractor: {{ sitesupervisor.supervisor_name }}</h3>
+  <input type="text" id="searchInput" placeholder="Search..." oninput="handleSearch()">
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Requisition ID</th>
+        <th>Item Name</th>
+        <th>Contractor</th>
+        <th>Payment Type</th>
+        <th style="text-align: right;">Amount (৳)</th>
+        <th>Date</th>
+        {% if request.session.department == "admin" %}
+        <th style="text-align: center;">Action</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      {% for p in payments %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ p.requi_uniq_id }}</td>
+        <td>{{ p.requi_item_name }}</td>
+        <td>{{ p.contractors }}</td>
+        <td>
+          {% if p.payment_type == 'requisition_pay' %}
+            <span style="background-color:#fde68a; padding:2px 6px; border-radius:4px;">Requisition Pay</span>
+          {% elif p.payment_type == 'purchase_pay' %}
+            <span style="background-color:#bfdbfe; padding:2px 6px; border-radius:4px;">Purchase Pay</span>
+          {% elif p.payment_type == 'approval_pay' %}
+            <span style="background-color:#bbf7d0; padding:2px 6px; border-radius:4px;">Approval Pay</span>
+          {% elif p.payment_type == 'advance_pay' %}
+            <span style="background-color:#fca5a5; padding:2px 6px; border-radius:4px;">Advance Pay</span>
+          {% else %}
+            {{ p.payment_type|capfirst }}
+          {% endif %}
+        </td>
+        <td style="text-align: right;">{{ p.requi_amount|floatformat:2|intcomma }}</td>
+        <td>{{ p.requisition_date|date:"d M Y" }}</td>
+        {% if request.session.department == "admin" %}
+        <td style="text-align: center; white-space: nowrap;">
+          <a href="{% url 'bill_approval_payment_edit' p.id %}" style="text-decoration: none;">
+            <span style="background-color:#10b981; padding:4px 8px; border-radius:4px; color:#ffffff; display:inline-block;">Edit</span>
+          </a>
+          <a href="{% url 'bill_approval_payment_delete' p.id %}" onclick="return confirm('Delete this approval payment?');" style="text-decoration: none;">
+            <span style="background-color:#f70000; padding:4px 8px; border-radius:4px; color:#ffffff; display:inline-block;">Delete</span>
+          </a>
+        </td>
+        {% endif %}
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="{% if request.session.department == 'admin' %}8{% else %}7{% endif %}" style="text-align: center; color: #6b7280;">No records found</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="summary">
+    <p><strong>Total Requisition Pay:</strong> ৳ {{ total.requisition_pay|floatformat:2|intcomma }}</p>
+    <p><strong>Total Purchase Pay:</strong> ৳ {{ total.purchase_pay|floatformat:2|intcomma }}</p>
+    <p><strong>Total Approval Pay:</strong> ৳ {{ total.approval_pay|floatformat:2|intcomma }}</p>
+    <p><strong>Total Advance Pay:</strong> ৳ {{ total.advance_pay|floatformat:2|intcomma }}</p>
+    <hr>
+    <p>
+      <strong>Balance:</strong> ৳ {{ balance|floatformat:2|intcomma }}
+      <span class="status-badge {{ status }}">{{ status }}</span>
+    </p>
+    <p><strong>In Words:</strong> {{ balance_in_words|capfirst }}</p>
+  </div>
+
+  <div class="footer no-print">
+    <button onclick="window.location.href='{% url 'bill_reqs_payment_list' %}'" class="back-btn">← Back</button>
+    <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+  </div>
+</div>
+
+<script>
+  function handleSearch() {
+    let searchValue = document.getElementById('searchInput').value.toLowerCase();
+    let rows = document.querySelectorAll("#tableBody tr");
+    rows.forEach(row => {
+      let columns = row.getElementsByTagName("td");
+      let rowText = "";
+      for (let i = 0; i < columns.length; i++) {
+        rowText += columns[i].textContent.toLowerCase();
+      }
+      row.style.display = rowText.includes(searchValue) ? "" : "none";
+    });
+  }
+</script>
+</body>
+</html>

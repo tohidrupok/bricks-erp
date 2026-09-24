@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rent Form</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f5f6fa;
+    padding: 40px;
+  }
+
+  h2 {
+    text-align: center;
+    color: #333;
+  }
+
+  form {
+    background: #fff;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #555;
+  }
+
+  select, input {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+  }
+
+  select:focus, input:focus {
+    border-color: #4a90e2;
+    outline: none;
+  }
+
+  button {
+    background-color: #4a90e2;
+    color: #fff;
+    padding: 12px 20px;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  button:hover {
+    background-color: #357ABD;
+  }
+
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+</head>
+<body>
+
+<h2>Rent Form</h2>
+
+<form method="POST">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  <label>ProjectRef:</label>
+  {{ form.projectref }}
+
+  <label>Flat:</label>
+  {{ form.flat }}
+
+  <label>Room:</label>
+  {{ form.room }}
+
+  <label>Tenant:</label>
+  {{ form.varatiya }}
+
+  <label>Start Month:</label>
+  {{ form.startmonths }}
+
+
+  <button type="submit">Save</button>
+</form>
+
+<script>
+function loadRooms() {
+    var projectrefId = $('#id_projectref').val();
+    var flat = $('#id_flat').val();
+
+    if(projectrefId && flat){
+        $.ajax({
+            url: "{% url 'ajax_load_rooms' %}",
+            data: {
+                'projectref_id': projectrefId,
+                'flat': flat
+            },
+            success: function(data){
+                var options = '<option value="">---------</option>';
+                data.rooms.forEach(function(room){
+                    options += `<option value="${room.id}">${room.name}</option>`;
+                });
+                $('#id_room').html(options);
+            }
+        });
+    }
+}
+
+$('#id_projectref, #id_flat').change(loadRooms);
+
+$(function() {
+    $("#id_startmonths, #id_endmonths").datepicker({
+        dateFormat: "yy-mm-dd",
+        changeMonth: true,
+        changeYear: true,
+        showButtonPanel: true
+    });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Note Apply - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-lg font-medium">Note Apply</h2>
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                       <form method="post" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+							{% csrf_token %}
+
+							<!-- Employee -->
+							<div class="mb-4">
+								<label for="id_employee" class="font-medium text-lg">Employee</label>
+								<select name="employee" id="id_employee" required
+									class="w-full text-sm border-slate-200 shadow-sm rounded-md focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary">
+									{% for option in form.employee.field.choices %}
+										<option value="{{ option.0 }}" {% if form.employee.value == option.0 %}selected{% endif %}>{{ option.1 }}</option>
+									{% endfor %}
+								</select>
+								{% if form.employee.errors %}
+									<ul class="text-red-600 mt-1">
+										{% for error in form.employee.errors %}
+											<li>{{ error }}</li>
+										{% endfor %}
+									</ul>
+								{% endif %}
+							</div>
+
+							<!-- Start Date -->
+							<div class="mb-4">
+								<label for="id_date" class="font-medium text-lg">Date</label>
+								<input type="date" name="date" id="id_date" required 
+									value="{{ form.date.value|date:'Y-m-d' }}"
+									class="w-full text-sm border-slate-200 shadow-sm rounded-md focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" />
+								{% if form.date.errors %}
+									<ul class="text-red-600 mt-1">
+										{% for error in form.date.errors %}
+											<li>{{ error }}</li>
+										{% endfor %}
+									</ul>
+								{% endif %}
+							</div>
+							<!-- Reason -->
+							<div class="mb-4">
+								<label for="id_reason" class="font-medium text-lg">Reason</label>
+								<textarea name="reason" id="id_reason" rows="3"
+									class="w-full text-sm border-slate-200 shadow-sm rounded-md focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary">{{ form.reason.value|default:'' }}</textarea>
+								{% if form.reason.errors %}
+									<ul class="text-red-600 mt-1">
+										{% for error in form.reason.errors %}
+											<li>{{ error }}</li>
+										{% endfor %}
+									</ul>
+								{% endif %}
+							</div>						
+							
+							<!-- Submit -->
+							<div class="flex justify-between items-center pt-4">
+								<a href="{% url 'note_list' %}" style="color:#FFFFFF;background-color:#1e3c98" class="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">Cancel</a>
+								<button type="submit" style="margin-left:0.5%;background-color:#1e3c98" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Save</button>
+							</div>
+						</form>												
+
+                        <br>  
+                    </div>
+                    
+                    
+                </div>
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

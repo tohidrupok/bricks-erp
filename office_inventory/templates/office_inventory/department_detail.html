@@ -1,0 +1,31 @@
+{% extends 'office_inventory/base.html' %}
+
+{% block header %}Department Details{% endblock %}
+
+{% block content %}
+<div class="card card-stat p-3" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-header mb-3">
+        <h2>Department Profile</h2>
+    </div>
+    
+    <div class="data-row mb-2">
+        <span class="label font-weight-bold text-muted" style="width: 120px; display: inline-block;">Dept Code:</span>
+        <span class="value"><strong>{{ department.dept_id }}</strong></span>
+    </div>
+    <div class="data-row mb-2">
+        <span class="label font-weight-bold text-muted" style="width: 120px; display: inline-block;">Name:</span>
+        <span class="value">{{ department.name }}</span>
+    </div>
+    <div class="data-row mb-3">
+        <span class="label font-weight-bold text-muted" style="width: 120px; display: inline-block;">Responsible Name:</span>
+        <span class="value">{{ department.manager|default:"No Manager Assigned" }}</span>
+    </div>
+    
+    <hr>
+    
+    <div class="footer-links d-flex gap-2">
+        <a href="{% url 'office_inventory:department_update' department.pk %}" class="btn btn-warning">Modify Details</a>
+        <a href="{% url 'office_inventory:department_list' %}" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Leave Allocation - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            {% include 'partials/header.html' %}
+
+            <div class="intro-y mt-10 max-w-lg mx-auto bg-white p-6 shadow-lg rounded-lg text-center">
+                <div class="text-4xl text-red-500 mb-3">⚠️</div>
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Confirm Delete Allocation</h2>
+                <p class="text-gray-600 mb-6 text-sm">
+                    Are you sure you want to delete the leave allocation record for 
+                    <strong class="text-gray-900">{{ alloc.employee.rda_emp_name }}</strong> 
+                    for the year <strong class="text-gray-900">{{ alloc.year }}</strong>?
+                </p>
+
+                <div class="bg-gray-50 p-4 rounded-md text-left text-xs text-gray-600 mb-6 space-y-1">
+                    <p><strong>Casual Leave (CL):</strong> {{ alloc.casual_leave_allocated }} days allocated ({{ alloc.casual_leave_used }} used)</p>
+                    <p><strong>Sick Leave (SL):</strong> {{ alloc.sick_leave_allocated }} days allocated ({{ alloc.sick_leave_used }} used)</p>
+                    <p><strong>Earned Leave (EL):</strong> {{ alloc.total_earned_leave }} days allocated ({{ alloc.earned_leave_used }} used)</p>
+                </div>
+
+                <form method="post" class="flex justify-center gap-4">
+                    {% csrf_token %}
+                    <a href="{% url 'allocation_list' %}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-5 py-2 rounded-md transition">
+                        Cancel
+                    </a>
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium px-5 py-2 rounded-md transition shadow">
+                        Yes, Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

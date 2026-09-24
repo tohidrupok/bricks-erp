@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Bill Requisition List View - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    background-color: silver;
+    padding: 20px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .logo img {
+    height: 50px;
+  }
+
+  .label-box {
+    background-color: #e2f0d9;
+    color: #000;
+    padding: 4px 10px;
+    font-weight: bold;
+    font-size: 13px;
+    border-radius: 4px;
+  }
+
+  .sub-head {
+    font-size: 11px;
+    color: #555;
+    margin-top: -10px;
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 10px 0;
+    text-align: left;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-top: 10px;
+  }
+
+  .table th,
+  .table td {
+    border: 1px solid #ccc;
+    padding: 6px 8px;
+    text-align: left;
+  }
+
+  .action-buttons a {
+    display: inline-block;
+    margin: 2px 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 11px;
+  }
+
+  .btn-view {
+    background-color: #84cc16;
+    color: white;
+  }
+
+  .btn-edit {
+    background-color: #1e3a8a;
+    color: white;
+  }
+
+  .btn-delete {
+    background-color: red;
+    color: white;
+  }
+
+  .approved-label {
+    color: green;
+    font-weight: bold;
+  }
+
+  .footer {
+    text-align: right;
+    margin-top: 20px;
+  }
+
+  .print-btn {
+    background-color: #1e3a8a;
+    color: white;
+    padding: 5px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+  }
+
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+
+    body {
+      background: white;
+      padding: 0;
+    }
+
+    .card {
+      box-shadow: none;
+      border: none;
+      margin: 0;
+      padding: 0;
+    }
+  }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+  {% include 'partials/mobile.html' %}
+  <div class="mt-[4.7rem] flex md:mt-0">
+    {% include 'partials/sidebar_list.html' %}
+    <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+      {% include 'partials/header.html' %}
+      
+      <div class="card mt-10">  
+        <!-- Top Buttons -->
+       <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap text-[12px] space-x-2 no-print">
+  
+          <!-- Left buttons -->
+          <div class="flex space-x-2">
+            <a href="{% url 'bill_requisition_list' %}">
+              <button style="background-color:#84cc16" class="px-3 py-1.5 text-xs font-semibold bg-green-600 text-white border border-green-600 rounded shadow hover:bg-green-700">
+                ← Back
+              </button>
+            </a>
+            &nbsp;
+            <a href="{% url 'bill_requisition_by_project' requi_id=requisitions.0.requi_uniq_id %}">
+              <button style="background-color:#00008B" class="px-3 py-1.5 text-xs font-semibold bg-blue-600 text-white border border-blue-600 rounded shadow hover:bg-blue-700">
+                🔄 Refresh
+              </button>
+            </a>
+          </div>
+        &nbsp;
+          <!-- Spacer to push search input right on larger screens -->
+          <div class="flex-grow"></div>
+        
+          <!-- Search box -->
+          <div class="relative w-48 mt-2 sm:mt-0">
+            <input
+              id="searchInput"
+              type="text"
+              placeholder="🔍 Search..."
+              class="w-full text-xs py-1.5 pl-3 pr-8 border rounded-md shadow-sm focus:ring focus:ring-blue-300 focus:outline-none"
+              oninput="handleSearch()"
+            >
+          </div>
+        
+        </div>
+
+
+
+        <!-- Project Title -->
+        <div class="section-title">
+  Project: {{ project.project_first_name }}  {# Only if project is FK object #}
+</div>
+
+<!-- Table -->
+<table class="table" id="requisitionTable">
+  <thead>
+    <tr>
+      <th>Project</th>
+      <th>Supplier</th>
+      <th>Date</th>
+      <th>Item</th>
+      <th>Amount</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody">
+    {% for req in requisitions %}
+      <tr>
+        <td>{{ req.project_name.project_first_name }}</td>  {# again, if FK #}
+        <td>{{ req.vendor_name }}</td>
+        <td>{{ req.requisition_date }}</td>
+        <td>{{ req.item_name }}</td>
+        <td>{{ req.amount|intcomma }}</td>
+        <td class="action-buttons">
+          {% if request.session.department == "admin" or req.approv_status != "approved" %}
+            <a href="{% url 'bill_requisition_edit' pk=req.pk %}" class="btn-edit">✏️ Edit</a>
+            <a href="{% url 'bill_requisition_delete' pk=req.pk %}" class="btn-delete" onclick="return confirm('Are you sure you want to delete this requisition?');">🗑️ Delete</a>
+          {% else %}
+            <span class="approved-label">Approved</span>
+          {% endif %}
+          {% if req.approv_status != "approved" %}
+          <!--  <a href="{% url 'bill_requisition_delete' pk=req.pk %}" class="btn-delete" onclick="return confirm('Are you sure you want to delete this requisition?');">🗑️ Delete</a>-->
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="6" style="text-align: center; color: gray;">No requisitions found.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function handleSearch() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#requisitionTable tbody tr');
+    rows.forEach(row => {
+      const text = row.innerText.toLowerCase();
+      row.style.display = text.includes(input) ? '' : 'none';
+    });
+  }
+</script>
+
+<script>
+                            function handleSearch() {
+                                let searchValue = document.getElementById('searchInput').value.toLowerCase();
+                                let rows = document.querySelectorAll("#tableBody tr");
+                    
+                                rows.forEach(row => {
+                                    let columns = row.getElementsByTagName("td");
+                                    let rowText = "";
+                                    
+                                    // Combine text content of all columns in the row for searching
+                                    for (let i = 0; i < columns.length; i++) {
+                                        rowText += columns[i].textContent.toLowerCase(); // Get all text in row
+                                    }
+                    
+                                    // If search term is found in the row's combined text, show the row, else hide it
+                                    if (rowText.includes(searchValue)) {
+                                        row.style.display = ""; // Show row
+                                    } else {
+                                        row.style.display = "none"; // Hide row
+                                    }
+                                });
+                            }
+                        </script>
+{% endblock %}

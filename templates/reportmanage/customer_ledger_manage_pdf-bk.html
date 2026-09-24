@@ -1,0 +1,116 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Customer Ledger Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 11px; background-color: #ccc; padding: 20px; color: #000; }
+    .invoice-box { background: #fff; max-width: 960px; margin: auto; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); border-radius: 8px; }
+    .header-row { overflow: hidden; margin-bottom: 10px; }
+    .logo img { height: 50px; float: left; }
+    .header-info { float: right; text-align: right; margin-top: 10px; font-size: 11px; }
+    .sub-head { clear: both; font-size: 11px; margin-bottom: 10px; color: #444; }
+    hr { margin: 8px 0; border-color: #ccc; }
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 11px; }
+    th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: center; }
+    th { background-color: #f1f5f9; }
+    .no-print { margin-top: 20px; text-align: center; }
+    .btn-back { background-color: #3490dc; }
+    .btn-print { background-color: #38c172; }
+    .btn-back, .btn-print { padding: 8px 16px; color: #fff; border-radius: 4px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; }
+    .print-time { font-style: italic; margin-top: 8px; text-align: right; font-size: 11px; color: #555; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white; padding: 0; }
+      .invoice-box { box-shadow: none; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="invoice-box">
+
+  <div class="header-row">
+    <div class="logo">
+      <img src="{% static 'images/BTP_logo_webp.webp' %}" />
+    </div>
+    <div class="header-info">
+      <div style="background-color:#e2f0d9;font-size:18px;">&nbsp; Customer Ledger Report &nbsp;</div>
+      <div>Print Date: {{ print_time|date:"F j, Y, g:i a" }}</div>
+    </div>
+  </div>
+
+  <div class="sub-head">
+    House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi, Dhaka<br>
+    +880191322203 | info@btpltd.com
+  </div>
+
+  <hr>
+
+  <p style="color:blue;font-size:14px;">
+    Date Range:
+    {% if selected_filters.from_date %}
+      {{ selected_filters.from_date|date:"d M Y" }}
+    {% endif %}
+    {% if selected_filters.to_date %}
+      to {{ selected_filters.to_date|date:"d M Y" }}
+    {% endif %}
+  </p>
+
+  {% if report_data %}
+    {% for group in report_data %}
+      <p><strong>Customer:</strong> {{ group.customer_name }}</p>
+      <p><strong>Project:</strong> {{ group.project_name }}</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th style="text-align:right;">Debit</th>
+            <th style="text-align:right;">Credit</th>
+            <th style="text-align:right;">Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in group.ledger_entries %}
+            <tr>
+              <td>{{ row.date|date:"d M Y" }}</td>
+              <td style="text-align:left;">{{ row.description }}</td>
+              <td style="text-align:right;">{{ row.debit|floatformat:2 }}</td>
+              <td style="text-align:right;">{{ row.credit|floatformat:2 }}</td>
+              <td style="text-align:right;">{{ row.balance|floatformat:2 }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th style="text-align:right;" colspan="2">Totals</th>
+            <th style="text-align:right;">{{ group.total_debit|floatformat:2 }}</th>
+            <th style="text-align:right;">{{ group.total_credit|floatformat:2 }}</th>
+            <th style="text-align:right;">{{ group.final_balance|floatformat:2 }}</th>
+          </tr>
+        </tfoot>
+      </table>
+      <hr style="margin:15px 0;" />
+    {% endfor %}
+
+    <p style="text-align:right; font-weight:bold;">Final Balance: {{ final_balance|floatformat:2 }} Taka</p>
+    {% if balance_in_words %}
+      <p style="text-align:right;">BILL AMOUNT IN WORDS: "{{ balance_in_words|upper }}"</p>
+    {% endif %}
+
+  {% else %}
+    <p style="text-align:center;color:#999;">No records found for the selected filters.</p>
+  {% endif %}
+
+  <div class="no-print">
+    <a href="{% url 'customer_ledger_manage' %}" class="btn-back">← Back</a>
+    <button onclick="window.print()" class="btn-print">🖨️ Print</button>
+  </div>
+
+</div>
+</body>
+</html>

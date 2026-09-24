@@ -1,0 +1,297 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Property Sales Report</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            background-color: silver;
+            padding: 20px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 6px;
+            padding: 20px;
+            max-width: 960px;
+            margin: auto;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo img {
+            height: 50px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .label-box {
+            background-color: #cfe2ff;
+            color: #000;
+            padding: 6px 12px;
+            font-weight: bold;
+            font-size: 13px;
+            border-radius: 4px;
+        }
+
+        .sub-head {
+            font-size: 11px;
+            color: #555;
+            margin-top: -18px;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            margin-top: 12px;
+        }
+
+        .table th,
+        .table td {
+            border: 1px solid #ccc;
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        .section-title {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 12px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 4px;
+        }
+
+        .signature-section {
+            margin-top: 35px;
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+        }
+
+        .signature-box {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .signature-line {
+            display: block;
+            border-top: 1px solid black;
+            margin-top: 30px;
+            width: 100%;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 12px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+
+        .back-btn {
+            background-color: green;
+            color: white;
+            padding: 6px 15px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .print-btn {
+            background-color: #1e3c98;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .card { box-shadow: none; border: none; padding: 0; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <!-- Header -->
+    <div class="card-header">
+        <div class="logo">
+            <img src="{% static 'images/BTP_logo_bricks.webp' %}" alt="Company Logo">
+        </div>
+        <div style="text-align:right;">
+            <div class="label-box">Property Sales Report</div>
+            <p style="font-size:11px; margin-top:4px;">Print Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+        </div>
+    </div>
+
+    <!-- Company Info -->
+    <div class="sub-head">
+        Bonanai, Dhaka-1216<br>
+        01993005558, 09639246230, 09639246231 <br>
+        bricks@gmail.com, bricks@gmail.com, www.bricks.com
+    </div>
+
+    <hr>
+
+    <!-- Project & Sales Basic Info -->
+    <div class="section-title">Basic Information</div>
+
+    <table class="table">
+        <tr>
+            <th>Project Name</th>
+            <td>{{ sale.project_name.project_first_name }}</td>
+
+            <th>Type</th>
+            <td>{{ sale.type|capfirst }}</td>
+        </tr>
+
+        <tr>
+            <th>Flat No</th>
+            <td>Flat-{{ sale.flat_no }}</td>
+
+            <th>Unit No</th>
+            <td>Unit-{{ sale.unit_no }}</td>
+        </tr>
+
+        <tr>
+            <th>Property Name</th>
+            <td>{{ sale.property_name|default:"N/A" }}</td>
+
+            <th>Property Code</th>
+            <td>{{ sale.property_code|default:"N/A" }}</td>
+        </tr>
+
+        <tr>
+            <th>Square Feet</th>
+            <td>{{ sale.square_fit|intcomma }}</td>
+
+            <th>Rate (Per Sqft)</th>
+            <td>{{ sale.per_square_rate|intcomma }}</td>
+        </tr>
+
+        <tr>
+            <th>Total Amount</th>
+            <td colspan="3" style="font-weight:bold;">{{ sale.total_amount|intcomma }}</td>
+        </tr>
+    </table>
+
+    <!-- Customer & Financial Info -->
+    <div class="section-title">Customer & Financial Details</div>
+
+    <table class="table">
+
+        <tr>
+            <th>Customer Name</th>
+            <td>{{ sale.customer_name.customer_name|default:"N/A" }}</td>
+
+            <th>Utility</th>
+            <td>{{ sale.utility|intcomma }}</td>
+        </tr>
+
+        <tr>
+            <th>Parking</th>
+            <td>{{ sale.parking|intcomma }}</td>
+
+            <th>Discount (%)</th>
+            <td>{{ sale.discount_percent }}</td>
+        </tr>
+
+        <tr>
+            <th>Discount Amount</th>
+            <td>{{ sale.discount|intcomma }}</td>
+
+            <th>Media Person</th>
+            <td>{{ sale.media_persion.customer_name|default:"N/A" }}</td>
+        </tr>
+
+        <tr>
+            <th>Commission (%)</th>
+            <td>{{ sale.commisoin_percent }}</td>
+
+            <th>Media Commission</th>
+            <td>{{ sale.media_commisoin|intcomma }}</td>
+        </tr>
+
+        <tr>
+            <th>Lillahitaala (%)</th>
+            <td>{{ sale.lilahetalah_percent }}</td>
+
+            <th>Lillahitaala Amount</th>
+            <td>{{ sale.lilahetalah_amount|intcomma }}</td>
+        </tr>
+
+        <tr>
+            <th>Sales Date</th>
+            <td>{{ sale.sales_date }}</td>
+
+            <th>Sales Amount</th>
+            <td><b>{{ sale.sales_amount|intcomma }}</b></td>
+        </tr>
+        <tr style="background:#e5e7eb; font-weight:bold;">
+            <th>Final Amount</th>
+            <td colspan="3">
+                {{ final_amount|intcomma }}
+            </td>
+        </tr>
+    </table>
+
+    <!-- Description -->
+    <div class="section-title">Details</div>
+    <p style="font-size:11px; margin-top:6px;">
+        {{ sale.details|default:"No additional information." }}
+    </p>
+
+    <!-- Signatures -->
+    <div class="signature-section">
+        <div class="signature-box">
+            <span class="signature-line"></span>
+            Client Signature
+        </div>
+        <div class="signature-box">
+            <span class="signature-line"></span>
+            Verified By
+        </div>
+        <div class="signature-box">
+            <span class="signature-line"></span>
+            Approved By
+        </div>
+        <div class="signature-box">
+            <span class="signature-line"></span>
+            Prepared By
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer no-print">
+        <button onclick="window.location.href='{% url 'flat_plot_sales' %}'" class="back-btn">
+            ← Back to List
+        </button>
+
+        <button onclick="window.print()" class="print-btn">
+            🖨️ Print
+        </button>
+    </div>
+
+</div>
+
+</body>
+</html>

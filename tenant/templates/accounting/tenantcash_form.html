@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header_dashboard.html' %}
+            <!-- END: Top Bar -->
+            <div class="intro-y flex h-10 items-center">
+                <h2 class="mr-5 truncate text-lg font-medium">Tenant Account Management</h2>
+            
+                <div class="ml-auto flex items-center gap-3">
+                    
+                    <!-- Back Button -->
+                    <a href="javascript:history.back()" class="flex items-center text-primary">
+                        <i data-lucide="arrow-left" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                        Back
+                    </a>
+            
+                    <!-- Dashboard Button -->
+                    <a href="{% url 'tenant_dashboard' %}" class="flex items-center text-primary">
+                        <i data-lucide="layout-dashboard" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                        Dashboard
+                    </a>
+            
+                    <!-- Reload Button -->
+                    <a class="flex items-center text-primary" href="">
+                        <i data-lucide="refresh-ccw" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                        Reload Data
+                    </a>
+            
+                </div>
+            </div>
+            <div class="btp-form-container mt-10">
+                <div class="btp-form-header">
+                    <h1>{{ title }}</h1>
+                    <p class="btp-subtitle">Fill out the form carefully to manage tenant account information.</p>
+                </div>
+
+                <form method="post" class="btp-form-box">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btp-btn-submit">Save</button>
+                </form>
+
+                <a href="{% url 'account_list' %}" class="btp-back-link">⬅ Back to Account List</a>
+            </div>
+
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+
+<!-- ===== BTP Form Styles ===== -->
+<style>
+.btp-form-container {
+    width: 100%;
+    max-width: 650px;
+    margin: 50px auto;
+    padding: 35px 40px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.btp-form-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.btp-form-header h1 {
+    font-size: 26px;
+    color: #1e355f;
+    font-weight: 700;
+}
+
+.btp-subtitle {
+    color: #5a6a85;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.btp-form-box {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btp-form-box input,
+.btp-form-box select,
+.btp-form-box textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d9e6;
+    font-size: 14px;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.btp-form-box input:focus,
+.btp-form-box select:focus,
+.btp-form-box textarea:focus {
+    border-color: #2c6fff;
+    box-shadow: 0 0 5px rgba(44,111,255,0.3);
+    outline: none;
+}
+
+.btp-btn-submit {
+    background: linear-gradient(135deg, #2c6fff, #5289ff);
+    color: #fff;
+    padding: 12px 0;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease-in-out;
+}
+
+.btp-btn-submit:hover {
+    background: linear-gradient(135deg, #204ecf, #3f7bff);
+    transform: translateY(-2px);
+}
+
+.btp-back-link {
+    display: inline-block;
+    margin-top: 20px;
+    text-decoration: none;
+    color: #2c6fff;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease-in-out;
+}
+
+.btp-back-link:hover {
+    text-decoration: underline;
+    color: #204ecf;
+}
+</style>
+<!-- ===== END BTP Form Styles ===== -->
+{% endblock %}

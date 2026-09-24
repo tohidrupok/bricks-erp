@@ -1,0 +1,549 @@
+<!-- templates/lead_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lead Accounts - BM ERP{% endblock %}
+
+{% block content %}
+
+{# Remove this line if base.html already loads Font Awesome 6 #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+/* ===== Lead list (scoped: .ld-page and .ld-modal only) ===== */
+.ld-page, .ld-page *, .ld-modal, .ld-modal * { box-sizing: border-box; }
+.ld-page, .ld-modal { --ld-primary:#4f46e5; --ld-primary-dark:#4338ca; --ld-soft:#eef2ff; --ld-border:#e2e8f0; --ld-text:#334155; --ld-muted:#94a3b8; --ld-rose:#e11d48; color: var(--ld-text); }
+.ld-page a { text-decoration:none; }
+
+/* buttons */
+.ld-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 14px; border-radius:8px; border:1px solid var(--ld-primary); background:var(--ld-primary); color:#fff; font-size:12px; font-weight:600; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,.12); transition:.2s; white-space:nowrap; }
+.ld-btn:hover { background:var(--ld-primary-dark); }
+.ld-btn.is-light { background:#f1f5f9; border-color:#cbd5e1; color:#1e293b; }
+.ld-btn.is-light:hover { background:#e2e8f0; }
+.ld-btn.is-dark { background:#1e293b; border-color:#1e293b; color:#fff; }
+.ld-btn.is-dark:hover { background:#0f172a; }
+.ld-btn.is-danger { background:var(--ld-rose); border-color:var(--ld-rose); color:#fff; }
+.ld-btn.is-danger:hover { background:#be123c; }
+.ld-inline-form { display:inline-block; margin:0; }
+
+/* alerts */
+.ld-alerts { margin-top:16px; display:flex; flex-direction:column; gap:8px; }
+.ld-alert { padding:9px 14px; border-radius:8px; font-size:12px; font-weight:600; background:#fffbeb; color:#92400e; border:1px solid #fde68a; }
+.ld-alert.is-success { background:#ecfdf5; color:#047857; border-color:#a7f3d0; }
+
+/* sub navbar */
+.ld-topbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin-top:20px; padding:10px 16px; background:#fff; border:1px solid var(--ld-border); border-radius:12px; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+.ld-topbar-left, .ld-topbar-right { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.ld-brand-logo { width:32px; height:32px; border-radius:8px; background:var(--ld-primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; }
+.ld-nav { display:none; align-items:center; gap:4px; }
+@media (min-width:1024px){ .ld-nav { display:flex; } }
+.ld-nav a { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; color:#475569; transition:.2s; }
+.ld-nav a:hover { background:#f1f5f9; }
+.ld-nav a.is-active { background:var(--ld-soft); color:var(--ld-primary); }
+.ld-quick { display:none; position:relative; }
+@media (min-width:640px){ .ld-quick { display:block; } }
+.ld-quick i { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--ld-muted); }
+.ld-quick input { width:12rem; padding:6px 14px 6px 32px; font-size:12px; border:1px solid var(--ld-border); border-radius:999px; background:#f8fafc; outline:none; }
+.ld-quick input:focus { border-color:var(--ld-primary); box-shadow:0 0 0 2px rgba(79,70,229,.25); }
+.ld-icon-circle { width:32px; height:32px; border:0; border-radius:50%; background:#f1f5f9; color:#475569; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.ld-icon-circle:hover { background:#e2e8f0; }
+
+/* user dropdown */
+.ld-user { position:relative; }
+.ld-user-btn { width:32px; height:32px; border:0; border-radius:50%; background:var(--ld-primary); color:#fff; font-weight:700; font-size:12px; cursor:pointer; }
+.ld-user-menu { display:none; position:absolute; right:0; top:100%; padding-top:8px; width:12rem; z-index:50; }
+.ld-user-menu-inner { background:#fff; border:1px solid var(--ld-border); border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,.12); padding:4px 0; }
+.ld-user:hover .ld-user-menu, .ld-user:focus-within .ld-user-menu { display:block; }
+.ld-user-name { padding:8px 16px; border-bottom:1px solid #f1f5f9; font-size:12px; font-weight:700; }
+.ld-user-link { display:flex; align-items:center; gap:8px; width:100%; padding:8px 16px; font-size:12px; color:#475569; background:none; border:0; text-align:left; cursor:pointer; }
+.ld-user-link:hover { background:#f8fafc; }
+.ld-user-link.is-danger { color:var(--ld-rose); }
+.ld-user-link.is-danger:hover { background:#fff1f2; }
+
+/* toolbar */
+.ld-toolbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; padding:14px 16px; background:#fff; border:1px solid var(--ld-border); border-radius:16px; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+.ld-search-form { width:100%; margin:0; }
+@media (min-width:768px){ .ld-search-form { width:20rem; } }
+.ld-search { position:relative; width:100%; }
+.ld-search input { width:100%; padding:8px 12px 8px 34px; font-size:12px; border:1px solid #cbd5e1; border-radius:12px; background:#f8fafc; color:#0f172a; outline:none; transition:.2s; }
+.ld-search input:focus { border-color:var(--ld-primary); background:#fff; }
+.ld-search i { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:12px; color:var(--ld-muted); pointer-events:none; }
+.ld-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+
+/* table */
+.ld-card { margin-top:16px; background:#fff; border:1px solid var(--ld-border); border-radius:16px; box-shadow:0 1px 2px rgba(0,0,0,.05); overflow:hidden; }
+.ld-table-wrap { overflow-x:auto; }
+.ld-table { width:100%; border-collapse:collapse; text-align:left; font-size:12px; }
+.ld-table thead { background:#0f172a; color:#fff; }
+.ld-table th { padding:12px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; border-right:1px solid #1e293b; white-space:nowrap; }
+.ld-table th:last-child { border-right:0; }
+.ld-table td { padding:12px; vertical-align:top; border-top:1px solid #f1f5f9; line-height:1.55; }
+.ld-table tbody tr:hover { background:rgba(248,250,252,.9); }
+.ld-center { text-align:center; }
+.ld-nowrap { white-space:nowrap; }
+.ld-col-sl { width:48px; }
+.ld-col-check { width:40px; }
+.ld-check { width:15px; height:15px; accent-color:var(--ld-primary); cursor:pointer; }
+.ld-lead-id { color:var(--ld-primary); font-weight:700; }
+.ld-lead-name { color:#0f172a; font-weight:600; }
+.ld-lead-addr { color:#64748b; font-size:11px; }
+.ld-lead-proj { color:#6366f1; font-size:11px; }
+.ld-lead-src { color:var(--ld-muted); font-size:11px; }
+.ld-strong { color:#1e293b; font-weight:600; }
+.ld-small { font-size:11px; color:#475569; }
+.ld-activity { min-width:160px; }
+.ld-next { min-width:140px; }
+.ld-comment { max-width:220px; font-size:11px; font-style:italic; color:#64748b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ld-dash { color:var(--ld-muted); }
+.ld-empty { padding:32px; text-align:center; color:var(--ld-muted); }
+
+/* row actions */
+.ld-row-actions { display:flex; align-items:center; justify-content:center; gap:4px; }
+.ld-badge { padding:3px 9px; border-radius:999px; font-size:10px; font-weight:700; background:#e2e8f0; color:#334155; }
+.ld-badge.is-sold { background:#059669; color:#fff; }
+.ld-badge.is-junk { background:#f43f5e; color:#fff; }
+.ld-badge.is-booked { background:#0f172a; color:#fff; }
+.ld-icon-btn { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border:0; border-radius:8px; color:#fff; font-size:11px; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,.12); transition:.2s; }
+.ld-icon-btn.is-edit { background:#6366f1; }
+.ld-icon-btn.is-edit:hover { background:#4f46e5; }
+.ld-icon-btn.is-call { background:#e0f2fe; color:#0284c7; border-radius:50%; }
+.ld-icon-btn.is-call:hover { background:#bae6fd; }
+.ld-icon-btn.is-wa { background:#10b981; }
+.ld-icon-btn.is-wa:hover { background:#059669; }
+.ld-icon-btn.is-del { background:#f43f5e; }
+.ld-icon-btn.is-del:hover { background:#e11d48; }
+
+/* add modal */
+.ld-modal { position:fixed; inset:0; z-index:1000; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(15,23,42,.6); backdrop-filter:blur(3px); }
+.ld-modal.is-open { display:flex; }
+.ld-modal-panel { width:100%; max-width:56rem; max-height:90vh; overflow-y:auto; background:#fff; border-radius:16px; box-shadow:0 25px 50px rgba(0,0,0,.3); border:1px solid #f1f5f9; }
+.ld-modal-head { display:flex; align-items:center; justify-content:space-between; padding:14px 24px; background:#f8fafc; border-bottom:1px solid var(--ld-border); }
+.ld-modal-title { margin:0; font-size:16px; font-weight:700; color:#1e293b; }
+.ld-modal-x { width:32px; height:32px; border:0; border-radius:50%; background:none; color:var(--ld-muted); font-size:22px; line-height:1; cursor:pointer; }
+.ld-modal-x:hover { background:#e2e8f0; color:#334155; }
+.ld-modal-form { padding:24px; display:flex; flex-direction:column; gap:20px; }
+.ld-section-title { padding:8px 16px; border-radius:12px; background:var(--ld-soft); border:1px solid #e0e7ff; color:#312e81; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:12px; }
+.ld-fields { display:grid; grid-template-columns:minmax(0,1fr); gap:14px; padding:16px; background:rgba(248,250,252,.7); border:1px solid var(--ld-border); border-radius:12px; }
+@media (min-width:768px){
+  .ld-fields.cols-4 { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  .ld-fields.cols-3 { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .ld-span-all { grid-column:1 / -1; }
+}
+.ld-label { display:block; margin-bottom:4px; font-size:12px; font-weight:600; color:#475569; }
+.ld-req { color:var(--ld-rose); }
+.ld-input { width:100%; padding:8px; font-size:12px; color:#0f172a; background:#fff; border:1px solid #cbd5e1; border-radius:8px; outline:none; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+.ld-input:focus { border-color:var(--ld-primary); box-shadow:0 0 0 3px rgba(79,70,229,.18); }
+.ld-input[readonly] { background:#f1f5f9; color:#64748b; cursor:not-allowed; }
+.ld-phone { display:flex; }
+.ld-phone-code { display:flex; align-items:center; padding:0 8px; font-size:12px; color:#475569; background:#f1f5f9; border:1px solid #cbd5e1; border-right:0; border-radius:8px 0 0 8px; white-space:nowrap; }
+.ld-phone .ld-input { border-radius:0 8px 8px 0; }
+
+/* collapsible sections */
+.ld-details { border:1px solid var(--ld-border); border-radius:12px; overflow:hidden; background:rgba(248,250,252,.7); }
+.ld-details summary { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; background:var(--ld-soft); color:#312e81; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; cursor:pointer; list-style:none; }
+.ld-details summary::-webkit-details-marker { display:none; }
+.ld-details .ld-chev { font-size:11px; transition:transform .2s; }
+.ld-details[open] .ld-chev { transform:rotate(180deg); }
+.ld-details .ld-fields { border:0; border-radius:0; background:transparent; }
+.ld-modal-foot { display:flex; justify-content:flex-end; gap:12px; padding-top:16px; border-top:1px solid var(--ld-border); }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+
+            <div class="ld-page">
+
+                <!-- CRM SUB NAVBAR -->
+                <header class="ld-topbar">
+                    <div class="ld-topbar-left">
+                        
+                        <nav class="ld-nav">
+                            
+                            <a href="{% url 'crm_dashboard' %}"><i class="fa-solid fa-chart-pie"></i><span>CRM</span></a>
+                            <a href="#"><i class="fa-solid fa-gear"></i><span>Configuration</span></a>
+                            <a href="{% url 'lead_list' %}" class="is-active"><i class="fa-solid fa-user-plus"></i><span>Lead</span></a>
+                            <a href="#"><i class="fa-solid fa-headset"></i><span>Call Center</span></a>
+                            <a href="#"><i class="fa-solid fa-car"></i><span>Task/Visit</span></a>
+                            <a href="#"><i class="fa-solid fa-building"></i><span>Property</span></a>
+                            <a href="#"><i class="fa-solid fa-chart-line"></i><span>Reports</span></a>
+                            <a href="#"><i class="fa-solid fa-gauge"></i><span>KPI</span></a>
+                        </nav>
+                    </div>
+                    
+                </header>
+
+                <!-- TOOLBAR -->
+                <div class="ld-toolbar">
+                    <form method="GET" class="ld-search-form">
+                        {% if show_junk %}<input type="hidden" name="view" value="junk">{% endif %}
+                        <div class="ld-search">
+                            <input type="text" name="q" value="{{ search_query }}" placeholder="Search by Name, Mobile, or Address">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+                    </form>
+
+                    <div class="ld-actions">
+                        <button type="button" class="ld-btn" onclick="toggleModal('leadAddModal')">+ New Lead</button>
+                        <button type="button" class="ld-btn is-light">Call Assign</button>
+                        <button type="button" class="ld-btn is-light">Bulk Import</button>
+                        <button type="button" class="ld-btn is-light">Send SMS</button>
+
+                        <form id="convertForm" method="POST" action="{% url 'convert_to_customer' %}" class="ld-inline-form">
+                            {% csrf_token %}
+                            <button type="submit" class="ld-btn is-light">+ Convert To Customer</button>
+                        </form>
+
+                        <button type="button" class="ld-btn is-light">Transfer</button>
+                        <button type="button" class="ld-btn is-light">Wish SMS</button>
+
+                        <a href="{% if show_junk %}{% url 'lead_list' %}{% else %}?view=junk{% endif %}" class="ld-btn {% if show_junk %}is-danger{% else %}is-dark{% endif %}">
+                            {% if show_junk %}<i class="fa-solid fa-arrow-left"></i> Back to Active{% else %}Junk{% endif %}
+                        </a>
+                    </div>
+                </div>
+
+                {% if messages %}
+                <div class="ld-alerts">
+                    {% for message in messages %}
+                    <div class="ld-alert {% if message.tags == 'success' %}is-success{% endif %}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- LEAD TABLE -->
+                <div class="ld-card">
+                    <div class="ld-table-wrap">
+                        <table class="ld-table">
+                            <thead>
+                                <tr>
+                                    <th class="ld-center ld-col-sl">SL</th>
+                                    <th class="ld-center ld-col-check"><input type="checkbox" id="ldSelectAll" class="ld-check"></th>
+                                    <th>Name</th>
+                                    <th>Mobile</th>
+                                    <th>SR/Officer</th>
+                                    <th>CR</th>
+                                    <th>Last Activity</th>
+                                    
+                                    <th class="ld-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lead in leads %}
+                                <tr class="ld-row">
+                                    <td class="ld-center ld-small">{{ forloop.counter }}</td>
+                                    <td class="ld-center">
+                                        {# form= attribute submits the checked leads with the Convert To Customer form #}
+                                        <input type="checkbox" name="selected_leads" value="{{ lead.id }}" form="convertForm" class="ld-check ld-lead-check">
+                                    </td>
+                                    <td>
+                                        <div class="ld-lead-id">ID: {{ lead.lead_code }}</div>
+                                        <div class="ld-lead-name">Name: {{ lead.customer.customer_name }}</div>
+                                        <div class="ld-lead-addr">Address: {{ lead.customer.address|default:"-" }}</div>
+                                        <div class="ld-lead-proj">Project: {{ lead.project_name|default:"-" }}</div>
+                                        <div class="ld-lead-src">Source: {{ lead.customer.lead_source|default:"-" }}</div>
+                                    </td>
+                                    <td class="ld-strong ld-nowrap">{{ lead.customer.contact_no }}</td>
+                                    <td class="ld-nowrap">{{ lead.customer.assign_to_user|default:"Admin" }}</td>
+                                    <td class="ld-nowrap">{{ lead.cr|default:"-" }}</td>
+                                    <td class="ld-activity">
+                                        {% if lead.last_activity %}
+                                            <div class="ld-strong">{{ lead.last_activity.get_activity_type_display }}</div>
+                                            <div class="ld-small">Date: {{ lead.last_activity.create_date|date:"d-m-Y" }}</div>
+                                            <div class="ld-small">Status: {{ lead.last_activity.communication_status|default:lead.last_activity.task_status|default:"-" }}</div>
+                                            <div class="ld-comment">Comment: {{ lead.last_activity.followup_note|default:lead.last_activity.comment|default:"-" }}</div>
+                                        {% else %}
+                                            <span class="ld-dash">-</span>
+                                        {% endif %}
+                                    </td>
+                                    
+                                    <td class="ld-center ld-nowrap">
+                                        <div class="ld-row-actions">
+                                            <span class="ld-badge {% if lead.stage == 'Sold' %}is-sold{% elif lead.stage == 'Junk' %}is-junk{% elif lead.stage == 'Booked' %}is-booked{% endif %}">{{ lead.stage }}</span>
+
+                                            <button type="button" class="ld-icon-btn is-edit edit-lead-info" data-edit-url="{% url 'lead_edit_modal' lead.id %}" title="Edit Lead">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+
+                                            {% comment %}
+                                            <button type="button" class="ld-icon-btn is-edit edit-lead-activity" data-activity-url="{% url 'lead_activity_detail' lead.id %}" title="Edit Activity">
+                                                <i class="fa-solid fa-clipboard-list"></i>
+                                            </button>
+                                            {% endcomment %}
+
+                                            <button type="button" class="ld-icon-btn is-call open-lead-modal" data-lead-id="{{ lead.id }}" title="Call">
+                                                <i class="fa-solid fa-phone"></i>
+                                            </button>
+                                            <a href="https://wa.me/{{ lead.customer.contact_no }}" target="_blank" rel="noopener" title="WhatsApp" class="ld-icon-btn is-wa">
+                                                <i class="fa-brands fa-whatsapp"></i>
+                                            </a>
+                                            <a href="{% url 'lead_delete' lead.id %}" onclick="return confirm('Delete this lead?');" title="Delete" class="ld-icon-btn is-del">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="9" class="ld-empty">No lead entries found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+
+<!-- ================= LEAD ADD MODAL ================= -->
+<div id="leadAddModal" class="ld-modal">
+    <div class="ld-modal-panel">
+        <div class="ld-modal-head">
+            <h3 class="ld-modal-title">Lead Accounts</h3>
+            <button type="button" class="ld-modal-x" onclick="toggleModal('leadAddModal')">&times;</button>
+        </div>
+
+        <form method="POST" action="{% url 'lead_create' %}" class="ld-modal-form">
+            {% csrf_token %}
+
+            <div>
+                <div class="ld-section-title">Basic Info</div>
+                <div class="ld-fields cols-4">
+                    <div>
+                        <label class="ld-label">Date</label>
+                        <input type="date" name="date" value="{% now 'Y-m-d' %}" class="ld-input">
+                    </div>
+                    <div>
+                        <label class="ld-label">Lead Code</label>
+                        <input type="text" value="{{ next_lead_code }}" readonly class="ld-input">
+                    </div>
+                    <div>
+                        <label class="ld-label">Name <span class="ld-req">*</span></label>
+                        <input type="text" name="name" required placeholder="Name" class="ld-input">
+                    </div>
+                    <div>
+                        <label class="ld-label">Phone/Mobile <span class="ld-req">*</span></label>
+                        <div class="ld-phone">
+                            <span class="ld-phone-code">BD (+880)</span>
+                            <input type="text" name="phone" required placeholder="Enter phone number" class="ld-input">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="ld-label">Secondary Number</label>
+                        <input type="text" name="secondary_phone" class="ld-input">
+                    </div>
+                    <div>
+                        <label class="ld-label">Assign User/SR</label>
+                        <input type="text" name="assign_user" value="Admin" class="ld-input">
+                    </div>
+                    <div>
+                        <label class="ld-label">If CR</label>
+                        <input type="text" name="cr" class="ld-input">
+                    </div>
+                    <div>
+                        <label class="ld-label">Lead Stages</label>
+                        <select name="lead_stage" class="ld-input">
+                            <option value="">Select Option</option>
+                            {% for value, label in stage_choices %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <details class="ld-details" open>
+                <summary><span>Lead Details</span><i class="fa-solid fa-chevron-down ld-chev"></i></summary>
+                <div class="ld-fields cols-4">
+                    <div>
+                        <label class="ld-label">Lead Source</label>
+                        <select name="lead_source" class="ld-input">
+                            <option value="">Select Source</option>
+                            {% for source in lead_sources %}<option value="{{ source }}">{{ source }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="ld-label">Interested Project</label>
+                        <select name="interested_project" class="ld-input">
+                            <option value="">Select Interested Project</option>
+                            {% for project in projects %}<option value="{{ project.id }}">{{ project }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="ld-label">Lead Category</label>
+                        <select name="lead_category" class="ld-input">
+                            <option value="">Select Category</option>
+                            {% for category in lead_categories %}<option value="{{ category }}">{{ category }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="ld-label">Campaign</label>
+                        <select name="campaign" class="ld-input">
+                            <option value="">Select Campaign</option>
+                            {% for campaign in campaigns %}<option value="{{ campaign.id }}">{{ campaign.name }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </details>
+
+            <details class="ld-details" open>
+                <summary><span>Personal Info</span><i class="fa-solid fa-chevron-down ld-chev"></i></summary>
+                <div class="ld-fields cols-3">
+                    <div>
+                        <label class="ld-label">Organization</label>
+                        <input type="text" name="organization" class="ld-input">
+                    </div>
+                    <div>
+                        <label class="ld-label">Designation</label>
+                        <input type="text" name="designation" class="ld-input">
+                    </div>
+                    <div>
+                        <label class="ld-label">Birth Date</label>
+                        <input type="date" name="birth_date" class="ld-input">
+                    </div>
+                    <div>
+                        <label class="ld-label">Anniversary Date</label>
+                        <input type="date" name="anniversary_date" class="ld-input">
+                    </div>
+                    <div>
+                        <label class="ld-label">Profession</label>
+                        <select name="profession" class="ld-input">
+                            <option value="">Select Profession</option>
+                            {% for profession in professions %}<option value="{{ profession }}">{{ profession }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="ld-label">Address</label>
+                        <input type="text" name="address" class="ld-input">
+                    </div>
+                    <div class="ld-span-all">
+                        <label class="ld-label">Email</label>
+                        <input type="email" name="email" class="ld-input">
+                    </div>
+                </div>
+            </details>
+
+            <div class="ld-modal-foot">
+                <button type="button" class="ld-btn is-light" onclick="toggleModal('leadAddModal')">Close</button>
+                <button type="submit" class="ld-btn">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="activityModalContainer"></div>
+<div id="leadEditModalContainer"></div>
+
+<script>
+/* Works for the add modal (.ld-modal) and for injected Tailwind-style modals (hidden/flex) */
+function toggleModal(modalId) {
+    var modal = document.getElementById(modalId);
+    if (!modal) return;
+    if (modal.classList.contains('ld-modal')) {
+        modal.classList.toggle('is-open');
+    } else {
+        modal.classList.toggle('hidden');
+        modal.classList.toggle('flex');
+    }
+}
+
+// Close add modal on backdrop click / Esc
+document.getElementById('leadAddModal').addEventListener('click', function (e) {
+    if (e.target === this) toggleModal('leadAddModal');
+});
+document.addEventListener('keydown', function (e) {
+    var m = document.getElementById('leadAddModal');
+    if (e.key === 'Escape' && m.classList.contains('is-open')) toggleModal('leadAddModal');
+});
+
+// Select all
+var ldSelectAll = document.getElementById('ldSelectAll');
+if (ldSelectAll) {
+    ldSelectAll.addEventListener('change', function () {
+        document.querySelectorAll('.ld-lead-check').forEach(function (cb) { cb.checked = ldSelectAll.checked; });
+    });
+}
+
+// Quick row filter (topbar)
+var ldQuick = document.getElementById('ldQuickFilter');
+if (ldQuick) {
+    ldQuick.addEventListener('input', function () {
+        var q = ldQuick.value.toLowerCase().trim();
+        document.querySelectorAll('.ld-row').forEach(function (row) {
+            row.style.display = row.textContent.toLowerCase().indexOf(q) > -1 ? '' : 'none';
+        });
+    });
+}
+
+// Edit Lead (pen icon)
+document.addEventListener('click', function (event) {
+    var trigger = event.target.closest('.edit-lead-info');
+    if (!trigger) return;
+    fetch(trigger.getAttribute('data-edit-url'))
+        .then(function (r) { return r.text(); })
+        .then(function (html) { document.getElementById('leadEditModalContainer').innerHTML = html; })
+        .catch(function (err) { console.error('Error loading lead edit modal:', err); });
+});
+
+// Edit Activity (clipboard icon, currently commented out in the table)
+document.addEventListener('click', function (event) {
+    var trigger = event.target.closest('.edit-lead-activity');
+    if (!trigger) return;
+    fetch(trigger.getAttribute('data-activity-url'))
+        .then(function (r) { return r.text(); })
+        .then(function (html) { document.getElementById('activityModalContainer').innerHTML = html; })
+        .catch(function (err) { console.error('Error loading activity modal:', err); });
+});
+
+// Call icon
+document.addEventListener('click', function (event) {
+    var trigger = event.target.closest('.open-lead-modal');
+    if (!trigger) return;
+    fetch('/lead-modal/' + trigger.getAttribute('data-lead-id') + '/')
+        .then(function (r) { return r.text(); })
+        .then(function (html) { document.getElementById('activityModalContainer').innerHTML = html; })
+        .catch(function (err) { console.error('Error loading modal:', err); });
+});
+
+/* Followup vs Task/Visit toggle. Lives here because the activity modal is
+   injected via innerHTML, so its own <script> never runs. */
+document.addEventListener('change', function (e) {
+    if (e.target.name === 'activity_type') {
+        toggleActivitySection(e.target.value, 'followupSection', 'taskSection');
+    }
+    if (e.target.name === 'next_activity_type') {
+        toggleActivitySection(e.target.value, 'nextFollowupSection', 'nextTaskSection');
+    }
+});
+
+function toggleActivitySection(value, followupId, taskId) {
+    var followupEl = document.getElementById(followupId);
+    var taskEl = document.getElementById(taskId);
+    if (!followupEl || !taskEl) return;
+    if (value === 'followup') {
+        followupEl.classList.remove('hidden');
+        taskEl.classList.add('hidden');
+    } else {
+        followupEl.classList.add('hidden');
+        taskEl.classList.remove('hidden');
+    }
+}
+</script>
+{% endblock %}

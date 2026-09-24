@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inventosty Stock Ledger Manage - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- Sidebar -->
+        {% include 'partials/sidebar_list.html' %}
+
+        <!-- Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+            <!-- Top Bar -->
+            {% include 'partials/header.html' %}
+
+            <!-- Page Header -->
+            <div class="intro-y mt-10 mb-5 flex items-center justify-between">
+                <h2 class="text-lg font-medium">Inventosty Stock Ledger Manage</h2>
+            </div>
+            <div class="mx-auto hidden text-slate-500 md:block">                             </div>
+            
+            <div class="mt-1 w-full flex flex-wrap justify-between items-center gap-4">
+            <!-- Left Side: Button -->
+            <div class="flex items-center space-x-2">
+                <a href="{% url 'invStock_ledger_list' %}">
+                    <button class="bg-success border-success text-white font-medium px-3 py-2 rounded-md shadow-md">
+                        Refresh
+                    </button>
+                </a>
+            </div>
+            <div class="flex items-center space-x-2">
+                <a href="{% url 'invStock_ledger_manage' %}">
+                    <button class="bg-primary border-primary text-white font-medium px-3 py-2 rounded-md shadow-md">
+                        Inventory Stock Report
+                    </button>
+                </a>
+            </div>
+            <!-- Right Side: Balance + Search -->
+            <div class="mb-4">
+              <input type="text" id="searchInput" placeholder="Search by Project Name or Location..." class="px-4 py-2 border rounded w-full" />
+            </div>
+        
+        </div>
+
+            <!-- Messages -->
+            {% if messages %}
+            <ul class="mb-4">
+                {% for message in messages %}
+                <li class="message {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <!-- Table Section -->
+            <div class="grid grid-cols-12 gap-6">
+                <div class="col-span-12">
+                    <h1 class="text-2xl font-semibold text-center">Inventory Ledger Report</h1>
+
+                     <div class="grid grid-cols-12 gap-6">
+                <div class="col-span-12">
+                    <div class="overflow-x-auto rounded-lg bg-white p-4 shadow">
+                        <table class="w-full border text-sm text-center border-collapse">
+                            <thead>
+                                <tr class="bg-slate-200">
+                                    <th class="border p-2">SL</th>
+                                    <th class="border p-2">Project</th>
+                                    <th class="border p-2">Date</th>
+                                    <th class="border p-2">Item Name</th>
+                                    <th class="border p-2">Purchase Qty</th>
+                                    <th class="border p-2">Use Qty</th>
+                                    <th class="border p-2">Balance Qty</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in summary %}
+                                <tr class="hover:bg-slate-100">
+                                    <td class="border p-2">{{ forloop.counter }}</td>
+                                    <td class="border p-2">{{ row.project_name }}</td>
+                                    <td class="border p-2">{{ row.date|date:"Y-m-d" }}</td>
+                                    <td class="border p-2">{{ row.item_name }}</td>
+                                    <td class="border p-2">{{ row.purchase_qty }}</td>
+                                    <td class="border p-2">{{ row.use_qty }}</td>
+                                    <td class="border p-2 font-semibold">{{ row.balance_qty }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="7" class="p-3 text-center">No records found.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                            <!--<tfoot>-->
+                            <!--    <tr class="bg-slate-100 font-semibold">-->
+                            <!--        <td class="border p-2 text-right" colspan="4">Total</td>-->
+                            <!--        <td class="border p-2">{{ total_purchase }}</td>-->
+                            <!--        <td class="border p-2">{{ total_use }}</td>-->
+                            <!--        <td class="border p-2">{{ total_balance }}</td>-->
+                            <!--    </tr>-->
+                            <!--</tfoot>-->
+                        </table>
+                        <p class="text-right text-xs mt-2 text-slate-500">
+                            Printed on: {{ print_time|date:"F j, Y, g:i a" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+                </div>
+            </div>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const searchInput = document.getElementById("searchInput");
+                    const table = document.querySelector("table");
+                    const tableRows = table.querySelectorAll("tbody tr");
+                    const totalPurchaseCell = table.querySelector("tfoot tr td:nth-child(5)");
+                    const totalUseCell = table.querySelector("tfoot tr td:nth-child(6)");
+                    const totalBalanceCell = table.querySelector("tfoot tr td:nth-child(7)");
+                
+                    function updateTotals() {
+                        let totalPurchase = 0;
+                        let totalUse = 0;
+                        let totalBalance = 0;
+                
+                        tableRows.forEach(row => {
+                            if (row.style.display !== "none") {
+                                const purchaseQty = parseFloat(row.children[4].textContent) || 0;
+                                const useQty = parseFloat(row.children[5].textContent) || 0;
+                                const balanceQty = parseFloat(row.children[6].textContent) || 0;
+                
+                                totalPurchase += purchaseQty;
+                                totalUse += useQty;
+                                totalBalance += balanceQty;
+                            }
+                        });
+                
+                        totalPurchaseCell.textContent = totalPurchase.toFixed(2);
+                        totalUseCell.textContent = totalUse.toFixed(2);
+                        totalBalanceCell.textContent = totalBalance.toFixed(2);
+                    }
+                
+                    searchInput.addEventListener("input", function () {
+                        const filter = searchInput.value.toLowerCase();
+                        tableRows.forEach(row => {
+                            const project = row.children[1]?.textContent.toLowerCase() || '';
+                            const item = row.children[3]?.textContent.toLowerCase() || '';
+                
+                            if (project.includes(filter) || item.includes(filter)) {
+                                row.style.display = "";
+                            } else {
+                                row.style.display = "none";
+                            }
+                        });
+                        updateTotals();
+                    });
+                
+                    // Initialize totals on page load
+                    updateTotals();
+                });
+                </script>
+
+
+
+        </div>
+    </div>
+</div>
+{% endblock %}

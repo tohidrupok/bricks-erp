@@ -1,0 +1,167 @@
+<!-- templates/restaurant/restaurant_kitchen_ledger_payment.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kitchen Ledger Payment - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+                
+                <h2 class="intro-y mt-10 text-lg font-medium">Kitchen Ledger Payment Voucher</h2>
+                
+                <!-- BEGIN: Filter / Selection Form -->
+                <div class="intro-y mt-5 bg-white p-5 shadow-sm rounded-lg">
+                    <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div>
+                            <label class="block font-medium text-sm text-gray-700 mb-1">Date</label>
+                            <input type="date" name="date" value="{{ selected_date }}" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-sm text-gray-700 mb-1">Project Name</label>
+                            <select name="project_id" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                <option value="">Select Project</option>
+                                {% for proj in projects %}
+                                    <option value="{{ proj.id }}" {% if selected_project|stringformat:"s" == proj.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ proj.project_first_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-medium text-sm text-gray-700 mb-1">Target Type</label>
+                            <input type="text" name="type_name" value="{{ target_type|default:'' }}" placeholder="e.g. Supplier" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full bg-slate-700 text-white font-medium p-2 rounded-md hover:bg-slate-800 transition">Filter Records</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- END: Filter Form -->
+
+                <!-- BEGIN: Formset Entry Grid -->
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5 bg-white shadow-lg rounded-lg">
+                        <form method="POST" class="w-full">
+                            {% csrf_token %}
+                            <input type="hidden" name="date" value="{{ selected_date }}">
+                            <input type="hidden" name="project_id" value="{{ selected_project }}">
+                            <input type="hidden" name="target_type" value="{{ target_type }}">
+
+                            {{ formset.management_form }}
+                            
+                            <div id="formset-container">
+                                {% for form in formset %}
+                                    <div class="formset-row border-b border-slate-200 pb-6 mb-6">
+                                        {% if form.non_field_errors %}
+                                            <div class="mb-4 text-red-600 text-sm">
+                                                {{ form.non_field_errors }}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% for hidden in form.hidden_fields %}
+                                            {{ hidden }}
+                                        {% endfor %}
+
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <!-- Type (Fixed / Pre-populated as Supplier or Target Type) -->
+                                            <div>
+                                                <label class="font-medium text-sm text-gray-800 block mb-1">Type</label>
+                                                {{ form.type }}
+                                                {% for error in form.type.errors %}
+                                                    <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                                                {% endfor %}
+                                            </div>
+
+                                            <!-- Vendor / Supplier Field -->
+                                            <div>
+                                                <label class="font-medium text-sm text-gray-800 block mb-1">Supplier Name</label>
+                                                {{ form.vendor }}
+                                                {% for error in form.vendor.errors %}
+                                                    <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                                                {% endfor %}
+                                            </div>
+
+                                            <!-- Amount -->
+                                            <div>
+                                                <label class="font-medium text-sm text-gray-800 block mb-1">Amount</label>
+                                                {{ form.amount }}
+                                                {% for error in form.amount.errors %}
+                                                    <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                                                {% endfor %}
+                                            </div>
+
+                                            <!-- Cash Type (Supplier Account mapping) -->
+                                            <div>
+                                                <label class="font-medium text-sm text-gray-800 block mb-1">Cash Type</label>
+                                                {{ form.cash_type }}
+                                                {% for error in form.cash_type.errors %}
+                                                    <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                                                {% endfor %}
+                                            </div>
+
+                                            <!-- Head of Account -->
+                                            <div>
+                                                <label class="font-medium text-sm text-gray-800 block mb-1">Head of Account</label>
+                                                {{ form.head_of_account }}
+                                                {% for error in form.head_of_account.errors %}
+                                                    <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                                                {% endfor %}
+                                            </div>
+
+                                            <!-- Delete checkbox if can_delete is active -->
+                                            {% if form.can_delete %}
+                                                <div class="flex items-center pt-6">
+                                                    <label class="cursor-pointer flex items-center text-red-600 font-medium text-sm">
+                                                        {{ form.DELETE }} <span class="ml-2">Delete Entry</span>
+                                                    </label>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Summary Block -->
+                            <div class="flex justify-between items-center my-6 p-4 bg-slate-50 rounded-md">
+                                <div class="text-sm font-medium text-gray-700">
+                                    <span>Expense Total: <strong>{{ expense_total }}</strong></span> | 
+                                    <span>Purchase Total: <strong>{{ purchase_total }}</strong></span>
+                                </div>
+                                <div class="text-lg font-bold text-gray-900">
+                                    Total Summary: {{ total_summary }}
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full bg-blue-600 text-white font-medium p-3 rounded-md hover:bg-blue-700 transition">Save & Sync Payment Vouchers</button>
+                        </form>
+                    </div>
+                </div>
+                <!-- END: Formset Entry Grid -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Add Tailwind CSS utility classes to formset widgets dynamically for unified UI rendering
+        const inputs = document.querySelectorAll('#formset-container input, #formset-container select, #formset-container textarea');
+        inputs.forEach(input => {
+            if (input.type !== 'checkbox' && input.type !== 'hidden') {
+                input.classList.add('w-full', 'text-sm', 'border', 'border-slate-300', 'shadow-sm', 'rounded-md', 'p-2');
+            }
+        });
+    });
+    </script>
+{% endblock %}

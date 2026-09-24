@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile & Security - BRICKS ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+        
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            <!-- BEGIN: Top Bar -->  
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+        
+            <div class="intro-y flex items-center mt-8 mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">Account Settings</h2>
+                    <p class="text-slate-500 text-sm mt-0.5">Manage your personal information, profile photo, and security credentials.</p>
+                </div>
+            </div>
+
+            {% if messages %}
+                <div class="mb-6 intro-y">
+                    {% for message in messages %}
+                        <div class="p-4 rounded-xl {% if message.tags == 'error' %}bg-rose-50 text-rose-700 border border-rose-200{% else %}bg-emerald-50 text-emerald-700 border border-emerald-200{% endif %} flex items-center shadow-sm">
+                            <i data-lucide="{% if message.tags == 'error' %}alert-circle{% else %}check-circle{% endif %}" class="w-5 h-5 mr-2 flex-shrink-0"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data"  class="w-full max-w-4xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                {% csrf_token %}
+                <div class="grid grid-cols-12 gap-6 intro-y">
+                    
+                    <!-- BEGIN: Profile Picture Card -->
+                    <div class="col-span-12 lg:col-span-4">
+                        <div class="box p-6 rounded-2xl bg-white shadow-sm border border-slate-200 text-center">
+                            <div class="relative w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden shadow-md border-4 border-slate-100">
+                                {% if employee and employee.photo %}
+                                    <img id="profilePreview" src="{{ employee.photo.url }}" alt="Profile Photo" class="w-full h-full object-cover">
+                                {% else %}
+                                    <div id="profilePlaceholder" class="w-full h-full bg-primary/10 text-primary flex items-center justify-center font-bold text-3xl">
+                                        {{ profile_user.username|slice:":2"|upper }}
+                                    </div>
+                                    <img id="profilePreview" src="" alt="Profile Photo" class="w-full h-full object-cover hidden">
+                                {% endif %}
+                            </div>
+
+                            <h3 class="font-bold text-base text-slate-800">{{ profile_user.get_full_name|default:profile_user.username }}</h3>
+                            <span class="inline-block px-3 py-1 mt-1 text-xs font-semibold rounded-full bg-primary/10 text-primary">
+                                {{ employee.position|default:"Staff Member" }}
+                            </span>
+
+                            <div class="mt-6 text-left border-t border-slate-100 pt-4">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Upload New Photo</label>
+                                <input type="file" name="photo" id="photoInput" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END: Profile Picture Card -->
+
+                    <!-- BEGIN: Profile Details & Password Form Card -->
+                    <div class="col-span-12 lg:col-span-8 space-y-6">
+                        
+                        <!-- Personal Info Section -->
+                        <div class="box p-6 rounded-2xl bg-white shadow-sm border border-slate-200">
+                            <h3 class="font-bold text-base text-slate-800 mb-4 pb-3 border-b border-slate-100 flex items-center">
+                                <i data-lucide="user-pen" class="w-4 h-4 mr-2 text-primary"></i> Personal Details
+                            </h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="form-label font-medium text-slate-700 text-xs uppercase tracking-wider">Username</label>
+                                    <input type="text" class="w-full px-3 py-2 bg-slate-100 text-slate-500 border border-slate-200 rounded-lg cursor-not-allowed text-sm" value="{{ profile_user.username }}" disabled>
+                                </div>
+                                <div>
+                                    <label class="form-label font-medium text-slate-700 text-xs uppercase tracking-wider">Email Address</label>
+                                    <input type="email" name="email" class="w-full px-3 py-2 bg-white text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm" value="{{ profile_user.email }}" required>
+                                </div>
+                                <div>
+                                    <label class="form-label font-medium text-slate-700 text-xs uppercase tracking-wider">First Name</label>
+                                    <input type="text" name="first_name" class="w-full px-3 py-2 bg-white text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm" value="{{ profile_user.first_name }}">
+                                </div>
+                                <div>
+                                    <label class="form-label font-medium text-slate-700 text-xs uppercase tracking-wider">Last Name</label>
+                                    <input type="text" name="last_name" class="w-full px-3 py-2 bg-white text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm" value="{{ profile_user.last_name }}">
+                                </div>
+
+                                <div>
+                                    <label class="form-label font-medium text-slate-700 text-xs uppercase tracking-wider">Full Employee Name</label>
+                                    <input type="text" name="employee_name" class="w-full px-3 py-2 bg-white text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm" value="{{ employee.employee_name|default:'' }}">
+                                </div>
+                                <div>
+                                    <label class="form-label font-medium text-slate-700 text-xs uppercase tracking-wider">Phone Number</label>
+                                    <input type="text" name="phone" class="w-full px-3 py-2 bg-white text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm" value="{{ employee.phone|default:'' }}">
+                                </div>
+                                <div>
+                                    <label class="form-label font-medium text-slate-700 text-xs uppercase tracking-wider">Position / Role</label>
+                                    <input type="text" name="position" class="w-full px-3 py-2 bg-white text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm" value="{{ employee.position|default:'' }}">
+                                </div>
+                                <div>
+                                    <label class="form-label font-medium text-slate-700 text-xs uppercase tracking-wider">Department Type</label>
+                                    <input type="text" class="w-full px-3 py-2 bg-slate-100 text-slate-500 border border-slate-200 rounded-lg cursor-not-allowed text-sm" value="{{ employee.emp_type|title|default:'Staff' }}" disabled>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="form-label font-medium text-slate-700 text-xs uppercase tracking-wider">Address</label>
+                                    <textarea name="address" class="w-full px-3 py-2 bg-white text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm" rows="3">{{ employee.address|default:'' }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Password Change Section -->
+                        <div class="box p-6 rounded-2xl bg-white shadow-sm border border-slate-200">
+                            <h3 class="font-bold text-base text-slate-800 mb-2 pb-3 border-b border-slate-100 flex items-center">
+                                <i data-lucide="lock" class="w-4 h-4 mr-2 text-primary"></i> Change Password
+                            </h3>
+                            <p class="text-xs text-slate-500 mb-4">Leave these fields blank if you do not want to change your password.</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="form-label font-medium text-slate-700 text-xs uppercase tracking-wider">Current Password</label>
+                                    <input type="password" name="current_password" class="w-full px-3 py-2 bg-white text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm" placeholder="••••••••">
+                                </div>
+                                <div>
+                                    <label class="form-label font-medium text-slate-700 text-xs uppercase tracking-wider">New Password</label>
+                                    <input type="password" name="new_password" class="w-full px-3 py-2 bg-white text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm" placeholder="••••••••">
+                                </div>
+                                <div>
+                                    <label class="form-label font-medium text-slate-700 text-xs uppercase tracking-wider">Confirm Password</label>
+                                    <input type="password" name="confirm_password" class="w-full px-3 py-2 bg-white text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm" placeholder="••••••••">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Submit Button -->
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-primary bg-primary text-white px-8 py-3 rounded-xl font-semibold shadow-md hover:bg-primary/95 transition-all">
+                                Save Changes
+                            </button>
+                        </div>
+
+                    </div>
+                    <!-- END: Profile Details & Password Form Card -->
+
+                </div>
+            </form>
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+
+<!-- JavaScript to handle instant profile picture preview -->
+<script>
+document.getElementById('photoInput').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('profilePreview');
+            const placeholder = document.getElementById('profilePlaceholder');
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+            if (placeholder) {
+                placeholder.classList.add('hidden');
+            }
+        }
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,420 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Received Voucher List - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Received/Collection Voucher List</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <style>
+                      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+                    
+                      .smsh-root {
+                        font-family: 'Plus Jakarta Sans', sans-serif;
+                        padding: 1.5rem;
+                        background: #f5f7ff;
+                        border-radius: 16px;
+                      }
+                    
+                      /* ── Top Bar ── */
+                      .smsh-topbar {
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        margin-bottom: 1.5rem;
+                      }
+                    
+                      .smsh-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 7px;
+                        padding: 9px 18px;
+                        border-radius: 10px;
+                        font-size: 0.82rem;
+                        font-weight: 600;
+                        border: none;
+                        cursor: pointer;
+                        text-decoration: none;
+                        transition: all 0.18s ease;
+                        letter-spacing: 0.2px;
+                        white-space: nowrap;
+                      }
+                      .smsh-btn:hover { transform: translateY(-2px); opacity: 0.9; text-decoration: none; }
+                    
+                      .smsh-btn-back {
+                        background: linear-gradient(135deg, #3b5bdb, #4dabf7);
+                        color: #fff;
+                        box-shadow: 0 4px 14px rgba(59,91,219,0.3);
+                      }
+                      .smsh-btn-refresh {
+                        background: linear-gradient(135deg, #2f9e44, #69db7c);
+                        color: #fff;
+                        box-shadow: 0 4px 14px rgba(47,158,68,0.3);
+                      }
+                    
+                      .smsh-search-wrap {
+                        margin-left: auto;
+                        position: relative;
+                      }
+                      .smsh-search-wrap input {
+                        padding: 9px 36px 9px 14px;
+                        border-radius: 10px;
+                        border: 1.5px solid #d0d5f0;
+                        font-size: 0.82rem;
+                        width: 220px;
+                        outline: none;
+                        background: #fff;
+                        font-family: inherit;
+                        transition: border 0.15s, box-shadow 0.15s;
+                      }
+                      .smsh-search-wrap input:focus {
+                        border-color: #3b5bdb;
+                        box-shadow: 0 0 0 3px rgba(59,91,219,0.1);
+                      }
+                      .smsh-search-icon {
+                        position: absolute;
+                        right: 11px;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        font-size: 13px;
+                        color: #94a3b8;
+                        pointer-events: none;
+                      }
+                    
+                      /* ── Card ── */
+                      .smsh-card {
+                        background: #fff;
+                        border-radius: 16px;
+                        box-shadow: 0 2px 18px rgba(0,0,0,0.07);
+                        overflow: hidden;
+                        animation: smshSlide 0.35s ease both;
+                      }
+                      @keyframes smshSlide {
+                        from { opacity: 0; transform: translateY(14px); }
+                        to   { opacity: 1; transform: translateY(0); }
+                      }
+                    
+                      .smsh-card-header {
+                        padding: 14px 22px;
+                        background: linear-gradient(135deg, #1a1f36, #343a40);
+                        color: #fff;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        font-weight: 700;
+                        font-size: 0.88rem;
+                        letter-spacing: 0.4px;
+                      }
+                    
+                      .smsh-card-header svg {
+                        opacity: 0.85;
+                      }
+                    
+                      .smsh-count-pill {
+                        margin-left: auto;
+                        background: rgba(255,255,255,0.18);
+                        border-radius: 20px;
+                        padding: 3px 12px;
+                        font-size: 0.74rem;
+                        font-weight: 600;
+                        letter-spacing: 0.3px;
+                      }
+                    
+                      /* ── Table ── */
+                      .smsh-table-wrap {
+                        overflow-x: auto;
+                      }
+                      .smsh-table-wrap::-webkit-scrollbar { height: 5px; }
+                      .smsh-table-wrap::-webkit-scrollbar-track { background: #f1f5f9; }
+                      .smsh-table-wrap::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 10px; }
+                    
+                      .smsh-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 0.82rem;
+                      }
+                    
+                      .smsh-table thead tr {
+                        background: #f0f4ff;
+                      }
+                      .smsh-table thead th {
+                        padding: 11px 16px;
+                        font-weight: 700;
+                        color: #3b5bdb;
+                        font-size: 0.76rem;
+                        letter-spacing: 0.6px;
+                        text-transform: uppercase;
+                        border-bottom: 2px solid #c5d0f5;
+                        white-space: nowrap;
+                      }
+                    
+                      .smsh-table tbody tr {
+                        border-bottom: 1px solid #f0f4ff;
+                        transition: background 0.12s;
+                      }
+                      .smsh-table tbody tr:hover { background: #f7f9ff; }
+                    
+                      .smsh-table td {
+                        padding: 11px 16px;
+                        color: #374151;
+                        vertical-align: middle;
+                      }
+                    
+                      /* Serial number */
+                      .smsh-serial {
+                        width: 42px;
+                        text-align: center;
+                        font-weight: 700;
+                        color: #94a3b8;
+                        font-size: 0.75rem;
+                      }
+                    
+                      /* Message preview */
+                      .smsh-msg-preview {
+                        max-width: 320px;
+                        color: #374151;
+                        line-height: 1.5;
+                      }
+                      .smsh-msg-bubble {
+                        background: #f0f4ff;
+                        border-left: 3px solid #3b5bdb;
+                        padding: 6px 10px;
+                        border-radius: 0 8px 8px 0;
+                        font-size: 0.8rem;
+                        color: #1a1f36;
+                        display: inline-block;
+                        max-width: 100%;
+                      }
+                    
+                      /* Created by */
+                      .smsh-creator {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        white-space: nowrap;
+                      }
+                      .smsh-creator-avatar {
+                        width: 28px;
+                        height: 28px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #7048e8, #b197fc);
+                        color: #fff;
+                        font-size: 0.68rem;
+                        font-weight: 700;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-shrink: 0;
+                      }
+                    
+                      /* Date */
+                      .smsh-date {
+                        white-space: nowrap;
+                        font-size: 0.78rem;
+                        color: #6b7280;
+                      }
+                      .smsh-date-day {
+                        font-weight: 700;
+                        color: #1a1f36;
+                        font-size: 0.82rem;
+                      }
+                    
+                      /* View button */
+                      .smsh-view-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 5px;
+                        padding: 5px 14px;
+                        border-radius: 8px;
+                        font-size: 0.76rem;
+                        font-weight: 600;
+                        background: linear-gradient(135deg, #3b5bdb, #748ffc);
+                        color: #fff;
+                        text-decoration: none;
+                        box-shadow: 0 3px 10px rgba(59,91,219,0.25);
+                        transition: all 0.15s ease;
+                        white-space: nowrap;
+                      }
+                      .smsh-view-btn:hover {
+                        transform: translateY(-1px);
+                        box-shadow: 0 5px 14px rgba(59,91,219,0.35);
+                        color: #fff;
+                        text-decoration: none;
+                      }
+                    
+                      /* Empty state */
+                      .smsh-empty {
+                        text-align: center;
+                        padding: 40px 20px;
+                      }
+                      .smsh-empty-icon {
+                        font-size: 2.5rem;
+                        margin-bottom: 12px;
+                      }
+                      .smsh-empty-text {
+                        color: #e03131;
+                        font-weight: 600;
+                        font-size: 0.88rem;
+                      }
+                    
+                      @media (max-width: 576px) {
+                        .smsh-search-wrap { margin-left: 0; width: 100%; }
+                        .smsh-search-wrap input { width: 100%; }
+                      }
+                    </style>
+                    
+                    <div class="smsh-root mt-5">
+                    
+                      <!-- Top Bar -->
+                      <div class="smsh-topbar">
+                        <a href="{% url 'varatiya_bulk_sms' %}" class="smsh-btn smsh-btn-back">
+                          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                          Back
+                        </a>
+                        <a href="{% url 'tenant_dashboard' %}" class="smsh-btn smsh-btn-back">
+                          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                          Dashboard
+                        </a>
+                        
+                         
+                          
+                        <a href="{% url 'varatiya_bulk_sms_list' %}" class="smsh-btn smsh-btn-refresh">
+                          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+                          Refresh
+                        </a>
+                    
+                        <div class="smsh-search-wrap">
+                          <input id="smshSearchInput" type="text" placeholder="Search history..." oninput="smshHandleSearch()">
+                          <span class="smsh-search-icon">🔍</span>
+                        </div>
+                      </div>
+                    
+                      <!-- SMS History Card -->
+                      <div class="smsh-card">
+                        <div class="smsh-card-header">
+                          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                          SMS History
+                          <span class="smsh-count-pill" id="smshCountPill">— records</span>
+                        </div>
+                    
+                        <div class="smsh-table-wrap">
+                          <table class="smsh-table" id="smshTable">
+                            <thead>
+                              <tr>
+                                <th class="smsh-serial">#</th>
+                                <th>Message</th>
+                                <th>Created By</th>
+                                <th>Date & Time</th>
+                                <th style="text-align:center;">Details</th>
+                              </tr>
+                            </thead>
+                            <tbody id="smshTbody">
+                              {% for sms in sms_history %}
+                              <tr>
+                                <td class="smsh-serial">{{ forloop.counter }}</td>
+                                <td>
+                                  <div class="smsh-msg-preview">
+                                    <span class="smsh-msg-bubble">{{ sms.message|truncatechars:100 }}</span>
+                                  </div>
+                                </td>
+                                <td>
+                                  <span class="smsh-creator">
+                                    <span class="smsh-creator-avatar">{{ sms.created_by|slice:":1"|upper }}</span>
+                                    {{ sms.created_by }}
+                                  </span>
+                                </td>
+                                <td>
+                                  <div class="smsh-date">
+                                    <div class="smsh-date-day">{{ sms.created_at|date:"d M Y" }}</div>
+                                    {{ sms.created_at|date:"h:i A" }}
+                                  </div>
+                                </td>
+                                <td style="text-align:center;">
+                                  <a href="{% url 'sms_detail' sms.id %}" class="smsh-view-btn">
+                                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    View
+                                  </a>
+                                </td>
+                              </tr>
+                              {% empty %}
+                              <tr>
+                                <td colspan="5">
+                                  <div class="smsh-empty">
+                                    <div class="smsh-empty-icon">📭</div>
+                                    <div class="smsh-empty-text">No SMS History Found</div>
+                                  </div>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    
+                    </div>
+                    
+                    <script>
+                      // Count pill
+                      (function() {
+                        const rows = document.querySelectorAll('#smshTbody tr:not(:has(.smsh-empty))');
+                        const pill = document.getElementById('smshCountPill');
+                        if (pill) pill.textContent = rows.length + ' record' + (rows.length !== 1 ? 's' : '');
+                      })();
+                    
+                      // Search
+                      function smshHandleSearch() {
+                        const q = document.getElementById('smshSearchInput').value.toLowerCase();
+                        const rows = document.querySelectorAll('#smshTbody tr');
+                        let visible = 0;
+                        rows.forEach(row => {
+                          if (row.querySelector('.smsh-empty')) return;
+                          const match = row.innerText.toLowerCase().includes(q);
+                          row.style.display = match ? '' : 'none';
+                          if (match) visible++;
+                        });
+                        const pill = document.getElementById('smshCountPill');
+                        if (pill) pill.textContent = visible + ' record' + (visible !== 1 ? 's' : '');
+                      }
+                    </script>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

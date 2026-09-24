@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requisition Report - BM ERP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+:root {
+    --bg-main:#f8fafc; --panel:#fff;
+    --primary:#0d6efd; --primary-hover:#0b5ed7;
+    --border:#e2e8f0; --text:#0f172a; --muted:#64748b;
+    --amber:#f59e0b; --green:#10b981; --red:#ef4444;
+    --r-md:8px; --r-lg:12px;
+}
+body { background:var(--bg-main); font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); margin:0; padding:30px; }
+.container { max-width:1300px; margin:auto; }
+.card { background:var(--panel); padding:26px; border-radius:var(--r-lg); border:1px solid var(--border);
+        box-shadow:0 4px 6px -1px rgba(0,0,0,.05); margin-bottom:22px; }
+
+.header-row { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+.page-title { margin:0; font-size:24px; font-weight:700; display:flex; align-items:center; gap:10px; }
+.hdr-btn { display:inline-flex; align-items:center; gap:6px; padding:10px 18px; border-radius:var(--r-md);
+           text-decoration:none; font-weight:600; font-size:.9rem; border:1px solid var(--border);
+           background:#fff; color:#475569; transition:.2s; cursor:pointer; font-family:inherit; }
+.hdr-btn:hover { background:#f1f5f9; }
+.hdr-btn.blue { background:var(--primary); border-color:var(--primary); color:#fff; }
+.hdr-btn.blue:hover { background:var(--primary-hover); }
+.hdr-btn.green { background:var(--green); border-color:var(--green); color:#fff; }
+
+.filter-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-top:6px; }
+input, select { padding:11px 13px; border:1px solid var(--border); border-radius:var(--r-md);
+                font-family:inherit; font-size:.92rem; background:#fff; color:var(--text); box-sizing:border-box; width:100%; }
+input:focus, select:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(13,110,253,.15); }
+
+/* Status quick-filter buttons */
+.status-bar { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+.status-chip { display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border-radius:24px;
+               font-weight:600; font-size:.85rem; text-decoration:none; border:1.5px solid var(--border);
+               background:#fff; color:#475569; transition:.2s; }
+.status-chip .badge { background:#e2e8f0; color:#334155; border-radius:12px; padding:1px 9px; font-size:.78rem; font-weight:700; }
+.status-chip:hover { border-color:var(--primary); color:var(--primary); }
+.status-chip.active { border-color:var(--primary); background:#eff6ff; color:var(--primary); }
+.status-chip.active .badge { background:var(--primary); color:#fff; }
+.status-chip.c-amber.active { border-color:var(--amber); background:#fffbeb; color:#b45309; }
+.status-chip.c-amber.active .badge { background:var(--amber); color:#fff; }
+.status-chip.c-green.active { border-color:var(--green); background:#ecfdf5; color:#047857; }
+.status-chip.c-green.active .badge { background:var(--green); color:#fff; }
+
+table { width:100%; border-collapse:separate; border-spacing:0; margin-top:18px;
+        border-radius:var(--r-md); overflow:hidden; border:1px solid var(--border); }
+th { background:#f1f5f9; color:#475569; font-weight:600; font-size:.85rem; text-transform:uppercase;
+     letter-spacing:.04em; text-align:left; }
+th, td { border-bottom:1px solid var(--border); border-right:1px solid var(--border); padding:11px 13px; font-size:.9rem; }
+th:last-child, td:last-child { border-right:none; }
+tr:last-child td { border-bottom:none; }
+tbody tr:hover { background:#f8fafc; }
+tfoot td { background:#f8fafc; font-weight:700; }
+
+.pill { display:inline-block; padding:3px 11px; border-radius:14px; font-size:.76rem; font-weight:700; }
+.pill.pending  { background:#fffbeb; color:#b45309; }
+.pill.approved { background:#ecfdf5; color:#047857; }
+.pill.rejected { background:#fef2f2; color:#b91c1c; }
+
+.table-box { overflow-x:auto; }
+.empty-row td { text-align:center; color:var(--muted); padding:30px; }
+
+/* ------------- PRINT LAYOUT ------------- */
+.print-only { display:none; }
+@media print {
+    body { background:#fff; padding:0; font-size:12px; }
+    .no-print { display:none !important; }
+    .print-only { display:block; }
+    .card { border:none; box-shadow:none; padding:0; }
+    table { border:1px solid #999; }
+    th, td { border-color:#999 !important; padding:6px 8px; font-size:11px; }
+    th { background:#eee !important; color:#000 !important; -webkit-print-color-adjust:exact; }
+    .print-header { text-align:center; margin-bottom:14px; }
+    .print-header h2 { margin:0 0 4px; font-size:18px; }
+    .print-header .meta { font-size:11px; color:#444; }
+    .sign-row { display:flex; justify-content:space-between; margin-top:70px; page-break-inside:avoid; }
+    .sign-box { width:30%; text-align:center; font-size:12px; }
+    .sign-line { border-top:1.5px solid #000; padding-top:6px; font-weight:700; }
+}
+
+@media(max-width:900px){
+    .filter-grid { grid-template-columns:1fr 1fr; }
+    body { padding:15px; }
+}
+@media(max-width:600px){
+    .filter-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- ============ HEADER ============ -->
+    <div class="card no-print">
+        <div class="header-row">
+            <h1 class="page-title"><i class="bi bi-file-earmark-text" style="color:var(--primary)"></i> Requisition Report</h1>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <a href="{% url 'public_rest_requisition_create' %}{% if project_id %}?project={{ project_id }}{% if employee_id %}&employee={{ employee_id }}{% endif %}{% endif %}" class="hdr-btn green">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+                <a href="{{ request.get_full_path }}" class="hdr-btn"><i class="bi bi-arrow-clockwise"></i> Refresh</a>
+                <button type="button" class="hdr-btn blue" onclick="window.print()">
+                    <i class="bi bi-printer"></i> Print Report
+                </button>
+            </div>
+        </div>
+
+        <!-- ============ FILTERS ============ -->
+        <form method="GET" class="filter-grid" style="margin-top:20px;">
+            {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
+            <select name="project">
+                <option value="">All Projects</option>
+                {% for p in projects %}
+                <option value="{{ p.id }}" {% if p.id|stringformat:"s" == project_id %}selected{% endif %}>{{ p.project_first_name }}</option>
+                {% endfor %}
+            </select>
+            <select name="employee">
+                <option value="">All Employees</option>
+                {% for e in employees %}
+                <option value="{{ e.id }}" {% if e.id|stringformat:"s" == employee_id %}selected{% endif %}>{{ e.rda_emp_name }}</option>
+                {% endfor %}
+            </select>
+            <input type="date" name="from_date" value="{{ from_date }}">
+            <input type="date" name="to_date" value="{{ to_date }}">
+            <button type="submit" class="hdr-btn blue" style="justify-content:center;"><i class="bi bi-funnel"></i> Filter</button>
+        </form>
+
+        <!-- ============ STATUS QUICK-FILTER BUTTONS ============ -->
+        <div class="status-bar">
+            {% with q="project="|add:project_id|add:"&employee="|add:employee_id|add:"&from_date="|add:from_date|add:"&to_date="|add:to_date %}
+            <a class="status-chip {% if not status %}active{% endif %}" href="?{{ q }}">
+                All <span class="badge">{{ counts.all }}</span>
+            </a>
+            <a class="status-chip c-amber {% if status == 'store_pending' %}active{% endif %}" href="?{{ q }}&status=store_pending">
+                <i class="bi bi-hourglass-split"></i> Store Pending <span class="badge">{{ counts.store_pending }}</span>
+            </a>
+            <a class="status-chip c-green {% if status == 'store_approved' %}active{% endif %}" href="?{{ q }}&status=store_approved">
+                <i class="bi bi-patch-check"></i> Store Approved <span class="badge">{{ counts.store_approved }}</span>
+            </a>
+            <a class="status-chip c-amber {% if status == 'purch_pending' %}active{% endif %}" href="?{{ q }}&status=purch_pending">
+                <i class="bi bi-hourglass-split"></i> Purchase Pending <span class="badge">{{ counts.purch_pending }}</span>
+            </a>
+            <a class="status-chip c-green {% if status == 'purch_approved' %}active{% endif %}" href="?{{ q }}&status=purch_approved">
+                <i class="bi bi-patch-check"></i> Purchase Approved <span class="badge">{{ counts.purch_approved }}</span>
+            </a>
+            {% endwith %}
+        </div>
+    </div>
+
+    <!-- ============ TABLE (screen + print) ============ -->
+    <div class="card">
+
+        <!-- Print-only report header -->
+        <div class="print-only print-header">
+            <h2>The Galleria — Requisition Report</h2>
+            <div class="meta">
+                {% if from_date or to_date %}Period: {{ from_date|default:"—" }} to {{ to_date|default:"—" }} &nbsp;|&nbsp;{% endif %}
+                {% if status %}Status: {{ status }} &nbsp;|&nbsp;{% endif %}
+                Printed: {% now "d M Y, h:i A" %}
+            </div>
+        </div>
+
+        <div class="table-box">
+            <table>
+                <thead>
+                    <tr>
+                        <th>SL</th>
+                        <th>Date</th>
+                        <th>Project</th>
+                        <th>Employee</th>
+                        <th>Item</th>
+                        <th>Vendor</th>
+                        <th>Unit</th>
+                        <th style="text-align:right;">Qty</th>
+                        <th style="text-align:right;">Rate</th>
+                        <th style="text-align:right;">Amount</th>
+                        <th class="no-print">Store</th>
+                        <th class="no-print">Purchase</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in requisitions %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ r.requisition_date|date:"d M Y" }}</td>
+                        <td>{{ r.project_name.project_first_name }}</td>
+                        <td>{{ r.employee_name.rda_emp_name }}</td>
+                        <td><strong>{{ r.item_name.rest_item_name }}</strong></td>
+                        <td>{{ r.vendor_name|default:"—" }}</td>
+                        <td>{{ r.unit }}</td>
+                        <td style="text-align:right;">{{ r.qty }}</td>
+                        <td style="text-align:right;">{{ r.rate }}</td>
+                        <td style="text-align:right;"><strong>৳{{ r.amount }}</strong></td>
+                        <td class="no-print"><span class="pill {{ r.approv_store }}">{{ r.approv_store|title }}</span></td>
+                        <td class="no-print"><span class="pill {{ r.approv_purch_status }}">{{ r.approv_purch_status|title }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row"><td colspan="12">No requisitions match the selected filters.</td></tr>
+                    {% endfor %}
+                </tbody>
+                {% if requisitions %}
+                <tfoot>
+                    <tr>
+                        <td colspan="7" style="text-align:right;">Total</td>
+                        <td style="text-align:right;">{{ total_qty }}</td>
+                        <td></td>
+                        <td style="text-align:right;">৳{{ total_amount }}</td>
+                        <td class="no-print" colspan="2"></td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
+
+        <!-- Print-only signature block -->
+        <div class="print-only sign-row">
+            <div class="sign-box"><div class="sign-line">Prepared By</div></div>
+            <div class="sign-box"><div class="sign-line">Checked By</div></div>
+            <div class="sign-box"><div class="sign-line">Approved By</div></div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

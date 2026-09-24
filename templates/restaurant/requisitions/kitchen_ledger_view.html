@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Restaurant Requisition History - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+  @media print {
+    .no-print { display: none !important; }
+    body { background: white; padding: 0; }
+    .card { box-shadow: none; border: none; margin: 0; padding: 0; }
+  }
+</style>
+
+<div class="rubick px-4 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+  {% include 'partials/mobile.html' %}
+  
+  <div class="mt-[4.7rem] flex md:mt-0">
+    {% include 'partials/sidebar_list.html' %}
+    
+    <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+      {% include 'partials/header.html' %}
+        
+      <!-- Header Bar -->
+      <div class="intro-y mt-10 flex flex-col items-center justify-between gap-4 border-b border-slate-200 pb-5 sm:flex-row dark:border-darkmode-400">
+        <div>
+          <h2 class="text-2xl font-semibold text-slate-700 dark:text-slate-200">Restaurant Requisition Payment</h2>
+          <p class="mt-0.5 text-xs text-slate-500">Manage and audit historical internal stock and branch requisitions.</p>
+        </div>
+        <div class="flex w-full items-center justify-end gap-3 sm:w-auto">
+          <a href="{% url 'restaurant_kitchen_ledger_list' %}" class="no-print">
+            <button type="button" style="background-color:green" class="inline-flex items-center gap-1.5 rounded-lg bg-blue-700 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+              </svg>
+              Back To Ledger List
+            </button>
+          </a>
+        </div>
+      </div>
+        
+      <!-- Messages -->
+      {% if messages %}
+      <div class="intro-y mt-4 space-y-2 no-print">
+        {% for message in messages %}
+        <div class="flex items-center justify-between rounded-lg border {% if message.tags == 'error' %}border-red-200 bg-red-50 text-red-700{% else %}border-blue-200 bg-blue-50 text-blue-700{% endif %} px-4 py-3 text-sm">
+          <div class="flex items-center gap-2">
+            <span>{% if message.tags == 'error' %}⚠️{% else %}ℹ️{% endif %}</span>
+            <p class="font-medium">{{ message }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+        
+      <!-- Card Container -->
+      <div class="card intro-y mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs dark:border-darkmode-400 dark:bg-darkmode-600">
+        <div class="border-b border-slate-200 bg-slate-50/50 px-6 py-4 dark:border-darkmode-400 dark:bg-darkmode-700">
+          <h3 class="text-base font-bold text-slate-800 dark:text-slate-200">Kitchen Ledger History Form</h3>
+        </div>
+
+        <!-- Responsive Table Box -->
+        <div class="w-full overflow-x-auto">
+          <table class="w-full min-w-[1200px] text-left text-sm border-collapse">
+         <thead class="text-xs uppercase tracking-wider text-white">
+              <tr style="background-color:green" class="bg-slate-800 dark:bg-darkmode-800">
+                <th scope="col" class="px-4 py-3 bg-slate-800 dark:bg-darkmode-800">ID</th>
+                <th scope="col" class="px-4 py-3 bg-slate-800 dark:bg-darkmode-800">Project</th>
+                <th scope="col" class="px-4 py-3 bg-slate-800 dark:bg-darkmode-800">Date</th>
+                <th scope="col" class="px-4 py-3 bg-slate-800 dark:bg-darkmode-800">Employee</th>
+                <th scope="col" class="px-4 py-3 bg-slate-800 dark:bg-darkmode-800">Supplier</th>
+                <th scope="col" class="px-4 py-3 bg-slate-800 dark:bg-darkmode-800">Item</th>
+                <th scope="col" class="px-4 py-3 text-center bg-slate-800 dark:bg-darkmode-800">Type</th>
+                <th scope="col" class="px-4 py-3 text-right bg-slate-800 dark:bg-darkmode-800">Debit (Dr)</th>
+                <th scope="col" class="px-4 py-3 text-right bg-slate-800 dark:bg-darkmode-800">Credit (Cr)</th>
+                <th scope="col" class="px-4 py-3 text-right bg-slate-800 dark:bg-darkmode-800">Balance Due</th>
+                <th scope="col" class="px-4 py-3 text-center bg-slate-800 dark:bg-darkmode-800">Status</th>
+              </tr>
+            </thead>
+            
+            <tbody class="divide-y divide-slate-200 dark:divide-darkmode-400">
+              {% for entry in ledger_entries %}
+              <tr class="transition-colors hover:bg-slate-50 dark:hover:bg-darkmode-400/50 {% if entry.id == target_entry.id %}bg-blue-50/80 border-l-4 border-blue-600 dark:bg-blue-950/40{% endif %}">
+                
+                <td class="px-4 py-3.5 font-semibold text-slate-600 dark:text-slate-400">
+                  #{{ entry.id }}
+                </td>
+
+                <td class="px-4 py-3.5 font-medium text-slate-800 dark:text-slate-200">
+                  {{ entry.project.project_first_name }}
+                </td>
+
+                <td class="px-4 py-3.5 whitespace-nowrap">
+                  <div class="text-slate-700 dark:text-slate-300">{{ entry.created_at|date:"Y-m-d" }}</div>
+                  <div class="font-mono text-xs text-slate-400">{{ entry.created_at|date:"H:i" }}</div>
+                </td>
+
+                <td class="px-4 py-3.5 text-slate-700 dark:text-slate-300">
+                  {{ entry.employee.rda_emp_name }}
+                </td>
+
+                <td class="px-4 py-3.5 text-slate-700 dark:text-slate-300">
+                  {{ entry.vendor_name.rest_supplier_name }}
+                </td>
+
+                <td class="px-4 py-3.5">
+                  <div class="max-w-[180px] truncate text-slate-700 dark:text-slate-300" title="{{ entry.item_name.item_name }}">
+                    {{ entry.item_name.item_name }}
+                  </div>
+                </td>
+
+                <td class="px-4 py-3.5 text-center whitespace-nowrap">
+                  {% if entry.type == 'Expense' %}
+                  <span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700 dark:bg-red-950/50 dark:text-red-400">
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                    Expense
+                  </span>
+                  {% else %}
+                  <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                    Purchase
+                  </span>
+                  {% endif %}
+                </td>
+
+                <td class="px-4 py-3.5 text-right font-mono font-semibold text-red-600 dark:text-red-400 whitespace-nowrap">
+                  {{ entry.debit }}
+                </td>
+
+                <td class="px-4 py-3.5 text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                  {{ entry.credit }}
+                </td>
+
+                <td class="px-4 py-3.5 text-right font-mono font-bold whitespace-nowrap">
+                  {% if entry.balance > 0 %}
+                  <span class="text-red-600 dark:text-red-400">{{ entry.balance }}</span>
+                  {% else %}
+                  <span class="text-emerald-600 dark:text-emerald-400">{{ entry.balance }}</span>
+                  {% endif %}
+                </td>
+
+                <td class="px-4 py-3.5 text-center whitespace-nowrap">
+                  {% if entry.is_paid %}
+                  <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+                    <svg class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Settled
+                  </span>
+                  {% else %}
+                  <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                    <svg class="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Pending Due
+                  </span>
+                  {% endif %}
+                </td>
+
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="11" class="py-12 text-center text-slate-500 dark:text-slate-400">
+                  <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>
+                  </svg>
+                  <div class="mt-3 text-base font-semibold text-slate-700 dark:text-slate-300">
+                    No Ledger Logs Found
+                  </div>
+                  <div class="mt-1 text-xs">
+                    No records are available under this view.
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

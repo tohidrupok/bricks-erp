@@ -1,0 +1,676 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tenant Ledger Filter - BM ERP{% endblock %}
+
+{% block content %} 
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 
+    dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] 
+            bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+
+            {% include 'partials/header.html' %}
+
+            <div class="mt-10 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12">
+                    <div class="intro-y flex h-10 items-center">
+                        <h2 class="mr-5 truncate text-lg font-medium">Expense Payment Voucher</h2>
+                    
+                        <div class="ml-auto flex items-center gap-3">
+                            
+                            <!-- Back Button -->
+                            <a href="javascript:history.back()" class="flex items-center text-primary">
+                                <i data-lucide="arrow-left" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                                Back
+                            </a>
+                    
+                            <!-- Dashboard Button -->
+                            <a href="{% url 'tenant_dashboard' %}" class="flex items-center text-primary">
+                                <i data-lucide="layout-dashboard" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                                Dashboard
+                            </a>
+                    
+                            <!-- Reload Button -->
+                            <a class="flex items-center text-primary" href="">
+                                <i data-lucide="refresh-ccw" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                                Reload Data
+                            </a>
+                    
+                        </div>
+                    </div>
+                    <div class="w-full max-w-3xl mx-auto bg-white dark:bg-darkmode-600 
+                        p-10 shadow-2xl rounded-2xl border border-gray-200 dark:border-darkmode-400">
+
+                    <!-- Supplier Payment Voucher - Designed Component -->
+                    
+                    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+                    
+                    <meta name="csrf-token" content="{{ csrf_token }}">
+                    
+                    <style>
+                      /* ── SPV Design System ── */
+                      .spv-wrapper {
+                        font-family: 'Sora', sans-serif;
+                        padding: 0;
+                        margin: 0;
+                      }
+                    
+                      .spv-card {
+                        background: #ffffff;
+                        border-radius: 20px;
+                        overflow: hidden;
+                        box-shadow:
+                          0 0 0 1px rgba(99, 102, 241, 0.08),
+                          0 8px 32px rgba(99, 102, 241, 0.10),
+                          0 2px 8px rgba(0,0,0,0.04);
+                        position: relative;
+                      }
+                    
+                      /* Decorative top bar */
+                      .spv-card::before {
+                        content: '';
+                        display: block;
+                        height: 4px;
+                        background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 40%, #ec4899 100%);
+                        width: 100%;
+                      }
+                    
+                      .spv-header {
+                        padding: 28px 32px 20px;
+                        border-bottom: 1px solid #f1f1f5;
+                        display: flex;
+                        align-items: center;
+                        gap: 14px;
+                        background: linear-gradient(135deg, #fafafa 0%, #f5f3ff 100%);
+                      }
+                    
+                      .spv-header-icon {
+                        width: 44px;
+                        height: 44px;
+                        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                        border-radius: 12px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-shrink: 0;
+                        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+                      }
+                    
+                      .spv-header-icon svg {
+                        width: 22px;
+                        height: 22px;
+                        fill: none;
+                        stroke: #fff;
+                        stroke-width: 2;
+                        stroke-linecap: round;
+                        stroke-linejoin: round;
+                      }
+                    
+                      .spv-title {
+                        font-size: 18px;
+                        font-weight: 700;
+                        color: #1e1b4b;
+                        margin: 0;
+                        letter-spacing: -0.3px;
+                      }
+                    
+                      .spv-subtitle {
+                        font-size: 12px;
+                        color: #7c7ca0;
+                        margin: 2px 0 0;
+                        font-weight: 400;
+                        font-family: 'JetBrains Mono', monospace;
+                      }
+                    
+                      /* Body */
+                      .spv-body {
+                        padding: 28px 32px 32px;
+                      }
+                    
+                      /* Section label */
+                      .spv-section-label {
+                        font-size: 10px;
+                        font-weight: 600;
+                        color: #a5b4fc;
+                        letter-spacing: 1.2px;
+                        text-transform: uppercase;
+                        margin: 0 0 16px;
+                        font-family: 'JetBrains Mono', monospace;
+                      }
+                    
+                      /* Grid */
+                      .spv-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 16px;
+                        margin-bottom: 20px;
+                      }
+                    
+                      .spv-grid-full {
+                        grid-column: 1 / -1;
+                      }
+                    
+                      /* Form groups */
+                      .spv-field {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 6px;
+                      }
+                    
+                      .spv-label {
+                        font-size: 12px;
+                        font-weight: 600;
+                        color: #4b4b7c;
+                        letter-spacing: 0.2px;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                      }
+                    
+                      .spv-label .spv-req {
+                        color: #ec4899;
+                        font-size: 14px;
+                        line-height: 1;
+                      }
+                    
+                      .spv-select,
+                      .spv-input,
+                      .spv-textarea {
+                        width: 100%;
+                        padding: 10px 14px;
+                        border: 1.5px solid #e8e8f4;
+                        border-radius: 10px;
+                        background: #fafaff;
+                        font-family: 'Sora', sans-serif;
+                        font-size: 13.5px;
+                        color: #1e1b4b;
+                        transition: all 0.2s ease;
+                        outline: none;
+                        box-sizing: border-box;
+                        appearance: none;
+                        -webkit-appearance: none;
+                      }
+                    
+                      .spv-select {
+                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+                        background-repeat: no-repeat;
+                        background-position: right 12px center;
+                        padding-right: 36px;
+                        cursor: pointer;
+                      }
+                    
+                      .spv-select:focus,
+                      .spv-input:focus,
+                      .spv-textarea:focus {
+                        border-color: #6366f1;
+                        background: #fff;
+                        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+                      }
+                    
+                      .spv-select:hover,
+                      .spv-input:hover,
+                      .spv-textarea:hover {
+                        border-color: #a5b4fc;
+                        background: #fff;
+                      }
+                    
+                      .spv-textarea {
+                        resize: vertical;
+                        min-height: 88px;
+                        line-height: 1.6;
+                      }
+                    
+                      /* Divider */
+                      .spv-divider {
+                        height: 1px;
+                        background: linear-gradient(90deg, transparent, #e8e8f4 20%, #e8e8f4 80%, transparent);
+                        margin: 20px 0;
+                      }
+                    
+                      /* Submit button */
+                      .spv-btn-submit {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        padding: 12px 28px;
+                        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+                        color: #fff;
+                        border: none;
+                        border-radius: 11px;
+                        font-family: 'Sora', sans-serif;
+                        font-size: 14px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        letter-spacing: 0.2px;
+                        box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+                        position: relative;
+                        overflow: hidden;
+                      }
+                    
+                      .spv-btn-submit::after {
+                        content: '';
+                        position: absolute;
+                        inset: 0;
+                        background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+                        opacity: 0;
+                        transition: opacity 0.2s ease;
+                      }
+                    
+                      .spv-btn-submit:hover {
+                        transform: translateY(-1px);
+                        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+                      }
+                    
+                      .spv-btn-submit:hover::after {
+                        opacity: 1;
+                      }
+                    
+                      .spv-btn-submit:active {
+                        transform: translateY(0);
+                      }
+                    
+                      .spv-btn-submit svg,
+                      .spv-btn-submit span {
+                        position: relative;
+                        z-index: 1;
+                      }
+                    
+                      .spv-btn-submit svg {
+                        width: 16px;
+                        height: 16px;
+                        stroke: currentColor;
+                        fill: none;
+                        stroke-width: 2.2;
+                        stroke-linecap: round;
+                        stroke-linejoin: round;
+                      }
+                    
+                      /* Footer row */
+                      .spv-footer {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                      }
+                    
+                      .spv-footer-note {
+                        font-size: 11.5px;
+                        color: #a0a0c0;
+                        font-family: 'JetBrains Mono', monospace;
+                      }
+                    
+                      /* Alert messages */
+                      .spv-alert {
+                        padding: 12px 16px;
+                        border-radius: 10px;
+                        font-size: 13px;
+                        font-weight: 500;
+                        margin-top: 16px;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        animation: spv-fadeIn 0.3s ease;
+                      }
+                    
+                      .spv-alert-success {
+                        background: #f0fdf4;
+                        color: #166534;
+                        border: 1px solid #bbf7d0;
+                      }
+                    
+                      .spv-alert-error {
+                        background: #fff1f2;
+                        color: #9f1239;
+                        border: 1px solid #fecdd3;
+                      }
+                    
+                      @keyframes spv-fadeIn {
+                        from { opacity: 0; transform: translateY(-6px); }
+                        to   { opacity: 1; transform: translateY(0); }
+                      }
+                    
+                      /* Responsive */
+                      @media (max-width: 600px) {
+                        .spv-grid {
+                          grid-template-columns: 1fr;
+                        }
+                        .spv-header, .spv-body {
+                          padding-left: 20px;
+                          padding-right: 20px;
+                        }
+                      }
+                    </style>
+                    
+                    <div class="spv-wrapper">
+                      <div class="spv-card">
+                    
+                        <!-- Header -->
+                    <div class="spv-header">
+                    
+                      <div class="spv-header-left">
+                        <div class="spv-header-icon">
+                          <svg viewBox="0 0 24 24">
+                            <rect x="2" y="5" width="20" height="14" rx="2"/>
+                            <line x1="2" y1="10" x2="22" y2="10"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <p class="spv-title">Expense Payment Voucher</p>
+                          <p class="spv-subtitle">Finance · Accounts Payable</p>
+                        </div>
+                      </div>
+                    
+                      <a href="{% url 'add_supplier' %}" class="spv-add-btn">
+                        <span class="spv-add-btn-icon">
+                          <svg viewBox="0 0 24 24">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                          </svg>
+                        </span>
+                        <span>Add Supplier</span>
+                      </a>
+                    
+                    </div>
+                    
+                    <style>
+                    .spv-header {
+                      padding: 22px 32px;
+                      border-bottom: 1px solid #f1f1f5;
+                      background: linear-gradient(135deg, #fafafa 0%, #f5f3ff 100%);
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      gap: 16px;
+                    }
+                    
+                    .spv-header-left {
+                      display: flex;
+                      align-items: center;
+                      gap: 14px;
+                    }
+                    
+                    /* Add Supplier Button */
+                    .spv-add-btn {
+                      display: inline-flex;
+                      align-items: center;
+                      gap: 7px;
+                      padding: 9px 18px;
+                      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+                      color: #fff !important;
+                      text-decoration: none !important;
+                      border-radius: 10px;
+                      font-family: 'Sora', sans-serif;
+                      font-size: 13px;
+                      font-weight: 600;
+                      letter-spacing: 0.2px;
+                      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.30);
+                      transition: all 0.2s ease;
+                      white-space: nowrap;
+                      position: relative;
+                      overflow: hidden;
+                    }
+                    
+                    .spv-add-btn::after {
+                      content: '';
+                      position: absolute;
+                      inset: 0;
+                      background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+                      opacity: 0;
+                      transition: opacity 0.2s ease;
+                    }
+                    
+                    .spv-add-btn:hover {
+                      transform: translateY(-1px);
+                      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.42);
+                    }
+                    
+                    .spv-add-btn:hover::after {
+                      opacity: 1;
+                    }
+                    
+                    .spv-add-btn:active {
+                      transform: translateY(0);
+                    }
+                    
+                    .spv-add-btn span {
+                      position: relative;
+                      z-index: 1;
+                    }
+                    
+                    .spv-add-btn-icon {
+                      width: 18px;
+                      height: 18px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      background: rgba(255,255,255,0.20);
+                      border-radius: 5px;
+                      flex-shrink: 0;
+                    }
+                    
+                    .spv-add-btn-icon svg {
+                      width: 11px;
+                      height: 11px;
+                      stroke: #fff;
+                      fill: none;
+                      stroke-width: 2.8;
+                      stroke-linecap: round;
+                    }
+                    
+                    @media (max-width: 500px) {
+                      .spv-header { padding: 18px 20px; }
+                      .spv-add-btn span:last-child { display: none; }
+                      .spv-add-btn { padding: 9px 12px; }
+                    }
+                    </style>
+                    
+                        <!-- Body -->
+                        <div class="spv-body">
+                          <form id="supplierPaymentForm">
+                            {% csrf_token %}
+                    
+                            <!-- Party & Project -->
+                            <p class="spv-section-label">Party Information</p>
+                            <div class="spv-grid">
+                    
+                              <div class="spv-field">
+                                <label class="spv-label">Supplier <span class="spv-req">*</span></label>
+                                <select name="supplier_id" class="spv-select" required>
+                                  <option value="">— Select Supplier —</option>
+                                  {% for s in suppliers %}
+                                  <option value="{{ s.id }}">{{ s.name }}</option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                    
+                              <div class="spv-field">
+                                <label class="spv-label">Project <span class="spv-req">*</span></label>
+                                <select name="project_id" class="spv-select" required style="color:black;">
+                                  <option value="">— Select Project —</option>
+                                  {% for p in projects %}
+                                  <option value="{{ p.id }}">{{ p.name }}</option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                    
+                            </div>
+                    
+                            <div class="spv-divider"></div>
+                    
+                            <!-- Payment Info -->
+                            <p class="spv-section-label">Payment Details</p>
+                            <div class="spv-grid">
+                    
+                              <div class="spv-field">
+                                <label class="spv-label">Cash Type <span class="spv-req">*</span></label>
+                                <select id="cash_type_id" name="cash_type_id" class="spv-select" required>
+                                  <option value="">— Select Cash Type —</option>
+                                  {% for ct in cash_types %}
+                                  <option value="{{ ct.id }}">{{ ct.account_name }}</option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                    
+                              <div class="spv-field">
+                                <label class="spv-label">Cheque Number <span style="color:#a0a0c0;font-weight:400">(Optional)</span></label>
+                                <select id="cheque_number" name="cheque_number" class="spv-select">
+                                  <option value="">— Select Cheque —</option>
+                                </select>
+                              </div>
+                    
+                              <div class="spv-field">
+                                <label class="spv-label">Payment Date <span class="spv-req">*</span></label>
+                                <input type="date" name="voucher_date" class="spv-input" required>
+                              </div>
+                    
+                              <div class="spv-field">
+                                <label class="spv-label">Amount <span class="spv-req">*</span></label>
+                                <input type="number" step="0.01" name="amount" class="spv-input" placeholder="0.00" required>
+                              </div>
+                    
+                              <div class="spv-field">
+                                <label class="spv-label">Carrier</label>
+                                <input type="text" name="carrier" class="spv-input" placeholder="Enter carrier name">
+                              </div>
+                    
+                              <div class="spv-field spv-grid-full">
+                                <label class="spv-label">Particulars</label>
+                                <textarea name="particulars" class="spv-textarea" placeholder="Add payment notes or description…"></textarea>
+                              </div>
+                    
+                            </div>
+                    
+                            <div class="spv-divider"></div>
+                    
+                            <!-- Footer -->
+                            <div class="spv-footer">
+                              <button type="submit" class="spv-btn-submit">
+                                <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                <span>Save Payment</span>
+                              </button>
+                              <span class="spv-footer-note">* Required fields</span>
+                            </div>
+                    
+                          </form>
+                    
+                          <!-- Response Messages -->
+                          <div id="spv-responseMessage"></div>
+                    
+                        </div><!-- /spv-body -->
+                      </div><!-- /spv-card -->
+                    </div><!-- /spv-wrapper -->
+
+
+<script>
+// CSRF token
+function getCSRFToken() {
+  return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+// Load cheques based on cash type
+document.getElementById("cash_type_id").addEventListener("change", function () {
+  const cashTypeId = this.value;
+  const chequeSelect = document.getElementById("cheque_number");
+  chequeSelect.innerHTML = '<option>Loading…</option>';
+
+  if (cashTypeId) {
+    fetch(`/tenant/get-cheques/${cashTypeId}/`)
+      .then(r => r.json())
+      .then(data => {
+        chequeSelect.innerHTML = '<option value="">— Select Cheque —</option>';
+        if (data.length === 0) {
+          chequeSelect.innerHTML = '<option>No unused cheques</option>';
+        } else {
+          data.forEach(cheque => {
+            const opt = document.createElement("option");
+            opt.value = cheque.id;
+            opt.textContent = cheque.cheque_number;
+            chequeSelect.appendChild(opt);
+          });
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        chequeSelect.innerHTML = '<option>Error loading cheques</option>';
+      });
+  }
+});
+
+// Submit form
+document.getElementById("supplierPaymentForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+  const msgBox = document.getElementById("spv-responseMessage");
+
+  fetch("{% url 'create_supplier_payment' %}", {
+    method: "POST",
+    headers: { "X-CSRFToken": getCSRFToken() },
+    body: formData
+  })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        msgBox.innerHTML = `<div class="spv-alert spv-alert-success">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Payment saved successfully.
+        </div>`;
+        document.getElementById("supplierPaymentForm").reset();
+      } else {
+        msgBox.innerHTML = `<div class="spv-alert spv-alert-error">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          ${data.error}
+        </div>`;
+      }
+    })
+    .catch(() => {
+      msgBox.innerHTML = `<div class="spv-alert spv-alert-error">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Server Error. Please try again.
+      </div>`;
+    });
+});
+</script>
+
+
+                        
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

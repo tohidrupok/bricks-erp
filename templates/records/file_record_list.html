@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CSV Add - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+
+        {% include 'partials/sidebar_list.html' %}
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+
+            {% include 'partials/header.html' %}
+            <div class="container mx-auto mt-10">
+
+                <div class="max-w-2xl mx-auto">
+                    
+                    {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                        <div class="p-4 mb-2 text-xs font-medium rounded-xl {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-emerald-50 text-emerald-700 border border-emerald-200{% endif %}">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="overflow-hidden rounded-lg shadow-lg bg-white">
+
+                        <div class="bg-primary px-6 py-4 text-white">
+                            <h4 class="mb-0 text-base font-semibold">
+                                Bulk Import Records via CSV
+                            </h4>
+                        </div>
+                        
+                        <div class="p-6">
+                            <p class="text-xs text-slate-500 mb-4">
+                                Select a structured <code class="bg-slate-100 px-1 py-0.5 rounded text-danger font-mono">.csv</code> file mapping the explicit column sequence displayed below:
+                            </p>
+
+                            <div class="overflow-x-auto mb-6 border border-slate-100 rounded-lg bg-slate-50 p-3">
+                                <table class="min-w-full text-[10px] text-left text-slate-500 font-mono">
+                                    <thead>
+                                        <tr class="text-slate-700 border-b border-slate-200">
+                                            <th class="px-2 py-1 pb-2">date</th>
+                                            <th class="px-2 py-1 pb-2">file_type</th>
+                                            <th class="px-2 py-1 pb-2">file_no</th>
+                                            <th class="px-2 py-1 pb-2">dag_no</th>
+                                            <th class="px-2 py-1 pb-2">owner_client</th>
+                                            <th class="px-2 py-1 pb-2">work_type</th>
+                                            <th class="px-2 py-1 pb-2">status</th>
+                                            <th class="px-2 py-1 pb-2">responsible</th>
+                                            <th class="px-2 py-1 pb-2">remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="text-slate-600">
+                                            <td class="px-2 py-1 pt-2">2026-06-29</td>
+                                            <td class="px-2 py-1 pt-2">RF</td>
+                                            <td class="px-2 py-1 pt-2">RF-1001</td>
+                                            <td class="px-2 py-1 pt-2">Dag-542</td>
+                                            <td class="px-2 py-1 pt-2">John Doe</td>
+                                            <td class="px-2 py-1 pt-2">Construction</td>
+                                            <td class="px-2 py-1 pt-2">Pending</td>
+                                            <td class="px-2 py-1 pt-2">Alex Smith</td>
+                                            <td class="px-2 py-1 pt-2">Review...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <form action="{% url 'upload_record_csv' %}" method="POST" enctype="multipart/form-data" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                                {% csrf_token %} 
+                                
+                                <div class="w-full sm:w-auto flex-1">
+                                    <input 
+                                        type="file" 
+                                        name="csv_file" 
+                                        accept=".csv"
+                                        class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer focus:outline-none border border-slate-200 rounded-xl p-1"
+                                        required
+                                    />
+                                </div>
+                                
+                                <button 
+                                    type="submit" style="background-color:green"
+                                    class="px-6 py-2.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition rounded-xl shadow-sm outline-none focus:ring-4 focus:ring-blue-100 whitespace-nowrap"
+                                >
+                                    Upload CSV
+                                </button>
+                            </form>
+                            
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        </div>
+
+</div>
+{% endblock %}

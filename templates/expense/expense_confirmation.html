@@ -1,0 +1,143 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Expense Details- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+               <h2 class="intro-y mt-10 text-2xl font-semibold text-gray-900">Expense Details</h2>
+                <div class="mt-6 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <div class="project-detail">
+                            <h1 class="text-3xl font-semibold text-gray-900 mb-4">
+                                {{ project.project_name }}
+                            </h1>
+
+                            <!-- 📝 Begin Form Here -->
+                            <form method="POST" action="">
+                                {% csrf_token %}
+                                {% for expense, data in requisitions_by_expense.items %}
+                                <h4 class="text-lg font-medium text-gray-700 mb-2">Expense Name : {{ expense }}</h4>
+
+                                <table class="min-w-full table-auto border-collapse border border-gray-300">
+                                    <thead>
+                                        <tr class="bg-gray-200">
+                                            <th class="border-b px-4 py-2 text-sm font-medium text-gray-600 text-center">
+                                                <input type="checkbox" id="select-all">
+                                            </th>
+                                            <th class="border-b px-4 py-2 text-sm font-medium text-gray-600">Expense Name</th>
+                                            <th class="border-b px-4 py-2 text-sm font-medium text-gray-600">Head</th>
+                                            <th class="border-b px-4 py-2 text-sm font-medium text-gray-600">Cahs Type</th>
+                                            <th class="border-b px-4 py-2 text-sm font-medium text-gray-600">Cheque No</th>
+                                            <th class="border-b px-4 py-2 text-sm font-medium text-gray-600">Amount</th>
+                                        </tr>
+                                    </thead>                                   
+                                    <tbody>
+                                        {% for item in data.items %}
+                                        <tr class="bg-white hover:bg-gray-100">
+                                            <td class="border-b px-4 py-2 text-sm text-center">
+                                                <input type="checkbox" name="selected_items" value="{{ item.id }}">
+                                            </td>
+                                            <td class="border-b px-4 py-2 text-sm text-gray-700">{{ item.expense_name }}</td>
+                                            <td class="border-b px-4 py-2 text-sm text-gray-700">{{ item.head_of_account }}</td>
+                                            <td class="border-b px-4 py-2 text-sm text-gray-700">{{ item.cash_type }}</td>
+                                            <td class="border-b px-4 py-2 text-sm text-gray-700">৳{{ item.cheque_number }}</td>
+                                            <td class="border-b px-4 py-2 text-sm text-gray-700">৳{{ item.amount }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+
+                                <div class="mt-4 text-right text-lg font-semibold text-gray-800">
+                                    <span>Total for {{ expense }}: </span>
+                                    <span class="text-primary">৳{{ data.total }}</span>
+                                </div>
+                                <hr class="my-6">
+                                {% endfor %}
+
+                                <!-- 🧾 Summary Section -->
+                                <div class="flex justify-end">
+                                    <div class="bg-gray-50 p-4 rounded-lg shadow-md mt-6 w-full max-w-xs">
+                                        <h4 class="text-xl font-semibold text-gray-800">Summary</h4>
+                                        <ul class="mt-4">
+                                            {% for expense, data in requisitions_by_expense.items %}
+                                            <li class="flex justify-between py-2 text-sm text-gray-700">
+                                                <span>{{ expense }}</span>
+                                                <span class="font-semibold">৳{{ data.total }}</span>
+                                            </li>
+                                            {% endfor %}
+                                            <hr class="my-2">
+                                            <li class="flex justify-between py-2 text-lg font-semibold text-gray-800">
+                                                <span>Final Total</span>
+                                                <span class="text-primary">৳{{ final_total }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- 🚦 Approval Status + Note -->
+                                <div class="flex justify-end">
+                                    <div class="bg-gray-50 p-4 rounded-lg shadow-md mt-0 w-full max-w-xs">                                       
+                                        <div class="mt-4">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Expense Approval Status</label>
+                                            <select name="approv_status" class="w-full px-3 py-2 border rounded-md">
+                                                <option value="">-- Select Status --</option>
+                                                <option value="approved" {% if current_status == 'approved' %}selected{% endif %}>Approved</option>
+                                                <option value="rejected" {% if current_status == 'rejected' %}selected{% endif %}>Rejected</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mt-4">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Note</label>
+                                            <textarea name="approv_note" rows="3" class="w-full px-3 py-2 border rounded-md" placeholder="Write a note...">{{ current_note }}</textarea>
+                                        </div>
+
+                                        <div class="mt-4">
+                                            <button type="submit" style="background-color:#1e3c98" class="w-full text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                                                Update
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            <!-- End Form -->
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function () {
+                                    const selectAllCheckbox = document.getElementById("select-all");
+                                    const itemCheckboxes = document.querySelectorAll('input[name="selected_items"]');
+
+                                    selectAllCheckbox.addEventListener("change", function () {
+                                        itemCheckboxes.forEach(cb => cb.checked = this.checked);
+                                    });
+                                });
+                            </script>
+                            <!-- 🔙 Back Button -->
+                            <div class="mt-8 text-center">
+                                <a href="{% url 'expense_list' %}" style="background-color:#1e3c98" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                    Back to Expense List
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

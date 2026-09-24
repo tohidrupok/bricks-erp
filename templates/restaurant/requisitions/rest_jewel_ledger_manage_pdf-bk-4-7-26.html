@@ -1,0 +1,120 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Jewel Ledger Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 11px; padding: 20px; color: #000; background: #ccc; }
+    .invoice-box { background: #fff; max-width: 960px; margin: auto; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); border-radius:8px; }
+    .header-row { overflow: hidden; margin-bottom: 10px; }
+    .logo img { height: 50px; float: left; }
+    .header-info { float: right; text-align:right; margin-top:10px; font-size:11px; }
+    .sub-head { clear: both; font-size:11px; margin-bottom:10px; color:#444; }
+    hr { margin:8px 0; border-color:#ccc; }
+    p { margin:4px 0; }
+    table { width:100%; border-collapse: collapse; margin-top:14px; font-size:11px; }
+    th, td { border:1px solid #ccc; padding:6px 8px; text-align:center; vertical-align:middle; }
+    th { background:#f1f5f9; font-weight:bold; }
+    td.description { text-align:left; }
+    .group-label-row { background-color:#007b83; color:white; font-weight:bold; font-size:13px; text-align:left; padding-left:10px; margin-top:20px; }
+    .group-summary { font-weight:bold; text-align:right; margin-top:4px; font-size:12px; }
+    .amount-words { margin-top:10px; font-weight:bold; font-size:12px; text-align:right; font-style:italic; }
+    .no-print { margin-top:20px; text-align:center; }
+    .no-print a, .no-print button { display:inline-block; margin:0 8px; padding:8px 16px; color:white; border-radius:4px; text-decoration:none; cursor:pointer; font-weight:bold; border:none; }
+    .btn-back { background-color:#3490dc; }
+    .btn-print { background-color:#38c172; }
+    .print-time { font-style:italic; margin-top:8px; text-align:right; font-size:11px; color:#555; }
+    @media print { .no-print { display:none !important; } .invoice-box { box-shadow:none; margin:0; padding:0; max-width:100%; } body { background:white; padding:0; } }
+  </style>
+</head>
+<body>
+
+<div class="invoice-box">
+  <div class="header-row">
+    <div class="logo">
+      <img src="{% static 'images/resturant-logo.png' %}" alt="Company Logo" />
+    </div>
+    <div class="header-info">
+      <div style="background-color:#e2f0d9;font-size:18px">&nbsp; Jewel Ledger Report &nbsp;</div>
+      <div>Print Date: {{ print_time|date:"F j, Y, g:i a" }}</div>
+    </div>
+  </div>
+
+  <div class="sub-head">
+    House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br />
+    01993005558, 09639246230, 09639246231 <br>
+    md2bayid@gmail.com, thebtplimited@gmail.com, www.btplimited.com
+  </div>
+
+  <hr />
+
+  <p style="color:blue;font-size:16px">
+    Date Range: 
+    {% if selected_filters.from_date %} {{ selected_filters.from_date|date:"d M Y" }} {% endif %}
+    {% if selected_filters.to_date %} to {{ selected_filters.to_date|date:"d M Y" }} {% endif %}
+  </p>
+
+  {% if report_data %}
+    {% for block in report_data %}
+      <h3 class="group-label-row">{{ block.project.project_first_name }}</h3>
+
+      {% if block.ledger_list %}
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Account</th>
+            <th>Name Context</th>
+            <th>Description</th>
+            <th>Payment (Debit)</th>
+            <th>Received (Credit)</th>
+            <th>Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in block.ledger_list %}
+          <tr>
+            <td>{{ entry.date|date:"d M Y" }}</td>
+            <td style="text-align:left">{{ entry.head }}</td>
+            <td style="text-align:left">{{ entry.account }}</td>
+            <td style="text-align:left">{{ entry.type_name }}</td>
+            <td class="description">{{ entry.description }}</td>
+            <td>{% if entry.debit > 0 %}{{ entry.debit|floatformat:2 }}{% else %}0.00{% endif %}</td>
+            <td>{% if entry.credit > 0 %}{{ entry.credit|floatformat:2 }}{% else %}0.00{% endif %}</td>
+            <td>{{ entry.running_balance|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+          <tr style="font-weight:bold; font-size:14px; background:#f1f5f9;">
+            <td colspan="5" style="text-align:right;"> Total:</td>
+            <td>{{ block.debit_total|floatformat:2 }}</td>
+            <td>{{ block.credit_total|floatformat:2 }}</td>
+            <td>{{ block.balance|floatformat:2 }}</td>
+          </tr>
+        </tbody>
+      </table>
+      {% endif %}
+      <br>
+    {% endfor %}
+
+    <div class="group-summary">
+      <p>Grand Total Payment: {{ grand_debit_total|floatformat:2 }} Taka</p>
+      <p>Grand Total Received: {{ grand_credit_total|floatformat:2 }} Taka</p>
+      <p>Grand Total Balance: {{ grand_total_balance|floatformat:2 }} Taka</p>
+      <p class="amount-words">{{ grand_total_in_words }}</p>
+    </div>
+
+  {% else %}
+    <p>No ledger records found for the selected filters.</p>
+  {% endif %}
+
+  <div class="no-print">
+    <a href="{% url 'rest_jewel_ledger_manage' %}" class="btn-back">← Back</a>
+    <button onclick="window.print()" class="btn-print">🖨️ Print</button>
+  </div>
+</div>
+
+</body>
+</html>

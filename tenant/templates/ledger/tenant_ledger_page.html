@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tenant Ledger</title>
+</head>
+<body>
+<h2>Tenant Ledger</h2>
+
+<!-- Project Selection -->
+<label>Project:</label>
+<select id="project_select">
+    <option value="">--Select Project--</option>
+    {% for project in projects %}
+    <option value="{{ project.id }}">{{ project.project_first_name }}</option>
+    {% endfor %}
+</select>
+
+<!-- Varatiya Selection -->
+<label>Tenant:</label>
+<select id="varatiya_select">
+    <option value="">--Select Varatiya--</option>
+</select>
+
+<!-- Filters -->
+<label>Include Opening Balance:</label>
+<select id="include_opening">
+    <option value="yes">Yes</option>
+    <option value="no" selected>No</option>
+</select>
+
+<label>Start Date:</label>
+<input type="date" id="start_date">
+<label>End Date:</label>
+<input type="date" id="end_date">
+
+<button id="filter_btn">Filter</button>
+
+<hr>
+
+<h3>Ledger Result</h3>
+<table border="1" style="width:100%; border-collapse: collapse;" id="ledger_table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Bill No.</th>
+            <th>Debit</th>
+            <th>Credit</th>
+            <th>Balance</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<p>Total Debit: <span id="total_debit">0</span></p>
+<p>Total Credit: <span id="total_credit">0</span></p>
+<p>Receivable: <span id="receivable">0</span></p>
+
+<script>
+async function fetchJSON(url) {
+    const response = await fetch(url);
+    return await response.json();
+}
+
+// Project select -> load varatiyas
+document.getElementById("project_select").addEventListener("change", async function() {
+    const project_id = this.value;
+    const varatiyaSelect = document.getElementById("varatiya_select");
+    varatiyaSelect.innerHTML = '<option value="">--Select Varatiya--</option>';
+    if (project_id) {
+        const data = await fetchJSON(`/tenant/ajax/project/${project_id}/varatiyas/`);
+        data.varatiyas.forEach(v => {
+            const option = document.createElement("option");
+            option.value = v.varatiya_id;
+            option.textContent = v.varatiya_name;
+            varatiyaSelect.appendChild(option);
+        });
+    }
+});
+
+// Filter button -> fetch ledger
+document.getElementById("filter_btn").addEventListener("click", async function() {
+    const varatiya_id = document.getElementById("varatiya_select").value;
+    if (!varatiya_id) { alert("Select a Varatiya!"); return; }
+
+    const start_date = document.getElementById("start_date").value;
+    const end_date = document.getElementById("end_date").value;
+    const include_opening = document.getElementById("include_opening").value;
+
+    let url = `/tenant/ajax/varatiya/${varatiya_id}/ledger/?include_opening=${include_opening}`;
+    if (start_date && end_date) url += `&start_date=${start_date}&end_date=${end_date}`;
+
+    const data = await fetchJSON(url);
+    const tbody = document.querySelector("#ledger_table tbody");
+    tbody.innerHTML = "";
+
+    data.rows.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${row.date}</td>
+            <td>${row.description}</td>
+            <td>${row.bill_no}</td>
+            <td>${row.debit.toFixed(2)}</td>
+            <td>${row.credit.toFixed(2)}</td>
+            <td>${row.balance.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById("total_debit").textContent = data.total_debit.toFixed(2);
+    document.getElementById("total_credit").textContent = data.total_credit.toFixed(2);
+    document.getElementById("receivable").textContent = data.receivable.toFixed(2);
+});
+</script>
+</body>
+</html>

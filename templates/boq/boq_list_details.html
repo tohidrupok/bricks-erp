@@ -1,0 +1,453 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}BOQ List - Bricks ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>    
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">BOQ List</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <!-- Button to open the popup -->
+						<a href="{% url 'boq_list' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">
+                                Back
+                            </button>
+                        </a>
+                        
+                        <!-- Refresh Button -->
+                        <a href="{% url 'boq_list_details' projects_firts.id %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">
+                                Refresh
+                            </button>
+                        </a>
+                        <a href="javascript:void(0);" onclick="openPopupDel()">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">
+                                Revised Item
+                            </button>
+                        </a>
+                        <div class="mx-auto hidden text-slate-500 md:block"></div>
+                
+                        <!-- Search Input -->
+                        <div class="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">
+                            <div class="relative w-56 text-slate-500 mb-4">
+                                <input id="searchInput" type="text" placeholder="Search..." class="w-full p-2 text-sm border rounded-md shadow-sm focus:ring-4 focus:ring-primary" oninput="handleSearch()">
+                                <i class="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4">🔍</i>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <!-- BEGIN: Property Owners List -->
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <table class="w-full text-left -mt-2 border-separate border-spacing-y-[10px]">
+                            <thead>
+                                <tr>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">
+                                        #
+                                    </th>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">
+                                        BOQ Date
+                                    </th>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">
+                                        Project Name
+                                    </th>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">
+                                        Category
+                                    </th>
+									<th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">
+                                        Item Name
+                                    </th>                                    
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">
+                                        Unit
+                                    </th>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">
+                                        Quantity
+                                    </th>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">
+                                        Rate
+                                    </th>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">
+                                        Amount
+                                    </th>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 text-center">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                {% for boq in boqs %}
+                                <tr class="intro-x">
+                                    <td class="px-5 py-3 border-b dark:border-darkmode-300 box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600 font-medium">
+                                        {{ forloop.counter }}
+                                    </td>
+                                    <!-- date -->
+                                    <td class="px-5 py-3 border-b dark:border-darkmode-300 box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                                        {{ boq.boq_date }}
+                                    </td>
+                                    <!-- Project Name (ForeignKey relationship to Project) -->
+                                    <td class="px-5 py-3 border-b dark:border-darkmode-300 box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                                        <a class="whitespace-nowrap font-medium" href="#">
+                                            {{ boq.project_name.project_first_name }}  <!-- Assuming 'project_name' is the field in Project model -->
+                                        </a>
+                                    </td>
+                                    
+                                    <!-- Category -->
+                                    <td class="px-5 py-3 border-b dark:border-darkmode-300 box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                                        {{ boq.category_name }}
+                                    </td>
+                        
+                                    <!-- Item Name -->
+                                    <td class="px-5 py-3 border-b dark:border-darkmode-300 box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                                        {{ boq.item_name }} / <span style="color:red"> {{ boq.update_item }} </span>
+                                    </td>									
+                        
+                                    <!-- Unit -->
+                                    <td class="px-5 py-3 border-b dark:border-darkmode-300 box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                                        {{ boq.unit }}
+                                    </td>
+                        
+                                    <!-- Quantity -->
+                                    <td class="px-5 py-3 border-b dark:border-darkmode-300 box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                                        {{ boq.qty }}
+                                    </td>
+                        
+                                    <!-- Rate -->
+                                    <td class="px-5 py-3 border-b dark:border-darkmode-300 box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                                        {{ boq.rate|floatformat:2 }}
+                                    </td>
+                        
+                                    <!-- Amount -->
+                                    <td class="px-5 py-3 border-b dark:border-darkmode-300 box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                                        {{ boq.amount|floatformat:2 }}
+                                    </td>
+                        
+                                    <!-- Actions -->
+                                    <td class="px-5 py-3 border-b dark:border-darkmode-300 box w-56 rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600 text-center">
+										{% if request.session.department == "admin" %}
+											<a href="{% url 'boq_revise' pk=boq.pk project_id=projects_firts.id %}"
+											   class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">
+												<i data-lucide="check" class="stroke-1.5 mr-1 h-4 w-4"></i>
+												Revise
+											</a>
+											<br/>
+											<a href="{% url 'boq_delete' pk=boq.pk %}" class="flex items-center text-danger">
+												<i data-lucide="trash" class="stroke-1.5 mr-1 h-4 w-4"></i> Delete
+											</a>
+										{% else %}
+											{% if boq.status_item != "Approved" %}
+												<a href="{% url 'boq_edit' pk=boq.pk %}" class="mr-3 flex items-center">
+													<i data-lucide="edit" class="stroke-1.5 mr-1 h-4 w-4"></i> Edit
+												</a>
+												<br/>
+												<a href="{% url 'boq_delete' pk=boq.pk %}" class="flex items-center text-danger">
+													<i data-lucide="trash" class="stroke-1.5 mr-1 h-4 w-4"></i> Delete
+												</a>
+											{% else %}
+												<p class="text-green-700 font-semibold">Approved</p>
+											{% endif %}
+										{% endif %}
+									</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center px-5 py-3">No BOQs available.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>                        
+                          <script>
+                          document.addEventListener('DOMContentLoaded', function() {
+                            const searchInput = document.getElementById('searchInput');
+                            const tableBody = document.getElementById('tableBody');
+                        
+                            if (!searchInput || !tableBody) {
+                              console.error('Search input or table body not found');
+                              return;
+                            }
+                        
+                            searchInput.addEventListener('input', function() {
+                              const searchValue = this.value.toLowerCase();
+                              const rows = tableBody.querySelectorAll('tr');
+                        
+                              rows.forEach(row => {
+                                const rowText = Array.from(row.cells)
+                                  .map(cell => cell.textContent.toLowerCase())
+                                  .join(' ');
+                        
+                                if (rowText.includes(searchValue)) {
+                                  row.style.display = '';
+                                } else {
+                                  row.style.display = 'none';
+                                }
+                              });
+                            });
+                          });
+                        </script>
+                    </div>                
+
+                    <!-- Start of Popup for selecting Project for Details BOQ -->
+                    <div id="popupdel" style="display: none;">
+						<div class="popup-content">
+							<h3>Revised Item Detail</h3>
+							<form id="popup-form">
+								<!-- Project Name Dropdown -->
+								<label for="project-select-del" class="form-label">Project Name:</label>
+								<select id="project-select-del" class="form-select" required>
+									<option value="">Select a Project</option>
+									{% for project in projects_firt_names %}
+										<option value="{{ project.id }}">{{ project.project_first_name }}</option>
+									{% endfor %}
+								</select>
+
+								<!-- Revised Items Dropdown -->
+								<label for="revised-items-select" class="form-label mt-4">Revised Items:</label>
+								<select id="revised-items-select" class="form-select">
+									<option value="">Select a Revised Item</option>
+									{% for boq in revised_boq_items %}
+										<option value="{{ boq.id }}">{{ boq.item_name }}</option>
+									{% empty %}
+										<option disabled>No revised items found</option>
+									{% endfor %}
+								</select>
+
+								<!-- Actions -->
+								<div class="popup-actions mt-4">
+									<button type="button" class="cancel-btn" onclick="closePopupDel()">Cancel</button>
+									<button type="button" class="submit-btn" onclick="submitPopupDel()">Submit</button>
+								</div>
+							</form>
+						</div>
+					</div>
+
+                    <style>
+                        #popupdel {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background: rgba(0, 0, 0, 0.5);
+                            display: none;
+                            justify-content: center;
+                            align-items: center;
+                            z-index: 1000;
+                        }
+                    
+                        .popup-content {
+                            background: white;
+                            padding: 30px;
+                            border-radius: 10px;
+                            width: 400px;
+                            text-align: center;
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        }
+                    
+                        .popup-content h3 {
+                            margin-bottom: 20px;
+                            font-size: 20px;
+                            font-weight: bold;
+                            color: #333;
+                        }
+                    
+                        .form-label {
+                            display: block;
+                            margin-bottom: 8px;
+                            text-align: left;
+                            font-size: 14px;
+                            color: #555;
+                        }
+                    
+                        .form-select {
+                            width: 100%;
+                            padding: 10px;
+                            margin-bottom: 15px;
+                            border: 1px solid #ddd;
+                            border-radius: 5px;
+                            font-size: 14px;
+                            transition: border 0.3s;
+                        }
+                    
+                        .form-select:focus {
+                            border-color: #4caf50;
+                            outline: none;
+                        }
+                    
+                        .popup-actions {
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                    
+                        .popup-actions button {
+                            padding: 10px 20px;
+                            border: none;
+                            border-radius: 5px;
+                            font-size: 14px;
+                            cursor: pointer;
+                            transition: background 0.3s;
+                            width: 45%;
+                        }
+                    
+                        .cancel-btn {
+                            background-color: #f44336;
+                            color: white;
+                        }
+                    
+                        .submit-btn {
+                            background-color: #4caf50;
+                            color: white;
+                        }
+                    
+                        .cancel-btn:hover {
+                            background-color: #d32f2f;
+                        }
+                    
+                        .submit-btn:hover {
+                            background-color: #45a049;
+                        }
+                    
+                        @media (max-width: 600px) {
+                            .popup-content {
+                                width: 90%;
+                            }
+                        }
+                    </style>
+                    <script>
+                        // Function to open the popup
+                        function openPopupDel() {
+                            document.getElementById('popupdel').style.display = 'flex';
+                        }
+                    
+                        // Function to close the popup
+                        function closePopupDel() {
+                            document.getElementById('popupdel').style.display = 'none';
+                        }
+                    
+                        // Function to handle the form submission
+                        function submitPopupDel() {
+                            const project_id = document.getElementById('project-select-del').value;
+							const revised_id = document.getElementById('revised-items-select').value;
+                    
+                            // Validate if a project is selected
+                            if (!project_id) {
+                                alert('Please select a project!');
+                                return;
+                            }
+                    
+                            // Redirect to project BOQ details page with selected project ID
+                            window.location.href = "{% url 'revised_item_entry' %}?project_id=" + encodeURIComponent(project_id)+ "&revised_id=" + encodeURIComponent(revised_id);
+                        }
+                    </script>
+                    <!-- End of Popup for selecting Project for Details BOQ -->       
+                     
+
+                    <!-- BEGIN: Pagination -->
+                    <div class="intro-y col-span-12 flex flex-wrap items-center sm:flex-row sm:flex-nowrap">
+                        <!-- Showing entries text -->
+                        <div class="mx-auto hidden text-slate-500 md:block">
+                            Showing {{ boqs.start_index }} to {{ boqs.end_index }} of {{ boqs.paginator.count }} entries
+                        </div>
+                
+                        <!-- Pagination navigation -->
+                        <nav class="w-full sm:mr-auto sm:w-auto">
+                            <ul class="flex w-full mr-0 sm:mr-auto sm:w-auto">
+                                <!-- Previous Page -->
+                                {% if boqs.has_previous %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <a href="?page={{ boqs.previous_page_number }}&page_size={{ boqs.paginator.per_page }}" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer">
+                                            <i class="chevrons-left h-4 w-4"></i> <!-- Left Chevron icon -->
+                                            Previous
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <span class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-not-allowed">
+                                            <i class="chevrons-left h-4 w-4"></i>
+                                            Previous
+                                        </span>
+                                    </li>
+                                {% endif %}
+                
+                                <!-- Page Numbers -->
+                                {% for num in boqs.paginator.page_range %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        {% if num == boqs.number %}
+                                            <a href="#" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer bg-primary text-white">{{ num }}</a>
+                                        {% else %}
+                                            <a href="?page={{ num }}&page_size={{ boqs.paginator.per_page }}" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer">{{ num }}</a>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                
+                                <!-- Next Page -->
+                                {% if boqs.has_next %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <a href="?page={{ boqs.next_page_number }}&page_size={{ boqs.paginator.per_page }}" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer">
+                                            Next
+                                            <i class="chevron-right h-4 w-4"></i> <!-- Right Chevron icon -->
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <span class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-not-allowed">
+                                            Next
+                                            <i class="chevron-right h-4 w-4"></i>
+                                        </span>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                
+                        <!-- Page Size Selector -->
+                        <form method="get" action="" class="inline-block">
+                            <select name="page_size" onchange="this.form.submit()" class="transition duration-200 ease-in-out text-sm border-slate-200 shadow-sm rounded-md py-2 px-3 pr-8 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+                                <option value="10" {% if boqs.paginator.per_page == 10 %}selected{% endif %}>10</option>
+                                <option value="25" {% if boqs.paginator.per_page == 25 %}selected{% endif %}>25</option>
+                                <option value="50" {% if boqs.paginator.per_page == 50 %}selected{% endif %}>50</option>
+                            </select>
+                        </form>
+                    </div>                   
+                    <!-- END: Pagination -->
+                </div>
+                
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

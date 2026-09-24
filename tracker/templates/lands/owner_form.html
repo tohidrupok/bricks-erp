@@ -1,0 +1,531 @@
+{% extends "lands/base.html" %}
+{% block title %}{{ action }} Owner | মালিক{% endblock %}
+
+{% block content %}
+<div class="container-sm">
+
+  <div class="breadcrumb">
+    <a href="{% url 'tracker:list' %}">Records</a> /
+    <a href="{% url 'tracker:detail' record.pk %}">{{ record.file_no }}</a> /
+    {{ action }} Owner
+  </div>
+
+  <div class="page-header">
+    <h1>{{ action }} Owner{% if parent %} — heir of <em>{{ parent.name }}</em>{% endif %}</h1>
+    <div class="bn-title">
+      {% if action == 'Add' %}মালিক / উত্তরাধিকারী যোগ করুন{% else %}তথ্য সম্পাদনা করুন{% endif %}
+    </div>
+    {% if parent %}
+    <div class="parent-badge">
+      ↳ Adding as child of <strong>{{ parent.name }}</strong>
+      {% if parent.step_label %} · {{ parent.step_label }}{% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  {% if action == 'Add' %}
+  <div class="mode-tabs" id="modeTabs">
+    <button type="button" class="tab-btn active" data-tab="single">➕ Single</button>
+    <button type="button" class="tab-btn" data-tab="bulk">
+      👥 Bulk Add<span class="tab-hint">add many at once</span>
+    </button>
+    <button type="button" class="tab-btn" data-tab="join">
+      🔗 Join Root<span class="tab-hint">create parent above any nodes</span>
+    </button>
+  </div>
+  {% endif %}
+
+  {# ── TAB 1: Single ── #}
+  <div class="tab-panel card" id="tab-single">
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="mode" value="single">
+      {% if parent %}<input type="hidden" name="parent_id" value="{{ parent.pk }}">{% endif %}
+      <div class="form-group">
+        <label>Full Name <span class="bn-label">পূর্ণ নাম *</span></label>
+        <input type="text" name="name" required
+               placeholder="e.g. Azmat Ali / আজমত আলী"
+               value="{{ owner.name|default:'' }}">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Step Label <span class="bn-label">ধাপের নাম</span></label>
+          <input type="text" name="step_label" placeholder="e.g. 1st Generation"
+                 value="{{ owner.step_label|default:'' }}">
+        </div>
+        <div class="form-group">
+          <label>Relation <span class="bn-label">সম্পর্ক</span></label>
+          <input type="text" name="relation" placeholder="e.g. Son, Daughter"
+                 value="{{ owner.relation|default:'' }}">
+        </div>
+        <div class="form-group">
+          <label>Dag No <span class="bn-label">দাগ নং</span></label>
+          <input type="text" name="dagno" placeholder="e.g. dagno"
+                 value="{{ owner.dagno|default:'' }}">
+        </div>
+        <div class="form-group">
+          <label>Share <span class="bn-label">অংশ</span></label>
+          <input type="text" name="share" placeholder="e.g. share"
+                 value="{{ owner.share|default:'' }}">
+        </div>
+        <div class="form-group">
+          <label>উত্তরাধিকারীর ক্রম</label>
+          <input type="number" name="order" min="0" value="{{ owner.order|default:'0' }}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notes <span class="bn-label">নোট</span></label>
+        <textarea name="note" placeholder="Share, deed info …">{{ owner.note|default:'' }}</textarea>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+          {% if action == 'Add' %}Add Owner{% else %}Save{% endif %}
+        </button>
+        <a href="{% url 'tracker:detail' record.pk %}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  {% if action == 'Add' %}
+  {# ── TAB 2: Bulk Add ── #}
+  <div class="tab-panel card hidden" id="tab-bulk">
+    <div class="bulk-count-row">
+      <label>How many owners? <span class="bn-label">কতজন?</span></label>
+      <div class="count-controls">
+        <button type="button" class="count-btn" id="countMinus">−</button>
+        <input type="number" id="bulkCount" value="2" min="1" max="30">
+        <button type="button" class="count-btn" id="countPlus">+</button>
+        <button type="button" class="btn btn-outline" id="generateFields">Generate Fields ↓</button>
+      </div>
+    </div>
+    <div class="bulk-shared-row">
+      <div class="form-group">
+        <label>Common Relation <small>(fills blank rows)</small></label>
+        <input type="text" id="sharedRelation" placeholder="e.g. Son / ছেলে">
+      </div>
+      <div class="form-group">
+        <label>Common Step Label</label>
+        <input type="text" id="sharedStepLabel" placeholder="e.g. 2nd Generation">
+      </div>
+    </div>
+    <form method="post" id="bulkForm">
+      {% csrf_token %}
+      <input type="hidden" name="mode" value="bulk">
+      {% if parent %}<input type="hidden" name="parent_id" value="{{ parent.pk }}">{% endif %}
+      <div id="bulkFields" class="bulk-fields-wrap"></div>
+      <div class="form-actions" id="bulkActions" style="display:none">
+        <button type="submit" class="btn btn-primary">Save All / সব সংরক্ষণ করুন</button>
+        <a href="{% url 'tracker:detail' record.pk %}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  {# ── TAB 3: Join Root ── #}
+  <div class="tab-panel card hidden" id="tab-join">
+    <div class="join-info">
+      <strong>🔗 Join Root</strong> — Select <strong>any 2 or more nodes</strong>
+      from <em>any level</em> of the tree. A new parent node will be created above them.<br>
+      <span class="bn-label">যেকোনো স্তরের ২+ নোড নির্বাচন করুন — নতুন প্যারেন্ট নোড তৈরি হবে।</span>
+    </div>
+
+    <div class="join-picker-header">
+      <span class="join-picker-label">Select nodes to join</span>
+      <div class="join-picker-controls">
+        <button type="button" class="pick-ctrl-btn" id="expandAll">⊞ Expand All</button>
+        <button type="button" class="pick-ctrl-btn" id="collapseAll">⊟ Collapse All</button>
+        <button type="button" class="pick-ctrl-btn danger" id="clearAll">✕ Clear</button>
+      </div>
+    </div>
+
+    <div class="join-tree-wrap" id="joinTreeWrap">
+      <div class="join-tree-loading">Click the "Join Root" tab to load tree…</div>
+    </div>
+
+    <div id="joinSummaryBar" class="join-summary-bar hidden">
+      <span id="joinSummaryText"></span>
+    </div>
+
+    <form method="post" id="joinForm">
+      {% csrf_token %}
+      <input type="hidden" name="mode" value="join">
+      <input type="hidden" name="join_children" id="joinChildrenInput">
+
+      <div class="join-new-title">
+        New parent node <span class="bn-label">নতুন প্যারেন্ট নোডের তথ্য</span>
+      </div>
+
+      <div class="form-group">
+        <label>Name of new parent * <span class="bn-label">নাম</span></label>
+        <input type="text" name="name" required
+               placeholder="e.g. মাদবর মোল্লাহ / হেবা দলিল নং ৬০৯৮">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Step Label</label>
+          <input type="text" name="step_label" placeholder="e.g. Deed date 20-8-1988">
+        </div>
+        <div class="form-group">
+          <label>Relation</label>
+          <input type="text" name="relation" placeholder="e.g. Joint Heirs">
+        </div>
+        <div class="form-group">
+          <label>Display Order</label>
+          <input type="number" name="order" value="0" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea name="note" placeholder="e.g. হেবা দলিল নং ৬০৯৮ তারিখ ২০-৮-১৯৮৮ …"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="joinSubmit" disabled>
+          🔗 Create Join Node / জয়েন নোড তৈরি করুন
+        </button>
+        <a href="{% url 'tracker:detail' record.pk %}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+  const ALL_OWNERS_JSON = {{ all_owners_json|safe }};
+</script>
+
+<style>
+.mode-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tab-btn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 18px;
+  border:1px solid var(--border-color,#ddd);border-radius:8px;background:var(--card-bg,#fff);
+  cursor:pointer;font-size:14px;font-weight:500;color:var(--text-secondary,#555);transition:all .15s;line-height:1.3}
+.tab-btn .tab-hint{font-size:11px;font-weight:400;opacity:.65}
+.tab-btn.active{background:var(--primary,#2563eb);color:#fff;border-color:var(--primary,#2563eb)}
+.tab-btn:hover:not(.active){border-color:var(--primary,#2563eb);color:var(--primary,#2563eb)}
+.hidden{display:none!important}
+.parent-badge{margin-top:10px;padding:10px 14px;background:var(--accent-bg,#eff6ff);
+  border-radius:8px;font-size:13px;color:var(--accent-text,#1e40af);border:1px solid var(--accent-border,#bfdbfe)}
+.bulk-count-row{margin-bottom:16px}
+.bulk-count-row>label{display:block;font-weight:600;margin-bottom:8px;font-size:14px}
+.count-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.count-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border-color,#ddd);
+  background:var(--card-bg,#fff);font-size:20px;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;font-weight:700;line-height:1}
+.count-btn:hover{border-color:var(--primary,#2563eb);color:var(--primary,#2563eb)}
+#bulkCount{width:68px;text-align:center;font-size:16px;font-weight:700;
+  padding:6px 10px;border:1px solid var(--border-color,#ddd);border-radius:8px}
+.btn-outline{border:1px solid var(--primary,#2563eb);color:var(--primary,#2563eb);
+  background:transparent;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;white-space:nowrap}
+.btn-outline:hover{background:var(--primary,#2563eb);color:#fff}
+.bulk-shared-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;
+  padding:14px;background:var(--accent-bg,#f8fafc);border-radius:8px;border:1px dashed var(--border-color,#ddd)}
+@media(max-width:540px){.bulk-shared-row{grid-template-columns:1fr}}
+.bulk-fields-wrap{display:flex;flex-direction:column}
+
+/* Updated grid styling to reflect 7 distinct columns */
+.bulk-header-row, .bulk-data-row {
+  display: grid;
+  gap: 8px;
+  align-items: start;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-color,#eee);
+  grid-template-columns: 28px 2fr 1fr 1fr 1fr 1.2fr 1.5fr;
+}
+.bulk-header-row{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  color:var(--text-secondary,#888);border-top:2px solid var(--primary,#2563eb)}
+.bulk-row-num{padding-top:8px;font-size:12px;color:var(--text-secondary,#888);font-weight:700;text-align:center}
+.bulk-data-row input{width:100%;padding:7px 10px;border:1px solid var(--border-color,#ddd);
+  border-radius:6px;font-size:13px;font-family:inherit}
+.bulk-data-row input:focus{outline:none;border-color:var(--primary,#2563eb);box-shadow:0 0 0 2px rgba(37,99,235,.15)}
+
+@media(max-width:768px){
+  .bulk-header-row, .bulk-data-row { grid-template-columns: 24px 1fr; }
+  .h-rel, .h-dag, .h-share, .h-step, .h-note, 
+  .bulk-col-rel, .bulk-col-dag, .bulk-col-share, .bulk-col-step, .bulk-col-note { display:none!important; }
+}
+
+.join-info{padding:12px 16px;background:#fffbeb;border:1px solid #fde68a;
+  border-radius:8px;font-size:13px;line-height:1.7;margin-bottom:16px}
+.join-picker-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px}
+.join-picker-label{font-weight:700;font-size:14px}
+.join-picker-controls{display:flex;gap:6px;flex-wrap:wrap}
+.pick-ctrl-btn{padding:5px 12px;border:1px solid var(--border-color,#ddd);border-radius:6px;
+  background:var(--card-bg,#fff);font-size:12px;cursor:pointer;color:var(--text-secondary,#555)}
+.pick-ctrl-btn:hover{border-color:var(--primary,#2563eb);color:var(--primary,#2563eb)}
+.pick-ctrl-btn.danger:hover{border-color:#dc2626;color:#dc2626}
+.join-tree-wrap{border:1px solid var(--border-color,#ddd);border-radius:10px;
+  background:var(--card-bg,#fff);max-height:400px;overflow-y:auto;padding:8px 6px}
+.join-tree-loading{padding:20px;text-align:center;color:var(--text-secondary,#999);font-size:13px}
+.jt-node{user-select:none}
+.jt-row{display:flex;align-items:center;padding:5px 6px;border-radius:7px;
+  transition:background .1s;position:relative}
+.jt-row:hover{background:var(--accent-bg,#eff6ff)}
+.jt-row.checked{background:#dbeafe}
+.jt-toggle{width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+  border-radius:4px;font-size:11px;color:var(--text-secondary,#888);flex-shrink:0;
+  transition:transform .15s;cursor:pointer;margin-right:2px}
+.jt-toggle.open{transform:rotate(90deg)}
+.jt-toggle.leaf{color:#ddd;cursor:default}
+.jt-cb{width:16px;height:16px;flex-shrink:0;cursor:pointer;margin-right:8px;accent-color:var(--primary,#2563eb)}
+.jt-indent{display:flex;flex-shrink:0}
+.jt-line{width:18px;border-left:1.5px solid #e2e8f0;margin-left:10px;flex-shrink:0;align-self:stretch}
+.jt-name{font-size:13px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jt-depth-0>.jt-row>.jt-name{color:#1e3a5f;font-size:14px}
+.jt-depth-1>.jt-row>.jt-name{color:#1d4ed8}
+.jt-depth-2>.jt-row>.jt-name{color:#0369a1}
+.jt-depth-3>.jt-row>.jt-name{color:#0f766e}
+.jt-depth-4>.jt-row>.jt-name{color:#7c3aed}
+.jt-tags{display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;margin-left:6px}
+.jt-tag{font-size:10px;padding:1px 6px;border-radius:4px;white-space:nowrap}
+.jt-tag.rel{background:#dbeafe;color:#1d4ed8}
+.jt-tag.step{background:#f3e8ff;color:#7c3aed}
+.jt-children{list-style:none;margin:0;padding:0}
+.jt-children .jt-children{padding-left:20px}
+.join-summary-bar{margin:10px 0;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500;border:1px solid}
+.join-summary-bar.ok{background:#dcfce7;border-color:#86efac;color:#166534}
+.join-summary-bar.warn{background:#fef9c3;border-color:#fde68a;color:#854d0e}
+.join-new-title{font-weight:700;font-size:14px;margin:20px 0 12px;padding-bottom:6px;
+  border-bottom:2px solid var(--primary,#2563eb);color:var(--primary,#2563eb)}
+.form-actions{display:flex;gap:10px;padding-top:16px;flex-wrap:wrap}
+</style>
+
+<script>
+(function () {
+  /* ─── Tab switching ─────────────────────────────────────────────────── */
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      btn.classList.add('active');
+      const panel = document.getElementById('tab-' + btn.dataset.tab);
+      if (panel) panel.classList.remove('hidden');
+      if (btn.dataset.tab === 'join') renderJoinTree();
+    });
+  });
+
+  /* ─── Bulk Add ──────────────────────────────────────────────────────── */
+  const countInput  = document.getElementById('bulkCount');
+  const genBtn      = document.getElementById('generateFields');
+  const bulkFields  = document.getElementById('bulkFields');
+  const bulkActions = document.getElementById('bulkActions');
+  const sharedRel   = document.getElementById('sharedRelation');
+  const sharedStep  = document.getElementById('sharedStepLabel');
+
+  document.getElementById('countMinus')?.addEventListener('click', () => {
+    const v = parseInt(countInput.value, 10); if (v > 1) countInput.value = v - 1;
+  });
+  document.getElementById('countPlus')?.addEventListener('click', () => {
+    const v = parseInt(countInput.value, 10); if (v < 30) countInput.value = v + 1;
+  });
+
+  function buildBulkFields() {
+    if (!bulkFields) return;
+    const count = Math.min(Math.max(parseInt(countInput.value, 10) || 2, 1), 30);
+    bulkFields.innerHTML = '';
+    
+    const hdr = document.createElement('div');
+    hdr.className = 'bulk-header-row';
+    hdr.innerHTML = `
+      <span>#</span>
+      <span>Name / নাম *</span>
+      <span class="h-rel">Relation</span>
+      <span class="h-dag">Dag No</span>
+      <span class="h-share">Share</span>
+      <span class="h-step">Step Label</span>
+      <span class="h-note">Note</span>
+    `;
+    bulkFields.appendChild(hdr);
+    
+    for (let i = 1; i <= count; i++) {
+      const row = document.createElement('div');
+      row.className = 'bulk-data-row';
+      row.innerHTML = `
+        <span class="bulk-row-num">${i}</span>
+        <input type="text" name="bulk_name" placeholder="Name ${i}" required>
+        <input type="text" name="bulk_relation" class="bulk-col-rel" placeholder="Relation">
+        <input type="text" name="bulk_dagno" class="bulk-col-dag" placeholder="Dag No">
+        <input type="text" name="bulk_share" class="bulk-col-share" placeholder="Share">
+        <input type="text" name="bulk_step_label" class="bulk-col-step" placeholder="Step">
+        <input type="text" name="bulk_note" class="bulk-col-note" placeholder="Note">
+      `;
+      bulkFields.appendChild(row);
+    }
+    if (bulkActions) bulkActions.style.display = 'flex';
+  }
+  
+  if (genBtn) { genBtn.addEventListener('click', buildBulkFields); buildBulkFields(); }
+  
+  document.getElementById('bulkForm')?.addEventListener('submit', () => {
+    const sr = sharedRel?.value.trim() || '';
+    const ss = sharedStep?.value.trim() || '';
+    if (sr) {
+      bulkFields.querySelectorAll('input[name="bulk_relation"]').forEach(el => { if (!el.value.trim()) el.value = sr; });
+    }
+    if (ss) {
+      bulkFields.querySelectorAll('input[name="bulk_step_label"]').forEach(el => { if (!el.value.trim()) el.value = ss; });
+    }
+  });
+
+  /* ─── Join Root full-tree picker ────────────────────────────────────── */
+  const treeWrap   = document.getElementById('joinTreeWrap');
+  const summaryBar = document.getElementById('joinSummaryBar');
+  const summaryTxt = document.getElementById('joinSummaryText');
+  const joinInput  = document.getElementById('joinChildrenInput');
+  const joinSubmit = document.getElementById('joinSubmit');
+
+  let treeRendered = false;
+  let selectedPks  = new Set();
+  let nodeMap      = {};
+
+  function flattenNodes(list, depth) {
+    list.forEach(o => {
+      o._depth = depth;
+      nodeMap[String(o.id)] = o;
+      if (o.children && o.children.length) flattenNodes(o.children, depth + 1);
+    });
+  }
+
+  function renderJoinTree() {
+    if (treeRendered) return;
+    treeRendered = true;
+    if (!treeWrap) return;
+    if (!ALL_OWNERS_JSON || ALL_OWNERS_JSON.length === 0) {
+      treeWrap.innerHTML = '<p style="padding:20px;text-align:center;color:#888;font-size:13px">No owners yet — add some first.</p>';
+      return;
+    }
+    flattenNodes(ALL_OWNERS_JSON, 0);
+    treeWrap.innerHTML = '';
+    treeWrap.appendChild(buildUL(ALL_OWNERS_JSON, 0));
+  }
+
+  function buildUL(nodes, depth) {
+    const ul = document.createElement('ul');
+    ul.className = 'jt-children';
+    nodes.forEach(n => ul.appendChild(buildLI(n, depth)));
+    return ul;
+  }
+
+  function buildLI(node, depth) {
+    const li = document.createElement('li');
+    li.className = `jt-node jt-depth-${Math.min(depth,4)}`;
+    li.dataset.pk = String(node.id);
+
+    const hasKids = node.children && node.children.length > 0;
+    const row = document.createElement('div');
+    row.className = 'jt-row';
+
+    if (depth > 0) {
+      const indent = document.createElement('div');
+      indent.className = 'jt-indent';
+      for (let i = 0; i < depth; i++) {
+        const line = document.createElement('div');
+        line.className = 'jt-line';
+        indent.appendChild(line);
+      }
+      row.appendChild(indent);
+    }
+
+    const toggle = document.createElement('span');
+    toggle.className = 'jt-toggle' + (hasKids ? '' : ' leaf');
+    toggle.textContent = hasKids ? '▶' : '·';
+    row.appendChild(toggle);
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'jt-cb';
+    cb.value = String(node.id);
+    cb.addEventListener('change', () => onCheck(cb, row));
+    row.appendChild(cb);
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'jt-name';
+    nameSpan.textContent = node.name;
+    row.appendChild(nameSpan);
+
+    if (node.relation || node.step_label) {
+      const tags = document.createElement('span');
+      tags.className = 'jt-tags';
+      if (node.relation)   tags.innerHTML += `<span class="jt-tag rel">${node.relation}</span>`;
+      if (node.step_label) tags.innerHTML += `<span class="jt-tag step">${node.step_label}</span>`;
+      row.appendChild(tags);
+    }
+
+    li.appendChild(row);
+
+    if (hasKids) {
+      const childUL = buildUL(node.children, depth + 1);
+      childUL.style.display = 'none';
+      li.appendChild(childUL);
+
+      toggle.addEventListener('click', e => {
+        e.stopPropagation();
+        const open = childUL.style.display !== 'none';
+        childUL.style.display = open ? 'none' : '';
+        toggle.classList.toggle('open', !open);
+      });
+
+      row.addEventListener('click', e => {
+        if (e.target === cb) return;
+        const open = childUL.style.display !== 'none';
+        childUL.style.display = open ? 'none' : '';
+        toggle.classList.toggle('open', !open);
+      });
+    } else {
+      row.addEventListener('click', e => {
+        if (e.target === cb) return;
+        cb.checked = !cb.checked;
+        onCheck(cb, row);
+      });
+    }
+
+    node._domRow = row;
+    node._domCB  = cb;
+    return li;
+  }
+
+  function onCheck(cb, row) {
+    if (cb.checked) { selectedPks.add(cb.value); row.classList.add('checked'); }
+    else            { selectedPks.delete(cb.value); row.classList.remove('checked'); }
+    updateSummary();
+  }
+
+  function updateSummary() {
+    const count = selectedPks.size;
+    if (joinInput)  joinInput.value = [...selectedPks].join(',');
+    if (joinSubmit) joinSubmit.disabled = count < 2;
+    if (!summaryBar) return;
+
+    if (count === 0) {
+      summaryBar.classList.add('hidden');
+      summaryBar.classList.remove('ok','warn');
+      return;
+    }
+    summaryBar.classList.remove('hidden');
+    const names = [...selectedPks].map(pk => nodeMap[pk]?.name || pk);
+    const ready = count >= 2;
+    summaryBar.classList.toggle('ok',   ready);
+    summaryBar.classList.toggle('warn', !ready);
+    summaryTxt.textContent = ready
+      ? `✓ ${count} selected: ${names.join(' + ')} — ready to join`
+      : `${count} selected: ${names.join(' + ')} — need at least 2`;
+  }
+
+  /* expand / collapse / clear */
+  document.getElementById('expandAll')?.addEventListener('click', () => {
+    treeWrap.querySelectorAll('.jt-children').forEach(u => u.style.display = '');
+    treeWrap.querySelectorAll('.jt-toggle:not(.leaf)').forEach(t => t.classList.add('open'));
+  });
+  document.getElementById('collapseAll')?.addEventListener('click', () => {
+    treeWrap.querySelectorAll('.jt-children').forEach(u => u.style.display = 'none');
+    treeWrap.querySelectorAll('.jt-toggle').forEach(t => t.classList.remove('open'));
+  });
+  document.getElementById('clearAll')?.addEventListener('click', () => {
+    selectedPks.clear();
+    treeWrap.querySelectorAll('.jt-cb').forEach(cb => { cb.checked = false; });
+    treeWrap.querySelectorAll('.jt-row').forEach(r => r.classList.remove('checked'));
+    updateSummary();
+  });
+
+})();
+</script>
+{% endblock %}

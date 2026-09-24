@@ -1,0 +1,499 @@
+<!-- templates/dashboard.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Dashboard - BRICKS ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .erp-dash {
+    font-family: Arial, sans-serif;
+    background: #f0f4ff;
+    color: #1e293b;
+    min-height: 100vh;
+    padding: 28px 28px 60px;
+  }
+
+  /* Header */
+  .dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+    border-radius: 18px;
+    padding: 22px 28px;
+    color: #fff;
+  }
+  .dash-title { font-size: 26px; font-weight: 800; }
+  .dash-subtitle { font-size: 13px; opacity: .8; margin-top: 3px; }
+  .dash-badge {
+    background: rgba(255,255,255,.2);
+    border-radius: 20px;
+    padding: 7px 18px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  /* Section Label */
+  .section-label {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #6366f1;
+    margin: 32px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, #6366f1, transparent);
+    border-radius: 2px;
+  }
+
+  /* KPI Grid */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+  @media(max-width:900px){ .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+
+  .kpi-card {
+    border-radius: 16px;
+    padding: 20px 22px 18px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,.12);
+    transition: transform .2s;
+  }
+  .kpi-card:hover { transform: translateY(-3px); }
+  .kpi-card::after {
+    content: '';
+    position: absolute;
+    right: -18px; bottom: -18px;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.12);
+  }
+  .kpi-card.k1 { background: linear-gradient(135deg, #6366f1, #818cf8); }
+  .kpi-card.k2 { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+  .kpi-card.k3 { background: linear-gradient(135deg, #10b981, #34d399); }
+  .kpi-card.k4 { background: linear-gradient(135deg, #ec4899, #f472b6); }
+  .kpi-card.k5 { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+  .kpi-card.k6 { background: linear-gradient(135deg, #14b8a6, #2dd4bf); }
+  .kpi-card.k7 { background: linear-gradient(135deg, #f97316, #fb923c); }
+  .kpi-card.k8 { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+
+  .kpi-icon { font-size: 26px; margin-bottom: 10px; }
+  .kpi-label { font-size: 11px; font-weight: 700; opacity: .85; }
+  .kpi-value { font-size: 30px; font-weight: 800; margin-top: 4px; line-height: 1; }
+  .kpi-sub { font-size: 11px; opacity: .7; margin-top: 6px; }
+
+  /* Chart Grid */
+  .chart-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .chart-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media(max-width:900px){ .chart-grid-2,.chart-grid-3 { grid-template-columns: 1fr; } }
+
+  .chart-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px 22px;
+    box-shadow: 0 2px 12px rgba(99,102,241,.08);
+    border: 1px solid #e0e7ff;
+  }
+  .chart-card-title { font-size: 14px; font-weight: 800; color: #1e293b; margin-bottom: 2px; }
+  .chart-card-sub { font-size: 11px; color: #94a3b8; margin-bottom: 14px; }
+  .chart-wrap canvas { max-height: 220px; }
+  .chart-wrap.tall canvas { max-height: 260px; }
+
+  /* Table Card */
+  .table-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(99,102,241,.08);
+    border: 1px solid #e0e7ff;
+  }
+  .table-card-header {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .table-card-header .chart-card-title { margin-bottom: 0; }
+  .tbl-badge {
+    font-size: 10px; font-weight: 800; letter-spacing: .5px;
+    padding: 3px 10px; border-radius: 20px;
+    background: #ede9fe; color: #7c3aed;
+  }
+  .erp-table { width: 100%; border-collapse: collapse; }
+  .erp-table th {
+    font-size: 10px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .7px; color: #64748b;
+    padding: 10px 20px; text-align: left;
+    background: #f8fafc; border-bottom: 1px solid #f1f5f9;
+  }
+  .erp-table td { padding: 11px 20px; font-size: 13px; color: #334155; border-bottom: 1px solid #f8fafc; }
+  .erp-table tr:last-child td { border-bottom: none; }
+  .erp-table tr:hover td { background: #fafbff; }
+  .amt-cell { font-weight: 800; color: #6366f1; }
+  .rank-dot {
+    display: inline-flex; width: 22px; height: 22px;
+    border-radius: 50%; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800;
+    background: #f1f5f9; color: #94a3b8; margin-right: 6px;
+  }
+  .rank-dot.r1 { background: #fef3c7; color: #d97706; }
+  .rank-dot.r2 { background: #e0f2fe; color: #0284c7; }
+  .rank-dot.r3 { background: #f0fdf4; color: #16a34a; }
+
+  /* Restaurant */
+  .rest-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 14px; }
+  @media(max-width:900px){ .rest-strip { grid-template-columns: repeat(2,1fr); } }
+  .rest-kpi { border-radius: 16px; padding: 20px; color: #fff; box-shadow: 0 4px 20px rgba(0,0,0,.12); }
+  .rest-kpi.rc { background: linear-gradient(135deg, #06b6d4, #22d3ee); }
+  .rest-kpi.rp { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+  .rest-kpi.rr { background: linear-gradient(135deg, #6366f1, #818cf8); }
+  .rest-kpi.rd { background: linear-gradient(135deg, #ef4444, #f87171); }
+  .rest-kpi .icon { font-size: 24px; margin-bottom: 10px; }
+  .rest-kpi .lbl { font-size: 11px; font-weight: 700; opacity: .85; text-transform: uppercase; letter-spacing: .5px; }
+  .rest-kpi .val { font-size: 26px; font-weight: 800; margin-top: 4px; }
+
+  .no-data { text-align: center; color: #94a3b8; font-size: 13px; padding: 24px 0; }
+  .mt14 { margin-top: 14px; }
+</style>
+
+<div class="erp-dash">
+
+  <div class="dash-header">
+    <div>
+      <div class="dash-title">📊 BRICKS ERP Dashboard</div>
+      <div class="dash-subtitle">Real-time overview · All modules</div>
+    </div>
+    <div class="dash-badge">🟢 Live Data</div>
+  </div>
+
+  <!-- REQUISITION -->
+  <div class="section-label">📋 Requisition Overview</div>
+  {% comment %} <div class="kpi-grid">
+    <div class="kpi-card k1"><div class="kpi-icon">📋</div><div class="kpi-label">Total Requisitions</div><div class="kpi-value">{{ summary.total_req|default:0 |floatformat:2}}</div><div class="kpi-sub">All time entries</div></div>
+    <div class="kpi-card k2"><div class="kpi-icon">⏳</div><div class="kpi-label">Pending</div><div class="kpi-value">{{ summary.total_pending|default:0|floatformat:2 }}</div><div class="kpi-sub">Awaiting approval</div></div>
+    <div class="kpi-card k3"><div class="kpi-icon">✅</div><div class="kpi-label">Approved</div><div class="kpi-value">{{ summary.total_approved|default:0|floatformat:2 }}</div><div class="kpi-sub">Processed successfully</div></div>
+    <div class="kpi-card k4"><div class="kpi-icon">💰</div><div class="kpi-label">Total Amount</div><div class="kpi-value">{{ summary.total_amount|default:0|floatformat:2 }}</div><div class="kpi-sub">Cumulative value</div></div>
+  </div> {% endcomment %}
+  <div class="kpi-grid">
+  <a href="{% url 'requisition_list' %}" style="text-decoration: none; color: inherit;">
+  <div class="kpi-card k1">
+    <div class="kpi-icon">📋</div>
+    <div class="kpi-label">Total Requisitions</div>
+    <div class="kpi-value" style="font-size:22px;">
+      {{ summary.total_req|intcomma  }}
+    </div>
+    <div class="kpi-sub">All time entries</div>
+  </div> </a>
+  <a href="{% url 'requisition_list' %}" style="text-decoration: none; color: inherit;">
+
+  <div class="kpi-card k2">
+    <div class="kpi-icon">⏳</div>
+    <div class="kpi-label">Pending</div>
+    <div class="kpi-value" style="font-size:22px;">
+      {{ summary.total_pending|intcomma  }}
+    </div>
+    <div class="kpi-sub">Awaiting approval</div>
+  </div> </a>
+  <a href="{% url 'requisition_list' %}" style="text-decoration: none; color: inherit;">
+
+  <div class="kpi-card k3">
+    <div class="kpi-icon">✅</div>
+    <div class="kpi-label">Approved</div>
+    <div class="kpi-value" style="font-size:22px;">
+      {{ summary.total_approved|intcomma  }}
+    </div>
+    <div class="kpi-sub">Processed successfully</div>
+  </div> </a>
+  <a href="{% url 'requisition_list' %}" style="text-decoration: none; color: inherit;">
+
+  <div class="kpi-card k4">
+    <div class="kpi-icon">💰</div>
+    <div class="kpi-label">Total Amount</div>
+    <div class="kpi-value" style="font-size:22px;">
+      {{ summary.total_amount|default:0|floatformat:2|intcomma }}
+    </div>
+    <div class="kpi-sub">Cumulative value</div>
+  </div></a>
+</div>
+
+  <div class="chart-grid-2 mt14">
+    <div class="chart-card">
+      <div class="chart-card-title">Requisition Status</div>
+      <div class="chart-card-sub">Approved vs Pending breakdown</div>
+      <div class="chart-wrap"><canvas id="reqStatusChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">Top Projects by Requisition</div>
+      <div class="chart-card-sub">Highest value projects</div>
+      <div class="chart-wrap"><canvas id="reqProjectChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-grid-2 mt14">
+    <div class="table-card">
+      <div class="table-card-header"><div class="chart-card-title">Top Suppliers (Requisition)</div><span class="tbl-badge">TOP 5</span></div>
+      <table class="erp-table">
+        <thead><tr><th>#</th><th>Supplier</th><th>Amount</th></tr></thead>
+        <tbody>
+          {% for s in top_suppliers %}<tr><td><span class="rank-dot {% if forloop.counter == 1 %}r1{% elif forloop.counter == 2 %}r2{% elif forloop.counter == 3 %}r3{% endif %}">{{ forloop.counter }}</span></td><td>{{ s.vendor_name }}</td><td class="amt-cell">{{ s.total_amount|default:0|floatformat:2|intcomma  }}</td></tr>{% empty %}<tr><td colspan="3" class="no-data">No data</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">Supplier Distribution</div>
+      <div class="chart-card-sub">By requisition amount</div>
+      <div class="chart-wrap"><canvas id="supplierPieChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- PURCHASE -->
+  <div class="section-label">🛒 Purchase</div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(1,1fr);max-width:260px;">
+    <div class="kpi-card k5"><div class="kpi-icon">🛒</div><div class="kpi-label">Total Purchase Amount</div><div class="kpi-value">{{ purchase_summary.total_purchase|default:0|floatformat:2 }}</div></div>
+  </div>
+  <div class="chart-grid-2 mt14">
+    <div class="chart-card"><div class="chart-card-title">Purchase by Project</div><div class="chart-card-sub">Top 5 projects</div><div class="chart-wrap"><canvas id="purchaseProjectChart"></canvas></div></div>
+    <div class="chart-card"><div class="chart-card-title">Purchase by Supplier</div><div class="chart-card-sub">Top supplier distribution</div><div class="chart-wrap"><canvas id="purchaseSupplierChart"></canvas></div></div>
+  </div>
+  <div class="chart-grid-2 mt14">
+    <div class="table-card">
+      <div class="table-card-header"><div class="chart-card-title">Top Projects (Purchase)</div><span class="tbl-badge">TOP 5</span></div>
+      <table class="erp-table"><thead><tr><th>#</th><th>Project</th><th>Amount</th></tr></thead><tbody>
+        {% for p in purchase_project %}<tr><td><span class="rank-dot {% if forloop.counter == 1 %}r1{% elif forloop.counter == 2 %}r2{% elif forloop.counter == 3 %}r3{% endif %}">{{ forloop.counter }}</span></td><td>{{ p.project_name__project_first_name }}</td><td class="amt-cell">{{ p.total_amount|default:0|floatformat:2|intcomma  }}</td></tr>{% empty %}<tr><td colspan="3" class="no-data">No data</td></tr>{% endfor %}
+      </tbody></table>
+    </div>
+    <div class="table-card">
+      <div class="table-card-header"><div class="chart-card-title">Top Suppliers (Purchase)</div><span class="tbl-badge">TOP 5</span></div>
+      <table class="erp-table"><thead><tr><th>#</th><th>Supplier</th><th>Amount</th></tr></thead><tbody>
+        {% for s in purchase_supplier %}<tr><td><span class="rank-dot {% if forloop.counter == 1 %}r1{% elif forloop.counter == 2 %}r2{% elif forloop.counter == 3 %}r3{% endif %}">{{ forloop.counter }}</span></td><td>{{ s.vendor_name__supplier_name }}</td><td class="amt-cell">{{ s.total_amount|default:0|floatformat:2|intcomma  }}</td></tr>{% empty %}<tr><td colspan="3" class="no-data">No data</td></tr>{% endfor %}
+      </tbody></table>
+    </div>
+  </div>
+
+  <!-- EXPENSE -->
+  <div class="section-label">💸 Expense</div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(1,1fr);max-width:260px;">
+    <div class="kpi-card k7"><div class="kpi-icon">💸</div><div class="kpi-label">Total Expense Amount</div><div class="kpi-value">{{ expense_summary.total_expense|default:0|floatformat:2|intcomma  }}</div></div>
+  </div>
+  <div class="chart-grid-2 mt14">
+    <div class="chart-card"><div class="chart-card-title">Expense by Project</div><div class="chart-card-sub">Top 5 projects</div><div class="chart-wrap"><canvas id="expenseProjectChart"></canvas></div></div>
+    <div class="chart-card"><div class="chart-card-title">Expense by Employee</div><div class="chart-card-sub">Top employees</div><div class="chart-wrap"><canvas id="expenseEmpChart"></canvas></div></div>
+  </div>
+  <div class="chart-grid-2 mt14">
+    <div class="table-card">
+      <div class="table-card-header"><div class="chart-card-title">Top Projects (Expense)</div><span class="tbl-badge">TOP 5</span></div>
+      <table class="erp-table"><thead><tr><th>#</th><th>Project</th><th>Amount</th></tr></thead><tbody>
+        {% for p in expense_project %}<tr><td><span class="rank-dot {% if forloop.counter == 1 %}r1{% elif forloop.counter == 2 %}r2{% elif forloop.counter == 3 %}r3{% endif %}">{{ forloop.counter }}</span></td><td>{{ p.project_name__project_first_name }}</td><td class="amt-cell">{{ p.total_amount|default:0|floatformat:2|intcomma  }}</td></tr>{% empty %}<tr><td colspan="3" class="no-data">No data</td></tr>{% endfor %}
+      </tbody></table>
+    </div>
+    <div class="table-card">
+      <div class="table-card-header"><div class="chart-card-title">Top Employees (Expense)</div><span class="tbl-badge">TOP 5</span></div>
+      <table class="erp-table"><thead><tr><th>#</th><th>Employee</th><th>Amount</th></tr></thead><tbody>
+        {% for e in expense_supplier %}<tr><td><span class="rank-dot {% if forloop.counter == 1 %}r1{% elif forloop.counter == 2 %}r2{% elif forloop.counter == 3 %}r3{% endif %}">{{ forloop.counter }}</span></td><td>{{ e.employee_name__emp_name }}</td><td class="amt-cell">{{ e.total_amount|default:0|floatformat:2|intcomma  }}</td></tr>{% empty %}<tr><td colspan="3" class="no-data">No data</td></tr>{% endfor %}
+      </tbody></table>
+    </div>
+  </div>
+
+  <!-- PROPERTIES -->
+  <div class="section-label">🏢 Properties</div>
+  <div class="kpi-grid">
+    <div class="kpi-card k6"><div class="kpi-icon">🏢</div><div class="kpi-label">Total Properties</div><div class="kpi-value">{{ property_summary.total_property|default:0|intcomma  }}</div></div>
+    <div class="kpi-card k8"><div class="kpi-icon">🏷️</div><div class="kpi-label">Total Property Value</div><div class="kpi-value">{{ property_summary.total_value|default:0|intcomma  }}</div></div>
+    <div class="kpi-card k3"><div class="kpi-icon">🔑</div><div class="kpi-label">Sold Units</div><div class="kpi-value">{{ unit_summary.total_sold|default:0 |intcomma }}</div></div>
+    <div class="kpi-card k2"><div class="kpi-icon">🏗️</div><div class="kpi-label">Available Units</div><div class="kpi-value">{{ unit_summary.total_available|default:0|intcomma  }}</div></div>
+  </div>
+  <div class="chart-grid-3 mt14">
+    <div class="chart-card"><div class="chart-card-title">Units Status</div><div class="chart-card-sub">Sold vs Available</div><div class="chart-wrap"><canvas id="unitDonutChart"></canvas></div></div>
+    <div class="chart-card" style="grid-column:span 2;"><div class="chart-card-title">Project-wise Units</div><div class="chart-card-sub">Sold vs Available per project</div><div class="chart-wrap tall"><canvas id="unitProjectChart"></canvas></div></div>
+  </div>
+  <div class="table-card mt14">
+    <div class="table-card-header"><div class="chart-card-title">Top Projects (Properties)</div><span class="tbl-badge">TOP 5</span></div>
+    <table class="erp-table"><thead><tr><th>#</th><th>Project</th><th>Total Units</th><th>Total Value</th></tr></thead><tbody>
+      {% for p in property_project %}<tr><td><span class="rank-dot {% if forloop.counter == 1 %}r1{% elif forloop.counter == 2 %}r2{% elif forloop.counter == 3 %}r3{% endif %}">{{ forloop.counter }}</span></td><td>{{ p.project_name__project_first_name }}</td><td>{{ p.total_units }}</td><td class="amt-cell">{{ p.total_value|default:0|intcomma  }}</td></tr>{% empty %}<tr><td colspan="4" class="no-data">No data</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+
+  <!-- CUSTOMERS & FINANCE -->
+  <div class="section-label">👥 Customers & Finance</div>
+  <div class="kpi-grid">
+    <div class="kpi-card k1"><div class="kpi-icon">👥</div><div class="kpi-label">Total Customers</div><div class="kpi-value">{{ customer_summary.total_customer|default:0|intcomma  }}</div></div>
+    <div class="kpi-card k3"><div class="kpi-icon">📥</div><div class="kpi-label">Total Received</div><div class="kpi-value">{{ received_summary.total_received|default:0|intcomma  }}</div></div>
+    <div class="kpi-card k4"><div class="kpi-icon">📤</div><div class="kpi-label">Total Payment</div><div class="kpi-value">{{ payment_summary.total_payment|default:0|intcomma  }}</div></div>
+    <div class="kpi-card k5"><div class="kpi-icon">🏠</div><div class="kpi-label">Project-wise Customers</div><div class="kpi-value">—</div></div>
+  </div>
+  <div class="chart-grid-2 mt14">
+    <div class="chart-card"><div class="chart-card-title">Cash Flow by Project</div><div class="chart-card-sub">Received vs Payment</div><div class="chart-wrap tall"><canvas id="cashflowChart"></canvas></div></div>
+    <div class="chart-card"><div class="chart-card-title">Customers by Project</div><div class="chart-card-sub">Distribution across projects</div><div class="chart-wrap tall"><canvas id="customerPieChart"></canvas></div></div>
+  </div>
+  <div class="chart-grid-2 mt14">
+    <div class="table-card">
+      <div class="table-card-header"><div class="chart-card-title">Received by Project</div><span class="tbl-badge" style="background:#dcfce7;color:#16a34a;">CREDIT</span></div>
+      <table class="erp-table"><thead><tr><th>#</th><th>Project</th><th>Received</th></tr></thead><tbody>
+        {% for r in received_project %}<tr><td><span class="rank-dot {% if forloop.counter == 1 %}r1{% elif forloop.counter == 2 %}r2{% elif forloop.counter == 3 %}r3{% endif %}">{{ forloop.counter }}</span></td><td>{{ r.project_name__project_first_name }}</td><td class="amt-cell" style="color:#16a34a;">{{ r.total_received|default:0|floatformat:2|intcomma  }}</td></tr>{% empty %}<tr><td colspan="3" class="no-data">No data</td></tr>{% endfor %}
+      </tbody></table>
+    </div>
+    <div class="table-card">
+      <div class="table-card-header"><div class="chart-card-title">Payment by Project</div><span class="tbl-badge" style="background:#fee2e2;color:#dc2626;">DEBIT</span></div>
+      <table class="erp-table"><thead><tr><th>#</th><th>Project</th><th>Payment</th></tr></thead><tbody>
+        {% for p in payment_project %}<tr><td><span class="rank-dot {% if forloop.counter == 1 %}r1{% elif forloop.counter == 2 %}r2{% elif forloop.counter == 3 %}r3{% endif %}">{{ forloop.counter }}</span></td><td>{{ p.project_name__project_first_name }}</td><td class="amt-cell" style="color:#dc2626;">{{ p.total_payment|default:0|floatformat:2|intcomma  }}</td></tr>{% empty %}<tr><td colspan="3" class="no-data">No data</td></tr>{% endfor %}
+      </tbody></table>
+    </div>
+  </div>
+
+  <!-- RESTAURANT -->
+  <!--<div class="section-label">🍽️ Restaurant</div>-->
+  <!--<div class="rest-strip">-->
+  <!--  <div class="rest-kpi rc"><div class="icon">🍽️</div><div class="lbl">Total Collection</div><div class="val">{{ rest_collection_summary.total_collection|default:0|intcomma  }}</div></div>-->
+  <!--  <div class="rest-kpi rp"><div class="icon">💸</div><div class="lbl">Daily Payment</div><div class="val">{{ rest_payment_summary.total_payment|default:0|intcomma  }}</div></div>-->
+  <!--  <div class="rest-kpi rr"><div class="icon">📥</div><div class="lbl">Total Received</div><div class="val">{{ rest_received_summary.total_received|default:0|intcomma  }}</div></div>-->
+  <!--  <div class="rest-kpi rd"><div class="icon">📤</div><div class="lbl">Total Paid Out</div><div class="val">{{ rest_debit_summary.total_payment|default:0|intcomma  }}</div></div>-->
+  <!--</div>-->
+  <!--<div class="chart-grid-2">-->
+  <!--  <div class="chart-card"><div class="chart-card-title">Restaurant Overview</div><div class="chart-card-sub">Collection · Payment · Received · Paid</div><div class="chart-wrap"><canvas id="restRadarChart"></canvas></div></div>-->
+  <!--  <div class="chart-card"><div class="chart-card-title">Collection by Project</div><div class="chart-card-sub">Top contributing projects</div><div class="chart-wrap"><canvas id="restCollectionChart"></canvas></div></div>-->
+  <!--</div>-->
+  <!--<div class="chart-grid-2 mt14">-->
+  <!--  <div class="table-card">-->
+  <!--    <div class="table-card-header"><div class="chart-card-title">Collection by Project</div><span class="tbl-badge">TOP 5</span></div>-->
+  <!--    <table class="erp-table"><thead><tr><th>#</th><th>Project</th><th>Amount</th></tr></thead><tbody>-->
+  <!--      {% for r in rest_collection_project %}<tr><td><span class="rank-dot {% if forloop.counter == 1 %}r1{% elif forloop.counter == 2 %}r2{% elif forloop.counter == 3 %}r3{% endif %}">{{ forloop.counter }}</span></td><td>{{ r.project__project_first_name }}</td><td class="amt-cell">{{ r.total_amount|floatformat:2|intcomma  }}</td></tr>{% empty %}<tr><td colspan="3" class="no-data">No data</td></tr>{% endfor %}-->
+  <!--    </tbody></table>-->
+  <!--  </div>-->
+  <!--  <div class="table-card">-->
+  <!--    <div class="table-card-header"><div class="chart-card-title">Daily Payment by Project</div><span class="tbl-badge">TOP 5</span></div>-->
+  <!--    <table class="erp-table"><thead><tr><th>#</th><th>Project</th><th>Amount</th></tr></thead><tbody>-->
+  <!--      {% for r in rest_payment_project %}<tr><td><span class="rank-dot {% if forloop.counter == 1 %}r1{% elif forloop.counter == 2 %}r2{% elif forloop.counter == 3 %}r3{% endif %}">{{ forloop.counter }}</span></td><td>{{ r.project__project_first_name }}</td><td class="amt-cell">{{ r.total_amount|floatformat:2|intcomma  }}</td></tr>{% empty %}<tr><td colspan="3" class="no-data">No data</td></tr>{% endfor %}-->
+  <!--    </tbody></table>-->
+  <!--  </div>-->
+  <!--</div>-->
+
+</div>
+
+<script>
+Chart.defaults.font.family = 'Arial, sans-serif';
+Chart.defaults.color = '#64748b';
+Chart.defaults.borderColor = '#f1f5f9';
+const C = ['#6366f1','#10b981','#f59e0b','#ec4899','#3b82f6','#14b8a6','#f97316','#8b5cf6','#ef4444','#06b6d4'];
+
+new Chart(document.getElementById('reqStatusChart'), {
+  type:'doughnut',
+  data:{ labels:['Approved','Pending','Others'], datasets:[{ data:[{{ summary.total_approved|default:0 }},{{ summary.total_pending|default:0 }},Math.max(0,{{ summary.total_req|default:0 }}-{{ summary.total_approved|default:0 }}-{{ summary.total_pending|default:0 }})], backgroundColor:['#10b981','#f59e0b','#e2e8f0'], borderWidth:3, borderColor:'#fff', hoverOffset:8 }] },
+  options:{ cutout:'68%', plugins:{ legend:{ position:'bottom', labels:{ padding:16, usePointStyle:true } } } }
+});
+
+new Chart(document.getElementById('reqProjectChart'), {
+  type:'bar',
+  data:{ labels:[{% for p in top_projects %}"{{ p.project_name__project_first_name }}"{% if not forloop.last %},{% endif %}{% endfor %}], datasets:[{ label:'Amount', data:[{% for p in top_projects %}{{ p.total_amount|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}], backgroundColor:C, borderRadius:8, borderSkipped:false }] },
+  options:{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ color:'#f1f5f9' } }, y:{ grid:{ display:false } } } }
+});
+
+new Chart(document.getElementById('supplierPieChart'), {
+  type:'pie',
+  data:{ labels:[{% for s in top_suppliers %}"{{ s.vendor_name }}"{% if not forloop.last %},{% endif %}{% endfor %}], datasets:[{ data:[{% for s in top_suppliers %}{{ s.total_amount|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}], backgroundColor:C, borderWidth:3, borderColor:'#fff', hoverOffset:10 }] },
+  options:{ plugins:{ legend:{ position:'bottom', labels:{ padding:12, usePointStyle:true, font:{size:11} } } } }
+});
+
+new Chart(document.getElementById('purchaseProjectChart'), {
+  type:'bar',
+  data:{ labels:[{% for p in purchase_project %}"{{ p.project_name__project_first_name }}"{% if not forloop.last %},{% endif %}{% endfor %}], datasets:[{ label:'Amount', data:[{% for p in purchase_project %}{{ p.total_amount|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}], backgroundColor:['#3b82f6','#60a5fa','#93c5fd','#bfdbfe','#dbeafe'], borderRadius:8, borderSkipped:false }] },
+  options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ grid:{ color:'#f1f5f9' } }, x:{ grid:{ display:false } } } }
+});
+
+new Chart(document.getElementById('purchaseSupplierChart'), {
+  type:'doughnut',
+  data:{ labels:[{% for s in purchase_supplier %}"{{ s.vendor_name__supplier_name }}"{% if not forloop.last %},{% endif %}{% endfor %}], datasets:[{ data:[{% for s in purchase_supplier %}{{ s.total_amount|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}], backgroundColor:C, borderWidth:3, borderColor:'#fff', hoverOffset:8 }] },
+  options:{ cutout:'60%', plugins:{ legend:{ position:'bottom', labels:{ padding:10, usePointStyle:true, font:{size:11} } } } }
+});
+
+new Chart(document.getElementById('expenseProjectChart'), {
+  type:'bar',
+  data:{ labels:[{% for p in expense_project %}"{{ p.project_name__project_first_name }}"{% if not forloop.last %},{% endif %}{% endfor %}], datasets:[{ label:'Amount', data:[{% for p in expense_project %}{{ p.total_amount|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}], backgroundColor:['#f97316','#fb923c','#fdba74','#fed7aa','#ffedd5'], borderRadius:8, borderSkipped:false }] },
+  options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ grid:{ color:'#f1f5f9' } }, x:{ grid:{ display:false } } } }
+});
+
+new Chart(document.getElementById('expenseEmpChart'), {
+  type:'pie',
+  data:{ labels:[{% for e in expense_supplier %}"{{ e.employee_name__emp_name }}"{% if not forloop.last %},{% endif %}{% endfor %}], datasets:[{ data:[{% for e in expense_supplier %}{{ e.total_amount|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}], backgroundColor:C, borderWidth:3, borderColor:'#fff', hoverOffset:10 }] },
+  options:{ plugins:{ legend:{ position:'bottom', labels:{ padding:10, usePointStyle:true, font:{size:11} } } } }
+});
+
+new Chart(document.getElementById('unitDonutChart'), {
+  type:'doughnut',
+  data:{ labels:['Sold','Available'], datasets:[{ data:[{{ unit_summary.total_sold|default:0 }},{{ unit_summary.total_available|default:0 }}], backgroundColor:['#10b981','#f59e0b'], borderWidth:3, borderColor:'#fff', hoverOffset:8 }] },
+  options:{ cutout:'70%', plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true, padding:14 } } } }
+});
+
+new Chart(document.getElementById('unitProjectChart'), {
+  type:'bar',
+  data:{ labels:[{% for u in unit_project %}"{{ u.project_name__project_first_name }}"{% if not forloop.last %},{% endif %}{% endfor %}], datasets:[ { label:'Sold', data:[{% for u in unit_project %}{{ u.sold|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}], backgroundColor:'#10b981', borderRadius:6, borderSkipped:false }, { label:'Available', data:[{% for u in unit_project %}{{ u.available|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}], backgroundColor:'#f59e0b', borderRadius:6, borderSkipped:false } ] },
+  options:{ plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true } } }, scales:{ y:{ grid:{ color:'#f1f5f9' } }, x:{ grid:{ display:false } } } }
+});
+
+(function(){
+  const rL=[{% for r in received_project %}"{{ r.project_name__project_first_name }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+  const rD=[{% for r in received_project %}{{ r.total_received|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const pL=[{% for p in payment_project %}"{{ p.project_name__project_first_name }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+  const pD=[{% for p in payment_project %}{{ p.total_payment|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const all=[...new Set([...rL,...pL])];
+  const gv=(l,d,n)=>{ const i=l.indexOf(n); return i>=0?d[i]:0; };
+  new Chart(document.getElementById('cashflowChart'), {
+    type:'bar',
+    data:{ labels:all, datasets:[ { label:'Received', data:all.map(n=>gv(rL,rD,n)), backgroundColor:'#10b981', borderRadius:6, borderSkipped:false }, { label:'Payment', data:all.map(n=>gv(pL,pD,n)), backgroundColor:'#ef4444', borderRadius:6, borderSkipped:false } ] },
+    options:{ plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true } } }, scales:{ y:{ grid:{ color:'#f1f5f9' } }, x:{ grid:{ display:false } } } }
+  });
+})();
+
+new Chart(document.getElementById('customerPieChart'), {
+  type:'doughnut',
+  data:{ labels:[{% for c in customer_project %}"{{ c.project__project_first_name }}"{% if not forloop.last %},{% endif %}{% endfor %}], datasets:[{ data:[{% for c in customer_project %}{{ c.total_customer }}{% if not forloop.last %},{% endif %}{% endfor %}], backgroundColor:C, borderWidth:3, borderColor:'#fff', hoverOffset:8 }] },
+  options:{ cutout:'60%', plugins:{ legend:{ position:'bottom', labels:{ padding:12, usePointStyle:true, font:{size:11} } } } }
+});
+
+// new Chart(document.getElementById('restRadarChart'), {
+//   type:'radar',
+//   data:{ labels:['Collection','Daily Payment','Received','Paid Out'], datasets:[{ label:'Restaurant', data:[{{ rest_collection_summary.total_collection|default:0 }},{{ rest_payment_summary.total_payment|default:0 }},{{ rest_received_summary.total_received|default:0 }},{{ rest_debit_summary.total_payment|default:0 }}], backgroundColor:'rgba(99,102,241,0.15)', borderColor:'#6366f1', pointBackgroundColor:'#6366f1', pointBorderColor:'#fff', borderWidth:2 }] },
+//   options:{ plugins:{ legend:{ display:false } }, scales:{ r:{ grid:{ color:'#e0e7ff' }, ticks:{ display:false }, pointLabels:{ font:{ size:12 } } } } }
+// });
+
+new Chart(document.getElementById('restCollectionChart'), {
+  type:'bar',
+  data:{ labels:[{% for r in rest_collection_project %}"{{ r.project__project_first_name }}"{% if not forloop.last %},{% endif %}{% endfor %}], datasets:[{ label:'Collection', data:[{% for r in rest_collection_project %}{{ r.total_amount }}{% if not forloop.last %},{% endif %}{% endfor %}], backgroundColor:C, borderRadius:8, borderSkipped:false }] },
+  options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ grid:{ color:'#f1f5f9' } }, x:{ grid:{ display:false } } } }
+});
+</script>
+
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}
+

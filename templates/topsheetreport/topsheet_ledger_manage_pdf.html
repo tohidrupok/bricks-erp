@@ -1,0 +1,209 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TOP Sheet Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: silver;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 1100px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .logo img {
+      height: 50px;
+    }
+
+    .label-box {
+      background-color: #e2f0d9;
+      color: #000;
+      padding: 4px 10px;
+      font-weight: bold;
+      font-size: 13px;
+      border-radius: 4px;
+    }
+
+    .sub-head {
+      font-size: 11px;
+      color: #555;
+      margin-top: -18px;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 10px;
+    }
+
+    .table th,
+    .table td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: right;
+    }
+
+    .table th {
+      background-color: #708090;
+      color: white;
+    }
+
+    .table td:first-child,
+    .table th:first-child {
+      text-align: left;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+      flex-wrap: wrap;
+    }
+
+    .print-btn {
+      background-color: #1e3c98;
+      color: white;
+      padding: 5px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      background-color: #e2e8f0;
+      padding: 4px 10px;
+      border-radius: 4px;
+      color: #000;
+      font-size: 11px;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .card {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Header -->
+  <div class="card-header">
+    <div class="logo">
+      <img src="{% static 'images/BTP_logo_bricks.webp' %}" alt="Logo">
+    </div>
+    <div style="text-align: right;">
+      <div class="label-box">TOP Sheet Report</div>
+      <p style="font-size: 11px; margin-top: 4px;">Printing Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+    </div>
+  </div>
+
+  <!-- Address -->
+  <div class="sub-head">
+     Bonanai, Dhaka-1216<br>
+      01993005558, 09639246230, 09639246231 <br>
+      bricks@gmail.com, bricks@gmail.com, www.bricks.com
+  </div>
+
+  <!-- Filter Summary -->
+  <table class="table">
+    <tr>
+      <td style="color:blue;font-size:18px"><strong>Date Range:</strong> {{ selected_filters.from_date }} to {{ selected_filters.to_date }}</td>
+    </tr>
+  </table>
+
+  <!-- Data Table -->
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Purchase</th>
+        <th>Supplier Payment</th>
+        <th>Sale</th>
+        <th>Sale Discount</th>
+        <th>Customer Collection</th>
+        <th>Expense</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for date, row in data_by_date.items %}
+        <tr>
+          <td>{{ date }}</td>
+          <td>{{ row.purchase|floatformat:2 }}</td>
+          <td>{{ row.supplier_payment|floatformat:2 }}</td>
+          <td>{{ row.sale|floatformat:2 }}</td>
+          <td>{{ row.sale_discount|floatformat:2 }}</td>
+          <td>{{ row.customer_collection|floatformat:2 }}</td>
+          <td>{{ row.expense|floatformat:2 }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="7" style="text-align:center; color:gray;">No data available for selected date range.</td>
+        </tr>
+      {% endfor %}
+      <tr style="font-weight:bold; background-color:#f3f4f6;">
+      <td>Total</td>
+      <td>{{ totals.purchase|floatformat:2 }}</td>
+      <td>{{ totals.supplier_payment|floatformat:2 }}</td>
+      <td>{{ totals.sale|floatformat:2 }}</td>
+      <td>{{ totals.sale_discount|floatformat:2 }}</td>
+      <td>{{ totals.customer_collection|floatformat:2 }}</td>
+      <td>{{ totals.expense|floatformat:2 }}</td>
+    </tr>
+    <tr style="font-weight:bold; background-color:#e5e7eb;">
+      <td colspan="6" style="text-align:right;">Grand Total (All Columns Sum):</td>
+      <td>{{ totals.grand_total|floatformat:2 }}</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- Footer Buttons -->
+  <div class="footer no-print">
+    <a href="{% url 'topsheet_ledger_manage' %}" class="back-link">← Back to Filter</a>
+    <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+  </div>
+
+</div>
+
+</body>
+</html>

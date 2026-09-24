@@ -1,0 +1,437 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Restaurant Requisition Add - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>    
+ <!-- Insert table design css-->
+<style>
+    /* Ensure the table fits well inside the container */
+table {
+    width: 100%;
+    table-layout: auto; /* Automatically adjust table cell width */
+    overflow-wrap: break-word; /* Prevent word overflow */
+}
+
+td, th {
+    padding: 8px 10px;
+    text-align: left;
+}
+
+/* Input fields */
+input[type="text"], input[type="number"] {
+    width: 100%; /* Make inputs take up the full width */
+    max-width: 200px; /* Limit the maximum width */
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+}
+
+/* Buttons */
+button {
+    padding: 8px 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #4CAF50; /* Change background on hover */
+}
+
+/* Add Row and Save Button Container */
+.button-container {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+/* Button Styles */
+.btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-success {
+    background-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+    .intro-y {
+        padding: 10px;
+    }
+
+    .button-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    input[type="text"], input[type="number"] {
+        max-width: 100%; /* Inputs take full width on small screens */
+    }
+}
+ </style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Restaurant Requisition Add</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+              <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+              <div class="category-section" id="pile-work">
+                <br />
+                <!-- Display Project & Employee -->
+                <input type="text" id="project-first-name" value="{{ project_first_name }}" style="border:none;font-weight:bold;" readonly>
+                <input type="text" id="employee_name" value="{{ employee_name }}" style="border:none;font-weight:bold;" readonly>
+                
+                <!-- Requisition Form -->
+                <form id="pile-work-form" method="POST">
+                  {% csrf_token %}
+                  
+                  <!-- Hidden input for type -->
+                  <input type="hidden" id="type-input" name="type" value="{{ type }}">
+            
+                  <table class="w-full text-left border-separate border-spacing-y-[10px]">
+                    <thead>
+                      <tr>
+                        <th>SL</th>
+                        <th>Item_Name</th>
+                        <th>{{ type }}</th>
+                        <th>Unit</th>
+                        <th>Qty</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                        <th>Discount</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="pile-work-body">
+                      <tr>
+                        <td>1</td>
+                        <td>
+                          <div class="relative dropdown w-full max-w-xs">
+                            <input type="text" oninput="filterDropdown(this)" onclick="toggleDropdown(this)" placeholder="Select Head" class="input input-bordered w-full" autocomplete="off">
+                            <input type="hidden" name="item_name_1">
+                            <div class="dropdown-content border bg-white w-full shadow-lg hidden absolute mt-1 max-h-60 overflow-y-auto z-50 rounded-md">
+                              {% for headRequist in headRequists %}
+                                <div onclick="selectDropdownItem(this)" data-id="{{ headRequist.id }}">{{ headRequist.rest_item_name }}</div>
+                              {% endfor %}
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <select name="vendor_name_1" required class="select select-bordered w-full max-w-xs">
+                            <option value="">Select Type</option>
+                            {% if type == "Supplier" %}
+                              {% for spplier in sppliers %}
+                                <option value="{{ spplier.rest_supplier_name }}">{{ spplier.rest_supplier_name }}</option>
+                              {% endfor %}
+                            {% elif type == "Others" %}
+                              <option value="other">Other</option>
+                            {% endif %}
+                          </select>
+                        </td>
+                        <td><input type="text" name="unit_1" required placeholder="Unit" class="w-full max-w-xs" /></td>
+                        <td><input type="number" step="any" name="qty_1" required placeholder="Qty" class="w-full max-w-xs" oninput="calculateAmount(this, 'pile-work')" /></td>
+                        <td><input type="number" step="any" name="rate_1" required placeholder="Rate" class="w-full max-w-xs" oninput="calculateAmount(this, 'pile-work')" /></td>
+                        <td><input type="number" step="any" name="amount_1" placeholder="Amount" class="w-full max-w-xs" readonly /></td>
+                        <td><input type="number" step="any" name="discount_1" required placeholder="Discount" value="0" class="w-full max-w-xs" oninput="calculateDiscount(this, 'pile-work')" /></td>
+                        <td><input type="text" name="description_1" placeholder="Description" class="w-full max-w-xs"/></td>
+                        <td><button type="button" class="text-red-600" onclick="deleteRow(this, 'pile-work')">🗑️</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+            
+                  <div class="my-4">
+                    <label for="remark" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea id="remark" name="remark" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
+                  </div>
+            
+                  <div class="button-container mt-4 flex justify-between">
+                    <button type="button" onclick="addRow('pile-work')" class="btn btn-primary">Add Row</button>
+                    <button type="submit" class="btn btn-success">Save</button>
+                  </div>
+                </form>
+            
+                <p class="mt-4">Total Amount: <span id="pile-work-total">0.00</span></p>
+              </div>
+            </div>
+            
+            <input type="hidden" id="employee" value="{{ employee }}">
+            <input type="hidden" id="project-id" value="{{ project_id }}">
+            
+            <style>
+              .dropdown-content div {
+                padding: 0.5rem;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+              }
+              .dropdown-content div:hover {
+                background-color: #f3f4f6;
+              }
+              .dropdown-content div.selected {
+                background-color: #e0f2fe;
+              }
+            </style>
+            
+            <script>
+              const vendorOptions = {
+                'Supplier': [
+                  {% for spplier in sppliers %}
+                  { id: "{{ spplier.rest_supplier_name }}", name: "{{ spplier.rest_supplier_name }}" },
+                  {% endfor %}
+                ],
+                'Others': [
+                  { id: "other", name: "Other" }
+                ]
+              };
+            
+              const currentType = "{{ type }}";
+            
+              function toggleDropdown(input) {
+                const wrapper = input.closest('.dropdown');
+                const dropdown = wrapper.querySelector('.dropdown-content');
+                dropdown.classList.toggle('hidden');
+              }
+            
+              function filterDropdown(input) {
+                const dropdown = input.closest('.dropdown').querySelector('.dropdown-content');
+                const filter = input.value.toLowerCase();
+                dropdown.querySelectorAll('div').forEach(item => {
+                  item.style.display = item.textContent.toLowerCase().includes(filter) ? '' : 'none';
+                });
+              }
+            
+              function selectDropdownItem(div) {
+                const wrapper = div.closest('.dropdown');
+                const input = wrapper.querySelector('input[type="text"]');
+                const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+                input.value = div.textContent;
+                hiddenInput.value = div.dataset.id;
+                wrapper.querySelector('.dropdown-content').classList.add('hidden');
+              }
+            
+              function addRow(itemname) {
+                const tbody = document.getElementById(`${itemname}-body`);
+                const rowCount = tbody.rows.length + 1;
+            
+                let optionsHtml = `<option value="">Select Type</option>`;
+                if (vendorOptions[currentType]) {
+                  vendorOptions[currentType].forEach(opt => {
+                    optionsHtml += `<option value="${opt.id}">${opt.name}</option>`;
+                  });
+                }
+            
+                const newRow = tbody.insertRow();
+                newRow.innerHTML = `
+                  <td>${rowCount}</td>
+                  <td>
+                    <div class="relative dropdown w-full max-w-xs">
+                      <input type="text" oninput="filterDropdown(this)" onclick="toggleDropdown(this)" placeholder="Select Head" class="input input-bordered w-full" autocomplete="off">
+                      <input type="hidden" name="item_name_${rowCount}">
+                      <div class="dropdown-content border bg-white w-full shadow-lg hidden absolute mt-1 max-h-60 overflow-y-auto z-50 rounded-md">
+                        {% for headRequist in headRequists %}
+                          <div onclick="selectDropdownItem(this)" data-id="{{ headRequist.id }}">{{ headRequist.rest_item_name }}</div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <select name="vendor_name_${rowCount}" required class="select select-bordered w-full max-w-xs">
+                      ${optionsHtml}
+                    </select>
+                  </td>
+                  <td><input type="text" name="unit_${rowCount}" required placeholder="Unit" class="w-full max-w-xs" /></td>
+                  <td><input type="number" step="any" name="qty_${rowCount}" required placeholder="Qty" class="w-full max-w-xs" oninput="calculateAmount(this, '${itemname}')" /></td>
+                  <td><input type="number" step="any" name="rate_${rowCount}" required placeholder="Rate" class="w-full max-w-xs" oninput="calculateAmount(this, '${itemname}')" /></td>
+                  <td><input type="number" step="any" name="amount_${rowCount}" placeholder="Amount" class="w-full max-w-xs" readonly /></td>
+                  <td><input type="number" step="any" name="discount_${rowCount}" required placeholder="Discount" value="0" class="w-full max-w-xs" oninput="calculateDiscount(this, '${itemname}')" /></td>
+                  <td><input type="text" name="description_${rowCount}" placeholder="Description" class="w-full max-w-xs"/></td>
+                  <td><button type="button" class="text-red-600" onclick="deleteRow(this, '${itemname}')">🗑️</button></td>
+                `;
+              }
+            
+              function calculateAmount(input, itemname) {
+                const row = input.closest('tr');
+                const qty = parseFloat(row.querySelector(`input[name^="qty_"]`).value) || 0;
+                const rate = parseFloat(row.querySelector(`input[name^="rate_"]`).value) || 0;
+                const discount = parseFloat(row.querySelector(`input[name^="discount_"]`)?.value || 0);
+            
+                const amountField = row.querySelector(`input[name^="amount_"]`);
+                let amount = qty * rate;
+                if (!isNaN(discount) && discount > 0) amount -= discount;
+            
+                amountField.value = amount.toFixed(2);
+                updateCategoryTotal(itemname);
+              }
+            
+              function calculateDiscount(input, itemname) {
+                const row = input.closest('tr');
+                calculateAmount(row.querySelector(`input[name^="qty_"]`), itemname);
+              }
+            
+              function updateCategoryTotal(itemname) {
+                let total = 0;
+                document.querySelectorAll(`#${itemname}-body input[name^="amount_"]`).forEach(input => {
+                  const value = parseFloat(input.value);
+                  if (!isNaN(value)) total += value;
+                });
+                document.getElementById(`${itemname}-total`).textContent = total.toFixed(2);
+              }
+            
+              function deleteRow(button, itemname) {
+                const row = button.closest('tr');
+                row.remove();
+                updateCategoryTotal(itemname);
+              }
+            
+              function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+              }
+            
+              // Form Submission
+            
+                document.getElementById('pile-work-form').addEventListener('submit', function (e) {
+                    e.preventDefault();
+                
+                    const data = [];
+                    const rows = document.querySelectorAll(`#pile-work-body tr`);
+                
+                    rows.forEach(row => {
+                        const itemInput = row.querySelector('input[name^="item_name_"]');
+                        const vendorSelect = row.querySelector('select[name^="vendor_name_"]');
+                        const unitInput = row.querySelector('input[name^="unit_"]');
+                        const qtyInput = row.querySelector('input[name^="qty_"]');
+                        const rateInput = row.querySelector('input[name^="rate_"]');
+                        const discountInput = row.querySelector('input[name^="discount_"]');
+                        const descriptionInput = row.querySelector('input[name^="description_"]');
+                
+                        const item_name = itemInput?.value.trim();
+                        const vendor_name = vendorSelect?.value.trim();
+                        const unit = unitInput?.value.trim();
+                        const qty = parseFloat(qtyInput?.value || 0);
+                        const rate = parseFloat(rateInput?.value || 0);
+                        const discount = parseFloat(discountInput?.value || 0);
+                        const description = descriptionInput?.value.trim() || "";
+                
+                        // ✅ Correct validation
+                        if (
+                            item_name &&
+                            vendor_name &&
+                            unit &&
+                            !isNaN(qty) &&
+                            !isNaN(rate)
+                        ) {
+                            data.push({
+                                item_name,
+                                vendor_name,
+                                unit,
+                                qty,
+                                rate,
+                                discount,
+                                description
+                            });
+                        }
+                    });
+                
+                    if (data.length === 0) {
+                        alert("Please fill all fields with valid data.");
+                        return;
+                    }
+                
+                    const project_id = document.getElementById('project-id').value;
+                    const type = document.getElementById('type-input').value;
+                    const employee = document.getElementById('employee').value;
+                    const remark = document.getElementById('remark').value;
+                
+                    const url = `{% url 'rest_requisitions_create' %}`;
+                
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            data,
+                            project_id,
+                            employee_id: employee,
+                            type,
+                            remark
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(response => {
+                        if (response.status === 'success') {
+                            alert("Data saved successfully!");
+                            window.location.href = '/dashboard/restau/requisitions/list/';
+                        } else {
+                            alert("Error saving data: " + response.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        alert("An unexpected error occurred.");
+                    });
+                });
+
+            </script>
+
+
+
+        </div>
+    </div>
+{% endblock %}

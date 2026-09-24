@@ -1,0 +1,98 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Firt Level ( Project Name ) Update- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				    {% include 'partials/header.html' %}
+                <div class="container mx-auto mt-10 ml-10"> 
+                <!-- END: Top Bar -->
+                <h1 class="text-3xl font-semibold text-gray-900 mb-6">Edit Project: {{ project.project_first_name }}</h1>
+
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                    <form method="POST" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                        {% csrf_token %}
+                    
+                        <h2 class="text-xl font-semibold mb-4 text-center">Edit BoQ Category</h2>
+                    
+                        <!-- Category Type Dropdown -->
+                        <div class="mb-4">
+                            <label for="boq_cat_type" class="font-medium text-lg text-gray-800">Category Type</label>
+                            <select id="boq_cat_type"
+                                    name="boq_cat_type"
+                                    class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 
+                                           focus:ring-4 focus:ring-blue-500 focus:border-blue-500 
+                                           dark:bg-darkmode-800 dark:border-transparent 
+                                           dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+                    
+                                <option value="" disabled {% if not form.boq_cat_type.value %} selected {% endif %}>Select Category Type</option>
+                    
+                                {% for value, label in form.boq_cat_type.field.choices %}
+                                    <option value="{{ value }}" {% if value == form.boq_cat_type.value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                    
+                            {% if form.boq_cat_type.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.boq_cat_type.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    
+                        <!-- Category Name Field -->
+                        <div class="mb-4">
+                            <label for="boq_cat_name" class="font-medium text-lg text-gray-800">Category Name</label>
+                            <input type="text"
+                                   id="boq_cat_name"
+                                   name="boq_cat_name"
+                                   class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 
+                                          focus:ring-4 focus:ring-blue-500 focus:border-blue-500 
+                                          dark:bg-darkmode-800 dark:border-transparent 
+                                          dark:focus:ring-slate-700 dark:focus:ring-opacity-50"
+                                   placeholder="Enter BoQ Category Name"
+                                   value="{{ form.boq_cat_name.value|default_if_none:'' }}">
+                            {% if form.boq_cat_name.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.boq_cat_name.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    
+                        <!-- Submit and Back Buttons -->
+                        <div class="text-center mt-6">
+                            <button type="submit" style="background-color:#1e3c98"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md">
+                                💾 Update Category
+                            </button>
+                            <a href="{% url 'boq_category_list' %}" style="margin-left:0.5%;background-color:#1e3c98"
+                               class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md ml-2">
+                                🔙 Back to List
+                            </a>
+                        </div>
+                    </form>
+                    
+                </div>
+                  </div>    
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

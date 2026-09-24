@@ -1,0 +1,145 @@
+<!-- templates/CreditVoucher.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Land Payment Voucher Update- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				    {% include 'partials/header.html' %}
+                <div class="container mx-auto mt-10 ml-10"> 
+                <!-- END: Top Bar -->
+                <h1 class="text-3xl font-semibold text-gray-900 mb-6">Land Payment Voucher Details</h1>
+
+              <form method="POST" class="w-full max-w-4xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+    {% csrf_token %}
+    <h2 class="text-xl font-semibold mb-6 text-center">Edit Payment Voucher</h2>
+
+    <!-- Type -->
+    <div class="mb-4">
+        <label for="id_type" class="font-medium">Type</label>
+        <select id="id_type" name="type" class="w-full border p-2 rounded" onchange="toggleFields()">
+            <option value="">Select Type</option>
+            {% for t in ["Contructor","Vendor","Capital","Investment","Expense"] %}
+                <option value="{{ t }}" {% if form.type.value == t %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+        </select>
+        {% for error in form.type.errors %}
+            <p class="text-red-600">{{ error }}</p>
+        {% endfor %}
+    </div>
+
+    <!-- Contructor -->
+    <div id="contructor_field" class="mb-4" style="display: {% if form.type.value == 'Contructor' %}block{% else %}none{% endif %};">
+        <label>Contructor Name</label>
+        <select name="contructor" class="w-full border p-2 rounded">
+            <option value="">Select Contructor</option>
+            {% for choice in form.contructor.field.choices %}
+                <option value="{{ choice.0 }}" {% if choice.0|stringformat:"s" == form.contructor.value|stringformat:"s" %}selected{% endif %}>{{ choice.1 }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Vendor -->
+    <div id="vendor_field" class="mb-4" style="display: {% if form.type.value == 'Vendor' %}block{% else %}none{% endif %};">
+        <label>Vendor Name</label>
+        <select name="vendor" class="w-full border p-2 rounded">
+            <option value="">Select Vendor</option>
+            {% for choice in form.vendor.field.choices %}
+                <option value="{{ choice.0 }}" {% if choice.0|stringformat:"s" == form.vendor.value|stringformat:"s" %}selected{% endif %}>{{ choice.1 }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Capital -->
+    <div id="capital_field" class="mb-4" style="display: {% if form.type.value == 'Capital' %}block{% else %}none{% endif %};">
+        <label>Capital Name</label>
+        <input list="capiNameList" name="capi_name" value="{{ form.capi_name.value|default_if_none:'' }}" class="w-full border p-2 rounded" />
+        <datalist id="capiNameList">
+            {% for value,label in form.capi_name.field.choices %}
+                <option value="{{ label }}"></option>
+            {% endfor %}
+        </datalist>
+    </div>
+
+    <!-- Investment -->
+    <div id="investment_field" class="mb-4" style="display: {% if form.type.value == 'Investment' %}block{% else %}none{% endif %};">
+        <label>Investment Name</label>
+        <input list="investNameList" name="invest_name" value="{{ form.invest_name.value|default_if_none:'' }}" class="w-full border p-2 rounded" />
+        <datalist id="investNameList">
+            {% for value,label in form.invest_name.field.choices %}
+                <option value="{{ label }}"></option>
+            {% endfor %}
+        </datalist>
+    </div>
+
+    <!-- Expense -->
+    <div id="expense_field" class="mb-4" style="display: {% if form.type.value == 'Expense' %}block{% else %}none{% endif %};">
+        <label>Expense Name</label>
+        <select name="exp_name" class="w-full border p-2 rounded">
+            <option value="">Select Expense</option>
+            {% for expense in expenses %}
+                <option value="{{ expense.pk }}" {% if expense.pk|stringformat:"s" == form.exp_name.value|stringformat:"s" %}selected{% endif %}>{{ expense.head_exp_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Amount -->
+    <div class="mb-4">
+        <label>Amount</label>
+        <input type="number" step="0.01" name="amount" value="{{ form.amount.value|default_if_none:'' }}" class="w-full border p-2 rounded" />
+    </div>
+
+    <!-- Particulars -->
+    <div class="mb-4">
+        <label>Particulars</label>
+        <textarea name="particulars" class="w-full border p-2 rounded" rows="3">{{ form.particulars.value|default_if_none:'' }}</textarea>
+    </div>
+
+    <!-- Confirm -->
+    <div class="mb-4">
+        <label>Confirm?</label>
+        <label><input type="radio" name="is_confirmed" value="True" {% if form.is_confirmed.value|stringformat:"s" == "True" %}checked{% endif %}> Yes</label>
+        <label><input type="radio" name="is_confirmed" value="False" {% if form.is_confirmed.value|stringformat:"s" == "False" %}checked{% endif %}> No</label>
+    </div>
+
+    <!-- Submit -->
+    <div class="text-center mt-6">
+        <button type="submit" class="px-6 py-2 bg-blue-700 text-white rounded">💾 Save Voucher</button>
+        <a href="{% url 'debitvoucher_list' %}" class="px-6 py-2 bg-gray-600 text-white rounded ml-2">🔙 Back</a>
+    </div>
+</form>
+
+<script>
+function toggleFields() {
+    const type = document.getElementById("id_type").value;
+    document.getElementById("contructor_field").style.display = (type === "Contructor") ? "block" : "none";
+    document.getElementById("vendor_field").style.display = (type === "Vendor") ? "block" : "none";
+    document.getElementById("capital_field").style.display = (type === "Capital") ? "block" : "none";
+    document.getElementById("investment_field").style.display = (type === "Investment") ? "block" : "none";
+    document.getElementById("expense_field").style.display = (type === "Expense") ? "block" : "none";
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    toggleFields();
+    document.getElementById('id_type').addEventListener('change', toggleFields);
+});
+</script>
+
+                
+                  </div>    
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

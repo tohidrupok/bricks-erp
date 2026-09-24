@@ -1,0 +1,213 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ledger Manage - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Ledger Manage</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{% url 'reports_manage_list' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Back</button>
+                        </a>
+                        <a href="{% url 'ledger_manage' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Refresh</button>
+                        </a>
+                    </div>
+            
+                    <!-- BEGIN: Property Owners List -->
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                         <form method="get" action="{% url 'ledger_report' %}" class="w-full max-w-4xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+							<!-- Head of Account -->
+							<div class="mb-4">
+								<label for="head" class="block font-medium mb-2">Head of Account</label>
+								<select name="head" id="head" class="w-full border rounded p-2">
+									<option value="">Select Head</option>
+									{% for h in heads %}
+										<option value="{{ h.id }}" {% if request.GET.head == h.id|stringformat:"s" %}selected{% endif %}>{{ h.head_name }}</option>
+									{% endfor %}
+								</select>
+							</div>
+
+							<!-- Vendor / Contructor / Bank -->
+							<div class="mb-4">
+								<label for="cash_type_name" class="block font-medium mb-2">Vendor / Contructor / Bank</label>
+								<select name="cash_type_name" id="cash_type_name" class="w-full border rounded p-2">
+									<option value="">Select Type</option>
+								</select>
+							</div>
+							<!-- Project -->
+							<div class="mb-4">
+							    <span class="block font-medium text-lg text-gray-800 mb-2">Select Type</span>
+                                  <div class="flex items-center space-x-4 mb-2">
+                                    <label class="inline-flex items-center">
+                                      <input type="radio" name="type" value="option1" class="form-radio text-blue-600">
+                                      <span class="ml-2 text-sm text-gray-700">All</span> &nbsp;&nbsp;&nbsp;
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                      <input type="radio" name="type" value="option2" class="form-radio text-blue-600" checked>
+                                      <span class="ml-2 text-sm text-gray-700">Single</span>
+                                    </label>
+                                  </div>
+								<label for="project" class="block font-medium mb-2">Project Name</label>
+								<select name="project" id="project" class="w-full border rounded p-2">
+									<option value="">Select Project</option>
+								</select>
+							</div>
+
+							<!-- Radio: Datewise vs All -->
+							<div class="mb-4">
+								<span class="block font-medium mb-2">Transaction Type</span>
+								<label class="inline-flex items-center mr-6">
+									<input type="radio" name="transaction" value="datewise" {% if request.GET.transaction != 'alldate' %}checked{% endif %} onclick="toggleDateFields()">
+									<span class="ml-2">Datewise</span>
+								</label>
+								<label class="inline-flex items-center">
+									<input type="radio" name="transaction" value="alldate" {% if request.GET.transaction == 'alldate' %}checked{% endif %} onclick="toggleDateFields()">
+									<span class="ml-2">All Date</span>
+								</label>
+							</div>
+
+							<!-- Date Range Fields -->
+							<div id="date-range-fields" class="grid grid-cols-2 gap-4 mb-4">
+								<div>
+									<label for="from_date" class="block mb-2">From Date</label>
+									<input type="date" name="from_date" id="from_date"
+										value="{{ request.GET.from_date|default:today|date:'Y-m-d' }}"
+										class="w-full border rounded p-2">
+								</div>
+								<div>
+									<label for="to_date" class="block mb-2">To Date</label>
+									<input type="date" name="to_date" id="to_date"
+										value="{{ request.GET.to_date|default:today|date:'Y-m-d' }}"
+										class="w-full border rounded p-2">
+								</div>
+							</div>
+
+							<div class="text-center">
+								<button type="submit" style="background-color:#1e3c98" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors duration-200">
+									Show Results
+								</button>
+							</div>
+						</form>
+
+						<!-- JavaScript to toggle date fields -->
+						<script>
+							function toggleDateFields() {
+								const selected = document.querySelector('input[name="transaction"]:checked').value;
+								const dateFields = document.getElementById('date-range-fields');
+								dateFields.style.display = (selected === 'datewise') ? 'grid' : 'none';
+							}
+
+							document.addEventListener('DOMContentLoaded', toggleDateFields);
+						</script>
+                    </div>
+                </div>
+            </div>
+            
+<!-- JS to dynamically fetch Type and Projects -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const headSelect = document.getElementById("head");
+    const typeSelect = document.getElementById("cash_type_name");
+    const projectSelect = document.getElementById("project");
+
+    function populateDropdown(url, targetEl, placeholder) {
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                targetEl.innerHTML = `<option value="">${placeholder}</option>`;
+                data.forEach(item => {
+                    const opt = document.createElement("option");
+                    opt.value = item.id;
+                    opt.textContent = item.name;
+
+                    // Preserve GET selection
+                    if (targetEl.name === "cash_type_name" && item.id == "{{ request.GET.cash_type_name|default:'' }}") {
+                        opt.selected = true;
+                    }
+                    if (targetEl.name === "project" && item.id == "{{ request.GET.project|default:'' }}") {
+                        opt.selected = true;
+                    }
+
+                    targetEl.appendChild(opt);
+                });
+            });
+    }
+
+    headSelect.addEventListener("change", function () {
+        const headId = this.value;
+        if (headId) {
+            populateDropdown(`/get-types-by-head/${headId}/`, typeSelect, "Select Type");
+            projectSelect.innerHTML = '<option value="">Select Project</option>';
+        } else {
+            typeSelect.innerHTML = '<option value="">Select Type</option>';
+            projectSelect.innerHTML = '<option value="">Select Project</option>';
+        }
+    });
+
+    typeSelect.addEventListener("change", function () {
+        const headId = headSelect.value;
+        const typeId = this.value;
+        if (headId && typeId) {
+            populateDropdown(`/get-projects-by-head-cash/${headId}/${typeId}/`, projectSelect, "Select Project");
+        } else {
+            projectSelect.innerHTML = '<option value="">Select Project</option>';
+        }
+    });
+
+    // Load on page if GET values exist
+    if (headSelect.value) {
+        populateDropdown(`/get-types-by-head/${headSelect.value}/`, typeSelect, "Select Type");
+
+        // Wait a bit to ensure type loads first, then project
+        setTimeout(() => {
+            const typeId = "{{ request.GET.cash_type_name|default:'' }}";
+            if (typeId) {
+                populateDropdown(`/get-projects-by-head-cash/${headSelect.value}/${typeId}/`, projectSelect, "Select Project");
+            }
+        }, 300);
+    }
+});
+</script>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,200 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Land Purchase Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-lg font-medium">Land Purchase Add</h2>
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <div class="property-detail p-8 bg-white rounded-lg shadow-lg border border-gray-200">
+                          <form method="POST" enctype="multipart/form-data" class="max-w-4xl mx-auto p-6 bg-white rounded shadow">
+                                {% csrf_token %}
+                                <h2 class="text-2xl font-bold mb-4">Land Purchase Form</h2>
+
+                                <!-- Land Supplier -->
+                                <div class="mb-4">
+                                    <label for="land_supplier" class="block font-medium">Land Supplier</label>
+                                    <input type="text" name="land_supplier" id="land_supplier" class="w-full border rounded px-3 py-2" required>
+                                </div>
+
+                                <!-- Mouza Name -->
+                                <div class="mb-4">
+                                    <label for="mouza_name" class="block font-medium">Mouza Name</label>
+                                    <input type="text" name="mouza_name" id="mouza_name" class="w-full border rounded px-3 py-2">
+                                </div>
+
+                                <!-- Dag Numbers -->
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label for="cs_dag_no" class="block font-medium">CS Dag No</label>
+                                        <input type="text" name="cs_dag_no" id="cs_dag_no" class="w-full border rounded px-3 py-2">
+                                    </div>
+                                    <div>
+                                        <label for="sa_dag_no" class="block font-medium">SA Dag No</label>
+                                        <input type="text" name="sa_dag_no" id="sa_dag_no" class="w-full border rounded px-3 py-2">
+                                    </div>
+                                    <div>
+                                        <label for="rs_dag_no" class="block font-medium">RS Dag No</label>
+                                        <input type="text" name="rs_dag_no" id="rs_dag_no" class="w-full border rounded px-3 py-2">
+                                    </div>
+                                    <div>
+                                        <label for="ct_dag_no" class="block font-medium">CT Dag No</label>
+                                        <input type="text" name="ct_dag_no" id="ct_dag_no" class="w-full border rounded px-3 py-2">
+                                    </div>
+                                </div>
+
+                                <!-- Agreement Details -->
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label for="did_agreement" class="block font-medium">Did Agreement?</label>
+                                        <select name="did_agreement" id="did_agreement" class="w-full border rounded px-3 py-2" required>
+                                            <option value="">Select</option>
+                                            <option value="Yes">Yes</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="agreement_date" class="block font-medium">Agreement Date</label>
+                                        <input type="date" name="agreement_date" id="agreement_date" class="w-full border rounded px-3 py-2">
+                                    </div>
+                                </div>
+
+                                <!-- Land Area & Type -->
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label for="land_area" class="block font-medium">Land Area (decimal)</label>
+                                        <input type="number" name="land_area" id="land_area" step="0.01" class="w-full border rounded px-3 py-2">
+                                    </div>
+                                    <div>
+                                        <label for="land_type" class="block font-medium">Land Type</label>
+                                        <select name="land_type" id="land_type" class="w-full border rounded px-3 py-2" required>
+                                            <option value="">Select</option>
+                                            <option value="Residential">Residential</option>
+                                            <option value="Commercial">Commercial</option>
+                                            <option value="Agricultural">Agricultural</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Pricing -->
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label for="price_per_decimal" class="block font-medium">Price per Decimal</label>
+                                        <input type="number" name="price_per_decimal" id="price_per_decimal" step="0.01" class="w-full border rounded px-3 py-2">
+                                    </div>
+                                    <div>
+                                        <label for="total_price" class="block font-medium">Total Price</label>
+                                        <input type="number" name="total_price" id="total_price" step="0.01" class="w-full border rounded px-3 py-2">
+                                    </div>
+                                </div>
+
+                                <!-- Payment -->
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label for="payment_method" class="block font-medium">Payment Method</label>
+                                        <select name="payment_method" id="payment_method" class="w-full border rounded px-3 py-2" required>
+                                            <option value="">Select</option>
+                                            <option value="Cash">Cash</option>
+                                            <option value="Cheque">Cheque</option>
+                                            <option value="Bank Transfer">Bank Transfer</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="payment_status" class="block font-medium">Payment Status</label>
+                                        <select name="payment_status" id="payment_status" class="w-full border rounded px-3 py-2" required>
+                                            <option value="">Select</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Partial">Partial</option>
+                                            <option value="Completed">Completed</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Deed & Registration -->
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label for="deed_number" class="block font-medium">Deed Number</label>
+                                        <input type="text" name="deed_number" id="deed_number" class="w-full border rounded px-3 py-2">
+                                    </div>
+                                    <div>
+                                        <label for="registration_date" class="block font-medium">Registration Date</label>
+                                        <input type="date" name="registration_date" id="registration_date" class="w-full border rounded px-3 py-2">
+                                    </div>
+                                </div>
+
+                                <!-- Registration Office -->
+                                <div class="mb-4">
+                                    <label for="registration_office" class="block font-medium">Registration Office</label>
+                                    <input type="text" name="registration_office" id="registration_office" class="w-full border rounded px-3 py-2">
+                                </div>
+
+                                <!-- Mutation & Legal Dispute -->
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label for="mutation_done" class="block font-medium">Mutation Done?</label>
+                                        <select name="mutation_done" id="mutation_done" class="w-full border rounded px-3 py-2">
+                                            <option value="">Select</option>
+                                            <option value="Yes">Yes</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="legal_dispute" class="block font-medium">Legal Dispute?</label>
+                                        <select name="legal_dispute" id="legal_dispute" class="w-full border rounded px-3 py-2">
+                                            <option value="">Select</option>
+                                            <option value="Yes">Yes</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Notes -->
+                                <div class="mb-4">
+                                    <label for="notes" class="block font-medium">Notes</label>
+                                    <textarea name="notes" id="notes" class="w-full border rounded px-3 py-2" rows="4"></textarea>
+                                </div>
+
+                                <!-- Documents -->
+                                <div class="mb-4">
+                                    <label for="documents" class="block font-medium">Upload Documents</label>
+                                    <input type="file" name="documents" id="documents" class="w-full border rounded px-3 py-2">
+                                </div>
+
+                                <!-- Submit -->
+                                 <div class="text-center mt-6">
+                                    <button type="submit" style="background-color:#1e3c98"
+                                            class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 rounded-md">
+                                        💾 Save Land
+                                    </button>
+                                    <a href="{% url 'land_list' %}" style="margin-left:0.5%;background-color:#1e3c98"
+                                    class="ml-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md">
+                                        🔙 Back to List
+                                    </a>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

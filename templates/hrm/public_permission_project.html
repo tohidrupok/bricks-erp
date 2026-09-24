@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --ink:        #14181C;
+        --panel:      #1D242B;
+        --panel-line: #2E3841;
+        --paper:      #ECE7DD;
+        --paper-dim:  #A9AFAE;
+        --amber:      #F2A93B;
+        --amber-dim:  #7A5C24;
+        --red:        #E4594F;
+        --red-dim:    #6B241F;
+        --radius:     10px;
+    }
+
+    .rap-wrap {
+        background: var(--ink);
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 2rem 4rem rgba(0,0,0,0.35);
+        border: 1px solid #000;
+        font-family: 'Inter', sans-serif;
+        color: var(--paper);
+    }
+
+    .rap-rail {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.1rem 1.75rem;
+        background: repeating-linear-gradient(135deg, #0F1317, #0F1317 10px, #12171C 10px, #12171C 20px);
+        border-bottom: 1px solid var(--panel-line);
+    }
+
+    .rap-rail-tag {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.72rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--paper-dim);
+    }
+
+    .rap-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--amber);
+        box-shadow: 0 0 0 3px var(--amber-dim);
+        animation: rap-pulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes rap-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+    .rap-rail-id {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        color: var(--paper-dim);
+    }
+
+    .rap-head { padding: 2.75rem 2.5rem 2.25rem; text-align: center; }
+
+    .rap-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.7rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--amber);
+        background: rgba(242, 169, 59, 0.1);
+        border: 1px solid var(--amber-dim);
+        padding: 0.4rem 0.9rem;
+        border-radius: 999px;
+        margin-bottom: 1.4rem;
+    }
+
+    .rap-title {
+        font-family: 'Oswald', sans-serif;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        font-size: clamp(1.8rem, 3.2vw, 2.4rem);
+        color: var(--paper);
+        margin-bottom: 0.6rem;
+    }
+
+    .rap-sub {
+        font-size: 1rem;
+        color: var(--paper-dim);
+        max-width: 30rem;
+        margin: 0 auto;
+    }
+
+    .rap-divider {
+        width: 100%;
+        max-width: 420px;
+        margin: 1.75rem auto 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--panel-line) 20%, var(--panel-line) 80%, transparent);
+        position: relative;
+    }
+    .rap-divider::before, .rap-divider::after {
+        content: '';
+        position: absolute;
+        top: -3px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--panel-line);
+    }
+    .rap-divider::before { left: 0; }
+    .rap-divider::after { right: 0; }
+
+    .rap-body { padding: 0.5rem 2.5rem 3rem; }
+
+    .rap-kiosk {
+        max-width: 30rem;
+        margin: 0 auto;
+        background: var(--panel);
+        border: 1px solid var(--panel-line);
+        border-radius: var(--radius);
+        padding: 2rem;
+    }
+
+    .rap-kiosk-head {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        margin-bottom: 1.75rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px dashed var(--panel-line);
+    }
+
+    .rap-kiosk-icon {
+        flex-shrink: 0;
+        width: 46px;
+        height: 46px;
+        border-radius: 8px;
+        background: rgba(242, 169, 59, 0.1);
+        border: 1px solid var(--amber-dim);
+        color: var(--amber);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .rap-kiosk-head h5 {
+        font-family: 'Oswald', sans-serif;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        color: var(--paper);
+        margin: 0 0 0.15rem;
+        font-size: 1.02rem;
+    }
+
+    .rap-kiosk-head small { color: var(--paper-dim); font-size: 0.82rem; }
+
+    .rap-label {
+        display: block;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--paper-dim);
+        margin-bottom: 0.6rem;
+    }
+
+    .rap-select-wrap { position: relative; margin-bottom: 1rem; }
+
+    .rap-select-wrap i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--paper-dim);
+        pointer-events: none;
+    }
+
+    .rap-select {
+        width: 100%;
+        appearance: none;
+        background: #12171C;
+        border: 1px solid var(--panel-line);
+        border-radius: 7px;
+        padding: 0.85rem 1rem 0.85rem 2.7rem;
+        color: var(--paper);
+        font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
+    }
+
+    .rap-select:focus {
+        outline: none;
+        border-color: var(--amber);
+        box-shadow: 0 0 0 3px rgba(242, 169, 59, 0.15);
+    }
+
+    .rap-select-wrap::after {
+        content: '\F282';
+        font-family: 'bootstrap-icons';
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--paper-dim);
+        pointer-events: none;
+        font-size: 0.9rem;
+    }
+
+    .rap-error {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(228, 89, 79, 0.1);
+        border: 1px solid var(--red-dim);
+        color: #F3B4AF;
+        font-size: 0.85rem;
+        padding: 0.7rem 0.9rem;
+        border-radius: 7px;
+        margin-bottom: 1.4rem;
+    }
+
+    .rap-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border-radius: 7px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        font-size: 0.92rem;
+        text-decoration: none;
+        border: 1px solid transparent;
+        background: var(--amber);
+        color: #24170A;
+        cursor: pointer;
+        transition: filter 0.2s ease, transform 0.2s ease;
+    }
+
+    .rap-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    @media (max-width: 576px) {
+        .rap-head { padding: 2.25rem 1.5rem 1.75rem; }
+        .rap-body { padding: 0.5rem 1.25rem 2.25rem; }
+        .rap-kiosk { padding: 1.5rem; }
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <div class="rap-wrap">
+
+                <div class="rap-rail">
+                    <div class="rap-rail-tag">
+                        <span class="rap-dot"></span>
+                        Awaiting Selection
+                    </div>
+                    <div class="rap-rail-id">BM&nbsp;ERP&nbsp;/&nbsp;PERMISSIONS</div>
+                </div>
+
+                <div class="rap-head">
+                    <span class="rap-eyebrow"><i class="bi bi-shield-check"></i> Permission Portal</span>
+                    <h1 class="rap-title">Select Location</h1>
+                    <p class="rap-sub">Choose the site you're granting attendance permission for.</p>
+                    <div class="rap-divider"></div>
+                </div>
+
+                <div class="rap-body">
+                    <div class="rap-kiosk">
+                        <div class="rap-kiosk-head">
+                            <div class="rap-kiosk-icon"><i class="bi bi-geo-alt"></i></div>
+                            <div>
+                                <h5>Choose Site</h5>
+                                <small>BTP Office routes to HRM &middot; restaurants share one flow</small>
+                            </div>
+                        </div>
+
+                        {% if error %}
+                        <div class="rap-error">
+                            <i class="bi bi-exclamation-triangle"></i> {{ error }}
+                        </div>
+                        {% endif %}
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <label for="project-select" class="rap-label">Location</label>
+                            <div class="rap-select-wrap">
+                                <i class="bi bi-shop"></i>
+                                <select name="project" id="project-select" class="rap-select" required>
+                                    <option value="" disabled selected>Choose a location&hellip;</option>
+                                    {% for project in projects %}
+                                    <option value="{{ project.id }}">{{ project.project_first_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <button type="submit" class="rap-btn">
+                                Continue <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

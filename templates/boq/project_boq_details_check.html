@@ -1,0 +1,379 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Project BOQ Details Check - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+            
+            {% include 'partials/header.html' %}
+
+            <h2 class="intro-y mt-10 text-2xl font-semibold text-gray-900">Project BOQ Details Check</h2>
+
+            {% if messages %}
+            <ul class="mt-4">
+                {% for message in messages %}
+                <li class="message {{ message.tags }} font-semibold text-green-600 text-lg">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <div class="max-w-7xl mx-auto px-4 py-6">
+            <!-- Header -->
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+            <div class="flex items-start justify-between gap-4 mb-6">
+              <div>
+                <p class="text-sm text-gray-500">Project: <span class="font-medium"><h1 class="text-2xl font-semibold">{{ project.project_first_name }}</h1></span></p>
+                {% if status or reqiDate or category or boq_type %}
+                  <p class="text-xs text-gray-500 mt-1">
+                    Active filters:
+                    {% if status %}<span class="px-2 py-0.5 bg-gray-200 rounded">{{ status }}</span>{% endif %}
+                    {% if reqiDate %}<span class="px-2 py-0.5 bg-gray-200 rounded">Date: {{ reqiDate }}</span>{% endif %}
+                    {% if category %}<span class="px-2 py-0.5 bg-gray-200 rounded">Category: {{ category }}</span>{% endif %}
+                    {% if boq_type %}<span class="px-2 py-0.5 bg-gray-200 rounded">Type: {{ boq_type }}</span>{% endif %}
+                  </p>
+                {% endif %}
+              </div>
+        
+              <div class="flex items-center gap-2">
+                <!--<button onclick="printPage()" class="px-3 py-2 rounded-lg border bg-white hover:bg-gray-50 text-sm">Print</button>-->
+                 <a href="{% url 'boq_list' %}" class="px-3 py-2 rounded-lg border bg-white hover:bg-gray-50 text-sm">Back</a>
+                 <a href="{% url 'project_boq_details_view' %}?project_id={{ project.id }}&status={{ status }}&reqiDate={{ reqiDate }}&boq_type={{ boq_type }}&category={{ category }}&category_name={{ category_name }}" 
+   class="px-3 py-2 rounded-lg border bg-white hover:bg-gray-50 text-sm" style="background-color:#1e40ae;color:#FFFFFF">View</a>
+              </div>
+            </div>
+        
+            <!-- Alerts -->
+            {% if messages %}
+              <div class="space-y-2 mb-4">
+                {% for message in messages %}
+                  <div class="px-4 py-3 rounded border
+                    {% if message.tags == 'success' %} bg-green-50 border-green-200 text-green-800
+                    {% elif message.tags == 'error' %} bg-red-50 border-red-200 text-red-800
+                    {% else %} bg-blue-50 border-blue-200 text-blue-800 {% endif %}">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+        
+            <!-- Filters (GET) -->
+            <form method="get" class="bg-white rounded-xl shadow p-4 mb-6">
+              <input type="hidden" name="project_id" value="{{ project.id }}">
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                 Status 
+                <div>
+                  <label class="block text-sm font-medium mb-1" for="status">Status</label>
+                  <select id="status" name="status" class="w-full border rounded-md px-3 py-2">
+                    <option value="">All</option>
+                    <option value="Pending" {% if status == 'Pending' %}selected{% endif %}>Pending</option>
+                    <option value="Approved" {% if status == 'Approved' %}selected{% endif %}>Approved</option>
+                  </select>
+                </div>
+        
+                 Date 
+                <div>
+                  <label class="block text-sm font-medium mb-1" for="reqiDate">BOQ Date</label>
+                  <input type="date" id="reqiDate" name="reqiDate" class="w-full border rounded-md px-3 py-2"
+                         value="{{ reqiDate|default_if_none:'' }}">
+                </div>
+                
+                 BOQ Type (category_type) 
+                <!--<div>-->
+                <!--  <label class="block text-sm font-medium mb-1" for="boq_type">BOQ Type</label>-->
+                <!--  <select id="boq_type" name="boq_type" class="w-full border rounded-md px-3 py-2">-->
+                <!--    <option value="">All</option>-->
+                <!--    <option value="Material Purchase Cost" {% if boq_type == "Material Purchase Cost" %}selected{% endif %}>Material Purchase Cost</option>-->
+                <!--    <option value="Labor Cost" {% if boq_type == "Labor Cost" %}selected{% endif %}>Labor Cost</option>-->
+                <!--  </select>-->
+                <!--</div>-->
+                
+                <div>
+                <label class="block text-sm font-medium mb-1" for="boq_type">BOQ Type</label>
+                <select id="boq_type" name="boq_type" class="w-full border rounded-md px-3 py-2">
+                  <option value="">All</option>
+                  <option value="Materials Purchase Cost" {% if boq_type == "Materials Purchase Cost" %}selected{% endif %}>Materials Purchase Cost</option>
+                  <option value="Labour Cost" {% if boq_type == "Labour Cost" %}selected{% endif %}>Labour Cost</option>
+                </select>
+                </div> 
+              
+
+                
+                 Category (category_name) 
+                <div>
+                     <label class="block text-sm font-medium mb-1" for="category">BOQ Name</label>
+                      <select id="category" name="category" class="w-full border rounded-md px-3 py-2">
+                        <option value="">All</option>
+                        {% for c in boq_categories %}
+                          <option value="{{ c }}" {% if category == c %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                      </select>
+
+                </div>
+                Category name (Cement/ Bricks Chips/) 
+                <div>
+                    <label class="block text-sm font-medium mb-1" for="category_name">Category Name</label>
+                    <select id="category_name" name="category_name" class="w-full border rounded-md px-3 py-2">
+                        <option value="">All</option>
+                        {% for cn in boq_category_names %}
+                            <option value="{{ cn }}" {% if category_name == cn %}selected{% endif %}>{{ cn }}</option>
+                        {% endfor %}
+                    </select>
+                </div> 
+
+              </div>
+        
+              <div class="mt-4 flex items-center gap-2">
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Apply Filters</button>
+                <a href="{% url request.resolver_match.url_name %}?project_id={{ project.id }}" class="px-4 py-2 border rounded-lg bg-white hover:bg-gray-50">Clear</a>
+              </div>
+            </form>
+        
+            <!-- Optional quick tabs -->
+            <div class="flex items-center gap-2 mb-6">
+              <a href="{% url request.resolver_match.url_name %}?project_id={{ project.id }}" class="px-3 py-1.5 text-sm rounded-lg border bg-white {% if not status %}ring-1 ring-blue-600{% endif %}">All</a>
+              <a href="{% url request.resolver_match.url_name %}?project_id={{ project.id }}&status=Pending" class="px-3 py-1.5 text-sm rounded-lg border bg-white {% if status == 'Pending' %}ring-1 ring-blue-600{% endif %}">Pending</a>
+              <a href="{% url request.resolver_match.url_name %}?project_id={{ project.id }}&status=Approved" class="px-3 py-1.5 text-sm rounded-lg border bg-white {% if status == 'Approved' %}ring-1 ring-blue-600{% endif %}">Approved</a>
+            </div>
+        
+            <!-- Totals by Category Type -->
+            <div class="bg-white rounded-xl shadow p-4 mb-6">
+              <h2 class="text-lg font-semibold mb-3">Totals by BOQ Type</h2>
+              <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                  <thead>
+                    <tr class="bg-gray-100">
+                      <th class="text-left px-3 py-2">BOQ Type</th>
+                      <th class="text-right px-3 py-2">Total Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for row in total_by_category_type %}
+                      <tr class="border-b">
+                        <td class="px-3 py-2">{{ row.category_type }}</td>
+                        <td class="px-3 py-2 text-right">{{ row.total_amount|default_if_none:0|floatformat:2 }}</td>
+                      </tr>
+                    {% empty %}
+                      <tr>
+                        <td colspan="2" class="px-3 py-4 text-center text-gray-500">No BOQ data found for the selected filters.</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+        
+           <!-- BOQ grouped details -->
+            {% if boq_by_type_and_category %}
+              {% for type_key, categories in boq_by_type_and_category.items %}
+                <div class="bg-white rounded-xl shadow mb-6">
+                  <div class="px-4 pt-4">
+                    <h3 class="text-lg font-semibold">{{ type_key|default:"Other" }}</h3>
+                  </div>
+                  <div class="divide-y">
+                    {% for category_key, block in categories.items %}
+                      <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                          <h4 class="font-medium">{{ category_key|default:"Uncategorized" }}</h4>
+                          <div class="text-sm text-gray-600">
+                            Category Total:
+                            <span class="font-semibold">{{ block.total|default_if_none:0|floatformat:2 }}</span>
+                          </div>
+                        </div>
+            
+                        <div class="overflow-x-auto">
+                          <table class="min-w-full text-sm">
+                            <thead>
+                              <tr class="bg-gray-100">
+                                <th class="text-left px-3 py-2">Category</th>
+                                <th class="text-left px-3 py-2">Item</th>
+                                <th class="text-left px-3 py-2">Supplier</th>
+                                <th class="text-left px-3 py-2">Unit</th>
+                                <th class="text-right px-3 py-2">Qty</th>
+                                <th class="text-right px-3 py-2">Rate</th>
+                                <th class="text-right px-3 py-2">Amount</th>
+                                <th class="text-left px-3 py-2">Remark</th>
+                                <th class="text-left px-3 py-2">Status</th>
+                                <th class="text-left px-3 py-2">BOQ Date</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% if block.items %}
+                                {% for item in block.items %}
+                                  <tr class="border-b">
+                                    <td class="px-3 py-2">{{ item.category_name|default:"-" }}</td>
+                                    <td class="px-3 py-2">{{ item.item_name|default:"-" }}</td>
+                                    <td class="px-3 py-2">{{ item.supplier_name|default:"-" }}</td>
+                                    <td class="px-3 py-2">{{ item.unit|default:"-" }}</td>
+                                    <td class="px-3 py-2 text-right">{{ item.qty|default_if_none:0|floatformat:2 }}</td>
+                                    <td class="px-3 py-2 text-right">{{ item.rate|default_if_none:0|floatformat:2 }}</td>
+                                    <td class="px-3 py-2 text-right">{{ item.amount|default_if_none:0|floatformat:2 }}</td>
+                                    <td class="px-3 py-2">{{ item.remark|default:"-" }}</td>
+                                    <td class="px-3 py-2">
+                                      {% if item.status_item == 'Approved' %}
+                                        <span class="px-2 py-0.5 rounded bg-green-100 text-green-800 text-xs">Approved</span>
+                                      {% else %}
+                                        <span class="px-2 py-0.5 rounded bg-yellow-100 text-yellow-800 text-xs">Pending</span>
+                                      {% endif %}
+                                    </td>
+                                    <td class="px-3 py-2">{{ item.boq_date|date:"Y-m-d"|default:"-" }}</td>
+                                  </tr>
+                                {% endfor %}
+                              {% else %}
+                                <tr>
+                                  <td colspan="9" class="px-3 py-3 text-center text-gray-500">No items in this category</td>
+                                </tr>
+                              {% endif %}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="bg-white rounded-xl shadow p-4 text-center text-gray-500">
+                No BOQ data found for the selected filters.
+              </div>
+            {% endif %}
+
+
+        
+            <!-- Other Project Costs -->
+            <div class="grid md:grid-cols-3 gap-6 mb-6">
+              <div class="bg-white rounded-xl shadow p-4">
+                <h3 class="font-semibold mb-3">Employee Costs</h3>
+                <div class="overflow-x-auto">
+                  <table class="min-w-full text-sm">
+                    <thead>
+                      <tr class="bg-gray-100">
+                        <th class="text-left px-3 py-2">Employee</th>
+                        <th class="text-right px-3 py-2">Salary</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for e in employees %}
+                        <tr class="border-b">
+                          <td class="px-3 py-2">
+                            {{ e.employee_name }}<br>
+                            <span class="text-xs text-gray-500">First Month: {{ e.first_month_salary|default_if_none:0|floatformat:2 }}, Duration: {{ e.project_duration_months }} mo</span>
+                          </td>
+                          <td class="px-3 py-2 text-right">{{ e.salary|default_if_none:0|floatformat:2 }}</td>
+                        </tr>
+                      {% empty %}
+                        <tr><td colspan="2" class="px-3 py-3 text-center text-gray-500">No employee data</td></tr>
+                      {% endfor %}
+                    </tbody>
+                    <tfoot>
+                      <tr class="font-semibold">
+                        <td class="px-3 py-2 text-right">Total</td>
+                        <td class="px-3 py-2 text-right">{{ employee_cost_total|default_if_none:0|floatformat:2 }}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+        
+              <div class="bg-white rounded-xl shadow p-4">
+                <h3 class="font-semibold mb-3">Safety Equipment</h3>
+                <div class="overflow-x-auto">
+                  <table class="min-w-full text-sm">
+                    <thead>
+                      <tr class="bg-gray-100">
+                        <th class="text-left px-3 py-2">Item</th>
+                        <th class="text-right px-3 py-2">Qty</th>
+                        <th class="text-right px-3 py-2">Cost</th>
+                        <th class="text-right px-3 py-2">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for s in safety_equipments %}
+                        <tr class="border-b">
+                          <td class="px-3 py-2">{{ s.item_name }}</td>
+                          <td class="px-3 py-2 text-right">{{ s.quantity|default_if_none:0 }}</td>
+                          <td class="px-3 py-2 text-right">{{ s.item_cost|default_if_none:0|floatformat:2 }}</td>
+                          <td class="px-3 py-2 text-right">{{ s.total_cost|default_if_none:0|floatformat:2 }}</td>
+                        </tr>
+                      {% empty %}
+                        <tr><td colspan="4" class="px-3 py-3 text-center text-gray-500">No safety equipment data</td></tr>
+                      {% endfor %}
+                    </tbody>
+                    <tfoot>
+                      <tr class="font-semibold">
+                        <td colspan="3" class="px-3 py-2 text-right">Total</td>
+                        <td class="px-3 py-2 text-right">{{ safety_equipment_total|default_if_none:0|floatformat:2 }}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+        
+              <div class="bg-white rounded-xl shadow p-4">
+                <h3 class="font-semibold mb-3">Other Expenses</h3>
+                <div class="overflow-x-auto">
+                  <table class="min-w-full text-sm">
+                    <thead>
+                      <tr class="bg-gray-100">
+                        <th class="text-left px-3 py-2">Item</th>
+                        <th class="text-right px-3 py-2">Qty</th>
+                        <th class="text-right px-3 py-2">Cost</th>
+                        <th class="text-right px-3 py-2">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for x in expense_costs %}
+                        <tr class="border-b">
+                          <td class="px-3 py-2">{{ x.item_name }}</td>
+                          <td class="px-3 py-2 text-right">{{ x.quantity|default_if_none:0 }}</td>
+                          <td class="px-3 py-2 text-right">{{ x.item_cost|default_if_none:0|floatformat:2 }}</td>
+                          <td class="px-3 py-2 text-right">{{ x.total_cost|default_if_none:0|floatformat:2 }}</td>
+                        </tr>
+                      {% empty %}
+                        <tr><td colspan="4" class="px-3 py-3 text-center text-gray-500">No expense data</td></tr>
+                      {% endfor %}
+                    </tbody>
+                    <tfoot>
+                      <tr class="font-semibold">
+                        <td colspan="3" class="px-3 py-2 text-right">Total</td>
+                        <td class="px-3 py-2 text-right">{{ expense_cost_total|default_if_none:0|floatformat:2 }}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+        
+            <!-- Grand total & Percentage Application (POST) -->
+            <div class="bg-white rounded-xl shadow p-4">
+              <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h3 class="text-lg font-semibold mb-2">Grand Total (Before Extra)</h3>
+                  <div class="text-2xl font-bold">{{ grand_total|default_if_none:0|floatformat:2 }}</div>
+                  <p class="text-xs text-gray-500 mt-1">
+                    Grand Total = BOQ Total + Employee Costs + Safety Equipment + Other Expenses
+                  </p>
+                </div>
+              </div>
+            </div>
+        
+            <!-- Footer -->
+            <div class="mt-10 text-center text-xs text-gray-400 print:hidden">
+              Generated on {{ now|date:"Y-m-d H:i" }}
+            </div>
+          </div>
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+{% endblock %}

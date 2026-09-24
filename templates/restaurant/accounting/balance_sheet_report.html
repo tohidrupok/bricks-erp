@@ -1,0 +1,173 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Balance Sheet</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    background-color: silver;
+    padding: 20px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 20px;
+    max-width: 960px;
+    margin: auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  .logo img { height: 50px; }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .label-box {
+    background-color: #e2f0d9;
+    padding: 4px 10px;
+    font-weight: bold;
+    font-size: 13px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .sub-head { font-size: 11px; color: #555; margin-bottom: 8px; }
+  .years { display: flex; justify-content: flex-end; gap: 40px; font-weight: bold; margin: 12px 0; }
+  .sheet { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+  .sheet th, .sheet td { border: 1px solid #ccc; padding: 6px 8px; }
+  .left-col { width: 60%; font-weight: 500; }
+  .right-col { text-align: right; min-width: 100px; }
+  .num { color: #1e3c98; font-weight: 600; }
+  .label { color: #666; font-style: italic; }
+  .section { font-weight: bold; background: #f3f6fa; }
+  .thin-hr td { border: none !important; border-top: 1px solid #aaa !important; height: 6px; }
+
+  /* Signature section */
+  .signature-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+  }
+  .signature-box {
+    text-align: center;
+    width: 22%;
+    font-size: 12px;
+  }
+  .signature-line {
+    display: block;
+    border-top: 1px solid #000;
+    margin: 40px 0 6px 0;
+  }
+
+  /* Buttons */
+  .footer { margin-top: 20px; display: flex; gap: 10px; }
+  .back-btn, .print-btn {
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .back-btn { background: #eee; }
+  .print-btn { background: #1e3c98; color: white; }
+  @media print {
+    .no-print { display: none !important; }
+    body { background: white; padding: 0; }
+    .card { box-shadow: none; border: none; margin: 0; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+
+    <!-- Header -->
+    <div class="card-header">
+      <div class="logo">
+        <img src="{% static 'images/BTP_logo_webp.webp' %}" alt="Company Logo">
+      </div>
+      <div style="text-align: right;">
+        <div class="label-box">Balance Sheet</div>
+        <p style="font-size: 11px; margin-top: 4px;">
+          Printing Date: {{ print_time|date:"F j, Y, g:i a" }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="sub-head">
+      House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br>
+       01993005558, 09639246230, 09639246231 <br>
+      md2bayid@gmail.com, thebtplimited@gmail.com, www.btplimited.com
+    </div>
+    <hr style="margin:8px 0;">
+
+    <!-- Years row -->
+    <div class="years">
+      {% for y in years %}<div>{{ y }}</div>{% endfor %}
+    </div>
+
+    <!-- Balance sheet table -->
+    <table class="sheet">
+      <tbody>
+        {% for head, types in grouped.items %}
+          <tr>
+            <td colspan="{{ years|length|add:1 }}" class="section">{{ head }}</td>
+          </tr>
+          {% for type_name, names in types.items %}
+            <tr>
+              <td class="left-col label">{{ type_name }}</td>
+              <td class="right-col" colspan="{{ years|length }}"></td>
+            </tr>
+            {% for name, values in names.items %}
+            <tr>
+              <td class="left-col">{{ name }}</td>
+              {% for val in values %}
+                <td class="right-col"><span class="num">{{ val|floatformat:2 }}</span></td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          {% endfor %}
+          <tr class="thin-hr"><td colspan="{{ years|length|add:1 }}"></td></tr>
+        {% endfor %}
+
+        <!-- Totals -->
+        <tr style="font-weight:bold; background:#f9fafb;">
+          <td class="left-col">Grand Total</td>
+          {% for t in totals %}
+            <td class="right-col"><span class="num">{{ t|floatformat:2 }}</span></td>
+          {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Signatures -->
+    <div class="signature-section">
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Prepared By
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Checked By
+      </div>      
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Approved By
+      </div>
+    </div>
+
+    <!-- Footer with Approval and Print -->
+    <div class="footer no-print">      
+      <button onclick="window.location.href='{% url 'home' %}'" class="back-btn">← Back to List</button>
+      <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

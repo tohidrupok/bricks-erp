@@ -1,0 +1,257 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Restaurant Employee Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+            <h2 class="intro-y mt-10 text-lg font-medium">Add New Restaurant Employee</h2>
+            <div class="mt-5 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                  <form method="POST" enctype="multipart/form-data" class="max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                    {% csrf_token %}
+                
+                    <!-- Employee Name -->
+                    <div class="mb-4">
+                        <label for="id_rda_emp_name" class="font-medium text-lg">Employee Name</label>
+                        <input type="text" name="rda_emp_name" id="id_rda_emp_name" placeholder="Enter Employee Name" required
+                            value="{{ form.data.rda_emp_name }}"
+                            class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90
+                                   focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" />
+                        {% if form.rda_emp_name.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.rda_emp_name.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Employee Type -->
+                    <div class="mb-4">
+                        <label for="id_rda_emp_type" class="font-medium text-lg">Employee Type</label>
+                        <select name="rda_emp_type" id="id_rda_emp_type"
+                            class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90
+                                   focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary">
+                            <option value="">Select an option</option>
+                            <option value="full_time" {% if form.rda_emp_type.value == "full_time" %}selected{% endif %}>Full Time Employee</option>
+                            <option value="part_time" {% if form.rda_emp_type.value == "part_time" %}selected{% endif %}>Part Time Employee</option>
+                        </select>
+                    
+                        {% if form.rda_emp_type.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.rda_emp_type.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                     <!-- Employee Type -->
+                    <div class="mb-4">
+                        <label for="id_rda_shift" class="font-medium text-lg">Schedule - Shift</label>
+                        <select name="rda_shift" id="id_rda_shift"
+                            class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90
+                                   focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary">
+                            <option value="">Select an Shift</option>
+                            <option value="Morning" {% if form.rda_shift.value == "Morning" %}selected{% endif %}>Morning</option>
+                            <option value="Evening" {% if form.rda_shift.value == "Evening" %}selected{% endif %}>Evening</option>
+                        </select>
+                    
+                        {% if form.rda_shift.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.rda_shift.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Salary -->
+                    <div class="mb-4">
+                        <label for="id_rda_salary" class="font-medium text-lg">Salary</label>
+                        <input type="number" step="0.01" name="rda_salary" id="id_rda_salary" placeholder="Enter Salary"
+                            value="{{ form.data.rda_salary}}"
+                            class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90
+                                   focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" />
+                        {% if form.rda_salary.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.rda_salary.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Phone -->
+                    <div class="mb-4">
+                        <label for="id_rda_phone" class="font-medium text-lg">Phone</label>
+                        <input type="tel" name="rda_phone" id="id_rda_phone" placeholder="Enter Phone Number"
+                            value="{{ form.data.rda_phone }}"
+                            class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90
+                                   focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" />
+                        {% if form.rda_phone.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.rda_phone.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Email -->
+                    <div class="mb-4">
+                        <label for="id_rda_email" class="font-medium text-lg">Email</label>
+                        <input type="email" name="rda_email" id="id_rda_email" placeholder="Enter Email"
+                            value="{{ form.data.rda_email }}"
+                            class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90
+                                   focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" />
+                        {% if form.rda_email.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.rda_email.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Position -->
+                    <div class="mb-4">
+                        <label for="id_rda_position" class="font-medium text-lg">Position</label>
+                        <input type="text" name="rda_position" id="id_rda_position" placeholder="Enter Position"
+                            value="{{ form.data.rda_position }}"
+                            class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90
+                                   focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" />
+                        {% if form.rda_position.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.rda_position.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Project Name (Select) -->
+                    <div class="mb-4">
+                        <label for="id_project_name" class="font-medium text-lg">Project Name</label>
+                        <select id="id_project" name="project_name"
+                                        class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                    {% for choice in form.project_name.field.choices %}
+                                        <option value="{{ choice.0 }}" {% if choice.0 == form.project_name.value %}selected{% endif %}>{{ choice.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                        {% if form.project_name.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.project_name.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Address -->
+                    <div class="mb-4">
+                        <label for="id_rda_address" class="font-medium text-lg">Address</label>
+                        <textarea name="rda_address" id="id_rda_address" rows="3" placeholder="Enter Address"
+                            class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90
+                                   focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary">{{ form.data.rda_address }}</textarea>
+                        {% if form.rda_address.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.rda_address.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    <!-- Position -->
+                    <div class="mb-4">
+                        <label for="id_rda_nid" class="font-medium text-lg">NID</label>
+                        <input type="text" name="rda_nid" id="id_rda_nid" placeholder="Enter NID"
+                            value="{{ form.data.rda_nid }}"
+                            class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90
+                                   focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" />
+                        {% if form.rda_nid.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.rda_nid.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    <div class="mb-4">
+                        <label for="id_rda_dofb" class="font-medium text-lg">Date of Birth</label>
+                        <input type="date" name="rda_dofb" id="id_rda_dofb" placeholder="Enter Date of Birth"
+                            value="{{ form.data.rda_dofb }}"
+                            class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90
+                                   focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" />
+                        {% if form.rda_dofb.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.rda_dofb.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Active Status Checkbox -->
+                    <div class="mb-4 flex items-center">
+                        <input type="checkbox" name="rda_active_status" id="id_rda_active_status"
+                            class="h-5 w-5 text-primary border-slate-300 focus:ring-primary"
+                            {% if form.data.rda_active_status or form.initial.rda_active_status %}checked{% endif %} />
+                        <label for="id_rda_active_status" class="ml-2 font-medium text-lg">Active Status</label>
+                        {% if form.rda_active_status.errors %}
+                            <ul class="text-red-600 mt-1 ml-2">
+                                {% for error in form.rda_active_status.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Photo -->
+                    <div class="mb-4">
+                        <label for="id_rda_photo" class="font-medium text-lg">Photo</label>
+                        <input type="file" name="rda_photo" id="id_rda_photo"
+                            class="w-full text-sm border-slate-200 shadow-sm rounded-md focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" />
+                        {% if form.rda_photo.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.rda_photo.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Submit -->
+                    <div class="mt-6">
+                        <button type="submit"
+                            class="btn btn-primary px-5 py-2 rounded-md bg-primary text-white hover:bg-primary-dark transition duration-150">
+                            Save Employee
+                        </button>
+                    </div>
+                </form>
+
+
+                </div>
+            </div>
+
+                </div>
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

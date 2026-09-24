@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requisitions - {{ project.project_first_name }}</title>
+<style>
+body{
+    font-family:Arial;
+    background:#eef2f7;
+    margin:0;
+    padding:0;
+}
+.navbar{
+    background:#198754;
+    padding:12px 20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:white;
+}
+.navbar a{
+    color:white;
+    text-decoration:none;
+    margin-right:15px;
+}
+.container{
+    max-width:1100px;
+    margin:20px auto;
+    padding:0 15px;
+}
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+.btn{
+    padding:8px 12px;
+    border-radius:6px;
+    text-decoration:none;
+    color:white;
+    font-size:14px;
+    display:inline-block;
+    border:none;
+    cursor:pointer;
+}
+.btn-blue{background:#0d6efd;}
+.btn-green{background:#28a745;}
+.btn-red{background:#dc3545;}
+.btn-gray{background:#6c757d;}
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+th{
+    background:#0d6efd;
+    color:white;
+    padding:10px;
+    text-align:left;
+}
+td{
+    padding:10px;
+    border-bottom:1px solid #eee;
+}
+tr:hover{
+    background:#f1f5ff;
+}
+.status-pending{
+    background-color:#dc3545;
+    padding:4px 10px;
+    border-radius:4px;
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+}
+.status-approved{
+    background-color:#28a745;
+    padding:4px 10px;
+    border-radius:4px;
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+}
+.filter{
+    margin:10px 0;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+}
+input{
+    padding:10px;
+    border:1px solid #ddd;
+    border-radius:6px;
+}
+.no-data{
+    text-align:center;
+    color:#6b7280;
+}
+@media(max-width:768px){
+    .header{
+        flex-direction:column;
+        gap:10px;
+        align-items:flex-start;
+    }
+}
+</style>
+</head>
+<body>
+<div class="navbar">
+    <div>
+        <a href="{% url 'restau_requisition_list_public' %}">Requisitions</a>
+    </div>
+    <a href="{% url 'restu_requisition_by_fallback_public' project.id %}" class="btn btn-gray">Refresh</a>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="header">
+            <h2>Requisitions - {{ project.project_first_name }}</h2>
+        </div>
+
+        <p><strong>Filter status:</strong> {{ approv_note }}</p>
+
+        <form method="get" class="filter">
+            <label>Date:
+                <input type="date" name="requisition_date" value="{{ requisition_date }}">
+            </label>
+            <label>Vendor:
+                <input type="text" name="vendor_name" value="{{ vendor_name }}" placeholder="Vendor name(s), comma separated">
+            </label>
+            <button type="submit" class="btn btn-blue">Filter</button>
+            <a href="{% url 'restu_requisition_by_fallback_public' project.id %}" class="btn btn-gray">Reset</a>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>SL</th>
+                    <th>Date</th>
+                    <th>Item</th>
+                    <th>Vendor</th>
+                    <th>Qty</th>
+                    <th>Unit</th>
+                    <th>Rate</th>
+                    <th>Discount</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requisitions %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ req.requisition_date }}</td>
+                    <td>{{ req.item_name }}</td>
+                    <td>{{ req.vendor_name|default:"-" }}</td>
+                    <td>{{ req.qty }}</td>
+                    <td>{{ req.unit }}</td>
+                    <td>{{ req.rate }}</td>
+                    <td>{{ req.discount }}</td>
+                    <td>৳{{ req.amount }}</td>
+                    <td>
+                        {% if req.approv_status == "approved" %}
+                            <span class="status-approved">Approved</span>
+                        {% else %}
+                            <span class="status-pending">{{ req.get_approv_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'restau_requisition_edit_public' req.pk %}" class="btn btn-blue">Edit</a>
+                        <a href="{% url 'restau_requisition_delete_public' req.pk %}" class="btn btn-red">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="11" class="no-data">No requisitions found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if vendors %}
+        <p style="margin-top:15px;"><strong>Vendors:</strong> {{ vendors|join:", " }}</p>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>

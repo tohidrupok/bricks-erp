@@ -1,0 +1,114 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Employee Ledger Report - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+                
+                {% for data in entry_data %}
+                    {% if forloop.first %}
+                        <h2 class="intro-y mt-10 text-lg font-medium">{{ data.entry.project_name.project_first_name }} Reports</h2>
+                    {% endif %}
+                {% endfor %}
+
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{% url 'employee_summary_report' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Back</button>
+                        </a>
+                        <a href="{{ request.get_full_path }}">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">
+                                Refresh
+                            </button>
+                        </a>
+                        <a target="_blank" href="{% url 'employee_ledger_manage_pdf' %}?type={{ request.GET.type|default_if_none:'' }}&employee_name={{ request.GET.employee_name|default_if_none:'' }}&transaction={{ request.GET.transaction|default_if_none:'all' }}&from_date={{ request.GET.from_date|default_if_none:'' }}&to_date={{ request.GET.to_date|default_if_none:'' }}">
+							<button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">
+								View Report
+							</button>
+						</a>
+                         
+                    </div>
+            
+                   <div class="intro-y col-span-12 overflow-auto lg:overflow-visible mt-5">
+					 <table class="table-auto w-full border border-gray-300 text-sm">
+						 {% if month_from_ledger %}
+						  <h2 class="text-lg font-bold mb-4">Employee Ledger Report — {{ month_from_ledger }}</h2>
+						{% else %}
+						  <h2 class="text-lg font-bold mb-4">Employee Ledger Report</h2>
+						{% endif %}
+
+						<table class="table-auto w-full border border-gray-300 text-sm">
+						  <thead class="bg-gray-100 text-gray-700 font-semibold">
+							<tr>
+							  <th class="border px-4 py-2 text-left">Employee</th>
+							  <th class="border px-4 py-2 text-right">Advance</th>
+							  <th class="border px-4 py-2 text-right">Allowance</th>
+							  <th class="border px-4 py-2 text-right">Total Received</th>
+							  <th class="border px-4 py-2 text-right">Salary</th>
+							  <th class="border px-4 py-2 text-right">Ledger (Debit)</th>
+							  <th class="border px-4 py-2 text-right">Balance (Salary - Ledger)</th>
+							</tr>
+						  </thead>
+						  <tbody>
+							{% for row in report_data %}
+							<tr class="hover:bg-gray-50 {% cycle 'bg-white' 'bg-gray-50' %}">
+							  <td class="border px-4 py-2">{{ row.employee.employee_name }}</td>
+							  <td class="border px-4 py-2 text-right">{{ row.advance_total|floatformat:2 }}</td>
+							  <td class="border px-4 py-2 text-right">{{ row.allowance_total|floatformat:2 }}</td>
+							  <td class="border px-4 py-2 text-right">{{ row.total_received|floatformat:2 }}</td>
+							  <td class="border px-4 py-2 text-right">{{ row.salary|floatformat:2 }}</td>
+							  <td class="border px-4 py-2 text-right">{{ row.ledger_total|floatformat:2 }}</td>
+							  <td class="border px-4 py-2 text-right font-semibold {% if row.balance < 0 %}text-red-600{% else %}text-green-700{% endif %}">
+								{{ row.balance|floatformat:2 }}
+							  </td>
+							</tr>
+							{% endfor %}
+						  </tbody>
+						</table>
+
+					</div>
+
+                    </div>
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

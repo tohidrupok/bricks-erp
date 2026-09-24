@@ -1,0 +1,6 @@
+<form method="POST">
+    {% csrf_token %}
+    <label for="folder_name">Folder Name</label>
+    <input type="text" id="folder_name" name="folder_name" required>
+    <button type="submit">Create Folder</button>
+</form>

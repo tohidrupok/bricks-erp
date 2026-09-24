@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Item - The Galleria Restaurant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-yellow-100 min-h-screen flex justify-center items-start p-6">
+
+<div class="bg-white w-[600px] border-2 border-yellow-600 shadow-lg p-6">
+
+  <div class="bg-yellow-600 text-white px-4 py-2 font-bold text-lg mb-4">
+    Add New Restaurant Item
+  </div>
+
+  {% if messages %}
+    <div class="mb-4">
+      {% for message in messages %}
+        <div class="p-2 {{ message.tags }} border rounded">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="POST" class="space-y-3">
+    {% csrf_token %}
+
+    <div class="flex items-center gap-2">
+        <label class="w-32">Category</label>
+        {{ form.category }}
+    </div>
+
+    <div class="flex items-center gap-2">
+        <label class="w-32">Item</label>
+        {{ form.item_name }}
+    </div>
+
+    <div class="flex items-center gap-2">
+        <label class="w-32">Opening Stock</label>
+        {{ form.opening_stock }}
+    </div>
+    <div class="flex items-center gap-2">
+        <label class="w-32">Purchase Price</label>
+        {{ form.purchase_price }}
+    </div>
+    <div class="flex items-center gap-2">
+        <label class="w-32">Selling Price</label>
+        {{ form.selling_price }}
+    </div>
+    <div class="flex items-center gap-2">
+        <label class="w-32">Re-Order Warning</label>
+        {{ form.reorder_warning }}
+    </div>
+    <div class="flex items-center gap-2">
+        <label class="w-32">Re-Order Size</label>
+        {{ form.reorder_size }}
+    </div>
+    <div class="flex items-center gap-2">
+        <label class="w-32">Unit</label>
+        {{ form.unit }}
+    </div>
+
+    <div class="flex gap-4 mt-4">
+      <button type="submit" class="bg-green-500 text-white px-6 py-1 border">Save</button>
+      <a href="{% url 'restaurant_item_amount_list' %}" class="bg-gray-500 text-white px-6 py-1 border">Cancel</a>
+    </div>
+
+  </form>
+</div>
+
+<script>
+const categorySelect = document.getElementById('id_category');
+const itemSelect = document.getElementById('id_item_name');
+
+categorySelect.addEventListener('change', function() {
+    const categoryId = this.value;
+    fetch(`/dashboard/restaurant-item-amount/load-items/?category=${categoryId}`)
+        .then(res => res.json())
+        .then(data => {
+            itemSelect.innerHTML = '';
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.text = item.name;
+                itemSelect.appendChild(option);
+            });
+        });
+});
+</script>
+
+</body>
+</html>

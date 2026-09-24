@@ -1,0 +1,499 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Entry - POS System</title>
+    <style>
+        :root {
+            --primary-gold: #b89230;
+            --primary-gold-dark: #967423;
+            --primary-blue: #0d6efd;
+            --bg-canvas: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-dark: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-canvas); color: var(--text-dark); line-height: 1.5; padding-bottom: 80px; }
+
+        .top-header { max-width: 1350px; margin: 15px auto 0; background: var(--card-bg); padding: 15px 20px; border-radius: 12px; box-shadow: var(--shadow-sm); }
+        .header-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .page-title { margin: 0; color: var(--primary-gold); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+        .page-subtitle { margin-top: 2px; color: var(--text-muted); font-size: 13px; }
+
+        .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+        .nav-btn { text-decoration: none; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; transition: all 0.2s ease; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+        .nav-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .home-btn { background: #0d6efd; }
+        .expense-btn { background: #6c757d; }
+        .supplier-btn { background: #198754; }
+        .category-btn { background: #fd7e14; }
+        .req-btn { background: #6f42c1; }
+        .refresh-btn { background: #4b5563; }
+
+        .pos-container { display: flex; flex-wrap: wrap; max-width: 1350px; margin: 15px auto; gap: 15px; padding: 0; }
+        .left-panel { width: 300px; display: flex; flex-direction: column; gap: 15px; }
+
+        .logo-box { background: var(--card-bg); border: 1px solid var(--border-color); height: 160px; display: flex; align-items: center; justify-content: center; border-radius: 10px; box-shadow: var(--shadow-sm); }
+        .logo-box svg { filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.05)); }
+
+        .stats-card { background: linear-gradient(135deg, var(--primary-gold) 0%, var(--primary-gold-dark) 100%); border-radius: 10px; padding: 18px; color: #ffffff; box-shadow: var(--shadow-md); }
+        .stats-card-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 6px; }
+
+        .stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .stat-row:last-child { margin-bottom: 0; }
+        .stat-row span { font-size: 13px; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .stat-input { width: 110px; text-align: right; font-weight: 700; padding: 6px 8px; border: none; border-radius: 6px; background: rgba(255, 255, 255, 0.95); color: var(--text-dark); font-size: 13px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
+
+        .main-panel { flex: 1; min-width: 600px; display: flex; flex-direction: column; gap: 15px; }
+        .card-panel { background: var(--card-bg); border: 1px solid var(--border-color); padding: 18px; border-radius: 10px; box-shadow: var(--shadow-sm); }
+
+        .form-row { display: flex; align-items: center; margin-bottom: 12px; gap: 12px; }
+        .form-row:last-child { margin-bottom: 0; }
+        .form-label { width: 110px; font-size: 13px; font-weight: 600; color: #374151; }
+        .form-control { flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13.5px; color: var(--text-dark); background-color: #fff; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+        .form-control:focus { outline: none; border-color: var(--primary-gold); box-shadow: 0 0 0 3px rgba(184, 146, 48, 0.15); }
+
+        .grid-split { display: grid; grid-template-columns: 310px 1fr; gap: 15px; }
+        .item-select-box { background: #f9fafb; border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; }
+        .btn-add { background: var(--primary-gold); border: none; color: #ffffff; font-weight: 700; padding: 10px; width: 100%; margin-top: 15px; cursor: pointer; border-radius: 6px; font-size: 13.5px; transition: all 0.2s ease; box-shadow: var(--shadow-sm); }
+        .btn-add:hover { background: var(--primary-gold-dark); transform: translateY(-1px); }
+
+        .basket-box { background: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; min-height: 250px; display: flex; flex-direction: column; justify-content: space-between; }
+        .pos-table-container { overflow-x: auto; flex: 1; }
+        .pos-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .pos-table th { background: #f3f4f6; color: #374151; font-weight: 600; border-bottom: 2px solid var(--border-color); padding: 8px 10px; text-align: left; }
+        .pos-table td { border-bottom: 1px solid var(--border-color); padding: 8px 10px; color: var(--text-dark); }
+        .pos-table tbody tr:hover { background-color: #f9fafb; }
+
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .delete-btn { color: #ef4444; font-weight: bold; cursor: pointer; border: none; background: none; font-size: 15px; padding: 2px 6px; border-radius: 4px; transition: background 0.15s; }
+        .delete-btn:hover { background: #fee2e2; }
+
+        .cart-summary-text { text-align: right; padding: 12px 10px 4px; font-size: 15px; font-weight: 700; color: var(--text-dark); border-top: 1px dashed var(--border-color); margin-top: 8px; }
+        .cart-summary-text span { color: var(--primary-gold-dark); }
+
+        .invoice-card { display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid var(--border-color); padding: 14px 18px; border-radius: 10px; box-shadow: var(--shadow-sm); }
+        .invoice-no-box { font-size: 14px; color: #4b5563; }
+        .invoice-no-box strong { color: var(--text-dark); }
+        .grand-total-badge { font-size: 16px; font-weight: 700; background: var(--primary-gold); color: #ffffff; padding: 8px 18px; border-radius: 6px; box-shadow: var(--shadow-sm); }
+
+        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #ffffff; border-top: 1px solid var(--border-color); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); z-index: 100; }
+        .bottom-bar-inner { max-width: 1350px; width: 100%; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+
+        .bottom-btn { padding: 8px 20px; font-size: 13.5px; font-weight: 600; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; background: #ffffff; color: #374151; margin-left: 8px; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 5px; }
+        .bottom-btn:hover { background: #f9fafb; border-color: #9ca3af; transform: translateY(-1px); }
+        .btn-save { background: var(--primary-gold); color: #ffffff; border-color: var(--primary-gold); }
+        .btn-save:hover { background: var(--primary-gold-dark); border-color: var(--primary-gold-dark); color: #ffffff; }
+
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+        .toast { padding: 12px 20px; color: #fff; border-radius: 6px; margin-bottom: 10px; font-weight: 600; font-size: 13.5px; box-shadow: var(--shadow-lg); animation: slideIn 0.3s ease forwards; }
+        .toast-success { background: #10b981; border-left: 5px solid #047857; }
+        .toast-error { background: #ef4444; border-left: 5px solid #b91c1c; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<!-- Navigation Header -->
+<div class="top-header">
+    <div class="header-row">
+        <div>
+            <h2 class="page-title">🛒 Purchase / Bazar POS Entry</h2>
+            <div class="page-subtitle">The Galleria Restaurant & Cafe</div>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'public_restaurant_home' %}" class="nav-btn home-btn">🏠 Home</a>
+            <a href="{% url 'restaurant_expense_purchase_history' %}" class="nav-btn expense-btn">📦 History</a>
+            <a href="{% url 'restaurant_expense_public_list' %}" class="nav-btn category-btn">💰 Expense</a>
+            <a href="{% url 'public_restaurant_supplier_list' %}" class="nav-btn supplier-btn">🏢 Supplier</a>
+            <a href="{% url 'public_restaurant_item_name' %}" class="nav-btn req-btn">📦 Item List</a>
+            <a href="javascript:void(0)" onclick="window.location.reload()" class="nav-btn refresh-btn">🔄 Refresh</a>
+        </div>
+    </div>
+</div>
+
+<div class="pos-container">
+    <!-- Left Dashboard Stats -->
+    <div class="left-panel">
+        <div class="logo-box">
+            <svg width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="#b89230" stroke-width="1.5">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+        </div>
+        <div class="stats-card">
+            <div class="stats-card-title">Live Summary</div>
+            <div class="stat-row">
+                <span>Account Balance</span>
+                <input type="text" class="stat-input" value="0.00" readonly>
+            </div>
+            <div class="stat-row">
+                <span>Total Items</span>
+                <input type="text" class="stat-input" id="totalItemsCount" value="0" readonly>
+            </div>
+            <div class="stat-row">
+                <span>Total Bill</span>
+                <input type="text" class="stat-input" id="widgetTotalBill" value="0.00" readonly>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Workspace -->
+    <div class="main-panel">
+        <div class="card-panel">
+            <div class="form-row">
+                <label for="purchaseDate" class="form-label">Date</label>
+                <!-- Fixed ID from purchaseDates to purchaseDate to align with JS payload extraction -->
+                <input type="date" id="purchaseDate" class="form-control" style="max-width: 220px;">
+            </div>
+            
+            <div class="form-row">
+                <span class="form-label">Supplier</span>
+                <select id="supplierSelect" class="form-control">
+                    <option value="">-- Select Supplier / Vendor --</option>
+                    {% for supplier in suppliers %}
+                        <option value="{{ supplier.rest_supplier_name }}">{{ supplier.rest_supplier_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-row">
+                <span class="form-label">Project Name</span>
+                <select id="projectSelect" class="form-control" onchange="handleProjectChange()">
+                    <option value="">-- Select Project Name --</option>
+                    {% for project in projects_firts %}
+                        <option value="{{ project.id }}">{{ project.project_first_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Auto-mapped Employee Selection Field -->
+            <div class="form-row">
+                <span class="form-label">Employee</span>
+                <select id="employeeSelect" class="form-control">
+                    <option value="">-- Auto Mapped Employee --</option>
+                    {% for emp in employees %}
+                        <option value="{{ emp.id }}">{{ emp.rda_emp_name }} (ID: {{ emp.id }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Cart & Entry Grid -->
+        <div class="grid-split">
+            <div class="item-select-box">
+                <!-- Alphabet Quick Filter Bar -->
+                <div class="alphabet-filter-bar mb-2" style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px;">
+                    <button type="button" class="btn btn-sm btn-outline-secondary active" onclick="filterItemsByLetter('ALL')">ALL</button>
+                    {% for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="filterItemsByLetter('{{ char }}')">{{ char }}</button>
+                    {% endfor %}
+                </div>
+
+                <div class="form-row">
+                    <span class="form-label" style="width: 85px;">Item Name</span>
+                    <select id="itemSelect" class="form-control" onchange="autoPopulateItemDetails()">
+                        <option value="">Select Item Name</option>
+                        {% for item in items %}
+                            <option value="{{ item.id }}" 
+                                    data-name="{{ item.rest_item_name }}" 
+                                    data-rate="{{ item.cost_price|default:0 }}"
+                                    data-unit="{{ item.rest_unit_type|default:'' }}">
+                                {{ item.rest_item_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-row">
+                    <span class="form-label" style="width: 85px;">Quantity</span>
+                    <input type="number" id="itemQty" class="form-control" value="1" step="0.01" oninput="calculateEntryAmount()">
+                </div>
+                
+                <!-- Rate & Mode Toggle (Unit / Whole) -->
+                <div class="form-row align-items-center">
+                    <span class="form-label" style="width: 85px;">Rate</span>
+                    <input type="number" id="itemRate" class="form-control" value="0.00" step="0.01" oninput="calculateEntryAmount()" required style="flex: 1;width:100px">
+                    
+                    <div class="calc-mode-group" style="margin-left: 5px; display: flex; gap: 8px; font-weight: 400;">
+                        <label style="cursor: pointer;">
+                            <input type="radio" name="calc_mode" value="unit" checked onchange="calculateEntryAmount()"> Unit
+                        </label>
+                        <label style="cursor: pointer;">
+                            <input type="radio" name="calc_mode" value="whole" onchange="calculateEntryAmount()"> Whole
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <span class="form-label" style="width: 85px;">Amount</span>
+                    <input type="number" id="itemAmount" class="form-control" value="0.00" readonly style="background-color: #e5e7eb; font-weight: 600;">
+                </div>
+
+                <button type="button" class="btn-add" onclick="addItemToBasket()">Add Item ➕</button>
+            </div>
+
+            <div class="basket-box">
+                <div class="pos-table-container">
+                    <table class="pos-table">
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th style="width: 60px;" class="text-center">Mode</th>
+                                <th style="width: 60px;" class="text-right">Qty</th>
+                                <th style="width: 75px;" class="text-right">Rate</th>
+                                <th style="width: 85px;" class="text-right">Amount</th>
+                                <th style="width: 40px;" class="text-center">✕</th>
+                            </tr>
+                        </thead>
+                        <tbody id="basketBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="cart-summary-text">
+                    Total: TK <span id="cartTotalDisplay">0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="invoice-card">
+            <div class="invoice-no-box">
+                Invoice No: <strong><span id="invoiceNo">{{ auto_invoice_no|default:"Auto Generated" }}</span></strong>
+            </div>
+            <div class="grand-total-badge">
+                Total Bill: TK <span id="grandTotalBill">0.00</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-bar">
+    <div class="bottom-bar-inner">
+        <div>
+            <a href="{% url 'public_restaurant_home' %}" class="bottom-btn" style="text-decoration: none;">← Back to List</a>
+        </div>
+        <div>
+            <button type="button" class="bottom-btn btn-save" onclick="submitPurchasePOS()">💾 Save</button>
+            <button type="button" class="bottom-btn" onclick="resetForm()">🔄 Refresh</button>
+            <button type="button" class="bottom-btn" onclick="window.location.reload()">❌ Exit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let cart = [];
+
+// Set default date to today on load
+document.addEventListener("DOMContentLoaded", () => {
+    const today = new Date().toISOString().split('T')[0];
+    const dateField = document.getElementById('purchaseDate');
+    if (dateField && !dateField.value) {
+        dateField.value = today;
+    }
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function handleProjectChange() {
+    const projectId = document.getElementById('projectSelect').value;
+    const employeeSelect = document.getElementById('employeeSelect');
+
+    if (projectId === "36") {
+        employeeSelect.value = "24";
+    } else if (projectId === "60") {
+        employeeSelect.value = "54";
+    } else {
+        employeeSelect.value = "";
+    }
+}
+
+function filterItemsByLetter(letter) {
+    const select = document.getElementById('itemSelect');
+    const options = select.options;
+
+    for (let i = 1; i < options.length; i++) {
+        const itemName = options[i].getAttribute('data-name') || options[i].text;
+        if (letter === 'ALL' || itemName.trim().toUpperCase().startsWith(letter)) {
+            options[i].style.display = "";
+        } else {
+            options[i].style.display = "none";
+        }
+    }
+    select.selectedIndex = 0;
+    autoPopulateItemDetails();
+}
+
+function autoPopulateItemDetails() {
+    const itemSelect = document.getElementById('itemSelect');
+    const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+    
+    if (selectedOption && selectedOption.value) {
+        const rate = parseFloat(selectedOption.getAttribute('data-rate')) || 0;
+        document.getElementById('itemRate').value = rate.toFixed(2);
+    } else {
+        document.getElementById('itemRate').value = "0.00";
+    }
+    calculateEntryAmount();
+}
+
+function calculateEntryAmount() {
+    const qty = parseFloat(document.getElementById('itemQty').value) || 0;
+    const rate = parseFloat(document.getElementById('itemRate').value) || 0;
+    const calcMode = document.querySelector('input[name="calc_mode"]:checked').value;
+
+    let amount = 0.00;
+    if (calcMode === 'unit') {
+        amount = qty * rate;
+    } else {
+        amount = rate; 
+    }
+
+    document.getElementById('itemAmount').value = amount.toFixed(2);
+}
+
+function addItemToBasket() {
+    const itemSelect = document.getElementById('itemSelect');
+    const itemId = itemSelect.value;
+    const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+    
+    if (!itemId) {
+        alert("Please select an item name to add.");
+        return;
+    }
+
+    const itemName = selectedOption.getAttribute('data-name');
+    const unit = selectedOption.getAttribute('data-unit') || '';
+    const qty = parseFloat(document.getElementById('itemQty').value) || 0;
+    const rate = parseFloat(document.getElementById('itemRate').value) || 0;
+    const calcMode = document.querySelector('input[name="calc_mode"]:checked').value;
+    
+    let amount = (calcMode === 'unit') ? (qty * rate) : rate;
+
+    if (qty <= 0) {
+        alert("Quantity must be greater than zero.");
+        return;
+    }
+
+    cart.push({
+        item_id: itemId,
+        item_name: itemName,
+        unit: unit,
+        qty: qty,
+        rate: rate,
+        calc_mode: calcMode,
+        amount: amount
+    });
+
+    renderBasket();
+    resetEntryFields();
+}
+
+function renderBasket() {
+    const tbody = document.getElementById('basketBody');
+    tbody.innerHTML = '';
+    let totalBill = 0;
+
+    cart.forEach((item, index) => {
+        totalBill += item.amount;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.item_name}</td>
+            <td class="text-center"><span class="badge ${item.calc_mode === 'unit' ? 'bg-info' : 'bg-warning'}">${item.calc_mode}</span></td>
+            <td class="text-right">${item.qty}</td>
+            <td class="text-right">${item.rate.toFixed(2)}</td>
+            <td class="text-right">${item.amount.toFixed(2)}</td>
+            <td class="text-center"><button type="button" class="btn btn-sm btn-danger p-0 px-1" onclick="removeItem(${index})">✕</button></td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    document.getElementById('cartTotalDisplay').innerText = totalBill.toFixed(2);
+    document.getElementById('grandTotalBill').innerText = totalBill.toFixed(2);
+    document.getElementById('widgetTotalBill').value = totalBill.toFixed(2);
+    document.getElementById('totalItemsCount').value = cart.length;
+}
+
+function removeItem(index) {
+    cart.splice(index, 1);
+    renderBasket();
+}
+
+function resetEntryFields() {
+    document.getElementById('itemSelect').selectedIndex = 0;
+    document.getElementById('itemQty').value = "1";
+    document.getElementById('itemRate').value = "0.00";
+    document.getElementById('itemAmount').value = "0.00";
+    document.querySelector('input[name="calc_mode"][value="unit"]').checked = true;
+}
+
+function resetForm() {
+    cart = [];
+    renderBasket();
+    resetEntryFields();
+}
+
+function submitPurchasePOS() {
+    if (cart.length === 0) {
+        alert("Basket is empty!");
+        return;
+    }
+
+    const payload = {
+        items: cart,
+        supplier_name: document.getElementById('supplierSelect').value,
+        project_id: document.getElementById('projectSelect').value,
+        employee_id: document.getElementById('employeeSelect').value,
+        req_date: document.getElementById('purchaseDate').value
+    };
+
+    fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert(data.message);
+            resetForm();
+        } else {
+            alert(data.message || 'Error occurred.');
+        }
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        alert('An unexpected error occurred during submission.');
+    });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,361 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Employee Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+            <h2 class="intro-y mt-10 text-lg font-medium">Add New Employee</h2>
+            <div class="mt-5 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                    <form method="POST" enctype="multipart/form-data" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                        {% csrf_token %}
+
+                        <!-- Visible Employee inputs -->
+                        <div class="mb-4">
+                            <label for="id_emp_name" class="font-medium text-lg">User Name</label>
+                            <input type="text" name="emp_name" id="id_emp_name" placeholder="Enter User Name" required value="{{ form.initial.username|default:'' }}"
+                                class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" />
+                            {% if form.emp_name.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.emp_name.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_employee_name" class="font-medium text-lg">Full Name</label>
+                            <input type="text" name="employee_name" id="id_employee_name" placeholder="Enter Full Name" required value="{{ form.initial.first_name|default:'' }}"
+                                class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" />
+                            {% if form.employee_name.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.employee_name.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <!-- Hidden inputs for required fields -->
+                        <input type="hidden" name="username" id="id_username" />
+                        <input type="hidden" name="first_name" id="id_first_name" />
+
+                        <script>
+                        document.querySelector('form').addEventListener('submit', function() {
+                            document.getElementById('id_username').value = document.getElementById('id_emp_name').value;
+                            document.getElementById('id_first_name').value = document.getElementById('id_employee_name').value;
+                        });
+                        </script>
+
+                        <!-- Employee Type -->
+                        <div class="mb-4">
+                            <label for="id_emp_type" class="font-medium text-lg">Employee Type</label>
+                            <select name="emp_type" id="id_emp_type"
+                                class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary">
+                                <option value="">Select Type</option>
+                                <option value="employee" {% if form.emp_type.value == "employee" %}selected{% endif %}>Employee</option>
+                                <option value="accounts" {% if form.emp_type.value == "accounts" %}selected{% endif %}>Accounts</option>
+                                <option value="purchase" {% if form.emp_type.value == "Purchase" %}selected{% endif %}>Purchase</option>
+                                <option value="hrm" {% if form.emp_type.value == "hrm" %}selected{% endif %}>HRM</option>
+                                <option value="tenant" {% if form.emp_type.value == "tenant" %}selected{% endif %}>Tenant</option>
+                                <option value="admin" {% if form.emp_type.value == "admin" %}selected{% endif %}>Admin</option>
+                                <option value="restaurant" {% if form.emp_type.value == "restaurant" %}selected{% endif %}>Restaurant</option>
+                            </select>
+                            {% if form.emp_type.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.emp_type.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                        <!-- Phone -->
+                        <div class="mb-4">
+                            <label for="id_phone" class="font-medium text-lg">Phone</label>
+                            <input type="text" name="phone" id="id_phone"
+                                value="{{ form.phone.value|default_if_none:'' }}"
+                                placeholder="e.g. +8801XXXXXXXXX, 017XXXXXXXX, 8801XXXXXXXXX"
+                                class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" />
+                            
+                            {% if form.phone.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.phone.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                        <div class="mb-4">
+                                <label for="id_project" class="font-medium text-lg text-gray-800">Project Name</label>
+                                <select id="id_project" name="project_name"
+                                        class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                    {% for choice in form.project_name.field.choices %}
+                                        <option value="{{ choice.0 }}" {% if choice.0 == form.project_name.value %}selected{% endif %}>{{ choice.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% for error in form.project_name.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>  
+						<!-- Salary -->
+                        <div class="mb-4">
+                            <label for="id_salary" class="font-medium text-lg">Salary</label>
+                            <input type="text" name="salary" id="id_salary"  placeholder="Enter Salary" value="{{ form.salary.value|default_if_none:'' }}"
+                                class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" />
+                            {% if form.salary.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.salary.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>						
+                        <!-- Email -->
+                        <div class="mb-4">
+                            <label for="id_email" class="font-medium text-lg">Email</label>
+                            <input type="email" name="email" id="id_email" placeholder="Enter Email Address" value="{{ form.initial.email|default:'' }}"
+                                class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" required />
+                            {% if form.email.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.email.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <!-- NID -->
+                        <div class="mb-4">
+                            <label for="id_nid" class="font-medium text-lg">NID</label>
+                            <input type="text" name="nid" id="id_nid" placeholder="Enter NID Number" value="{{ form.nid.value|default_if_none:'' }}"
+                                class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" />
+                            {% if form.nid.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.nid.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <!-- Position -->
+                        <div class="mb-4">
+                            <label for="id_position" class="font-medium text-lg">Position</label>
+                            <input type="text" name="position" id="id_position" placeholder="Enter Position" value="{{ form.position.value|default_if_none:'' }}"
+                                class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" required />
+                            {% if form.position.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.position.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>                      
+
+                        <!-- Address -->
+                        <div class="mb-4">
+                            <label for="id_address" class="font-medium text-lg">Address</label>
+                            <textarea name="address" id="id_address" placeholder="Enter Address" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary">{{ form.address.value|default_if_none:'' }}</textarea>
+                            {% if form.address.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.address.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                       <!-- Active Status -->
+                        <div class="mb-4 flex items-center">
+                            <input type="checkbox" name="is_active" id="id_is_active" {% if form.is_active.value %}checked{% endif %}
+                                class="mr-2 h-5 w-5 text-primary border-slate-300 focus:ring-primary" />
+                            <label for="id_is_active" class="font-medium text-lg">Active</label>
+                            {% if form.is_active.errors %}
+                                <ul class="text-red-600 mt-1 ml-2">
+                                    {% for error in form.is_active.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+
+                        <!-- Photo -->
+                        <div class="mb-4">
+                            <label for="id_photo" class="font-medium text-lg">Photo</label>
+                            <input type="file" name="photo" id="id_photo"
+                                class="w-full text-sm border-slate-200 shadow-sm rounded-md focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary" />
+                            {% if form.photo.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.photo.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <!-- Staff Status -->
+                        <div class="mb-4 flex items-center">
+                            <input type="checkbox" name="is_staff" id="id_is_staff" {% if form.is_staff.value %}checked{% endif %}
+                                class="mr-2 h-5 w-5 text-primary border-slate-300 focus:ring-primary" required />
+                            <label for="id_is_staff" class="font-medium text-lg">Staff Status</label>
+                            {% if form.is_staff.errors %}
+                                <ul class="text-red-600 mt-1 ml-2">
+                                    {% for error in form.is_staff.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <!-- Superuser Status -->
+                        <div class="mb-4 flex items-center">
+                            <input type="checkbox" name="is_superuser" id="id_is_superuser" {% if form.is_superuser.value %}checked{% endif %}
+                                class="mr-2 h-5 w-5 text-primary border-slate-300 focus:ring-primary" required />
+                            <label for="id_is_superuser" class="font-medium text-lg">Superuser Status</label>
+                            {% if form.is_superuser.errors %}
+                                <ul class="text-red-600 mt-1 ml-2">
+                                    {% for error in form.is_superuser.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                       <!-- Group Selection -->
+                <div class="mb-4">
+                    <label class="font-medium text-lg block mb-1">Select Groups <span class="text-red-600">*</span></label>
+                    <div class="space-y-2" id="group-checkboxes">
+                        {% for group in form.groups.field.queryset %}
+                            <label class="block">
+                                <input type="checkbox" class="group-checkbox mr-2" name="group_checkbox"
+                                    value="{{ group.id }}"
+                                    data-permissions='[
+                                        {% for perm in group.permissions.all %}
+                                            "{{ perm.id }}"{% if not forloop.last %},{% endif %}
+                                        {% endfor %}
+                                    ]'>
+                                {{ group.name }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                    <p id="group-error" class="text-red-600 mt-1 hidden">At least one group must be selected.</p>
+                </div>
+
+                <!-- Hidden Multi-select for groups -->
+                <select name="groups" id="id_groups" multiple hidden>
+                    {% for group in form.groups.field.queryset %}
+                        <option value="{{ group.id }}" {% if group.id|stringformat:"s" in form.groups.value %}selected{% endif %}></option>
+                    {% endfor %}
+                </select>
+
+                <!-- User Permissions -->
+                <div class="mb-6">
+                    <label class="font-medium text-lg mb-2 block">User Permissions</label>
+                    {% regroup form.user_permissions.field.queryset by content_type.app_label as permission_groups %}
+                    {% for group in permission_groups %}
+                        <div class="mb-2 font-semibold">{{ group.grouper|capfirst }}</div>
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                        {% for perm in group.list %}
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="user_permissions" id="perm-{{ perm.id }}" value="{{ perm.id }}"
+                                    {% if perm in form.user_permissions.value %}checked{% endif %}
+                                    class="mr-2 permission-checkbox">
+                                {{ perm.name }}
+                            </label>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Password Fields -->
+                <div class="mb-4">
+                    <label for="id_password1" class="font-medium text-lg block mb-1">Password</label>
+                    <input type="password" name="password1" id="id_password1" class="w-full ..." required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="id_password2" class="font-medium text-lg block mb-1">Confirm Password</label>
+                    <input type="password" name="password2" id="id_password2" class="w-full ..." required>
+                </div>
+
+                <!-- JavaScript for group-permission sync and validation -->
+                <script>
+                    const groupCheckboxes = document.querySelectorAll('.group-checkbox');
+                    const groupSelect = document.getElementById('id_groups');
+                    const form = document.querySelector('form');
+                    const groupError = document.getElementById('group-error');
+
+                    // Sync group checkboxes with hidden select and permissions
+                    groupCheckboxes.forEach(checkbox => {
+                        checkbox.addEventListener('change', () => {
+                            const groupId = checkbox.value;
+                            const permissions = JSON.parse(checkbox.dataset.permissions);
+
+                            // Update hidden select
+                            for (const option of groupSelect.options) {
+                                if (option.value === groupId) {
+                                    option.selected = checkbox.checked;
+                                    break;
+                                }
+                            }
+
+                            // Toggle permission checkboxes
+                            permissions.forEach(permId => {
+                                const permCheckbox = document.getElementById(`perm-${permId}`);
+                                if (permCheckbox) {
+                                    if (checkbox.checked) {
+                                        permCheckbox.checked = true;
+                                    } else {
+                                        permCheckbox.checked = false;
+                                    }
+                                }
+                            });
+                        });
+                    });
+
+                    // Form submission validation for group check
+                    form.addEventListener('submit', (e) => {
+                        const atLeastOneChecked = Array.from(groupCheckboxes).some(cb => cb.checked);
+                        if (!atLeastOneChecked) {
+                            e.preventDefault();
+                            groupError.classList.remove('hidden');
+                        } else {
+                            groupError.classList.add('hidden');
+                        }
+                    });
+                </script>
+
+
+                <!-- Submit Button -->
+                <button type="submit"
+                    class="btn btn-primary px-5 py-2 rounded-md bg-primary text-white hover:bg-primary-dark transition duration-150">
+                    Save Employee
+                </button>
+            </form>
+        </div>
+    </div>
+
+                </div>
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

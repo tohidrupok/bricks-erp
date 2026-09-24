@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Product List - The Galleria Restaurant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-yellow-100 min-h-screen flex justify-center items-start p-6">
+
+<div class="bg-white w-[950px] border-2 border-yellow-600 shadow-lg">
+
+  <!-- Header -->
+  <div class="bg-yellow-600 text-white px-4 py-2 font-bold text-lg">
+    The Galleria Restaurant _cafe
+  </div>
+  <div class="text-yellow-600 font-semibold px-4 py-1 border-b border-gray-400">
+    Item Name Add - Sales Amount Update
+  </div>
+
+  <!-- Form + Table -->
+  <form method="POST" class="p-4 grid grid-cols-2 gap-6 text-sm items-start">
+    {% csrf_token %}
+
+    <!-- LEFT FORM -->
+    <div class="space-y-2">
+
+      <!-- Category Filter -->
+      <div class="flex items-center gap-2">
+        <label class="w-32">Category</label>
+        <div class="flex-1">
+          <select name="category" class="w-full border rounded px-2 py-1">
+            {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if selected_category == cat.id %}selected{% endif %}>
+              {{ cat.restu_category_name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="bg-gray-200 px-3 py-1 border border-gray-400">
+          Item Search
+        </button>
+      </div>
+
+      <!-- Item Select -->
+      <div class="flex items-center gap-2">
+        <label class="w-32">Item</label>
+        <div class="flex-1">
+          <select id="item_select" name="item_name" class="w-full border rounded px-2 py-1">
+            <option value="">-- Select Item --</option>
+            {% for obj in items %}
+            <option value="{{ obj.item_name.id }}">{{ obj.item_name.rest_item_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- Other fields -->
+      <div class="flex items-center gap-2">
+        <label class="w-32">Item Code</label>
+        <input type="text" id="id_item_code" name="item_code" class="flex-1 border px-2 py-1">
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="w-32">Opening Stock</label>
+        <input type="number" id="id_opening_stock" name="opening_stock" class="flex-1 border px-2 py-1">
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="w-32">Pur Price/Costing</label>
+        <input type="text" id="id_purchase_price" name="purchase_price" class="flex-1 border px-2 py-1">
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="w-32">Selling Price</label>
+        <input type="text" id="id_selling_price" name="selling_price" class="flex-1 border px-2 py-1">
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="w-32">Re-Order Warning</label>
+        <input type="number" id="id_reorder_warning" name="reorder_warning" class="flex-1 border px-2 py-1">
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="w-32">Re-Order Size</label>
+        <input type="number" id="id_reorder_size" name="reorder_size" class="flex-1 border px-2 py-1">
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="w-32">Unit</label>
+        <input type="text" id="id_unit" name="unit" class="flex-1 border px-2 py-1" value="PRCE">
+      </div>
+    </div>
+
+    <!-- RIGHT TABLE + ACTIONS -->
+    <div class="space-y-2">
+
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-10">Unit</label>
+        {{ form.unit }}
+
+        <!-- Add -->
+        <!-- <button type="submit" class="bg-blue-500 text-white px-6 py-1 border">Add</button> -->
+         <a href="{% url 'restaurant_item_amount_add' %}" 
+          class="bg-blue-500 text-white px-6 py-1 border inline-block text-center">
+            Add
+        </a>
+
+        <!-- Refresh -->
+        <a href="{% url 'restaurant_item_amount_list' %}" 
+           class="bg-gray-400 text-white px-6 py-1 border inline-block text-center">
+           Refresh
+        </a>
+
+        <!-- Delete -->
+        <button type="button" id="deleteBtn" class="bg-red-500 text-white px-6 py-1 border">Delete</button>
+      </div>
+
+      <div class="border h-[300px] overflow-y-auto">
+        <table id="itemsTable" class="w-full text-sm border-collapse">
+          <thead class="bg-gray-200 sticky top-0">
+            <tr>
+              <th class="border px-2 py-1 w-8">#</th>
+              <th class="border px-2 py-1">Select</th>
+              <th class="border px-2 py-1">Item Name</th>
+              <th class="border px-2 py-1">Item Code</th>
+              <th class="border px-2 py-1">Unit</th>
+              <th class="border px-2 py-1">Selling Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for obj in items %}
+            <tr class="hover:bg-yellow-50" data-item-id="{{ obj.item_name.id }}">
+              <td class="border px-2 py-1">{{ forloop.counter }}</td>
+              <td class="border px-2 py-1 text-center">
+                <input type="checkbox" class="rowCheckbox" value="{{ obj.id }}">
+              </td>
+              <td class="border px-2 py-1">{{ obj.item_name.rest_item_name }}</td>
+              <td class="border px-2 py-1">{{ obj.item_code }}</td>
+              <td class="border px-2 py-1">{{ obj.unit }}</td>
+              <td class="border px-2 py-1">{{ obj.selling_price }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="text-center py-2">No items found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FOOTER BUTTONS -->
+    <div class="col-span-2 flex justify-center gap-4 py-3 border-t border-yellow-600 mt-2">
+      <button type="submit" class="bg-green-500 text-white px-6 py-1 border">Save</button>
+      <a href="{% url 'home' %}" class="bg-black text-white px-6 py-1 border">Exit</a>
+    </div>
+
+  </form>
+</div>
+
+<script>
+// Filtering: show only selected item in the table
+document.getElementById('item_select').addEventListener('change', function() {
+  let selectedId = this.value;
+  let rows = document.querySelectorAll('#itemsTable tbody tr');
+  rows.forEach(row => {
+    if (!selectedId || row.dataset.itemId === selectedId) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+
+  // Auto-fill form fields when selecting item
+  if (!selectedId) return;
+  fetch(`/dashboard/restaurant-item-amount/get-item-data/?item_id=${selectedId}`)
+    .then(res => res.json())
+    .then(resp => {
+      if (resp.status === 'ok') {
+        let data = resp.data;
+        document.getElementById('id_item_code').value = data.item_code || '';
+        document.getElementById('id_opening_stock').value = data.opening_stock || 0;
+        document.getElementById('id_purchase_price').value = data.purchase_price || '';
+        document.getElementById('id_selling_price').value = data.selling_price || '';
+        document.getElementById('id_reorder_warning').value = data.reorder_warning || 0;
+        document.getElementById('id_reorder_size').value = data.reorder_size || 0;
+        document.getElementById('id_unit').value = data.unit || 'PRCE';
+      }
+    });
+});
+// Delete selected rows with confirmation
+  document.getElementById('deleteBtn').addEventListener('click', function() {
+    // Show confirmation dialog
+    if (!confirm("Are you sure you want to delete the selected items?")) {
+      return; // Stop if user clicks Cancel
+    }
+
+    // Collect checked rows
+    let checked = [...document.querySelectorAll('.rowCheckbox:checked')].map(cb => cb.value);
+    if (checked.length === 0) {
+      alert("Please select at least one row to delete.");
+      return;
+    }
+
+    // Send AJAX request to delete
+    fetch("{% url 'delete_items' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}"
+      },
+      body: JSON.stringify({ ids: checked })
+    })
+    .then(res => res.json())
+    .then(resp => {
+      if (resp.status === "ok") {
+        checked.forEach(id => {
+          let row = document.querySelector(`#itemsTable tbody input[value="${id}"]`).closest("tr");
+          if (row) row.remove();
+        });
+      } else {
+        alert("Error deleting items.");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("An error occurred while deleting items.");
+    });
+  });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Delete Menu Item</h4>
+<p>Are you sure you want to delete <strong>{{ item.title }}</strong>?</p>
+{% if item.children.exists %}
+  <div class="alert alert-warning">This will also delete {{ item.children.count }} child item(s).</div>
+{% endif %}
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-danger">Delete</button>
+  <a href="{% url 'menu_item_list' %}" class="btn btn-outline-secondary">Cancel</a>
+</form>
+{% endblock %}

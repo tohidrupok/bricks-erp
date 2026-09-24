@@ -1,0 +1,357 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sales Add Record - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Sales Add Record</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{{ request.get_full_path }}">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">
+                                Refresh
+                            </button>
+                        </a>
+                        <a href="{% url 'flat_plot_sales' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Sales List</button>
+                        </a>
+                        <div class="mx-auto hidden text-slate-500 md:block"> </div>            
+                    </div>
+            
+                  <!-- BEGIN: Property Sales List -->
+					<div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                         <div class="mt-5 grid grid-cols-12 gap-6">
+                            <div class="intro-y col-span-12">
+                                <!-- Filter Form (GET) -->
+                                <form method="get" class="flex flex-wrap gap-4 items-end mb-4">
+                                        <div class="flex-1 min-w-[200px]">
+                                            <label for="project_name">Select Project Name</label>
+                                            <select name="project_name" id="project_name" class="form-select w-full" required>
+                                                <option value="">-- Select Project --</option>
+                                                {% for project in project_names %}
+                                                <option value="{{ project.id }}" {% if project.id == selected_project_id %}selected{% endif %}>
+                                                    {{ project.project_first_name }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="flex-1 min-w-[200px]">
+                                        <label for="project_name">Select Flat/Plot-Unit</label>
+                                        <select name="property_id" id="property" class="form-select w-full" required>
+                                            <option value="">-- Select Property --</option>
+                                            {% for prop in properties %}
+                                                <option value="{{ prop.id }}" {% if prop.id == selected_property_id %}selected{% endif %}>
+                                                    {{ prop.type|capfirst }}-{{ prop.flat_no }} / Unit-{{ prop.unit_no }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        </div>
+                                        <div class="flex-1 min-w-[200px]">
+                                            <label for="customer">Select Customer Name</label>
+                                            <select name="customer_id" id="customer" class="form-select w-full">
+                                                <option value="">-- Select Customer --</option>
+                                                {% for cust in customers %}
+                                                <option value="{{ cust.id }}" {% if cust.id == selected_customer_id %}selected{% endif %}>
+                                                    {{ cust.customer_name }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <button type="submit" style="background-color:#1e3c98" 
+                                                class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">
+                                                Filter
+                                            </button>
+                                        </div>
+                                    </form>
+
+                                    <script>
+                                        // Auto-submit the form when project is changed
+                                        document.getElementById('project_name').addEventListener('change', function () {
+                                            this.form.submit();
+                                        });
+                                    </script>
+                                </div>
+
+                          {% if plots %}
+                            <div class="intro-y col-span-12">
+                                <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">🏠 Flat / Plot Property Details</h2>
+
+                                <div class="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead  style="background-color:#1e3c98;color:#FFFFFF"  class="bg-gradient-to-r from-blue-100 to-blue-50">
+                                            <tr>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Flat / Plot</th>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Unit No</th>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Property Name</th>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Property Code</th>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Sq. Ft</th>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Rate / Sqft</th>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Total Amount</th>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Details</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            {% for plot in plots %}
+                                            <tr class="hover:bg-blue-50 transition duration-150">
+                                                <td class="px-4 py-3 text-gray-800 font-medium">
+                                                    {% if plot.type == "flat" %}
+                                                        Flat-{{ plot.flat_no }}
+                                                    {% elif plot.type == "plot" %}
+                                                        Plot-{{ plot.flat_no }}
+                                                    {% else %}
+                                                        {{ plot.flat_no }}
+                                                    {% endif %}
+                                                </td>
+                                                <td class="px-4 py-3 text-gray-600">
+                                                    Unit-{{ plot.unit_no }}
+                                                </td>
+                                                <td class="px-4 py-3 text-gray-600">
+                                                    {{ plot.property_name }}
+                                                </td>
+                                                <td class="px-4 py-3 text-gray-600">
+                                                    {{ plot.property_code }}
+                                                </td>
+                                                <td class="px-4 py-3 text-gray-600">
+                                                    {{ plot.square_fit }}
+                                                </td>
+                                                <td class="px-4 py-3 text-gray-600">
+                                                    {{ plot.per_square_rate }}
+                                                </td>
+                                                <td class="px-4 py-3 text-green-600 font-semibold">
+                                                    {{ plot.total_amount }}
+                                                </td>
+                                                <td class="px-4 py-3 text-gray-600">
+                                                    {{ plot.details }}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% endif %}
+
+
+                           {% if plots %}
+                            <div class="intro-y col-span-12 overflow-auto">
+                                <h2 class="text-xl font-semibold mb-4">Flat/Plot Property Sales Entry</h2>
+
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="project_name" value="{{ selected_project_id }}">
+                                    <input type="hidden" name="save_sales" value="true">
+
+                                    <div class="flex gap-4 mb-4 items-center">
+                                        <div>
+                                            <label class="font-semibold">Selected Customer:</label>
+                                            <span>
+                                                {% if selected_customer %}
+                                                    {{ selected_customer.customer_name }}
+                                                {% else %}
+                                                    None
+                                                {% endif %}
+                                            </span>
+                                        </div>
+
+                                        <div>
+                                            <label class="font-semibold">Total Amount:</label>
+                                            <span id="totalAmountDisplay">{{ total_amount|floatformat:2 }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-4 gap-4 mb-4">
+                                        <div>
+                                            <label for="utility" class="block font-medium">Utility (৳)</label>
+                                            <input type="number" step="0.01" min="0" name="utility" id="utility" class="form-input w-full" value="0" required>
+                                        </div>
+                                        <div>
+                                            <label for="parking" class="block font-medium">Parking (৳)</label>
+                                            <input type="number" step="0.01" min="0" name="parking" id="parking" class="form-input w-full" value="0" required>
+                                        </div>
+                                        <div>
+                                            <label for="discount_percent" class="block font-medium">Discount ( Percentage % )</label>
+                                            <input type="number" step="0.01" min="0" name="discount_percent" id="discount_percent" class="form-input w-full" value="0">
+                                        </div>
+                                        <div>
+                                            <label for="discount" class="block font-medium">Discount Amount</label>
+                                            <input type="number" step="0.01" min="0" name="discount" id="discount" class="form-input w-full" value="0" readonly>
+                                        </div>
+                                        <div>
+                                            <label for="discount" class="block font-medium">Media Persion</label>
+                                             <select name="media_persion" id="media_persion" class="form-select w-full">
+                                                <option value="">-- Select Customer --</option>
+                                                {% for cust in customers %}
+                                                <option value="{{ cust.id }}" {% if cust.id == selected_customer_id %}selected{% endif %}>
+                                                    {{ cust.customer_name }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        
+                                        </div>
+                                        <div>
+                                            <label for="commisoin_percent" class="block font-medium">Commision ( Percentage % )</label>
+                                            <input type="number" step="0.01" min="0" name="commisoin_percent" id="commisoin_percent" class="form-input w-full" value="0">
+                                        </div>
+                                         <div>
+                                            <label for="media_commisoin" class="block font-medium">Commision Amount</label>
+                                            <input type="number" step="0.01" min="0" name="media_commisoin" id="media_commisoin" class="form-input w-full" value="0" readonly>
+                                        </div>
+                                        <div>
+                                            <label for="sales_date" class="block font-medium">Sales Date</label>
+                                            <input type="date" name="sales_date" id="sales_date" class="form-input w-full" value="{{ today|default_if_none:''|date:'Y-m-d' }}" required>
+                                        </div>
+                                         <div>
+                                            <label for="lilahetalah_percent" class="block font-medium">Lilahetalah ( Percentage % )</label>
+                                            <input type="number" step="0.01" min="0" name="lilahetalah_percent" id="lilahetalah_percent" class="form-input w-full" value="0">
+                                        </div>
+                                         <div>
+                                            <label for="lilahetalah_amount" class="block font-medium">Lilahetalah Amount</label>
+                                            <input type="number" step="0.01" min="0" name="lilahetalah_amount" id="lilahetalah_amount" class="form-input w-full" value="0" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-4 gap-4 mb-4">
+                                    <div class="col-span-4">
+                                        <label for="description" class="block font-medium">Description</label>
+                                        <textarea name="description" id="description" rows="4" class="form-input w-full" placeholder="Enter description here..."></textarea>
+                                    </div>
+                                    </div>                                  
+
+                                    <!-- Final Amount Row -->
+                                    <div class="mb-4 font-semibold text-lg">
+                                        Final Amount: 
+                                        <span id="finalAmountDisplay">{{ total_amount|floatformat:2 }}</span> ৳
+                                    </div>
+                                    <input type="hidden" name="sales_amount" id="salesAmountInput" value="{{ total_amount|floatformat:2 }}">
+
+                                    {% if selected_property_id and selected_customer_id %}
+                                        <button type="submit" style="background-color:#1e3c98" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                            Save Sales
+                                        </button>
+                                    {% endif %}
+                                </form>
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                    // Read total amount from the span (strip commas if any)
+                                    const totalAmountText = (document.getElementById('totalAmountDisplay').textContent || "0").replace(/,/g, '').trim();
+                                    const totalAmount = parseFloat(totalAmountText) || 0;
+
+                                    // Inputs
+                                    const utilityInput = document.getElementById('utility');
+                                    const parkingInput = document.getElementById('parking');
+
+                                    const discountPercentInput = document.getElementById('discount_percent');
+                                    const discountAmountInput  = document.getElementById('discount');
+
+                                    const commissionPercentInput = document.getElementById('commisoin_percent');
+                                    const commissionAmountInput  = document.getElementById('media_commisoin');
+
+                                    const finalAmountDisplay = document.getElementById('finalAmountDisplay');
+                                    const salesAmountInput = document.getElementById('salesAmountInput');
+
+                                    const toFloat = v => parseFloat(v) || 0;
+
+                                    // Calculate discount amount from percent and totalAmount
+                                    function updateDiscountAmount() {
+                                        const p = toFloat(discountPercentInput.value);
+                                        const amt = (totalAmount * p) / 100;
+                                        discountAmountInput.value = amt.toFixed(2);
+                                    }
+
+                                    // Calculate commission amount from percent and totalAmount
+                                    function updateCommissionAmount() {
+                                        const p = toFloat(commissionPercentInput.value);
+                                        const amt = (totalAmount * p) / 100;
+                                        commissionAmountInput.value = amt.toFixed(2);
+                                    }
+
+                                    // Recompute final amount and update hidden input
+                                    function updateFinalAmount() {
+                                        const utility = toFloat(utilityInput.value);
+                                        const parking = toFloat(parkingInput.value);
+                                        const discount = toFloat(discountAmountInput.value); // use computed discount
+                                        // If commission should affect final total remove/add here.
+                                        const finalAmount = totalAmount + utility + parking - discount;
+                                        const fixed = finalAmount.toFixed(2);
+                                        finalAmountDisplay.textContent = fixed;
+                                        salesAmountInput.value = fixed;
+                                    }
+
+                                    // When percent fields change, recompute their amounts then final.
+                                    discountPercentInput.addEventListener('input', function () {
+                                        updateDiscountAmount();
+                                        updateFinalAmount();
+                                    });
+
+                                    commissionPercentInput.addEventListener('input', function () {
+                                        updateCommissionAmount();
+                                        // If commission should subtract from final amount, also call updateFinalAmount()
+                                        // updateFinalAmount();
+                                    });
+
+                                    // If user edits utility/parking, recalc final amount
+                                    utilityInput.addEventListener('input', updateFinalAmount);
+                                    parkingInput.addEventListener('input', updateFinalAmount);
+
+                                    // If you keep discount amount editable (we made it readonly above),
+                                    // then this will recalc final whenever someone edits it manually.
+                                    discountAmountInput.addEventListener('input', updateFinalAmount);
+
+                                    // Initialize values on page load
+                                    updateDiscountAmount();
+                                    updateCommissionAmount();
+                                    updateFinalAmount();
+                                    });
+                                </script>                                
+
+                            </div>
+                            {% endif %}          
+	
+					</div>                    
+                    
+                    <!-- END: Pagination -->
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

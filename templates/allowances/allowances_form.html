@@ -1,0 +1,112 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Allowance Payment Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+				<h2 class="intro-y mt-10 text-lg font-semibold text-gray-900">Allowance Payment Entry</h2>
+
+				<div class="mt-5 grid grid-cols-12 gap-6">
+				  <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+					<div class="mt-5 grid grid-cols-12 gap-6">
+				  <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+				<form method="POST" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                        {% csrf_token %}
+                    
+                        <!-- Project Name -->
+                        <div class="mb-4">
+                            <label for="id_project_name" class="font-medium text-lg text-gray-800">Project Name</label><br/>
+                            {{ form.project_name }}
+                            {% for error in form.project_name.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Employee -->
+                        <div class="mb-4">
+                            <label for="id_employee" class="font-medium text-lg text-gray-800">Employee</label>
+                            {{ form.employee }}
+                            {% for error in form.employee.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Date -->
+                        <div class="mb-4">
+                            <label for="id_date" class="font-medium text-lg text-gray-800">Date</label>
+                            <input type="date"
+                                   id="id_date"
+                                   name="date"
+                                   class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                   value="{{ form.date.value|default:today|date:'Y-m-d' }}">
+                            {% for error in form.date.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Amount -->
+                        <div class="mb-4">
+                            <label for="id_amount" class="font-medium text-lg text-gray-800">Amount</label>
+                            {{ form.amount }}
+                            {% for error in form.amount.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Reason -->
+                        <div class="mb-4">
+                            <label for="id_reason" class="font-medium text-lg text-gray-800">Reason</label>
+                            {{ form.reason }}
+                            {% for error in form.reason.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Status -->
+                        <div class="mb-4">
+                            <label for="id_status" class="font-medium text-lg text-gray-800">Status</label>
+                            {{ form.status }}
+                            {% for error in form.status.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Buttons -->
+                        <div class="flex justify-center space-x-4 mt-8">
+                            <button type="submit"
+                                    style="background-color:#1e3c98"
+                                    class="text-white px-6 py-2 rounded-md font-semibold">
+                                Save Allowance
+                            </button>
+                    
+                            <a href="{% url 'allowances_list' %}"
+                               style="background-color:#1e3c98"
+                               class="text-white px-6 py-2 rounded-md font-semibold">
+                                Back to List
+                            </a>
+                        </div>
+                    </form>
+				  </div>
+				</div>
+
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

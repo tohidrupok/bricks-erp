@@ -1,0 +1,430 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Employees Details - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style> 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Employees Details</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{% url 'employee_details' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Refresh</button>
+                        </a>
+                         <a href="javascript:void(0);" onclick="openPopup()">
+							<button
+								class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer
+								focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50
+								bg-success border-success text-white mr-2 shadow-md">
+								Salary Generate
+							</button>
+						</a>
+                        <div class="mx-auto hidden text-slate-500 md:block">                             </div>
+            
+                        <div class="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">                           
+                            <div class="relative w-56 text-slate-500 mb-4">
+                                <input id="searchInput" type="text" placeholder="Search..." class="w-full p-2 text-sm border rounded-md shadow-sm focus:ring-4 focus:ring-primary" oninput="handleSearch()">
+                                <i class="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4">🔍</i>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- BEGIN: Property Owners List -->
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <table class="w-full text-left border-separate border-spacing-y-[10px]">
+                            <thead>
+                                <tr>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">Photo</th>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">Project</th>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">Name</th>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">UserID</th>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">Type</th>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">Phone</th>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">Position</th>
+                                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0">Salary</th>
+                                </tr>
+                            </thead>
+                                <tbody id="tableBody">
+                                {% for emp in employees %}
+                                <tr data-tw-merge="" class="intro-x">
+                                    <!-- Photo -->
+                                    <td data-tw-merge="" class="px-5 py-3 border-b dark:border-darkmode-300 box 
+                                        rounded-l-none rounded-r-none border-x-0 
+                                        shadow-[5px_3px_5px_#00000005] 
+                                        first:rounded-l-[0.6rem] first:border-l 
+                                        last:rounded-r-[0.6rem] last:border-r 
+                                        dark:bg-darkmode-600">
+                                        {% if emp.photo %}
+                                            <img src="{{ emp.photo.url }}" alt="Employee Photo" class="w-12 h-12 object-cover rounded-full">
+                                        {% else %}
+                                            <span>No Photo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td data-tw-merge="" class="px-5 py-3 border-b dark:border-darkmode-300 box 
+                                        rounded-l-none rounded-r-none border-x-0 
+                                        shadow-[5px_3px_5px_#00000005] 
+                                        first:rounded-l-[0.6rem] first:border-l 
+                                        last:rounded-r-[0.6rem] last:border-r 
+                                        dark:bg-darkmode-600">
+                                        {{ emp.project_name }}
+                                    </td>
+                                    <!-- Employee Name -->
+                                    <td data-tw-merge="" class="px-5 py-3 border-b dark:border-darkmode-300 box 
+                                        rounded-l-none rounded-r-none border-x-0 
+                                        shadow-[5px_3px_5px_#00000005] 
+                                        first:rounded-l-[0.6rem] first:border-l 
+                                        last:rounded-r-[0.6rem] last:border-r 
+                                        dark:bg-darkmode-600">
+                                        {{ emp.employee_name }}
+                                    </td>
+                                    <!-- User ID -->
+                                    <td data-tw-merge="" class="px-5 py-3 border-b dark:border-darkmode-300 box 
+                                        rounded-l-none rounded-r-none border-x-0 
+                                        shadow-[5px_3px_5px_#00000005] 
+                                        first:rounded-l-[0.6rem] first:border-l 
+                                        last:rounded-r-[0.6rem] last:border-r 
+                                        dark:bg-darkmode-600">
+                                        E-0{{ emp.id }}
+                                    </td> 
+
+                                    <!-- Employee Type -->
+                                    <td data-tw-merge="" class="px-5 py-3 border-b dark:border-darkmode-300 box 
+                                        rounded-l-none rounded-r-none border-x-0 
+                                        shadow-[5px_3px_5px_#00000005] 
+                                        first:rounded-l-[0.6rem] first:border-l 
+                                        last:rounded-r-[0.6rem] last:border-r 
+                                        dark:bg-darkmode-600">
+                                        {{ emp.emp_type }}
+                                    </td>
+
+                                    <!-- Phone -->
+                                    <td data-tw-merge="" class="px-5 py-3 border-b dark:border-darkmode-300 box 
+                                        rounded-l-none rounded-r-none border-x-0 
+                                        shadow-[5px_3px_5px_#00000005] 
+                                        first:rounded-l-[0.6rem] first:border-l 
+                                        last:rounded-r-[0.6rem] last:border-r 
+                                        dark:bg-darkmode-600">
+                                        {{ emp.phone }}
+                                    </td>                                  
+
+                                    <!-- Position -->
+                                    <td data-tw-merge="" class="px-5 py-3 border-b dark:border-darkmode-300 box 
+                                        rounded-l-none rounded-r-none border-x-0 
+                                        shadow-[5px_3px_5px_#00000005] 
+                                        first:rounded-l-[0.6rem] first:border-l 
+                                        last:rounded-r-[0.6rem] last:border-r 
+                                        dark:bg-darkmode-600">
+                                        {{ emp.position }}
+                                    </td>
+                                    <!-- Salary -->
+                                    <td data-tw-merge="" class="px-5 py-3 border-b dark:border-darkmode-300 box 
+                                        rounded-l-none rounded-r-none border-x-0 
+                                        shadow-[5px_3px_5px_#00000005] 
+                                        first:rounded-l-[0.6rem] first:border-l 
+                                        last:rounded-r-[0.6rem] last:border-r 
+                                        dark:bg-darkmode-600">
+                                        {{ emp.salary }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>                       
+                    
+                        <script>
+                            function handleSearch() {
+                                let searchValue = document.getElementById('searchInput').value.toLowerCase();
+                                let rows = document.querySelectorAll("#tableBody tr");
+                    
+                                rows.forEach(row => {
+                                    let columns = row.getElementsByTagName("td");
+                                    let rowText = "";
+                                    
+                                    // Combine text content of all columns in the row for searching
+                                    for (let i = 0; i < columns.length; i++) {
+                                        rowText += columns[i].textContent.toLowerCase(); // Get all text in row
+                                    }
+                    
+                                    // If search term is found in the row's combined text, show the row, else hide it
+                                    if (rowText.includes(searchValue)) {
+                                        row.style.display = ""; // Show row
+                                    } else {
+                                        row.style.display = "none"; // Hide row
+                                    }
+                                });
+                            }
+                        </script>
+                    </div>
+                    
+                    <!-- END: Property Owners List -->
+                    <div id="popup" style="display: none;">
+                    <div class="popup-content bg-white p-6 rounded shadow-md max-w-md mx-auto">
+                        <h3 class="text-xl font-semibold mb-4">Select Project & Month Name</h3>
+                
+                        <form id="popup-form">
+                            <label for="project-input" class="form-label">Project Name:</label>
+                                <select id="project-select" class="form-select" required>
+                                    <option value="">Select a Project</option>
+                                    {% for projectFirst in projects_firts %}
+                                        <option value="{{ projectFirst.id }}">{{ projectFirst.project_first_name }}</option>
+                                    {% endfor %}
+                                </select>
+                                
+                            <!-- Month Selector (populated by JS) -->
+                            <label for="month-input" class="form-label">Month Name:</label>
+                            <select id="month-select" class="w-full border border-gray-300 rounded px-3 py-2 mb-4" required>
+                                <option value="">Select Month</option>
+                            </select>
+                            <div class="popup-actions">
+                                <button type="button" class="cancel-btn" onclick="closePopup()">Cancel</button>
+                                <button type="button" class="submit-btn" onclick="submitPopup()">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <style>
+                        #popup {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background: rgba(0, 0, 0, 0.5);
+                            display: none;
+                            justify-content: center;
+                            align-items: center;
+                            z-index: 1000;
+                        }
+
+                        .popup-content {
+                            background: white;
+                            padding: 30px;
+                            border-radius: 10px;
+                            width: 400px;
+                            text-align: center;
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        }
+
+                        .popup-content h3 {
+                            margin-bottom: 20px;
+                            font-size: 20px;
+                            font-weight: bold;
+                            color: #333;
+                        }
+
+                        /* Styling for Form Inputs */
+                        .form-label {
+                            display: block;
+                            margin-bottom: 8px;
+                            text-align: left;
+                            font-size: 14px;
+                            color: #555;
+                        }
+
+                        .form-input,
+                        .form-select {
+                            width: 100%;
+                            padding: 10px;
+                            margin-bottom: 15px;
+                            border: 1px solid #ddd;
+                            border-radius: 5px;
+                            font-size: 14px;
+                            transition: border 0.3s;
+                        }
+
+                        .form-input:focus,
+                        .form-select:focus {
+                            border-color: #4caf50;
+                            outline: none;
+                        }
+
+                        /* Button Styles */
+                        .popup-actions {
+                            display: flex;
+                            justify-content: space-between;
+                        }
+
+                        .popup-actions button {
+                            padding: 10px 20px;
+                            border: none;
+                            border-radius: 5px;
+                            font-size: 14px;
+                            cursor: pointer;
+                            transition: background 0.3s;
+                            width: 45%;
+                        }
+
+                        .cancel-btn {
+                            background-color: #f44336;
+                            color: white;
+                        }
+
+                        .submit-btn {
+                            background-color: #4caf50;
+                            color: white;
+                        }
+
+                        .cancel-btn:hover {
+                            background-color: #d32f2f;
+                        }
+
+                        .submit-btn:hover {
+                            background-color: #45a049;
+                        }
+
+                        /* Responsive Design */
+                        @media (max-width: 600px) {
+                            .popup-content {
+                                width: 90%;
+                            }
+                        }
+                    </style>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+                            const monthSelect = document.getElementById("month-select");
+                            const months = [
+                                "January", "February", "March", "April", "May", "June",
+                                "July", "August", "September", "October", "November", "December"
+                            ];
+                            months.forEach(month => {
+                                const option = document.createElement("option");
+                                option.value = month;
+                                option.textContent = month;
+                                monthSelect.appendChild(option);
+                            });
+                        });
+                    
+                        function openPopup() {
+                            document.getElementById('popup').style.display = 'flex';
+                        }
+                    
+                        function closePopup() {
+                            document.getElementById('popup').style.display = 'none';
+                        }
+                    
+                        function submitPopup() {
+                            const project = document.getElementById('project-select').value;
+                            const month = document.getElementById('month-select').value;
+                            
+                            if (!month) {
+                                alert('Please select month!');
+                                return;
+                            }
+                            const url = `{% url 'monthly_salary_generate' %}?project=${encodeURIComponent(project)}&month=${encodeURIComponent(month)}`;
+                            window.location.href = url;
+                        }
+                    </script>
+
+            
+                    <!-- BEGIN: Pagination -->
+                    <div class="intro-y col-span-12 flex flex-wrap items-center sm:flex-row sm:flex-nowrap">
+                        <!-- Showing entries text -->
+                        <div class="mx-auto hidden text-slate-500 md:block">
+                            Showing {{ property_owners.start_index }} to {{ property_owners.end_index }} of {{ property_owners.paginator.count }} entries
+                        </div>
+                    
+                        <!-- Pagination navigation -->
+                        <nav class="w-full sm:mr-auto sm:w-auto">
+                            <ul class="flex w-full mr-0 sm:mr-auto sm:w-auto">
+                                <!-- Previous Page -->
+                                {% if property_owners.has_previous %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <a href="?page={{ property_owners.previous_page_number }}&page_size={{ property_owners.paginator.per_page }}" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer">
+                                            <i class="chevrons-left h-4 w-4"></i> <!-- Left Chevron icon -->
+                                            Previous
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <span class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-not-allowed">
+                                            <i class="chevrons-left h-4 w-4"></i>
+                                            Previous
+                                        </span>
+                                    </li>
+                                {% endif %}
+                    
+                                <!-- Page Numbers -->
+                                {% for num in property_owners.paginator.page_range %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        {% if num == property_owners.number %}
+                                            <a href="#" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer bg-primary text-white">{{ num }}</a>
+                                        {% else %}
+                                            <a href="?page={{ num }}&page_size={{ property_owners.paginator.per_page }}" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer">{{ num }}</a>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                    
+                                <!-- Next Page -->
+                                {% if property_owners.has_next %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <a href="?page={{ property_owners.next_page_number }}&page_size={{ property_owners.paginator.per_page }}" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer">
+                                            Next
+                                            <i class="chevron-right h-4 w-4"></i> <!-- Right Chevron icon -->
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <span class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-not-allowed">
+                                            Next
+                                            <i class="chevron-right h-4 w-4"></i>
+                                        </span>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    
+                        <!-- Page Size Selector -->
+                        <form method="get" action="" class="inline-block">
+                            <select name="page_size" onchange="this.form.submit()" class="transition duration-200 ease-in-out text-sm border-slate-200 shadow-sm rounded-md py-2 px-3 pr-8 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+                                <option value="10" {% if property_owners.paginator.per_page == 10 %}selected{% endif %}>10</option>
+                                <option value="25" {% if property_owners.paginator.per_page == 25 %}selected{% endif %}>25</option>
+                                <option value="50" {% if property_owners.paginator.per_page == 50 %}selected{% endif %}>50</option>
+                            </select>
+                        </form>
+                    </div>
+                    
+                    <!-- END: Pagination -->
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

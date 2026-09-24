@@ -1,0 +1,285 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payroll Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: silver;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 960px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo img {
+      height: 50px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .label-box {
+      background-color: #e2f0d9;
+      color: #000;
+      padding: 4px 10px;
+      font-weight: bold;
+      font-size: 13px;
+      border-radius: 4px;
+    }
+
+    .sub-head {
+      font-size: 11px;
+      color: #555;
+      margin-top: -18px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .section-title {
+      font-weight: bold;
+      font-size: 14px;
+      color: #0A8754;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 10px;
+    }
+
+    .table th,
+    .table td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .table th {
+      background-color: #0A8754;
+      color: white;
+      text-align: center;
+    }
+
+    .table td.text-center {
+      text-align: center;
+    }
+
+    .table td.text-right {
+      text-align: right;
+    }
+
+    .total-row td {
+      font-weight: bold;
+      background-color: #e3f1e6;
+      text-align: right;
+    }
+
+    .amount-in-words {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #0A8754;
+      font-size: 12px;
+    }
+
+    .signature-section {
+      margin-top: 100px;
+      display: flex;
+      justify-content: space-between;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .signature-box {
+      flex: 1;
+      padding: 8px;
+      border-top: 1.5px solid #0A8754;
+      margin: 0 5px;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #333;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+      flex-wrap: wrap;
+    }
+
+    .print-btn {
+      background-color: #1e3c98;
+      color: white;
+      padding: 5px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .btn-back {
+      background-color: #e2e8f0;
+      color: #333;
+      padding: 5px 12px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 11px;
+      border: 1px solid #ccc;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .card {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+
+    <!-- Header -->
+    <div class="card-header">
+      <div class="logo">
+        <img src="{% static 'images/resturant-logo.png' %}" alt="Company Logo" />
+      </div>
+      <div style="text-align: right;">
+        <div class="label-box">Payroll Report</div>
+        <p style="font-size: 11px; margin-top: 4px;">Printing Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+      </div>
+    </div>
+
+    <!-- Address or info line (optional, you can customize) -->
+    <div class="sub-head">
+      House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br />
+      +880191322203<br />
+      md2bayid@gmail.com
+    </div>
+
+    <hr style="margin: 8px 0;" />
+    
+    {% if selected_project %}
+      <h2 class="text-lg font-semibold mb-4">
+        Payroll Report – {{ selected_project.project_first_name }} ({{ month }})
+      </h2>
+    {% else %}
+      <h2 class="text-lg font-semibold mb-4">
+        Payroll Report – {{ month }}
+      </h2>
+    {% endif %}
+    
+    <table class="table w-full border-collapse border border-gray-300 text-sm">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="border px-2 py-1">Employee Name</th>
+          <th class="border px-2 py-1">Designation</th>
+          <th class="border px-2 py-1 text-right">Salary</th>
+          <th class="border px-2 py-1 text-center">Total Days</th>
+          <th class="border px-2 py-1 text-center">Present</th>
+          <th class="border px-2 py-1 text-center">Leave</th>
+          <th class="border px-2 py-1 text-center">Off Day</th>
+          <th class="border px-2 py-1 text-center">Absent</th>
+          <th class="border px-2 py-1 text-center font-semibold">Payable Days</th>
+          <th class="border px-2 py-1 text-right">Gross Salary</th>
+          <th class="border px-2 py-1 text-right">Advance</th>
+          <th class="border px-2 py-1 text-right">Loan Deduction</th>
+          <th class="border px-2 py-1 text-right">Net Salary</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if payrolls %}
+          {% for item in payrolls %}
+            <tr>
+              <td class="border px-2 py-1">{{ item.employee.rda_emp_name }}</td>
+              <td class="border px-2 py-1">{{ item.employee.rda_position }}</td>
+              <td class="border px-2 py-1 text-right">{{ item.employee.rda_salary|floatformat:2 }}</td>
+              <td class="border px-2 py-1 text-center">{{ item.days_in_month }}</td>
+              <td class="border px-2 py-1 text-center">{{ item.present_days }}</td>
+              <td class="border px-2 py-1 text-center">{{ item.leave_days }}</td>
+              <td class="border px-2 py-1 text-center">{{ item.off_days }}</td>
+              <td class="border px-2 py-1 text-center">{{ item.absent_days }}</td>
+              <td class="border px-2 py-1 text-center font-semibold">{{ item.working_days }}</td>
+              <td class="border px-2 py-1 text-right">{{ item.basic_salary|floatformat:2 }}</td>
+              <td class="border px-2 py-1 text-right">{{ item.deductions|floatformat:2 }}</td>
+              <td class="border px-2 py-1 text-right">{{ item.loan_amount|floatformat:2 }}</td>
+              <td class="border px-2 py-1 text-right font-semibold">{{ item.net_salary|floatformat:2 }}</td>
+            </tr>
+          {% endfor %}
+          <tr class="font-bold bg-gray-50">
+            <td colspan="8" class="border px-2 py-1 text-right">Total</td>
+            <td class="border px-2 py-1 text-right">{{ total_basic_salary|floatformat:2 }}</td>
+            <td class="border px-2 py-1 text-right">{{ total_allowances|floatformat:2 }}</td>
+            <td class="border px-2 py-1 text-right">{{ total_advance|floatformat:2 }}</td>
+            <td class="border px-2 py-1 text-right">{{ total_loans|floatformat:2 }}</td>
+            <td class="border px-2 py-1 text-right">{{ total_net_salary|floatformat:2 }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="13" class="text-center text-gray-500 p-4">
+              No payroll data available for this period.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+
+
+
+
+    <!-- Amount in Words -->
+    {% if balance_in_words %}
+      <div class="amount-in-words">
+        Balance in words: "{{ balance_in_words }}"
+      </div>
+    {% endif %}
+    
+    <!-- Signatures -->
+    <div class="signature-section">
+      <div class="signature-box">Prepared by</div>
+      <div class="signature-box">Checked by</div>
+      <div class="signature-box">Forwarded by</div>
+      <div class="signature-box">Approved by</div>
+    </div>
+
+    <!-- Footer with Back & Print buttons -->
+    <div class="footer no-print">
+      <a href="{% url 'restaurant_payroll_list' %}" class="btn-back">← Back to List</a>
+	  &nbsp;&nbsp;
+      <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+    </div>
+
+  </div>
+
+</body>
+</html>

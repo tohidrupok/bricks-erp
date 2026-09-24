@@ -1,0 +1,6 @@
+<form method="POST">
+    {% csrf_token %}
+    <label for="file_id">File ID to delete</label>
+    <input type="text" id="file_id" name="file_id" required>
+    <button type="submit">Delete File</button>
+</form>

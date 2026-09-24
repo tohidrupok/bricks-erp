@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Restaurant Requisition History - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+  @media print {
+    .no-print { display: none !important; }
+    body { background: white; padding: 0; }
+    .card { box-shadow: none; border: none; margin: 0; padding: 0; }
+  }
+  
+  /* Smooth transitions for interactive elements */
+  .transition-all {
+    transition: all 0.2s ease-in-out;
+  }
+</style>
+<style>
+    .ledger-wrap { max-width: 1200px; margin: 30px auto; }
+    .ledger-card { background: #fff; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,.08); overflow: hidden; }
+    .ledger-header { background: #0d6efd; color: #fff; padding: 15px 20px; font-weight: bold; font-size: 18px; }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: #f8f9fa; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+    .balance-positive { color: #dc3545; font-weight: bold; }
+    .balance-zero { color: #198754; font-weight: bold; }
+    .pay-btn { background: #0d6efd; color: #fff; border: none; padding: 4px 8px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    .pay-btn:disabled { opacity: .5; cursor: not-allowed; background: #adb5bd; }
+    .view-btn { background: green; color: #fff; border: none; padding: 4px 8px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+</style>
+
+<div class="rubick px-4 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+  {% include 'partials/mobile.html' %}
+  
+  <div class="mt-[4.7rem] flex md:mt-0">
+    {% include 'partials/sidebar_list.html' %}
+    
+    <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+      {% include 'partials/header.html' %}
+        
+      <div class="intro-y mt-10 flex flex-col items-center justify-between gap-4 border-b border-slate-200 pb-5 sm:flex-row dark:border-darkmode-400">
+        <div>
+          <h2 class="text-2xl font-semibold text-slate-700 dark:text-slate-200">Restaurant Requisition Ledger</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Manage and audit historical internal stock and branch requisitions.</p>
+        </div>
+        
+        <div class="flex w-full items-center justify-end gap-3 sm:w-auto">
+          <a href="{% url 'restaurant_kitchen_ledger_list' %}" class="no-print">
+            <button style="background-color:#1e40ae" class="transition-all inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+              🔄 Refresh
+            </button>
+          </a>
+        </div>
+      </div>
+        
+      {% if messages %}
+      <div class="intro-y mt-4 space-y-2 no-print">
+        {% for message in messages %}
+        <div class="flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-400">
+          <div class="flex items-center gap-2">
+            <span>ℹ️</span>
+            <p class="font-medium">{{ message }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+        
+      <div class="card intro-y mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-darkmode-400 dark:bg-darkmode-600">
+        <div class="border-b border-slate-200 bg-slate-50/50 px-6 py-4 dark:border-darkmode-400 dark:bg-darkmode-700">
+          <h3 class="text-base font-bold text-slate-800 dark:text-slate-200">Ledger History</h3>
+        </div>
+
+        <div class="overflow-x-auto">
+          <div class="ledger-wrap">
+    <div class="ledger-card">
+        <div class="ledger-header">🧾 Restaurant Kitchen Ledger</div>
+       <table>
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Project</th>
+            <th>Employee</th>
+            <th>Suppler</th>
+            <th>Debit (৳)</th>
+            <th>Credit (৳)</th>
+            <th>Balance (৳)</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for l in ledgers %}
+        <tr>
+            <td>{{ l.type }}</td>
+            <td>{{ l.project__project_first_name|default:"General Stock / Unassigned" }}</td>
+            <td>{{ l.employee__rda_emp_name|default:"N/A" }}</td>
+            <td>{{ l.vendor_name__rest_supplier_name|default:"N/A" }}</td>
+            <td>{{ l.total_debit|floatformat:2 }}</td>
+            <td>{{ l.total_credit|floatformat:2 }}</td>
+            <td>৳{{ l.balance }}</td>
+            
+            <td class="whitespace-nowrap text-center no-print">
+                {% if l.balance <= 0 %}
+                    <button type="button" class="pay-btn opacity-50 cursor-not-allowed" disabled>
+                        Paid
+                    </button>
+                {% else %}
+                   <a href="{% url 'restaurant_kitchen_ledger_payment' %}?project_id={{ l.project }}&type_name={{ l.type }}&balance={{ l.balance }}"
+                       class="pay-btn btn btn-sm btn-primary"
+                       style="text-decoration:none; display:inline-block;">
+                        Pay
+                    </a>
+                {% endif %}
+                <a href="{% url 'restaurant_kitchen_ledger_view' l.project %}"
+                           class="view-btn"
+                           style="text-decoration:none; display:inline-block;">
+                            View
+                        </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center p-4 text-slate-400 text-xs">
+                No active kitchen ledger records aggregated.
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        document.cookie.split(";").forEach(c => {
+            c = c.trim();
+            if (c.startsWith(name + "=")) cookieValue = decodeURIComponent(c.substring(name.length + 1));
+        });
+    }
+    return cookieValue;
+}
+
+function payKitchenLedger(ledgerId) {
+    if (!confirm("Confirm payment for this ledger entry?")) return;
+
+    fetch(`/restaurant/kitchen-ledger/pay/${ledgerId}/`, {
+        method: "POST",
+        headers: { "X-CSRFToken": getCookie("csrftoken") }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || "Payment failed.");
+        }
+    })
+    .catch(() => alert("Network error while processing payment."));
+}
+</script>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+{% endblock %}

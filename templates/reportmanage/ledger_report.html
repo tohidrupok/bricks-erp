@@ -1,0 +1,160 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ledger Report - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+                
+                {% for data in entry_data %}
+                    {% if forloop.first %}
+                        <h2 class="intro-y mt-10 text-lg font-medium">{{ data.entry.project_name.project_first_name }} Reports</h2>
+                    {% endif %}
+                {% endfor %}
+
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{% url 'reports_manage_list' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Back</button>
+                        </a>
+                        <a href="{{ request.get_full_path }}">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">
+                                Refresh
+                            </button>
+                        </a>
+                      {% if request.GET.type == "Capital" and request.GET.cash_type_name == "14" or request.GET.type == "Capital" and request.GET.cash_type_name == "12" %}
+
+                        <a href="{% url 'ledger_manage_pdf' %}?{{ request.GET.urlencode }}&type=Investment">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">
+                                View Report
+                            </button>
+                        </a>
+                    
+                    {% else %}
+                    
+                        {% if request.GET.type == "Contructor" and request.GET.cash_type_name == "14" or request.GET.type == "Contructor" and request.GET.cash_type_name == "12" %}
+                    
+                            <a href="{% url 'ledger_manage_pdf' %}?{{ request.GET.urlencode }}">
+                                <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">
+                                    View Report
+                                </button>
+                            </a>
+                    
+                        {% else %}
+                    
+                            <a href="{% url 'ledger_manage_pdf' %}?{{ request.GET.urlencode }}">
+                                <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">
+                                    View Report
+                                </button>
+                            </a>
+                    
+                        {% endif %}
+                    
+                    {% endif %}
+                                <a href="{% url 'ledger_sup_details' %}?{{ request.GET.urlencode }}">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">
+                                Purchase Item View
+                            </button>
+                        </a>
+                    </div>
+            
+                    <!-- BEGIN: Property Owners List -->
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible"><table class="w-full border border-collapse">
+						<table class="w-full border border-collapse">
+							<thead>
+								<tr class="bg-gray-100">
+									<th class="border px-4 py-2">Project Name</th>
+									<th class="border px-4 py-2">Type</th>
+									<th class="border px-4 py-2">Name</th>
+									<th class="border px-4 py-2">Date</th>
+									<th class="border px-4 py-2">Description</th>
+									<th class="border px-4 py-2">Payment</th>
+									<th class="border px-4 py-2">Received</th>
+									<th class="border px-4 py-2">Balance</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for data in entry_data %}
+								<tr class="{% if data.source == 'inventory' %}bg-yellow-50{% endif %}">
+									<td class="border px-4 py-2">{{ data.project_name }}</td>
+									<td class="border px-4 py-2">{{ data.head }}</td>
+									<td class="border px-4 py-2">{{ data.name }}</td>
+									<td class="border px-4 py-2">{{ data.date }}</td>
+									<td class="border px-4 py-2">{{ data.description }}</td>
+
+									<!-- Payment -->
+									<td class="border px-4 py-2 text-right">
+										{{ data.debit|floatformat:2 }}
+									</td>
+
+									<!-- Received -->
+									<td class="border px-4 py-2 text-right">
+										{% if data.credit %}
+											{{ data.credit|floatformat:2 }}
+										{% else %}
+											-
+										{% endif %}
+									</td>
+
+									<!-- Updated Balance Column -->
+									<td class="border px-4 py-2 text-right">
+										{% if data.source == 'ledger' %}
+											{{ data.balance|floatformat:2 }}
+										{% elif data.credit %}
+											{{ data.credit|floatformat:2 }}
+										{% else %}
+											-
+										{% endif %}
+									</td>
+								</tr>
+								{% empty %}
+								<tr>
+									<td colspan="8" class="text-center text-gray-500 py-4">No records found.</td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+
+                    </div>
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

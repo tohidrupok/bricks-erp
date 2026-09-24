@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Information Delete - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-['']
+            before:bg-gradient-to-b before:from-theme-1 before:to-theme-2
+            dark:before:from-darkmode-800 dark:before:to-darkmode-800
+            before:fixed before:inset-0 before:z-[-1]">
+
+    <!-- Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- Sidebar -->
+        {% include 'partials/sidebar_list.html' %}
+
+        <!-- Content -->
+        <div class="md:max-w-auto min-h-screen flex-1 rounded-[30px]
+                    bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+
+            <!-- Header -->
+            {% include 'partials/header.html' %}
+
+            <!-- Page Title -->
+            <div class="container mx-auto mt-10">
+                <h2 class="text-3xl font-semibold text-gray-900 mb-6">
+                    Delete Information
+                </h2>
+
+                <!-- Delete Card -->
+                <div class="flex justify-center">
+                    <div class="w-full max-w-xl bg-white p-8 shadow-xl rounded-xl
+                                border border-red-200">
+
+                        <!-- Icon -->
+                        <div class="flex justify-center mb-4">
+                            <div class="w-16 h-16 flex items-center justify-center
+                                        rounded-full bg-red-100 text-red-600 text-3xl">
+                                ⚠
+                            </div>
+                        </div>
+
+                        <!-- Message -->
+                        <h3 class="text-2xl font-semibold text-center text-red-600 mb-3">
+                            Confirm Deletion
+                        </h3>
+
+                        <p class="text-center text-gray-700 text-lg mb-6 leading-relaxed">
+                            You are about to permanently delete this
+                            <span class="font-semibold text-gray-900">
+                                Payment Voucher
+                            </span>.
+                            <br>
+                            <span class="text-sm text-gray-500">
+                                This action cannot be undone.
+                            </span>
+                        </p>
+
+                        <!-- Voucher Info -->
+                        <div class="bg-slate-50 border rounded-md p-4 mb-6 text-center">
+                            <p class="text-gray-600">
+                                Payment Details:
+                                <span class="font-semibold text-gray-900 block mt-1">
+                                    {{ payment }}
+                                </span>
+                            </p>
+                        </div>
+
+                        <!-- Actions -->
+                        <form method="POST" class="flex justify-center gap-4">
+                            {% csrf_token %}
+
+                            <button type="submit" style="background-color:#dc2626"
+                                    class="px-6 py-2 text-white rounded shadow transition">
+                                Yes, Delete
+                            </button>
+
+                            <a href="{% url 'bill_reqs_payment_list' %}" style="background-color:#6b7280"
+                               class="px-6 py-2 text-white rounded shadow transition text-decoration-none">
+                                Cancel
+                            </a>
+                        </form>
+
+                    </div>
+                </div>
+                <!-- End Delete Card -->
+
+            </div>
+        </div>
+        <!-- End Content -->
+    </div>
+</div>
+{% endblock %}

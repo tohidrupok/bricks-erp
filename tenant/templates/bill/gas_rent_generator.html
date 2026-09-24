@@ -1,0 +1,321 @@
+<!-- templates/dashboard.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tenant - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header_dashboard.html' %}
+
+                <!-- END: Top Bar -->
+                <div class="grid grid-cols-12 gap-6">
+                    <div class="col-span-12 2xl:col-span-9">
+                        <div class="grid grid-cols-12 gap-6">
+                            <!-- BEGIN: General Report -->
+                            <div class="col-span-12 mt-8">
+                                <div class="intro-y flex h-10 items-center">
+                                    <h2 class="mr-5 truncate text-lg font-medium">Gas Rent Generator</h2>
+                                
+                                    <div class="ml-auto flex items-center gap-3">
+                                        
+                                        <!-- Back Button -->
+                                        <a href="javascript:history.back()" class="flex items-center text-primary">
+                                            <i data-lucide="arrow-left" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                                            Back
+                                        </a>
+                                
+                                        <!-- Dashboard Button -->
+                                        <a href="{% url 'tenant_dashboard' %}" class="flex items-center text-primary">
+                                            <i data-lucide="layout-dashboard" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                                            Dashboard
+                                        </a>
+                                
+                                        <!-- Reload Button -->
+                                        <a class="flex items-center text-primary" href="">
+                                            <i data-lucide="refresh-ccw" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                                            Reload Data
+                                        </a>
+                                
+                                    </div>
+                                </div>
+                                
+
+  
+                                
+                            <script src="https://cdn.tailwindcss.com"></script>
+                            <style>
+                                @media print { .no-print { display: none !important; } }
+                            </style>
+
+                        <body class="bg-gray-100 min-h-screen p-6">
+
+                        <div class="max-w-7xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+                            <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">🔥 Gas Bill Management</h2>
+
+                            <!-- Project Selection -->
+                            <div class="flex items-center gap-4 mb-6">
+                                <div>
+                                    <label for="project" class="font-semibold text-gray-700">Select Project:</label>
+                                    <select id="project" class="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                        <option value="">---------</option>
+                                        {% for p in projects %}
+                                            <option value="{{ p.id }}">{{ p.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button id="search-btn"
+                                    class="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg shadow-md hover:from-indigo-600 hover:to-blue-500 transition-all duration-300">
+                                    Search
+                                </button>
+                            </div>
+
+                            <!-- Room Table -->
+                            <div id="room-data" class="mt-6 overflow-x-auto"></div>
+
+                            <!-- Month select + Generate -->
+                            <div class="flex items-center gap-4 mt-4">
+                                <div>
+                                    <label for="bill-month" class="font-semibold text-gray-700">Select Month:</label>
+                                    <input type="month" id="bill-month" class="border p-2 rounded-lg" value="{{ current_month }}">
+                                </div>
+                                <button id="generate-btn"
+                                    class="px-6 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 transition-all duration-300">
+                                    Generate Gas Bills
+                                </button>
+                            </div>
+
+                            <!-- Message -->
+                            <div id="bill-message" class="mt-4 font-semibold"></div>
+
+                            <!-- Generated Bills -->
+                            <div id="generated-bills" class="mt-6 overflow-x-auto"></div>
+                        </div>
+
+                        <script>
+                        const searchBtn = document.getElementById("search-btn");
+                        const projectSelect = document.getElementById("project");
+                        const roomDataDiv = document.getElementById("room-data");
+
+                        const generateBtn = document.getElementById("generate-btn");
+                        const billMonthInput = document.getElementById("bill-month");
+                        const billMessageDiv = document.getElementById("bill-message");
+                        const generatedBillsDiv = document.getElementById("generated-bills");
+
+                        // 🔹 Fetch rooms for selected project
+                        searchBtn.addEventListener("click", function() {
+                            const projectId = projectSelect.value;
+                            if (!projectId) {
+                                alert("⚠️ Please select a project first!");
+                                return;
+                            }
+
+                            fetch(`/tenant/gas-bill/project/${projectId}/rooms/`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (!data.rooms || data.rooms.length === 0) {
+                                        roomDataDiv.innerHTML = `<p class="text-red-600 font-bold">❌ No active rooms found.</p>`;
+                                        return;
+                                    }
+
+                                    let html = `<table class="min-w-full border border-gray-300 rounded-lg overflow-hidden shadow-md">
+                                            <thead class="bg-gray-100">
+                                                <tr>
+                                                    <th class="border px-4 py-2 text-left">Room</th>
+                                                    <th class="border px-4 py-2 text-left">Flat</th>
+                                                    <th class="border px-4 py-2 text-left">Tenant</th>
+                                                    <th class="border px-4 py-2 text-right">Gas Rent</th>
+                                                </tr>
+                                            </thead><tbody>`;
+
+                                    data.rooms.forEach(r => {
+                                        html += `<tr class="hover:bg-gray-50">
+                                                    <td class="border px-4 py-2">${r.room_name}</td>
+                                                    <td class="border px-4 py-2">${r.flat}</td>
+                                                    <td class="border px-4 py-2">${r.client_name || '-'}</td>
+                                                    <td class="border px-4 py-2 text-right">${r.gas_rent.toFixed(2)}</td>
+                                                </tr>`;
+                                    });
+
+                                    html += `<tfoot>
+                                                <tr class="bg-gray-100 font-bold">
+                                                    <td colspan="3" class="border px-4 py-2 text-right">Grand Total:</td>
+                                                    <td class="border px-4 py-2 text-right">${data.grand_total.toFixed(2)}</td>
+                                                </tr>
+                                            </tfoot></table>`;
+
+                                    roomDataDiv.innerHTML = html;
+                                })
+                                .catch(err => {
+                                    console.error(err);
+                                    roomDataDiv.innerHTML = `<p class="text-red-600 font-bold">⚠️ Error fetching data.</p>`;
+                                });
+                        });
+
+                        // 🔹 Generate Gas Bills
+                        generateBtn.addEventListener("click", function() {
+                            const bill_month = billMonthInput.value;
+                            if (!bill_month) {
+                                alert("⚠️ Select month first!");
+                                return;
+                            }
+
+                            const rows = document.querySelectorAll("#room-data tbody tr");
+                            if (rows.length === 0) {
+                                alert("No rooms to generate gas bills!");
+                                return;
+                            }
+
+                            let roomsData = [];
+                            rows.forEach(row => {
+                                const cells = row.querySelectorAll("td");
+                                roomsData.push({
+                                    room_name: cells[0].innerText,
+                                    flat: cells[1].innerText,
+                                    client_name: cells[2].innerText,
+                                    gas_rent: parseFloat(cells[3].innerText)
+                                });
+                            });
+
+                            billMessageDiv.innerText = "⏳ Generating gas bills...";
+                            billMessageDiv.className = "mt-4 font-semibold text-blue-600";
+
+                            fetch("{% url 'create_gas_bills' %}", {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': '{{ csrf_token }}',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    bill_month: bill_month,
+                                    rooms: roomsData
+                                })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                billMessageDiv.innerText = data.message;
+
+                                if (data.success) {
+                                    billMessageDiv.className = "mt-4 font-semibold text-green-700";
+                                } else {
+                                    billMessageDiv.className = "mt-4 font-semibold text-red-600";
+                                }
+
+                                if (!data.success) return;
+
+                                // Show generated bills + print option
+                                let html = `<div class="flex justify-end mt-4">
+                                                <a id="print-btn" href="#"
+                                                class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium px-5 py-2 rounded-lg shadow-md transition-all duration-300 no-print">
+                                                    <!-- Eye Icon -->
+                                                    <svg xmlns="http://www.w3.org/2000/svg" 
+                                                        class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 
+                                                                4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                    View Gas Bill
+                                                </a>
+                                            </div>
+                                            <table class="min-w-full border border-gray-300 rounded-lg overflow-hidden shadow-md mt-4">
+                                            <thead class="bg-gray-100">
+                                                <tr>
+                                                    <th class="border px-4 py-2">Room</th>
+                                                    <th class="border px-4 py-2">Flat</th>
+                                                    <th class="border px-4 py-2">Tenant</th>
+                                                    <th class="border px-4 py-2 text-right">Gas Rent</th>
+                                                    <th class="border px-4 py-2">Month</th>
+                                                    <th class="border px-4 py-2">Status</th>
+                                                </tr>
+                                            </thead><tbody>`;
+
+                                data.bills.forEach(b => {
+                                    html += `<tr class="hover:bg-gray-50">
+                                                <td class="border px-4 py-2">${b.room_name}</td>
+                                                <td class="border px-4 py-2">${b.flat}</td>
+                                                <td class="border px-4 py-2">${b.varatiya_name}</td>
+                                                <td class="border px-4 py-2 text-right">${b.gas_rent.toFixed(2)}</td>
+                                                <td class="border px-4 py-2">${b.bill_month}</td>
+                                                <td class="border px-4 py-2">${b.status}</td>
+                                            </tr>`;
+                                });
+
+                                html += `</tbody></table>`;
+                                generatedBillsDiv.innerHTML = html;
+
+                                // Update Print button dynamically
+                                const printBtn = document.getElementById("print-btn");
+                                const projectId = projectSelect.value;
+                                printBtn.href = `/tenant/gas-bill/print/?projectref=${projectId}&month=${bill_month}`;
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                billMessageDiv.innerText = "❌ Failed generating gas bills!";
+                                billMessageDiv.className = "mt-4 font-semibold text-red-600";
+                            });
+                        });
+                        </script>
+
+                        </body>
+
+
+
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

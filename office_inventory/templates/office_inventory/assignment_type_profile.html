@@ -1,0 +1,74 @@
+{% extends 'office_inventory/base.html' %}
+{% block header %}{{ a_type.name }} - Assignment Profile{% endblock %}
+{% block content %}
+
+<div class="card card-stat p-4 mb-4">
+  <div class="d-flex align-items-center gap-3 flex-wrap">
+    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center"
+         style="width:64px;height:64px;">
+      <i class="bi bi-tags-fill text-primary" style="font-size:1.8rem;"></i>
+    </div>
+    <div class="flex-grow-1">
+      <h4 class="mb-0">{{ a_type.name }}</h4>
+      <div class="text-muted small">{{ a_type.description|default:"Assignment type profile" }}</div>
+    </div>
+    <div class="d-flex gap-4 text-center">
+      <div>
+        <div class="num text-warning" style="font-size:1.6rem;font-weight:700;">{{ active_count }}</div>
+        <div class="small text-muted">Currently Held</div>
+      </div>
+      <div>
+        <div class="num text-secondary" style="font-size:1.6rem;font-weight:700;">{{ total_count }}</div>
+        <div class="small text-muted">Total Ever Assigned</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card card-stat p-3 mb-4">
+  <h6 class="mb-3"><i class="bi bi-box-seam me-1"></i> Currently Assigned</h6>
+  <table class="table table-hover align-middle mb-0">
+    <thead><tr><th>Assigned To</th><th>Location</th><th>Item</th><th>Qty</th><th>Assigned Date</th><th>Remarks</th><th></th></tr></thead>
+    <tbody>
+    {% for a in active_assignments %}
+    <tr>
+      <td>{% if a.employee %}<a href="{% url 'office_inventory:employee_asset_profile' a.employee.pk %}">{{ a.employee }}</a>{% else %}{{ a.assignee_label }}{% endif %}</td>
+      <td>{{ a.location.name|default:"-" }}</td>
+      <td>{{ a.item.item_code }} - {{ a.item.name }}</td>
+      <td>{{ a.qty }}</td>
+      <td>{{ a.assigned_date }}</td>
+      <td class="small text-muted">{{ a.remarks|default:"-" }}</td>
+      <td>
+        <form method="post" action="{% url 'office_inventory:assignment_return' a.pk %}">{% csrf_token %}
+          <button class="btn btn-sm btn-outline-secondary">Mark Returned</button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" class="text-center text-muted">Nothing currently assigned under this type.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card card-stat p-3">
+  <h6 class="mb-3"><i class="bi bi-arrow-counterclockwise me-1"></i> Returned / History</h6>
+  <table class="table table-sm align-middle mb-0">
+    <thead><tr><th>Assigned To</th><th>Location</th><th>Item</th><th>Qty</th><th>Assigned</th><th>Returned</th></tr></thead>
+    <tbody>
+    {% for a in returned_assignments %}
+    <tr>
+      <td>{% if a.employee %}{{ a.employee }}{% else %}{{ a.assignee_label }}{% endif %}</td>
+      <td>{{ a.location.name|default:"-" }}</td>
+      <td>{{ a.item.item_code }}</td>
+      <td>{{ a.qty }}</td>
+      <td>{{ a.assigned_date }}</td>
+      <td>{{ a.return_date }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6" class="text-center text-muted">No returned items yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

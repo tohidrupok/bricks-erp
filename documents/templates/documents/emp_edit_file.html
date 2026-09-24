@@ -1,0 +1,89 @@
+<!-- templates/CreditVoucher.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Emp Update File Name - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <div class="max-w-lg mx-auto mt-10">
+                    <div class="intro-y box p-6 rounded-2xl shadow-lg bg-white dark:bg-darkmode-600">
+                
+                        <!-- Header -->
+                        <div class="border-b pb-4 mb-5">
+                            <h2 class="text-xl font-semibold text-primary">
+                                ✏️ Update File Name
+                            </h2>
+                            <p class="text-sm text-slate-500 mt-1">
+                                Edit your employee file label below
+                            </p>
+                        </div>
+                
+                        <!-- File Info -->
+                        <div class="mb-4 p-3 bg-slate-100 dark:bg-darkmode-400 rounded-lg">
+                            <p class="text-xs text-slate-500">Current File</p>
+                            <p class="text-sm font-medium text-slate-700 dark:text-white">
+                                {{ file.file.name }}
+                            </p>
+                        </div>
+                
+                        <!-- Form -->
+                        <form method="POST" class="space-y-4">
+                            {% csrf_token %}
+                
+                            <!-- Label -->
+                            <div>
+                                <label class="block text-sm font-medium mb-1 text-slate-600">
+                                    File Name
+                                </label>
+                
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value="{{ file.name }}"
+                                    placeholder="Enter file name..."
+                                    class="w-full rounded-lg border border-slate-300 px-4 py-2 
+                                           focus:border-primary focus:ring-2 focus:ring-primary/20
+                                           dark:bg-darkmode-800 dark:border-darkmode-500"
+                                >
+                            </div>
+                
+                            <!-- Buttons -->
+                            <div class="flex justify-between items-center pt-3">
+                
+                                <a href="javascript:history.back()"
+                                   class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100">
+                                    Cancel
+                                </a>
+                
+                                <button type="submit"
+                                        class="px-5 py-2 rounded-lg bg-primary text-white font-medium
+                                               hover:bg-primary/90 transition">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </form>
+                
+                    </div>
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}
+
+
+

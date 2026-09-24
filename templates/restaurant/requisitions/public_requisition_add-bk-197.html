@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Requisition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --panel-white: #ffffff;
+            --primary-blue: #0d6efd;
+            --primary-hover: #0b5ed7;
+            --border-color: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        body {
+            background: var(--bg-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: auto;
+        }
+
+        .card {
+            background: var(--panel-white);
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .row {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: #fff;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+        }
+
+        /* Highly Styled Custom Structured Tables */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        table th {
+            background: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+            font-size: 0.88rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: left;
+        }
+
+        table th, table td {
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            padding: 12px 14px;
+        }
+
+        table th:last-child, table td:last-child {
+            border-right: none;
+        }
+
+        table tr:last-child td {
+            border-bottom: none;
+        }
+
+        table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .btn-area {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary { background: var(--primary-blue); }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-success { background: #10b981; }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: #ef4444; }
+        .btn-danger:hover { background: #dc2626; }
+
+        /* Modernized Header layout components */
+        .header-card {
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            background: #fff;
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .header-title {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            color: #475569;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        .action-btn.primary-action {
+            background: var(--primary-blue);
+            color: #fff;
+            border-color: var(--primary-blue);
+        }
+        .action-btn.primary-action:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Datalist Custom Search Wrapper Controls */
+        .searchable-select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        /* Toast Grid Elements Setup */
+        #toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+        }
+
+        .toast-message {
+            background: #1e293b;
+            color: #fff;
+            padding: 14px 24px;
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .toast-success { border-left: 4px solid #10b981; }
+        .toast-error { border-left: 4px solid #ef4444; }
+
+        @keyframes slideIn {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        @media(max-width:991px){
+            .row { flex-direction: column; gap: 16px; }
+            table { display: block; overflow-x: auto; }
+            body { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<datalist id="item-master-list">
+    {% for item in headRequists %}
+    <option data-value="{{ item.id }}" value="{{ item.rest_item_name }}"></option>
+    {% endfor %}
+</datalist>
+
+<div class="container">
+
+<div class="header-card">
+    <div class="header-row">
+        <h1 class="header-title"><i class="bi bi-egg-fried" style="color:var(--primary-blue)"></i> Restaurant Requisition</h1>
+        <div class="header-buttons">
+            <a href="{% url 'public_restaurant_home' %}" class="action-btn"><i class="bi bi-house"></i> Home</a>
+            <a href="" id="refresh-btn-link" class="action-btn"><i class="bi bi-arrow-clockwise"></i> Refresh Current</a>
+            <a href="{% url 'public_rest_requisition_create' %}" class="action-btn id-clear"><i class="bi bi-x-circle"></i> Clear Filters</a>
+            <a href="{% url 'public_rest_requisition_list' %}" id="public-view-link" class="action-btn primary-action"><i class="bi bi-globe"></i> Public View</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <form id="pile-work-form">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col">
+                <label>Project Workspace</label>
+                <select id="project_id" onchange="filterEmployees(this.value); updateURL();" required>
+                    <option value="">Select Project</option>
+                    {% for p in projects_firts %}
+                    <option value="{{ p.id }}" {% if selected_project_id|slugify == p.id|slugify %}selected{% endif %}>
+                        {{ p.project_first_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col">
+                <label>Assigned Employee</label>
+                <select id="employee_id" onchange="updateURL();" required>
+                    <option value="">Select Employee</option>
+                    {% for emp in employees %}
+                    <option value="{{ emp.id }}" {% if selected_employee_id|slugify == emp.id|slugify %}selected{% endif %}>
+                        {{ emp.rda_emp_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 60px;">SL</th>
+                    <th>Item Name (Searchable)</th>
+                    <th style="width: 180px;">Purchase Unit</th>
+                    <th style="width: 140px;">Quantity</th>
+                    <th>Description Reference</th>
+                    <th style="width: 80px; text-align: center;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="item-body">
+                <tr>
+                    <td>1</td>
+                    <td>
+                        <div class="searchable-select-wrapper">
+                            <input type="text" list="item-master-list" class="searchable-item-input" placeholder="Type or click to search item..." required>
+                            <input type="hidden" name="item_name_1" class="hidden-item-id">
+                        </div>
+                    </td>
+                    <td>
+                        <select name="unit_1" required>
+                            <option value="">Select Unit</option>
+                            <option value="Kg">Kg</option>
+                            <option value="Pcs">Pcs</option>
+                            <option value="Gram">Gram</option>
+                            <option value="Litre">Litre</option>
+                            <option value="Box">Box</option>
+                            <option value="Pack">Pack</option>
+                        </select>
+                    </td>
+                    <td><input type="number" name="qty_1" min="0.01" step="0.01" placeholder="0.00" required></td>
+                    <td><input type="text" name="description_1" placeholder="Optional details..."></td>
+                    <td style="text-align: center;">
+                        <button type="button" class="btn btn-danger" onclick="deleteRow(this)" style="padding: 8px 12px; font-size: 0.9rem;"><i class="bi bi-trash3"></i></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="margin-top: 20px;">
+            <label>General Requisition Remarks</label>
+            <textarea id="remark" rows="3" placeholder="Enter notes here..."></textarea>
+        </div>
+
+        <div class="btn-area">
+            <button type="button" class="btn btn-primary" onclick="addRow()"><i class="bi bi-plus-lg"></i> Add New Row</button>
+            <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Save Requisition Form</button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h3 style="margin-top:0; margin-bottom: 20px; font-size: 1.3rem; font-weight: 700;">
+        <i class="bi bi-clock-history" style="color:var(--primary-blue)"></i> Today's Requisitions Logs
+    </h3>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Project Block</th>
+                <th>Employee</th>
+                <th>Item Specification</th>
+                <th style="width: 160px;">Unit</th>
+                <th style="width: 120px;">Qty</th>
+                <th>Description</th>
+                <th style="width: 110px; text-align: center;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in today_requisitions %}
+            <tr id="db-row-{{ row.id }}">
+                <td>{{ row.requisition_date }}</td>
+                <td><strong>{{ row.project_name.project_first_name }}</strong></td>
+                <td>{{ row.employee_name.rda_emp_name }}</td>
+                <td>
+                    <select onchange="updateInlineField({{ row.id }}, 'item_name', this.value)">
+                        {% for item in headRequists %}
+                        <option value="{{ item.id }}" {% if row.item_name.id == item.id %}selected{% endif %}>
+                            {{ item.rest_item_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <select onchange="updateInlineField({{ row.id }}, 'unit', this.value)">
+                        <option value="Kg" {% if row.unit == "Kg" %}selected{% endif %}>Kg</option>
+                        <option value="Pcs" {% if row.unit == "Pcs" %}selected{% endif %}>Pcs</option>
+                        <option value="Gram" {% if row.unit == "Gram" %}selected{% endif %}>Gram</option>
+                        <option value="Litre" {% if row.unit == "Litre" %}selected{% endif %}>Litre</option>
+                        <option value="Box" {% if row.unit == "Box" %}selected{% endif %}>Box</option>
+                        <option value="Pack" {% if row.unit == "Pack" %}selected{% endif %}>Pack</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="number" min="0.01" step="0.01" value="{{ row.qty }}" onchange="updateInlineField({{ row.id }}, 'qty', this.value)">
+                </td>
+                <td>
+                    <input type="text" value="{{ row.description }}" onchange="updateInlineField({{ row.id }}, 'description', this.value)">
+                </td>
+                <td style="text-align: center;">
+                    <button type="button" class="btn btn-danger" style="padding: 7px 12px; font-size: 0.85rem;" onclick="deleteInlineRow({{ row.id }})">
+                        <i class="bi bi-trash3-fill"></i> Delete
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="text-align:center; color: var(--text-muted); padding: 30px;">No requisitions verified today.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+
+<script>
+// Sync logic for inputs reading option sets
+function bindDatalistValidation(inputEl) {
+    inputEl.addEventListener('input', function() {
+        const listId = this.getAttribute('list');
+        const list = document.getElementById(listId);
+        const options = list.querySelectorAll('option');
+        const hiddenInput = this.closest('.searchable-select-wrapper').querySelector('.hidden-item-id');
+        
+        let found = false;
+        options.forEach(opt => {
+            if (opt.value === this.value) {
+                hiddenInput.value = opt.getAttribute('data-value');
+                found = true;
+            }
+        });
+        if (!found) {
+            hiddenInput.value = ""; // Form validation fails if value isn't matched
+        }
+    });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    updateURL();
+    document.querySelectorAll('.searchable-item-input').forEach(input => {
+        bindDatalistValidation(input);
+    });
+});
+
+function updateURL() {
+    const projId = document.getElementById('project_id').value;
+    const empId = document.getElementById('employee_id').value;
+    let base_url = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    let params = [];
+    
+    if (projId) params.push(`project=${projId}`);
+    if (empId) params.push(`employee=${empId}`);
+    
+    let queryStr = params.length > 0 ? "?" + params.join("&") : "";
+    let new_url = base_url + queryStr;
+    
+    window.history.pushState({ path: new_url }, '', new_url);
+    document.getElementById('refresh-btn-link').href = new_url;
+    
+    let publicViewBase = "{% url 'public_rest_requisition_list' %}";
+    document.getElementById('public-view-link').href = publicViewBase + queryStr;
+}
+
+function filterEmployees(projectId, selectedEmpId = null) {
+    const employeeSelect = document.getElementById('employee_id');
+    employeeSelect.innerHTML = '<option value="">Loading Employees...</option>';
+    
+    let url = `{% url "public_rest_requisition_create" %}`;
+    url += projectId ? `?project_id=${projectId}` : `?project_id=`;
+    
+    fetch(url, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        employeeSelect.innerHTML = '<option value="">Select Employee</option>';
+        if (data.employees && data.employees.length > 0) {
+            data.employees.forEach(emp => {
+                let opt = document.createElement('option');
+                opt.value = emp.id;
+                opt.textContent = emp.name;
+                if(selectedEmpId && String(emp.id) === String(selectedEmpId)) {
+                    opt.selected = true;
+                }
+                employeeSelect.appendChild(opt);
+            });
+        } else {
+            employeeSelect.innerHTML = '<option value="">No restaurant employees found</option>';
+        }
+        updateURL();
+    })
+    .catch(err => {
+        console.error(err);
+        employeeSelect.innerHTML = '<option value="">Error processing employee lookup</option>';
+    });
+}
+
+function showToast(message, type = "success") {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast-message toast-${type}`;
+    toast.innerHTML = type === 'success' ? `<i class="bi bi-check-circle-fill"></i> ${message}` : `<i class="bi bi-exclamation-triangle-fill"></i> ${message}`;
+    
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.animation = "fadeOut 0.4s ease forwards";
+        setTimeout(() => { toast.remove(); }, 400);
+    }, 3000);
+}
+
+function updateInlineField(rowId, fieldName, fieldValue) {
+    fetch("{% url 'public_rest_requisition_create' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            action: 'update_row',
+            id: rowId,
+            field: fieldName,
+            value: fieldValue
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'success') {
+            showToast(`Log Entry #${rowId} altered successfully.`, 'success');
+        } else {
+            showToast(`Update Failed: ${data.message}`, 'error');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast("System connection failure.", "error");
+    });
+}
+
+function deleteInlineRow(rowId) {
+    if (!confirm("Permanently erase record logs?")) return;
+
+    fetch("{% url 'public_rest_requisition_create' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            action: 'delete_row',
+            id: rowId
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showToast(`Record #${rowId} successfully pulled.`, 'success');
+            const targetRow = document.getElementById(`db-row-${rowId}`);
+            if (targetRow) {
+                targetRow.style.transition = "all 0.3s ease";
+                targetRow.style.opacity = "0";
+                setTimeout(() => { targetRow.remove(); }, 300);
+            }
+        } else {
+            showToast(`Delete failure.`, 'error');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast("Network processing timeout.", "error");
+    });
+}
+
+function addRow() {
+    const tbody = document.getElementById('item-body');
+    const rowCount = tbody.rows.length + 1;
+    const row = document.createElement('tr');
+
+    row.innerHTML = `
+        <td>${rowCount}</td>
+        <td>
+            <div class="searchable-select-wrapper">
+                <input type="text" list="item-master-list" class="searchable-item-input" placeholder="Type or click to search item..." required>
+                <input type="hidden" name="item_name_${rowCount}" class="hidden-item-id">
+            </div>
+        </td>
+        <td>
+            <select name="unit_${rowCount}" required>
+                <option value="">Select Unit</option>
+                <option value="Kg">Kg</option>
+                <option value="Pcs">Pcs</option>
+                <option value="Gram">Gram</option>
+                <option value="Litre">Litre</option>
+                <option value="Box">Box</option>
+                <option value="Pack">Pack</option>
+            </select>
+        </td>
+        <td><input type="number" name="qty_${rowCount}" min="0.01" step="0.01" placeholder="0.00" required></td>
+        <td><input type="text" name="description_${rowCount}" placeholder="Optional details..."></td>
+        <td style="text-align: center;">
+            <button type="button" class="btn btn-danger" onclick="deleteRow(this)" style="padding: 8px 12px; font-size: 0.9rem;"><i class="bi bi-trash3"></i></button>
+        </td>
+    `;
+    tbody.appendChild(row);
+    bindDatalistValidation(row.querySelector('.searchable-item-input'));
+}
+
+function deleteRow(btn) {
+    const tbody = document.getElementById('item-body');
+    if (tbody.rows.length <= 1) {
+        alert('At least one operational item configuration row is required.');
+        return;
+    }
+    btn.closest('tr').remove();
+    [...tbody.rows].forEach((row, index) => {
+        row.cells[0].innerText = index + 1;
+    });
+}
+
+document.getElementById('pile-work-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const project_id = document.getElementById('project_id').value;
+    const employee_id = document.getElementById('employee_id').value;
+
+    if (!project_id || !employee_id) {
+        showToast('Please check Project/Employee select targets.', 'error');
+        return;
+    }
+
+    let itemMatrixPayload = [];
+    let validationPassed = true;
+
+    document.querySelectorAll('#item-body tr').forEach(row => {
+        const itemVal = row.querySelector('.hidden-item-id').value;
+        if (!itemVal) {
+            validationPassed = false;
+            row.querySelector('.searchable-item-input').style.borderColor = "#ef4444";
+        } else {
+            row.querySelector('.searchable-item-input').style.borderColor = "";
+        }
+
+        itemMatrixPayload.push({
+            item_name: itemVal,
+            unit: row.querySelector('[name^="unit_"]').value,
+            qty: row.querySelector('[name^="qty_"]').value,
+            description: row.querySelector('[name^="description_"]').value
+        });
+    });
+
+    if (!validationPassed) {
+        showToast('Please select a valid item from the search suggestion drops.', 'error');
+        return;
+    }
+
+    fetch("{% url 'public_rest_requisition_create' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            project_name: project_id,
+            employee_name: employee_id,
+            remark: document.getElementById('remark').value,
+            data: itemMatrixPayload
+        })
+    })
+    .then(response => response.json())
+    .then(response => {
+        if (response.status === 'success') {
+            showToast(response.message, 'success');
+            setTimeout(() => { window.location.reload(); }, 1000);
+        } else {
+            showToast(response.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error(error);
+        showToast('System validation mismatch.', 'error');
+    });
+});
+</script>
+</body>
+</html>

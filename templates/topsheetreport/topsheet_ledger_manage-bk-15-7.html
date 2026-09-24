@@ -1,0 +1,313 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Top Sheet Ledger Manage - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Top Sheet Ledger Manage</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{% url 'transaction_reports_list' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Back</button>
+                        </a>
+                        <a href="{% url 'transaction_ledger_manage' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Refresh</button>
+                        </a>
+                    </div>
+            
+                    <!-- BEGIN: Property Owners List -->
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                       <form method="get" action="{% url 'topsheet_ledger_report' %}" class="w-full max-w-4xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                        <h2 class="text-2xl font-semibold text-gray-800 text-center mb-6">Top Sheet Ledger Report </h2>
+
+                        <div class="space-y-6">
+                            
+                            <!-- Opening Balance Radio Buttons -->
+                           <!-- Head Type Selection -->
+							<!--<div>-->
+							<!--	<label class="block font-medium text-gray-800 mb-2"><b>Head Type</b></label>-->
+							<!--	<div class="flex gap-6">-->
+							<!--		<label class="inline-flex items-center">-->
+							<!--			<input type="radio" name="head" value="allhead" class="form-radio text-blue-600"-->
+							<!--				{% if request.GET.head == 'allhead' %}checked{% endif %}>-->
+							<!--			<span class="ml-2 text-gray-700">All Head</span>-->
+							<!--		</label>-->
+							<!--		<label class="inline-flex items-center">-->
+							<!--			<input type="radio" name="head" value="onehead" class="form-radio text-blue-600"-->
+							<!--				{% if request.GET.head == 'onehead' or not request.GET.head %}checked{% endif %}>-->
+							<!--			<span class="ml-2 text-gray-700">One Head</span>-->
+							<!--		</label>-->
+							<!--	</div>-->
+							<!--</div>-->
+
+							<br>
+
+							<!-- Head Dropdown (Conditional) -->
+							<div class="relative dropdown w-full max-w-xs">
+								<!-- Visible input -->
+								<input type="text" id="head_input" oninput="filterDropdown(this)" onclick="toggleDropdown(this)" placeholder="Select Head"
+									class="input input-bordered w-full border border-gray-300 p-2 rounded-md" autocomplete="off">
+								<!-- Hidden value input -->
+								<input type="hidden" name="head_value" id="id_type">
+
+								<!-- Dropdown options -->
+								<div class="dropdown-content border bg-white w-full shadow-lg hidden absolute mt-1 max-h-60 overflow-y-auto z-50 rounded-md">
+									{% for headName in headNames %}
+										<div onclick="selectDropdownItem(this)" data-id="{{ headName.id }}" class="p-2 hover:bg-blue-100 cursor-pointer">
+											{{ headName.head_name }}
+										</div>
+									{% endfor %}
+								</div>
+							</div>
+							<script>
+								function toggleDropdown(input) {
+									const dropdown = input.nextElementSibling.nextElementSibling;
+									dropdown.classList.toggle('hidden');
+								}
+
+								function filterDropdown(input) {
+									const filter = input.value.toLowerCase();
+									const dropdown = input.nextElementSibling.nextElementSibling;
+									const items = dropdown.querySelectorAll('div');
+									let anyVisible = false;
+
+									items.forEach(item => {
+										if (item.textContent.toLowerCase().includes(filter)) {
+											item.classList.remove('hidden');
+											anyVisible = true;
+										} else {
+											item.classList.add('hidden');
+										}
+									});
+
+									dropdown.classList.remove('hidden');
+									if (!anyVisible) {
+										dropdown.classList.add('hidden');
+									}
+								}
+
+								function selectDropdownItem(item) {
+									const dropdown = item.parentElement;
+									const container = dropdown.parentElement;
+									const visibleInput = container.querySelector('input[type="text"]');
+									const hiddenInput = container.querySelector('input[type="hidden"]');
+
+									visibleInput.value = item.textContent.trim();
+									hiddenInput.value = item.getAttribute('data-id');
+									dropdown.classList.add('hidden');
+								}
+
+								// Close dropdown if clicked outside
+								document.addEventListener('click', function (e) {
+									document.querySelectorAll('.dropdown').forEach(drop => {
+										if (!drop.contains(e.target)) {
+											const menu = drop.querySelector('.dropdown-content');
+											if (menu) menu.classList.add('hidden');
+										}
+									});
+								});
+							</script>
+
+							<br>
+
+                            <!-- Transaction Type Radio Buttons -->
+                            <div>
+                                <label class="block font-medium text-gray-800 mb-2"><b>Transaction Type</b></label>
+                                <div class="flex space-x-6">
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="transaction" value="all" class="form-radio text-blue-600"
+                                            {% if request.GET.transaction == 'all' %}checked{% endif %}>
+                                        <span class="ml-2 text-gray-700">All Transactions &nbsp;&nbsp;&nbsp;&nbsp; </span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="transaction" value="datewise" class="form-radio text-blue-600"
+                                            {% if request.GET.transaction == 'datewise' or not request.GET.transaction %}checked{% endif %}>
+                                        <span class="ml-2 text-gray-700">Date Wise</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- From Date -->
+                            <div>
+                                <label for="from_date" class="block font-medium text-gray-800 mb-2"><b>From Date</b></label>
+                                <input type="date" name="from_date" id="from_date"
+                                    value="{{ request.GET.from_date|default:today|date:'Y-m-d' }}"
+                                    class="w-full border border-slate-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <!-- To Date -->
+                            <div>
+                                <label for="to_date" class="block font-medium text-gray-800 mb-2"><b>To Date</b></label>
+                                <input type="date" name="to_date" id="to_date"
+                                    value="{{ request.GET.to_date|default:today|date:'Y-m-d' }}"
+                                    class="w-full border border-slate-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="text-center pt-4">
+                                <button type="submit" style="margin-left:0.5%;background-color:#1e3c98" class="bg-blue-700 text-white px-6 py-3 rounded-md hover:bg-blue-800 transition-colors duration-200">
+                                    Show Results
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+						
+						<!-- Script Logic -->
+						<script>
+							function toggleDropdown(input) {
+								const dropdown = input.nextElementSibling.nextElementSibling;
+								dropdown.classList.toggle('hidden');
+							}
+
+							function filterDropdown(input) {
+								const filter = input.value.toLowerCase();
+								const dropdown = input.nextElementSibling.nextElementSibling;
+								const items = dropdown.querySelectorAll('div');
+								let anyVisible = false;
+
+								items.forEach(item => {
+									if (item.textContent.toLowerCase().includes(filter)) {
+										item.classList.remove('hidden');
+										anyVisible = true;
+									} else {
+										item.classList.add('hidden');
+									}
+								});
+
+								dropdown.classList.remove('hidden');
+								if (!anyVisible) dropdown.classList.add('hidden');
+							}
+
+							function selectDropdownItem(item) {
+								const dropdown = item.parentElement;
+								const container = dropdown.parentElement;
+								const visibleInput = container.querySelector('input[type="text"]');
+								const hiddenInput = container.querySelector('input[type="hidden"]');
+
+								visibleInput.value = item.textContent.trim();
+								hiddenInput.value = item.getAttribute('data-id');
+								dropdown.classList.add('hidden');
+							}
+
+							document.addEventListener('click', function (e) {
+								document.querySelectorAll('.dropdown').forEach(drop => {
+									if (!drop.contains(e.target)) {
+										const menu = drop.querySelector('.dropdown-content');
+										if (menu) menu.classList.add('hidden');
+									}
+								});
+							});
+
+							document.addEventListener('DOMContentLoaded', function () {
+								const transactionRadios = document.querySelectorAll('input[name="transaction"]');
+								const fromDate = document.getElementById('from_date');
+								const toDate = document.getElementById('to_date');
+
+								const headRadios = document.querySelectorAll('input[name="head"]');
+								const headInput = document.getElementById('head_input');
+
+								function updateDateFields() {
+									const selectedTransaction = document.querySelector('input[name="transaction"]:checked')?.value;
+									const readonly = selectedTransaction === 'all';
+
+									fromDate.readOnly = readonly;
+									toDate.readOnly = readonly;
+									fromDate.style.backgroundColor = readonly ? '#f1f1f1' : '';
+									toDate.style.backgroundColor = readonly ? '#f1f1f1' : '';
+								}
+
+								function updateHeadFields() {
+									const selectedHead = document.querySelector('input[name="head"]:checked')?.value;
+									const disabled = selectedHead === 'allhead';
+
+									headInput.readOnly = disabled;
+									headInput.style.backgroundColor = disabled ? '#f1f1f1' : '';
+								}
+
+								transactionRadios.forEach(radio => {
+									radio.addEventListener('change', updateDateFields);
+								});
+
+								headRadios.forEach(radio => {
+									radio.addEventListener('change', updateHeadFields);
+								});
+
+								updateDateFields();
+								updateHeadFields();
+							});
+						</script>	
+					
+					<!-- Date fields readonly option -->
+						<!--<script>
+							document.addEventListener('DOMContentLoaded', function () {
+								const transactionRadios = document.querySelectorAll('input[name="transaction"]');
+								const fromDate = document.getElementById('from_date');
+								const toDate = document.getElementById('to_date');
+
+								function updateDateFields() {
+									const selectedValue = document.querySelector('input[name="transaction"]:checked').value;
+									const isAll = selectedValue === 'all';
+
+									fromDate.readOnly = isAll;
+									toDate.readOnly = isAll;
+
+									// Optional: Gray out the fields when readonly
+									fromDate.style.backgroundColor = isAll ? '#f1f1f1' : '';
+									toDate.style.backgroundColor = isAll ? '#f1f1f1' : '';
+								}
+
+								// Initial call on page load
+								updateDateFields();
+
+								// Update on change
+								transactionRadios.forEach(radio => {
+									radio.addEventListener('change', updateDateFields);
+								});
+							});
+						</script>-->
+                       
+                    </div>
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

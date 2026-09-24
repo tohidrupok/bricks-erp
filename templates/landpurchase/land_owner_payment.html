@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Land Owner Payment - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            {% include 'partials/header.html' %}
+
+            <h2 class="intro-y mt-10 text-lg font-medium">Land Owner Payment</h2>
+
+            <div class="mt-5 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                    <form method="POST" class="w-full max-w-4xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                        {% csrf_token %}
+
+                        <input type="hidden" name="create_dr_by" value="{{ request.user.get_full_name }}">
+
+                        <h2 class="text-xl font-semibold mb-6 text-center text-gray-800">Land Approval Payment</h2>
+
+                        <!-- Owner Info -->
+                        <div class="mb-4">
+                            <label class="font-medium text-lg text-gray-800">Owner Name</label>
+                            <input type="text" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2 bg-gray-100" value="{{ owner.owner_name }}" readonly>
+                        </div>
+
+                       <!-- Head of Account -->
+						<div class="mb-4">
+							<label class="font-medium text-lg text-gray-800">Head of Account</label>
+							<select name="head_of_account" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+								<option value="">Select Head of Account</option>
+								{% for h in head_of_accounts %}
+									<option value="{{ h.id }}"
+										{% if form.head_of_account.value|stringformat:"s" == h.id|stringformat:"s" %}selected{% endif %}>
+										{{ h.head_code }} - {{ h.head_name }}
+									</option>
+								{% endfor %}
+							</select>
+							{% for error in form.head_of_account.errors %}
+								<p class="text-red-600 text-sm">{{ error }}</p>
+							{% endfor %}
+						</div>
+
+						<!-- Cash Type -->
+						<div class="mb-4">
+							<label class="font-medium text-lg text-gray-800">Cash Type</label>
+							<select name="cash_type" id="id_cash_type" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+								<option value="">Select Cash Type</option>
+								{% for c in cash_methods %}
+									<option value="{{ c.id }}"
+										{% if form.cash_type.value and form.cash_type.value|add:""|stringformat:"s" == c.id|stringformat:"s" %}selected{% endif %}>
+										{{ c.method_name }} ({{ c.type_amount|floatformat:2 }})
+									</option>
+								{% endfor %}
+							</select>
+							{% for error in form.cash_type.errors %}
+								<p class="text-red-600 text-sm">{{ error }}</p>
+							{% endfor %}
+						</div>
+
+
+						<!-- Cheque Number (dynamic) -->
+						<div id="chequeNumberField" class="mb-4 {% if not form.cheque_number.value %}hidden{% endif %}">
+							<label class="font-medium text-lg text-gray-800">Cheque Number</label>
+							<input type="text" name="cheque_number" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+								   value="{{ form.cheque_number.value|default_if_none:'' }}">
+							{% for error in form.cheque_number.errors %}
+								<p class="text-red-600 text-sm">{{ error }}</p>
+							{% endfor %}
+						</div>
+
+						<script>
+						document.addEventListener('DOMContentLoaded', function () {
+							const cashTypeSelect = document.getElementById('id_cash_type');
+							const chequeField = document.getElementById('chequeNumberField');
+
+							function toggleChequeField() {
+								// If no cash type selected or cash_type.id = 1, hide cheque field
+								if (!cashTypeSelect.value || cashTypeSelect.value === '1') {
+									chequeField.classList.add('hidden');
+								} else {
+									chequeField.classList.remove('hidden');
+								}
+							}
+
+							toggleChequeField();
+							cashTypeSelect.addEventListener('change', toggleChequeField);
+						});
+						</script>
+
+                        <!-- Carrier -->
+                        <div class="mb-4">
+                            <label class="font-medium text-lg text-gray-800">Carrier</label>
+                            <input type="text" name="carrier" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2" value="{{ form.carrier.value|default_if_none:'' }}">
+                            {% for error in form.carrier.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Amount -->
+                        <!-- Amount Field -->
+						<div class="mb-4">
+							<label class="font-medium text-lg text-gray-800">Amount</label>
+							<input type="number" name="amount" step="0.01"
+								   class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+								   value="{{ form.amount.value|default:balance_amount }}">
+							{% for error in form.amount.errors %}
+								<p class="text-red-600 text-sm">{{ error }}</p>
+							{% endfor %}
+						</div>
+
+                        <!-- MR/Bill No -->
+                        <div class="mb-4">
+                            <label class="font-medium text-lg text-gray-800">M.R/Bill No</label>
+                            <input type="text" name="mr_or_bill_no" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2" value="{{ form.mr_or_bill_no.value|default_if_none:'' }}">
+                            {% for error in form.mr_or_bill_no.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Date -->
+                        <div class="mb-4">
+                            <label class="font-medium text-lg text-gray-800">Date</label>
+                            <input type="date" name="date" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2" value="{{ form.date.value|default:today }}">
+                            {% for error in form.date.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="text-center mt-6">
+                            <button type="submit" style="background-color:green" class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 rounded-md">Save Payment</button>
+                            <a href="{% url 'land_payment_list' %}" class="ml-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md">Back to List</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

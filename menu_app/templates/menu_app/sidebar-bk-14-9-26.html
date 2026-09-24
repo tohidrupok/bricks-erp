@@ -1,0 +1,187 @@
+{% load static %}
+{% load menu_tags %}
+{% get_sidebar_menu as sidebar_menu %}
+
+<nav class="side-nav hidden w-[80px] overflow-x-hidden pb-16 pr-5 md:block xl:w-[230px]">
+    <a class="flex items-center pt-4 pl-5 intro-x" href="/">
+        <img src="{% static 'images/Bricks Holdings Logo V2.png' %}" alt="BRICKS ERP">
+    </a>
+    <div class="my-6 side-nav__divider"></div>
+
+    <ul class="menu-app-sidebar">
+    {% for item in sidebar_menu %}
+        {% with title_lower=item.title|lower %}
+        <li class="menu-app-item {% if item.children %}has-children{% endif %}">
+            {% if item.children %}
+                <a href="javascript:;" class="menu-app-link menu-app-toggle {% if 'dashboard' in title_lower %}custom-dashboard-menu{% endif %}">
+                    <i data-lucide="{{ item.icon|default:'circle' }}" class="menu-app-icon"></i>
+                    <span class="menu-app-label">{{ item.title }}</span>
+                    <i data-lucide="chevron-down" class="menu-app-chevron"></i>
+                </a>
+            {% elif item.url %}
+                <a href="{% url item.url %}" class="menu-app-link {% if 'dashboard' in title_lower %}custom-dashboard-menu{% endif %}">
+                    <i data-lucide="{{ item.icon|default:'circle' }}" class="menu-app-icon"></i>
+                    <span class="menu-app-label">{{ item.title }}</span>
+                </a>
+            {% else %}
+                <a href="javascript:;" class="menu-app-link {% if 'dashboard' in title_lower %}custom-dashboard-menu{% endif %}">
+                    <i data-lucide="{{ item.icon|default:'circle' }}" class="menu-app-icon"></i>
+                    <span class="menu-app-label">{{ item.title }}</span>
+                </a>
+            {% endif %}
+
+            {% if item.children %}
+                <ul class="menu-app-submenu">
+                    {% for child in item.children %}
+                        <li>
+                            {% if child.url %}
+                                <a href="{% url child.url %}" class="menu-app-sublink">
+                                    <i data-lucide="{{ child.icon|default:'zap' }}" class="menu-app-subicon"></i>
+                                    <span>{{ child.title }}</span>
+                                </a>
+                            {% else %}
+                                <a href="javascript:;" class="menu-app-sublink">
+                                    <i data-lucide="{{ child.icon|default:'zap' }}" class="menu-app-subicon"></i>
+                                    <span>{{ child.title }}</span>
+                                </a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </li>
+        {% endwith %}
+    {% endfor %}
+    </ul>
+</nav>
+
+<style>
+.menu-app-sidebar {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+}
+
+.menu-app-item {
+    margin-bottom: 2px !important;
+    list-style: none !important;
+}
+
+.menu-app-link,
+.menu-app-sublink {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 10px 12px !important;
+    border-radius: 8px !important;
+    color: rgba(255, 255, 255, 0.65) !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+    white-space: nowrap !important;
+}
+
+.menu-app-link:hover,
+.menu-app-sublink:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+}
+
+.menu-app-link.is-active,
+.menu-app-sublink.is-active {
+    background-color: #d9480f !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+/* SPECIFIC HIGHLIGHT ONLY FOR DASHBOARD MENU */
+.menu-app-link.custom-dashboard-menu {
+    background: linear-gradient(135deg, #d9480f 0%, #ff6b35) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(217, 72, 15, 0.3) !important;
+}
+
+.menu-app-link.custom-dashboard-menu:hover {
+    background: linear-gradient(135deg, #c23e0c 0%, #e85d2b) !important;
+    color: #ffffff !important;
+}
+
+.menu-app-icon {
+    width: 18px !important;
+    height: 18px !important;
+    flex-shrink: 0 !important;
+    stroke-width: 1.75 !important;
+}
+
+.menu-app-label {
+    flex: 1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.menu-app-chevron {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.2s ease !important;
+    opacity: 0.6 !important;
+}
+
+.menu-app-item.open > .menu-app-link .menu-app-chevron {
+    transform: rotate(180deg) !important;
+}
+
+.menu-app-submenu {
+    list-style: none !important;
+    margin: 2px 0 4px 0 !important;
+    padding: 0 !important;
+    display: none !important;
+}
+
+.menu-app-item.open > .menu-app-submenu {
+    display: block !important;
+}
+
+.menu-app-submenu li {
+    list-style: none !important;
+    display: block !important;
+}
+
+.menu-app-sublink {
+    padding-left: 42px !important;
+    font-size: 13.5px !important;
+    font-weight: 400 !important;
+}
+
+.menu-app-subicon {
+    width: 15px !important;
+    height: 15px !important;
+    flex-shrink: 0 !important;
+    opacity: 0.7 !important;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".menu-app-toggle").forEach(function (toggle) {
+        toggle.addEventListener("click", function () {
+            var item = toggle.closest(".menu-app-item");
+            var wasOpen = item.classList.contains("open");
+            document.querySelectorAll(".menu-app-item.open").forEach(function (openItem) {
+                if (openItem !== item) openItem.classList.remove("open");
+            });
+            item.classList.toggle("open", !wasOpen);
+        });
+    });
+
+    document.querySelectorAll(".menu-app-item.is-active-parent").forEach(function (item) {
+        item.classList.add("open");
+    });
+
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+});
+</script>

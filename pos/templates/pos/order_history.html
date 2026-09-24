@@ -1,0 +1,87 @@
+{% extends 'pos/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4><i class="fa-solid fa-clock-rotate-left me-2"></i>Order Log & Refunds</h4>
+</div>
+
+<div class="bg-white p-3 rounded border shadow-sm">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Order No</th>
+                <th>Channel</th>
+                <th>Customer</th>
+                <th>Net Total</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for o in orders %}
+            <tr>
+                <td class="fw-bold">{{ o.order_no }}</td>
+                <td><span class="badge bg-dark">{{ o.get_channel_display }}</span></td>
+                <td>{{ o.customer.name|default:"Walk-in Customer" }}</td>
+                <td class="fw-bold text-success">BDT {{ o.net_total }}</td>
+                <td><span class="badge bg-light text-dark border">{{ o.get_payment_method_display }}</span></td>
+                <td>
+                    {% if o.status == 'COMPLETED' %}
+                    <span class="badge bg-success">Completed</span>
+                    {% elif o.status == 'REFUNDED' %}
+                    <span class="badge bg-danger">Refunded</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if o.status == 'COMPLETED' %}
+                    <button class="btn btn-outline-danger btn-sm" onclick="openReturnModal('{{ o.id }}', '{{ o.order_no }}', '{{ o.net_total }}')">
+                        <i class="fa-solid fa-rotate-left me-1"></i> Taka Return
+                    </button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Taka Return Modal -->
+<div class="modal fade" id="returnModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" action="{% url 'process_taka_return' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="order_id" id="returnOrderId">
+            <div class="modal-header"><h5 class="modal-title">Process Taka Return (Refund)</h5></div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Order Reference</label>
+                    <input type="text" id="returnOrderNo" class="form-control" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Refund Amount (BDT)</label>
+                    <input type="number" step="0.01" name="refund_amount" id="returnAmount" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Reason for Return</label>
+                    <textarea name="reason" class="form-control" rows="3" required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-danger">Confirm Refund</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openReturnModal(orderId, orderNo, netTotal) {
+    document.getElementById('returnOrderId').value = orderId;
+    document.getElementById('returnOrderNo').value = orderNo;
+    document.getElementById('returnAmount').value = netTotal;
+    new bootstrap.Modal(document.getElementById('returnModal')).show();
+}
+</script>
+{% endblock %}

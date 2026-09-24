@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+body{
+    background:silver;
+    font-family:Arial,sans-serif;
+    font-size:13px;
+}
+
+.logo img {
+      height: 50px;
+    }
+    
+.portal-card{
+    background:#fff;
+    max-width:900px;
+    margin:30px auto;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+    overflow:hidden;
+}
+
+.card-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px;
+    border-bottom:1px solid #ddd;
+}
+
+.logo-section h2{
+    color:#1e3c98;
+    font-size:28px;
+    margin:0;
+}
+
+.logo-section p{
+    margin:5px 0 0;
+    color:#666;
+}
+
+.label-box{
+    background:#e2f0d9;
+    padding:8px 18px;
+    border-radius:5px;
+    font-size:16px;
+    font-weight:bold;
+}
+
+.sub-head{
+    font-size:12px;
+    color:#555;
+    margin-top:8px;
+}
+
+.form-body{
+    padding:30px;
+}
+
+.form-row{
+    display:flex;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.form-label{
+    width:220px;
+    font-weight:bold;
+    color:#333;
+}
+
+.form-control{
+    flex:1;
+    padding:10px 12px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    background:#fafafa;
+    font-size:13px;
+}
+
+.form-control:focus{
+    outline:none;
+    border-color:#1e3c98;
+}
+
+.button-row{
+    text-align:center;
+    margin-top:30px;
+}
+
+.submit-btn{
+    background:#1e3c98;
+    color:white;
+    border:none;
+    padding:12px 40px;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:bold;
+}
+
+.submit-btn:hover{
+    background:#17317f;
+}
+
+.footer{
+    border-top:1px solid #ddd;
+    padding:15px 20px;
+    display:flex;
+    justify-content:space-between;
+    color:#555;
+    font-size:12px;
+}
+
+@media(max-width:768px){
+
+.form-row{
+    flex-direction:column;
+    align-items:flex-start;
+}
+
+.form-label{
+    width:100%;
+    margin-bottom:8px;
+}
+
+.card-header{
+    flex-direction:column;
+    gap:15px;
+    text-align:center;
+}
+
+.footer{
+    flex-direction:column;
+    text-align:center;
+    gap:10px;
+}
+
+}
+</style>
+
+<div class="portal-card">
+
+    <div class="card-header">
+
+        <div class="logo-section">
+            <div class="logo">
+                <img src="{% static '/images/resturant-logo.png' %}" alt="Company Logo">
+             </div>
+            <p>Rasturant Management System</p>
+        </div>
+
+        <div>
+            <div class="label-box">
+                Rasturant Home Portal
+            </div>
+
+            <div class="sub-head">
+                Select Project, Employee and Department Category
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="form-body">
+
+        <form id="requisitionForm">
+
+            <div class="form-row">
+                <div class="form-label">
+                    Project Location
+                </div>
+
+                <select id="project" class="form-control" required>
+                    <option value="">Select Project</option>
+                    {% for p in projects %}
+                    <option value="{{ p.id }}">
+                        {{ p.project_first_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+
+            <div class="form-row">
+                <div class="form-label">
+                    Authorized Employee
+                </div>
+
+                <select id="employee" class="form-control" required>
+                    <option value="">Select Employee</option>
+                    {% for emp in employees %}
+                    <option value="{{ emp.id }}" data-project="{{ emp.project_name.id }}">
+                        {{ emp.rda_emp_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+
+            <div class="form-row">
+                <div class="form-label">
+                    Department Category
+                </div>
+
+                <select id="category" class="form-control" required>
+                    <option value="">Select Category</option>
+                    <option value="kitchen">Kitchen</option>
+                    <option value="store">Store</option>
+                    <option value="purchase">Purchase</option>
+                </select>
+            </div>
+
+
+            <div class="button-row">
+                <button type="submit" class="submit-btn">
+                    Proceed →
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <div class="footer">
+        <div>
+            <strong>BTP Limited ERP</strong>
+        </div>
+
+        <div>
+            Public Requisition Management System
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+
+const projectSelect = document.getElementById("project");
+const employeeSelect = document.getElementById("employee");
+
+projectSelect.addEventListener("change", function(){
+
+    let projectId = this.value;
+
+    Array.from(employeeSelect.options).forEach(option => {
+
+        if(option.value===""){
+            option.hidden=false;
+            return;
+        }
+
+        option.hidden = option.dataset.project !== projectId;
+
+    });
+
+    employeeSelect.value="";
+});
+
+
+document.getElementById("requisitionForm").addEventListener("submit", function(e){
+
+    e.preventDefault();
+
+    let project = document.getElementById("project").value;
+    let employee = document.getElementById("employee").value;
+    let category = document.getElementById("category").value;
+
+    if(!project || !employee || !category){
+        alert("Please select Project, Employee and Category.");
+        return;
+    }
+
+    let url="";
+
+    if(category==="kitchen"){
+        url="https://erp.btplimited.com/restaurant/public-requisition/";
+    }
+    else if(category==="store"){
+        url="https://erp.btplimited.com/requisitions/public/store/list/";
+    }
+    else if(category==="purchase"){
+        url="https://erp.btplimited.com/requisitions/public/list/";
+    }
+
+    window.location.href=url+"?project="+project+"&employee="+employee;
+
+});
+
+</script>
+
+{% endblock %}

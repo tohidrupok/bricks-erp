@@ -1,0 +1,203 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tenant Ledger Filter - BM ERP{% endblock %}
+
+{% block content %} 
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 
+    dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] 
+            bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+
+            {% include 'partials/header.html' %}
+            <div class="intro-y flex h-10 items-center">
+                    <h2 class="mr-5 truncate text-lg font-medium">Tenant Ledger Filter</h2>
+                
+                    <div class="ml-auto flex items-center gap-3">
+                        
+                        <!-- Back Button -->
+                        <a href="javascript:history.back()" class="flex items-center text-primary">
+                            <i data-lucide="arrow-left" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Back
+                        </a>
+                
+                        <!-- Dashboard Button -->
+                        <a href="{% url 'tenant_dashboard' %}" class="flex items-center text-primary">
+                            <i data-lucide="layout-dashboard" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Dashboard
+                        </a>
+                
+                        <!-- Reload Button -->
+                        <a class="flex items-center text-primary" href="">
+                            <i data-lucide="refresh-ccw" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Reload Data
+                        </a>
+                
+                    </div>
+            </div>
+            <div class="mt-10 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12">
+                    
+                    <div class="w-full max-w-3xl mx-auto bg-white dark:bg-darkmode-600 
+                        p-10 shadow-2xl rounded-2xl border border-gray-200 dark:border-darkmode-400">
+
+                        <h2 class="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-6">
+                            Tenant Ledger Filter
+                        </h2>
+                        <p class="text-center text-gray-500 dark:text-gray-300 mb-8">
+                            Select project, tenant, and date option to generate ledger report
+                        </p>
+
+                        <style>
+                            .filter-label {
+                                display: block;
+                                margin-bottom: 6px;
+                                font-weight: 600;
+                                font-size: 14px;
+                                color: #2c3e50;
+                            }
+                            .filter-input, .filter-select {
+                                width: 100%;
+                                padding: 10px 12px;
+                                border: 1px solid #ccc;
+                                border-radius: 8px;
+                                font-size: 14px;
+                                margin-bottom: 16px;
+                                background: #f9fafb;
+                                transition: 0.3s;
+                            }
+                            .filter-input:focus, .filter-select:focus {
+                                border-color: #2563eb;
+                                box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+                                outline: none;
+                                background: #fff;
+                            }
+                            .filter-btn {
+                                width: 100%;
+                                padding: 12px;
+                                font-size: 16px;
+                                font-weight: bold;
+                                background: #2563eb;
+                                color: #fff;
+                                border: none;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                transition: background 0.3s;
+                            }
+                            .filter-btn:hover {
+                                background: #1d4ed8;
+                            }
+                        </style>
+
+                        <!-- Filter Form -->
+                        <div>
+                            <!-- Project -->
+                            <label class="filter-label">Project:</label>
+                            <select id="project_select" class="filter-select">
+                                <option value="">-- Select Project --</option>
+                                {% for project in projects %}
+                                <option value="{{ project.id }}">{{ project.name }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <!-- Tenant -->
+                            <label class="filter-label">Tenant:</label>
+                            <select id="varatiya_select" class="filter-select">
+                                <option value="">-- Select Tenant --</option>
+                            </select>
+
+                            <!-- Opening Balance -->
+                            <label class="filter-label">Include Opening Balance:</label>
+                            <select id="include_opening" class="filter-select">
+                                <option value="yes">Yes</option>
+                                <option value="no" selected>No</option>
+                            </select>
+
+                            <!-- Date Option -->
+                            <label class="filter-label">Date Option:</label>
+                            <select id="date_option" class="filter-select">
+                                <option value="all">All Dates</option>
+                                <option value="range">Date Range</option>
+                            </select>
+
+                            <!-- Date Range -->
+                            <div id="date_range_container" class="grid grid-cols-2 gap-4 hidden">
+                                <div>
+                                    <label class="filter-label">Start Date:</label>
+                                    <input type="date" id="start_date" class="filter-input">
+                                </div>
+                                <div>
+                                    <label class="filter-label">End Date:</label>
+                                    <input type="date" id="end_date" class="filter-input">
+                                </div>
+                            </div>
+
+                            <!-- Button -->
+                            <button id="filter_btn" class="filter-btn mt-6">Show Ledger</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function fetchJSON(url) {
+    const response = await fetch(url);
+    return await response.json();
+}
+
+// Project select -> load varatiyas
+document.getElementById("project_select").addEventListener("change", async function() {
+    const project_id = this.value;
+    const varatiyaSelect = document.getElementById("varatiya_select");
+    varatiyaSelect.innerHTML = '<option value="">-- Select Varatiya --</option>';
+    if (project_id) {
+        const data = await fetchJSON(`/tenant/ajax/project/${project_id}/varatiyas/`);
+        data.varatiyas.forEach(v => {
+            const option = document.createElement("option");
+            option.value = v.varatiya_id;
+            option.textContent = v.varatiya_name;
+            varatiyaSelect.appendChild(option);
+        });
+    }
+});
+
+// Date option toggle
+document.getElementById("date_option").addEventListener("change", function() {
+    const container = document.getElementById("date_range_container");
+    if (this.value === "range") {
+        container.classList.remove("hidden");
+    } else {
+        container.classList.add("hidden");
+    }
+});
+
+// Filter button -> redirect
+document.getElementById("filter_btn").addEventListener("click", function() {
+    const varatiya_id = document.getElementById("varatiya_select").value;
+    if (!varatiya_id) { alert("Please select a Varatiya!"); return; }
+
+    const include_opening = document.getElementById("include_opening").value;
+    const date_option = document.getElementById("date_option").value;
+    let url = `/tenant/tenant-ledger/result/?varatiya_id=${varatiya_id}&include_opening=${include_opening}`;
+
+    if (date_option === "range") {
+        const start_date = document.getElementById("start_date").value;
+        const end_date = document.getElementById("end_date").value;
+        if (!start_date || !end_date) { alert("Please select both dates!"); return; }
+        url += `&start_date=${start_date}&end_date=${end_date}`;
+    }
+
+    window.location.href = url;
+});
+</script>
+{% endblock %}

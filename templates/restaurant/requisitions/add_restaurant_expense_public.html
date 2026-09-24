@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+
+body{
+    background:#eef2f7;
+}
+
+/* CARD */
+
+.form-container{
+    max-width:700px;
+    margin:25px auto;
+}
+
+.card{
+    background:#fff;
+    border:none;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+}
+
+.card-header{
+    background:#198754;
+    color:#fff;
+    padding:18px 25px;
+}
+
+.card-header h3{
+    margin:0;
+    font-size:24px;
+}
+
+/* FORM */
+
+.card-body{
+    padding:30px;
+}
+
+.form-group{
+    margin-bottom:20px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:600;
+    color:#444;
+}
+
+.form-group input,
+.form-group select{
+    width:100%;
+    padding:12px 15px;
+    border:1px solid #d8dee4;
+    border-radius:8px;
+    font-size:15px;
+    background:#fff;
+    transition:.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus{
+    border-color:#198754;
+    outline:none;
+    box-shadow:0 0 0 0.2rem rgba(25,135,84,.15);
+}
+
+/* BUTTONS */
+
+.button-group{
+    margin-top:30px;
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.btn{
+    padding:12px 22px;
+    border:none;
+    border-radius:8px;
+    color:#fff;
+    text-decoration:none;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.btn-save{
+    background:#198754;
+}
+
+.btn-save:hover{
+    background:#157347;
+}
+
+.btn-back{
+    background:#6c757d;
+}
+
+.btn-back:hover{
+    background:#5c636a;
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+    .card-body{
+        padding:20px;
+    }
+
+    .button-group{
+        flex-direction:column;
+    }
+
+    .btn{
+        width:100%;
+        text-align:center;
+    }
+
+}
+
+</style>
+
+
+<div class="form-container">
+
+    <div class="card">
+
+        <div class="card-header">
+            <h3>🍽 Add Restaurant Expense</h3>
+        </div>
+
+        <div class="card-body">
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label>Project Name</label>
+                    {{ form.project_name }}
+                </div>
+
+                <div class="form-group">
+                    <label>Expense Category</label>
+                    {{ form.restu_cate_name }}
+                </div>
+                <div class="form-group">
+                    <label>Expense Type</label>
+                    {{ form.restu_expense_type }}
+                </div>
+                <div class="form-group">
+                    <label>Expense Description</label>
+                    {{ form.restu_expense_name }}
+                </div>
+
+                <div class="form-group">
+                    <label>Amount</label>
+                    {{ form.restu_expense_amount }}
+                </div>
+
+                <div class="button-group">
+
+                    <button type="submit" class="btn btn-save">
+                        💾 Save Expense
+                    </button>
+
+                    <a href="{% url 'restaurant_expense_public_list' %}"
+                       class="btn btn-back">
+                        ← Back to List
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

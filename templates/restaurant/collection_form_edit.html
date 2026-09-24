@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Received Voucher edit - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+.message.success {
+    color: green;
+    background-color: #d4edda;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.message.error {
+    color: red;
+    background-color: #f8d7da;
+    padding: 10px;
+    border-radius: 5px;
+}
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+</style>
+
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            {% include 'partials/header.html' %}
+
+            <h2 class="intro-y mt-10 text-lg font-medium">Received/Collection Edit </h2>
+
+            {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                        <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <div class="mt-5 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                    <a href="{% url 'collection_list' %}">
+                        <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium bg-success border-success text-white mr-2 shadow-md">
+                            Back
+                        </button>
+                    </a>    
+                </div>
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <form method="post" class="w-full max-w-4xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                        {% csrf_token %}
+            
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+                            <div>
+                                <label class="block font-medium mb-1">Type</label>
+                                {{ form.type }}
+                            </div>
+            
+                            <div>
+                                <label class="block font-medium mb-1">Employee</label>
+                                {{ form.employee }}
+                            </div>
+            
+                            <div>
+                                <label class="block font-medium mb-1">Customer</label>
+                                {{ form.customer_name }}
+                            </div>
+            
+                            <div>
+                                <label class="block font-medium mb-1">Sales Type</label>
+                                {{ form.sales_type }}
+                            </div>
+            
+                            <div>
+                                <label class="block font-medium mb-1">Cash Type</label>
+                                {{ form.cash_type }}
+                            </div>
+            
+                            <div>
+                                <label class="block font-medium mb-1">Amount</label>
+                                {{ form.amount }}
+                            </div>
+            
+                        </div>
+            
+                        <div class="mt-6 flex gap-3">
+            
+                            <button type="submit" style="background-color:green;color:white"
+                                class="px-5 py-2 bg-green-600 text-white rounded-md shadow hover:bg-green-700 transition">
+                                Update
+                            </button>
+            
+                            <a href="{% url 'collection_list' %}" style="background-color:green;color:white"
+                                class="px-5 py-2 bg-gray-500 text-white rounded-md shadow hover:bg-gray-600 transition">
+                                Cancel
+                            </a>
+            
+                        </div>
+            
+                    </form>
+            
+                </div>
+            
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

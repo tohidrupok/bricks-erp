@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Received Voucher List - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+.message.success {
+    color: green;
+    background-color: #d4edda;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.message.error {
+    color: red;
+    background-color: #f8d7da;
+    padding: 10px;
+    border-radius: 5px;
+}
+#table { border-collapse: collapse; width: 100%; }
+#th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+</style>
+<style>
+table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;   /* ✅ Important */
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 6px;
+    text-align: center;
+    overflow: hidden;
+}
+
+th {
+    background: #f3f3f3;
+}
+
+/* Make inputs full width inside cell */
+td select,
+td input {
+    width: 100%;
+    box-sizing: border-box;
+}
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            {% include 'partials/header.html' %}
+
+            <h2 class="intro-y mt-10 text-lg font-medium">Received/Collection Voucher List</h2>
+
+            {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                        <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <div class="mt-5 grid grid-cols-12 gap-6">
+                <!--<div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">-->
+                <!--    <a href="{% url 'collection_add' %}">-->
+                <!--        <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium bg-success border-success text-white mr-2 shadow-md">-->
+                <!--            Refresh-->
+                <!--        </button>-->
+                <!--    </a>    -->
+                <!--    <a href="{% url 'collection_list' %}">-->
+                <!--        <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium bg-primary border-primary text-white mr-2 shadow-md">-->
+                <!--            Collection List-->
+                <!--        </button>-->
+                <!--    </a>  -->
+                <!--</div>-->
+                <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center justify-between sm:flex-nowrap w-full">
+    
+                    <!-- Left side buttons and Month Filter Form -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <a href="{% url 'collection_add' %}">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium bg-success border-success text-white mr-2 shadow-md">
+                                Refresh
+                            </button>
+                        </a>    
+                        <a href="{% url 'collection_list' %}">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium bg-primary border-primary text-white mr-2 shadow-md">
+                                Collection List
+                            </button>
+                        </a>  
+                         <a href="{% url 'month_collection_list' %}">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium bg-success border-success text-white mr-2 shadow-md">
+                                Collection View
+                            </button>
+                        </a>
+                    </div>
+                
+                
+                </div>
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                   <form method="post">
+                        {% csrf_token %}
+                        {{ formset.management_form }}
+                    
+                        {% if formset.non_form_errors %}
+                            <div class="alert alert-danger">
+                                {{ formset.non_form_errors }}
+                            </div>
+                        {% endif %}
+                    
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Project</th>
+                                    <th>Type</th>
+                                    <th>Name</th>
+                                    <th>Sales Type</th>
+                                    <th>Amount</th>
+                                    <th>Cash Type</th>
+                                    <th>Total Sale</th>
+                                </tr>
+                            </thead>
+                         <tbody>
+                            {% for form in formset %}
+                            <tr>
+                            
+                                {{ form.id }}
+                            
+                                {% if forloop.first %}
+                                <td rowspan="{{ formset.total_form_count }}">
+                                    <input type="date" name="date"
+                                           value="{{ selected_date }}"
+                                           onchange="if(this.value) this.form.submit()">
+                                </td>
+                                
+                                <td rowspan="{{ formset.total_form_count }}">
+                                    <select name="project"
+                                            onchange="if(this.value) this.form.submit()">
+                                        <option value="">Select</option>
+                                        {% for p in projects %}
+                                            <option value="{{ p.id }}"
+                                                {% if p.id|stringformat:"s" == selected_project %}
+                                                    selected
+                                                {% endif %}
+                                            >
+                                                {{ p.project_first_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                {% endif %}
+                            
+                                <!-- ✅ TYPE -->
+                                <td>
+                                    {{ form.type }}
+                                </td>
+                            
+                                <!-- ✅ EMPLOYEE -->
+                                <td class="employee-field">
+                                    {{ form.employee }}
+                                </td>
+                            
+                                <!-- ✅ CUSTOMER -->
+                                <td class="customer-field">
+                                    {{ form.customer_name }}
+                                </td>
+                            
+                                <td>{{ form.sales_type }}</td>
+                                <td>{{ form.amount }}</td>
+                                <td>{{ form.cash_type }}</td>
+                            
+                                {% if forloop.first %}
+                                    <td rowspan="{{ formset.total_form_count }}" id="totalAmount">
+                                        {{ total_sale|default:"0.00" }}
+                                    </td>
+                                {% endif %}
+                            
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    
+                        <br>
+                    
+                        <button type="submit"
+                            class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium bg-primary text-white shadow-md">
+                            Save Collection
+                        </button>
+                    </form>
+                    {% if selected_date and selected_project %}
+                    <div class="mt-5 p-4 bg-white rounded shadow">
+                        <h3 style="font-weight:bold;">Total Summary</h3>
+                    
+                        <p><strong>Date:</strong> {{ selected_date }}</p>
+                    
+                        <p><strong>Project:</strong>
+                            {% for p in projects %}
+                                {% if p.id|stringformat:"s" == selected_project %}
+                                    {{ p.project_first_name }}
+                                {% endif %}
+                            {% endfor %}
+                        </p>
+                    
+                        <p style="font-size:20px; color:green;">
+                            <strong>Total Amount:</strong> {{ total_summary|floatformat:2 }}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function calculateTotal() {
+    let total = 0;
+    document.querySelectorAll('input[name$="amount"]').forEach(input => {
+        let val = parseFloat(input.value);
+        if(!isNaN(val)) total += val;
+    });
+    const totalBox = document.getElementById('totalAmount');
+    if(totalBox) totalBox.innerText = total.toFixed(2);
+}
+document.addEventListener('input', calculateTotal);
+</script>
+
+<script>
+function toggleRowFields(row) {
+    const typeSelect = row.querySelector("select[name$='type']");
+    const employeeField = row.querySelector(".employee-field");
+    const customerField = row.querySelector(".customer-field");
+
+    if (!typeSelect) return;
+
+    const selectedValue = typeSelect.value;
+
+    if (selectedValue === "Employee") {
+        employeeField.style.display = "table-cell";
+        customerField.style.display = "none";
+    }
+    else if (selectedValue === "Customer") {
+        employeeField.style.display = "none";
+        customerField.style.display = "table-cell";
+    }
+    else {
+        employeeField.style.display = "table-cell";
+        customerField.style.display = "none";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const rows = document.querySelectorAll("tbody tr");
+
+    rows.forEach(function(row) {
+
+        // Initial state
+        toggleRowFields(row);
+
+        // On change
+        const typeSelect = row.querySelector("select[name$='type']");
+        if (typeSelect) {
+            typeSelect.addEventListener("change", function() {
+                toggleRowFields(row);
+            });
+        }
+
+    });
+
+});
+</script>
+
+{% endblock %}

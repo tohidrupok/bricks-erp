@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Restaurant Expense Category</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#eef2f7;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:600px;
+    margin:auto;
+}
+
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+h2{
+    margin-bottom:15px;
+}
+
+input, textarea, select{
+    width:100%;
+    padding:10px;
+    margin-bottom:12px;
+    border:1px solid #ddd;
+    border-radius:6px;
+}
+
+button{
+    background:#28a745;
+    color:white;
+    padding:10px 15px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#218838;
+}
+
+a{
+    text-decoration:none;
+    color:#0d6efd;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <h2>Add Restaurant Category</h2>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button type="submit">Save Category</button>
+        </form>
+
+        <br>
+
+        <a href="{% url 'public_restaurant_requisition_exp_category' %}">
+            ← Back to Category List
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

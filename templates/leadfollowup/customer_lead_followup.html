@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Customer Lead Followup - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+            <h2 class="intro-y mt-10 text-lg font-medium">Customer Lead Followup</h2>
+
+            <div class="mt-5 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+
+                    <div class="max-w-5xl mx-auto p-8 bg-white shadow-xl rounded-2xl mt-6">
+						<h2 class="text-3xl font-bold text-gray-800 mb-8 border-b pb-4">🗓️ Add Follow-up</h2>
+
+                       <form method="POST" class="space-y-6">
+                            {% csrf_token %}
+
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="mt-2 text-sm font-medium text-{{ message.tags }}-600">
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                            <p class="text-sm text-gray-700">
+                                Lead Name: <strong>{{ previous_leads.lead_name }}</strong><br>
+                                Customer Name: <strong>{{ previous_leads.customer.customer_name }}</strong>
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="col-span-1 md:col-span-2">
+                                    <label for="followup_note" class="block text-sm font-semibold text-gray-600 mb-1">Follow-up Note</label>
+                                    <textarea name="followup_note" id="followup_note" rows="4"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                                        placeholder="Enter follow-up note...">{{ form.followup_note.value|default_if_none:'' }}</textarea>
+                                    {% for error in form.followup_note.errors %}
+                                        <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+
+                                <div>
+                                    <label for="followup_date" class="block text-sm font-semibold text-gray-600 mb-1">Next Follow-up Date</label>
+                                    <input type="date" name="followup_date" id="followup_date"
+                                        value="{{ form.followup_date.value|default:today }}"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+                                    {% for error in form.followup_date.errors %}
+                                        <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+
+                                <div class="flex items-center space-x-6">
+                                    <label class="inline-flex items-center">
+                                    <input type="radio" name="status" value="open"
+                                            {% if lead.status == 'open' %}checked{% endif %}
+                                            class="form-radio text-green-600" checked>
+                                    <span class="ml-2 text-sm text-gray-700">Open</span> &nbsp;&nbsp;&nbsp;
+                                    </label>
+
+                                    <label class="inline-flex items-center">
+                                    <input type="radio" name="status" value="close"
+                                            {% if lead.status == 'close' %}checked{% endif %}
+                                            class="form-radio text-red-600">
+                                    <span class="ml-2 text-sm text-gray-700">Close</span>
+                                    </label>
+                                </div>
+                                </div>
+
+                            <div class="flex justify-center space-x-4 mt-8">
+                                <button type="submit"
+                                        style="background-color:#1e3c98"
+                                        class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-8 py-3 rounded-md shadow transition duration-150 ease-in-out">
+                                    Save Follow-up
+                                </button>
+
+                                <a href="{% url 'lead_followup_list' %}"
+                                    class="inline-flex items-center justify-center bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold text-sm px-8 py-3 rounded-md shadow transition duration-150 ease-in-out">
+                                    ← Back
+                                </a>
+                                </div>
+                        </form>
+
+                       {% if previous_followups %}
+                        <div class="mt-10 max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4">Previous Follow-ups</h3>
+                            <table class="w-full table-auto border border-gray-300 text-sm">
+                                <thead>
+                                    <tr class="bg-gray-200">
+                                        <th class="border px-3 py-2">Date</th>
+                                        <th class="border px-3 py-2">Note</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for followup in previous_followups %}
+                                    <tr class="hover:bg-gray-100">
+                                        <td class="border px-3 py-2">{{ followup.create_date|date:"Y-m-d H:i" }}</td>
+                                        <td class="border px-3 py-2">{{ followup.followup_note }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+
+                </div>
+            </div>
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+{% endblock %}

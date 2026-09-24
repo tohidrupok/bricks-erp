@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Jewel Ledger Manage - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        {% include 'partials/mobile.html' %}
+        <div class="mt-[4.7rem] flex md:mt-0">
+            {% include 'partials/sidebar_list.html' %}
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                {% include 'partials/header.html' %}
+                <h2 class="intro-y mt-10 text-lg font-medium">Jewel Ledger Manage</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{% url 'requisition_jewel_ledger_list' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Back</button>
+                        </a>
+                        <a href="{% url 'rest_jewel_ledger_manage' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Refresh</button>
+                        </a>
+                    </div>
+            
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <form method="get" action="{% url 'rest_jewel_ledger_report' %}" class="w-full max-w-4xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                            <h2 class="text-2xl font-semibold text-gray-800 text-center mb-6">Jewel Restaurant Ledger</h2>
+                            
+                            <div class="space-y-4">
+                                <input type="hidden" name="type" value="Project">
+                                
+                                <div class="mb-4">
+                                    <label for="id_project" class="block font-medium text-gray-800 mb-1">Project Name</label>
+                                    <select name="project" id="id_project" 
+                                        class="w-full border border-slate-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Select Project</option>
+                                        {% for projectName in projectNames %}
+                                            <option value="{{ projectName.id }}">{{ projectName.project_first_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <!--<div class="mb-4" id="employee_field_wrapper">-->
+                                <!--    <label for="id_employee" class="block font-medium text-gray-800 mb-1">Employee Name</label>-->
+                                <!--    <select name="employee" id="id_employee" -->
+                                <!--        class="w-full border border-slate-300 rounded-md p-3 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">-->
+                                <!--        <option value="">Select an Employee</option>-->
+                                <!--    </select>-->
+                                <!--</div>-->
+                                <div class="mb-4" id="employee_field_wrapper">
+                                    <label for="id_ledger_type" class="block font-medium text-gray-800 mb-1">Ledger Type</label>
+                                    <select name="ledger_type" id="id_ledger_type" 
+                                        class="w-full border border-slate-300 rounded-md p-3 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Select an Type</option>
+                                        <option value="Expense">Expense</option>
+                                        <option value="Purchase">Purchase</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block font-medium text-gray-800 mb-2"><b>Transaction Type</b></label>
+                                    <div class="flex space-x-6">
+                                        <label class="inline-flex items-center">
+                                            <input type="radio" name="transaction" value="all" class="form-radio text-blue-600"
+                                                {% if request.GET.transaction == 'all' %}checked{% endif %}>
+                                            <span class="ml-2 text-gray-700">All Transactions &nbsp;&nbsp;&nbsp;&nbsp; </span>
+                                        </label>
+                                        <label class="inline-flex items-center">
+                                            <input type="radio" name="transaction" value="datewise" class="form-radio text-blue-600"
+                                                {% if request.GET.transaction == 'datewise' or not request.GET.transaction %}checked{% endif %}>
+                                            <span class="ml-2 text-gray-700">Date Wise</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <br>
+                                
+                                <div>
+                                    <label for="from_date" class="block font-medium text-gray-800 mb-2"><b>From Date</b></label>
+                                    <input type="date" name="from_date" id="from_date"
+                                        value="{{ request.GET.from_date|default:today|date:'Y-m-d' }}"
+                                        class="w-full border border-slate-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="to_date" class="block font-medium text-gray-800 mb-2"><b>To Date</b></label>
+                                    <input type="date" name="to_date" id="to_date"
+                                        value="{{ request.GET.to_date|default:today|date:'Y-m-d' }}"
+                                        class="w-full border border-slate-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <br/>
+                                <div class="text-center">
+                                    <button type="submit" style="background-color:#1e3c98" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors duration-200">
+                                        Show Results
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const projectSelect = document.getElementById('id_project');
+                                const employeeSelect = document.getElementById('id_employee');
+
+                                projectSelect.addEventListener('change', function () {
+                                    const projectId = this.value;
+
+                                    // Clear current selection choices
+                                    employeeSelect.innerHTML = '<option value="">Select an Employee</option>';
+
+                                    if (!projectId) {
+                                        employeeSelect.disabled = true;
+                                        employeeSelect.style.backgroundColor = '#f1f1f1';
+                                        return;
+                                    }
+
+                                    // Asynchronously pull linked active employee profiles
+                                    const targetUrl = `{% url "ajax_get_restaurant_employees" %}?project_id=${projectId}`;
+                                    
+                                    fetch(targetUrl)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.length > 0) {
+                                                employeeSelect.disabled = false;
+                                                employeeSelect.style.backgroundColor = '';
+                                                
+                                                data.forEach(emp => {
+                                                    const option = document.createElement('option');
+                                                    option.value = emp.id;
+                                                    option.textContent = emp.rda_emp_name;
+                                                    employeeSelect.appendChild(option);
+                                                });
+                                            } else {
+                                                employeeSelect.disabled = true;
+                                                employeeSelect.style.backgroundColor = '#f1f1f1';
+                                                employeeSelect.innerHTML = '<option value="">No active employees discovered</option>';
+                                            }
+                                        })
+                                        .catch(err => {
+                                            console.error("Failed to load project employee datasets:", err);
+                                        });
+                                });
+
+                                // Basic setup rules for elements
+                                const transactionRadios = document.querySelectorAll('input[name="transaction"]');
+                                const fromDate = document.getElementById('from_date');
+                                const toDate = document.getElementById('to_date');
+
+                                function updateDateFields() {
+                                    const selectedTransaction = document.querySelector('input[name="transaction"]:checked')?.value;
+                                    const isAllTransaction = selectedTransaction === 'all';
+
+                                    fromDate.readOnly = isAllTransaction;
+                                    toDate.readOnly = isAllTransaction;
+
+                                    fromDate.style.backgroundColor = isAllTransaction ? '#f1f1f1' : '';
+                                    toDate.style.backgroundColor = isAllTransaction ? '#f1f1f1' : '';
+                                }
+
+                                updateDateFields();
+                                transactionRadios.forEach(radio => {
+                                    radio.addEventListener('change', updateDateFields);
+                                });
+                            });
+                        </script>                   
+                    </div>
+                </div>
+            </div>
+            </div>
+    </div>
+{% endblock %}

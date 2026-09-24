@@ -1,0 +1,204 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BOQ Category PDF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: #1f3bb3;
+            font-weight: bold;
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .sub-header {
+            text-align: center;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 3px;
+        }
+
+        .contact {
+            text-align: center;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .memo-box {
+            position: absolute;
+            right: 40px;
+            top: 20px;
+            border: 2px solid #ccc;
+            padding: 8px;
+            width: 130px;
+            text-align: center;
+        }
+
+        .memo-box h3 {
+            margin: 0;
+            font-size: 14px;
+            color: green;
+        }
+
+        .memo-box p {
+            color: red;
+            font-weight: bold;
+            margin: 4px 0 0 0;
+            font-size: 13px;
+        }
+
+        .info {
+            font-size: 13px;
+            margin: 10px 0;
+        }
+
+        .info span {
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #000;
+        }
+
+        th {
+            background: #f0f0f0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        th, td {
+            padding: 6px;
+            text-align: center;
+        }
+
+        .description {
+            text-align: left;
+        }
+
+        .amount-word {
+            font-weight: bold;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .note {
+            margin-top: 30px;
+            font-size: 13px;
+        }
+
+        .signature {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+        }
+
+        .signature div {
+            width: 24%;
+            padding-top: 10px;
+            border-top: 2px solid #000;
+            font-size: 13px;
+        }
+
+        .no-print {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">BRICKS LIMITED</div>
+        <div class="contact">
+              Bonanai, Dhaka-1216<br>
+              01993005558, 09639246230, 09639246231 <br>
+              bricks@gmail.com, bricks@gmail.com, www.bricks.com
+        </div>
+
+        <!-- Memo Box -->
+        <div class="memo-box">
+            <h3>BOQ | Category PDF</h3>
+            
+        </div>
+
+        <!-- Info Section -->
+        <div class="info">
+            <p><span>Project:</span> {{ project.project_first_name }}</p>
+            <p><span>Date:</span> {{ project.current_date }}</p>
+            <p><span>Category:</span> {{ category_name }}</p>
+        </div>
+
+        <!-- Table Section -->
+        <table>
+            <thead>
+                <tr>
+                    <th>SL</th>
+                    <th>Item Name</th>
+                    <th>Unit</th>
+                    <th>Qty</th>
+                    <th>Rate</th>
+                    <th>Amount (Tk)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in boq_items %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="description"><b>{{ item.item_name }}</b></td>
+                    <td>{{ item.unit }}</td>
+                    <td>{{ item.qty }}</td>
+                    <td>{{ item.rate|floatformat:2 }}</td>
+                    <td>{{ item.amount|intcomma }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">No BOQ items found.</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="5" style="text-align: right;"><strong>Total Amount (Tk)</strong></td>
+                    <td><strong>{{ total_amount|intcomma }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Amount in Words -->
+        <div class="amount-word">
+            In Words: {{ amount_in_words }} Only.
+        </div>
+
+        <!-- Print Button -->
+        <div class="no-print">
+            <button onclick="window.print()" style="background-color: #1f3bb3; color: white; padding: 8px 18px; border: none; border-radius: 4px;">Print</button>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,122 @@
+{% extends 'office_inventory/base.html' %}
+
+{% block header %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card card-stat p-3" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-header mb-3">
+        <h2>{{ title }}</h2>
+        {% if assignment %}<div class="text-muted small">Currently: {{ assignment.assignee_label }} - {{ assignment.item }}</div>{% endif %}
+    </div>
+
+    <form method="post" id="assignmentForm" novalidate>
+        {% csrf_token %}
+
+        {% for field in form %}
+            {% if field.name == 'employee' or field.name == 'restaurant_employee' or field.name == 'assignee_name' %}
+                <div class="form-group mb-3 assign-target-field" data-field="{{ field.name }}">
+                    <label class="form-label font-weight-bold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors.0 }}</div>{% endif %}
+                </div>
+            {% elif field.name == 'unit' %}
+                <div class="form-group mb-3">
+                    <label class="form-label font-weight-bold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    <div class="form-text">Auto-filled from the selected item's unit - change only if this specific assignment is unit-different.</div>
+                    {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors.0 }}</div>{% endif %}
+                </div>
+            {% else %}
+                <div class="form-group mb-3">
+                    <label class="form-label font-weight-bold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                    {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors.0 }}</div>{% endif %}
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-success flex-grow-1">Save Record</button>
+            <a href="{% url 'office_inventory:assignment_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{{ employee_source_map|json_script:"employee-source-map" }}
+{{ item_unit_map|json_script:"item-unit-map" }}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // employee_source_map: {"<AssignmentType id>": "HR" | "RESTAURANT" | "NONE"}
+    // item_unit_map: {"<InventoryItem id>": "PCS" | "SET" | ...}
+    // Both rendered by the view.
+    const mapEl = document.getElementById('employee-source-map');
+    const sourceMap = mapEl ? JSON.parse(mapEl.textContent) : {};
+    const unitMapEl = document.getElementById('item-unit-map');
+    const itemUnitMap = unitMapEl ? JSON.parse(unitMapEl.textContent) : {};
+
+    const typeField = document.querySelector('[id$="assignment_type"]');
+    const employeeWrap = document.querySelector('.assign-target-field[data-field="employee"]');
+    const restaurantWrap = document.querySelector('.assign-target-field[data-field="restaurant_employee"]');
+    const nameWrap = document.querySelector('.assign-target-field[data-field="assignee_name"]');
+
+    function showOnly(wrapToShow) {
+        [employeeWrap, restaurantWrap, nameWrap].forEach(function (wrap) {
+            if (!wrap) return;
+            wrap.style.display = (wrap === wrapToShow) ? '' : 'none';
+        });
+    }
+
+    function syncTargetField() {
+        if (!typeField) return;
+        const source = sourceMap[typeField.value];
+        if (source === 'HR') {
+            showOnly(employeeWrap);
+        } else if (source === 'RESTAURANT') {
+            showOnly(restaurantWrap);
+        } else if (source === 'NONE') {
+            showOnly(nameWrap);
+        } else {
+            // Unknown/none selected yet - show all three, let server-side
+            // validation guide the user once they pick a type.
+            [employeeWrap, restaurantWrap, nameWrap].forEach(function (wrap) {
+                if (wrap) wrap.style.display = '';
+            });
+        }
+    }
+
+    if (typeField) {
+        typeField.addEventListener('change', syncTargetField);
+        syncTargetField();
+    }
+
+    // Suggest the unit from the selected item - convenience default only,
+    // still editable for a genuinely unit-different assignment.
+    const itemField = document.querySelector('[id$="item"]');
+    const unitField = document.querySelector('[id$="unit"]');
+    function syncUnitField(force) {
+        if (!itemField || !unitField) return;
+        const unit = itemUnitMap[itemField.value];
+        if (unit && (force || !unitField.value)) {
+            unitField.value = unit;
+        }
+    }
+    if (itemField) {
+        itemField.addEventListener('change', function () { syncUnitField(true); });
+        syncUnitField(false);
+    }
+
+    // Status field (only present when the model exposes it on this form) -
+    // clear return date if switched back to Assigned.
+    const statusField = document.querySelector('[id$="status"]');
+    const returnDateField = document.querySelector('[id$="return_date"]');
+    if (statusField && returnDateField) {
+        statusField.addEventListener("change", function () {
+            if (this.value === "ASSIGNED") {
+                returnDateField.value = "";
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

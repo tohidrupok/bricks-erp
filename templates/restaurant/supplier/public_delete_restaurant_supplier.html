@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Restaurant Supplier</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#eef2f7;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:500px;
+    margin:auto;
+}
+
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    text-align:center;
+}
+
+button{
+    background:#dc3545;
+    color:white;
+    padding:10px 15px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#bb2d3b;
+}
+
+a{
+    text-decoration:none;
+    color:#0d6efd;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+    <div class="card">
+
+        <h2>Delete Supplier</h2>
+
+        <p>Are you sure you want to delete:</p>
+
+        <h3>{{ supplier.rest_supplier_name }}</h3>
+
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit">Yes, Delete</button>
+        </form>
+
+        <br>
+
+        <a href="{% url 'public_restaurant_supplier_list' %}">Cancel</a>
+
+    </div>
+</div>
+
+</body>
+</html>

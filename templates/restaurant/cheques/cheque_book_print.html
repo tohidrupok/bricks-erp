@@ -1,0 +1,214 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Cheque Book List</title>
+
+<style>
+body {
+    font-family: Arial;
+    font-size: 11px;
+    background: silver;
+    padding: 20px;
+}
+
+.card {
+    background: #fff;
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+}
+
+/* Header */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo img {
+    height: 50px;
+}
+
+.label-box {
+    background-color: #e2f0d9;
+    padding: 5px 12px;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+/* Tables */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.table th, .table td {
+    border: 1px solid #ccc;
+    padding: 6px;
+}
+
+/* Footer */
+.footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+}
+
+.back-btn {
+    background: green;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.print-btn {
+    background: #1e3c98;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.signature-section {
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+}
+
+.signature-box {
+    flex: 1;
+    padding: 8px;
+}
+
+.signature-box:not(:last-child) {
+    margin-right: 10px;
+}
+
+.signature-line {
+    display: block;
+    margin-top: 25px;
+    border-top: 1px solid #000;
+    width: 100%;
+}
+
+.bm-property {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+
+@media print {
+    body { background: white; padding: 0; }
+    .no-print { display: none; }
+    .card { box-shadow: none; border: none; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<!-- Header -->
+<div class="card-header">
+    <div class="logo">
+        <img src="{% static '/images/resturant-logo.png' %}" alt="Company Logo">
+    </div>
+
+    <div style="text-align:right;">
+        <div class="label-box">Cheque Book Report</div>
+        <p style="font-size:11px;margin-top:4px;">
+            Printing Date: {{ print_time|date:"F j, Y, g:i a" }}
+        </p>
+    </div>
+</div>
+
+<hr>
+
+<!-- Book Info -->
+<div>
+    <strong>Book Name:</strong> {{ book.book_name }}<br>
+    <strong>Book Number:</strong> {{ book.book_number }}<br>
+    <strong>Account:</strong> {{ book.account }}
+</div>
+
+<hr>
+
+<!-- Cheque Table -->
+<table class="table">
+<thead>
+<tr>
+    <th>Cheque No</th>
+    <th>Payee</th>
+    <th>Amount</th>
+    <th>Status</th>
+    <th>Remarks</th>
+</tr>
+</thead>
+
+<tbody>
+{% for cheque in cheques %}
+<tr>
+    <td>{{ cheque.cheque_number }}</td>
+    <td>{{ cheque.payee_name }}</td>
+    <td>{{ cheque.amount }}</td>
+    <td>{{ cheque.get_status_display }}</td>
+    <td>{{ cheque.remarks }}</td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="5">No cheques found</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+<!-- Signatures -->
+<div class="signature-section">
+    <div class="signature-box">
+        <span class="signature-line"></span>
+        Prepared By
+    </div>
+
+    <div class="signature-box">
+        <span class="signature-line"></span>
+        Checked By
+    </div>
+
+    <div class="signature-box">
+        <span class="bm-property">
+            {{ voucher.create_dr|default:"" }}
+        </span>
+        <span class="signature-line"></span>
+        Approved By
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+
+    <div class="no-print">
+        <button onclick="window.history.back()" class="back-btn">
+            ← Back
+        </button>
+    </div>
+
+    <div class="no-print">
+        <button onclick="window.print()" class="print-btn">
+            🖨️ Print
+        </button>
+    </div>
+
+</div>
+
+</div>
+</body>
+</html>

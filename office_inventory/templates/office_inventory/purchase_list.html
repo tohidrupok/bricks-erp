@@ -1,0 +1,38 @@
+{% extends 'office_inventory/base.html' %}
+{% block header %}Purchases{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+  <form class="d-flex gap-2" method="get">
+    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">All Status</option>
+      {% for val, label in status_choices %}<option value="{{ val }}" {% if selected_status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </form>
+  <!--<a href="{% url 'office_inventory:purchase_create' %}" class="btn btn-sm btn-primary"><i class="bi bi-plus"></i> New Purchase</a>-->
+</div>
+<div class="card card-stat p-3">
+<table class="table table-hover">
+<thead><tr><th>PO No</th><th>Date</th><th>Item</th><th>Requisition</th><th>Supplier</th><th>Qty</th><th>Unit Price</th><th>Total</th><th>Status</th><th></th></tr></thead>
+<tbody>
+{% for p in purchases %}
+<tr>
+  <td>{{ p.purchase_no }}</td><td>{{ p.date }}</td><td>{{ p.item }}</td>
+  <td>{% if p.requisition %}<a href="{% url 'office_inventory:requisition_detail' p.requisition.pk %}">{{ p.requisition.req_no }}</a>{% else %}-{% endif %}</td>
+  <td>{{ p.supplier|default:"-" }}</td>
+  <td>{{ p.qty }}</td><td>{{ p.unit_price }}</td><td>{{ p.total_amount }}</td>
+  <td><span class="badge {% if p.status == 'RECEIVED' %}bg-success{% elif p.status == 'CANCELLED' %}bg-secondary{% else %}bg-warning{% endif %}">{{ p.get_status_display }}</span></td>
+  <td class="d-flex gap-1">
+    {% if p.status == 'ORDERED' and can_receive %}
+    <form method="post" action="{% url 'office_inventory:purchase_receive' p.pk %}">{% csrf_token %}
+      <button class="btn btn-sm btn-outline-success">Receive</button>
+    </form>
+    <form method="post" action="{% url 'office_inventory:purchase_cancel' p.pk %}">{% csrf_token %}
+      <button class="btn btn-sm btn-outline-danger">Cancel</button>
+    </form>
+    {% endif %}
+  </td>
+</tr>
+{% empty %}<tr><td colspan="10" class="text-center text-muted">No purchases yet.</td></tr>{% endfor %}
+</tbody></table>
+</div>
+{% endblock %}

@@ -1,0 +1,779 @@
+{% load humanize %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payroll Report</title>
+
+    <style>
+
+        body{
+            font-family: Arial, sans-serif;
+            font-size:11px;
+            background:silver;
+            padding:20px;
+        }
+
+        .card{
+            background:#fff;
+            border-radius:6px;
+            padding:20px;
+            max-width:1500px;
+            margin:auto;
+            box-shadow:0 2px 6px rgba(0,0,0,.1);
+        }
+
+        .logo img{
+            height:55px;
+        }
+
+        .card-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            margin-bottom:10px;
+        }
+
+        .label-box{
+            background:#e2f0d9;
+            padding:5px 12px;
+            font-weight:bold;
+            border-radius:4px;
+            font-size:13px;
+        }
+
+        .sub-head{
+            font-size:11px;
+            color:#555;
+            margin-top:-15px;
+            margin-bottom:10px;
+        }
+
+        .table{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:15px;
+            font-size:11px;
+        }
+
+        .table th,
+        .table td{
+            border:1px solid #ccc;
+            padding:6px;
+        }
+
+        .table th{
+            background:#0A8754;
+            color:#fff;
+            text-align:center;
+        }
+
+        .text-right{
+            text-align:right;
+        }
+
+        .text-center{
+            text-align:center;
+        }
+
+        .total-row td{
+            background:#e3f1e6;
+            font-weight:bold;
+        }
+
+        .manual-input{
+            margin:15px 0;
+            display:flex;
+            gap:10px;
+            align-items:end;
+            flex-wrap:wrap;
+        }
+
+        .manual-input input,
+        .manual-input select{
+            padding:6px;
+            border:1px solid #ccc;
+            border-radius:4px;
+        }
+
+        .btn-update{
+            background:#0A8754;
+            color:#fff;
+            border:none;
+            padding:7px 14px;
+            border-radius:4px;
+            cursor:pointer;
+        }
+
+        .print-btn{
+            background:#1e3c98;
+            color:#fff;
+            border:none;
+            padding:7px 14px;
+            border-radius:4px;
+            cursor:pointer;
+        }
+
+        .btn-back{
+            background:#6c757d;
+            color:#fff;
+            text-decoration:none;
+            padding:7px 14px;
+            border-radius:4px;
+        }
+
+        .footer{
+            display:flex;
+            justify-content:space-between;
+            margin-top:20px;
+        }
+
+        .signature-section{
+            margin-top:80px;
+            display:flex;
+            justify-content:space-between;
+            gap:20px;
+        }
+
+        .signature-box{
+            flex:1;
+            border-top:1px solid #000;
+            text-align:center;
+            padding-top:8px;
+        }
+
+        input[type=number]{
+            width:65px;
+            text-align:center;
+        }
+
+        .status-select{
+            width:80px;
+        }
+
+       @media print{
+
+    body{
+        background:#fff;
+        padding:0;
+    }
+
+    .card{
+        box-shadow:none;
+    }
+
+    .no-print{
+        display:none !important;
+    }
+
+    input.print-clean{
+        border:none !important;
+        outline:none !important;
+        background:transparent !important;
+        appearance:none;
+        -webkit-appearance:none;
+        font-size:11px;
+        font-weight:bold;
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button{
+        -webkit-appearance:none;
+        margin:0;
+    }
+
+    /* =========================
+       HIDE BASIC COLUMN
+    ========================= */
+
+    .table th:nth-child(10),
+    .table td:nth-child(10){
+        display:none !important;
+    }
+
+    /* =========================
+       HIDE ADVANCE COLUMN
+    ========================= */
+
+    .table th:nth-child(14),
+    .table td:nth-child(14){
+        display:none !important;
+    }
+
+    /* =========================
+       HIDE LOAN COLUMN
+    ========================= */
+
+    .table th:nth-child(16),
+    .table td:nth-child(16){
+        display:none !important;
+    }
+    .hide-print{
+    display:none !important;
+}
+
+}
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+    <!-- HEADER -->
+    <div class="card-header">
+
+        <div class="logo">
+            <img src="{% static 'images/BTP_logo_webp.webp' %}">
+        </div>
+
+        <div style="text-align:right;">
+            <div class="label-box">
+                Payroll Report
+            </div>
+
+            <p>
+                Printing :
+                {{ print_time|date:"F j, Y, g:i a" }}
+            </p>
+        </div>
+
+    </div>
+
+    <div class="sub-head">
+        House-148 (4th Floor), Road-02, Block-A, Mirpur, Dhaka
+    </div>
+
+    <hr>
+
+    <!-- TITLE -->
+    {% if selected_project %}
+        <h3>
+            Payroll Report -
+            {{ selected_project.project_first_name }}
+            ({{ month }})
+        </h3>
+    {% else %}
+        <h3>
+            Payroll Report - {{ month }}
+        </h3>
+    {% endif %}
+
+    <!-- FILTER -->
+    <div class="manual-input no-print">
+
+        <form method="GET" style="display:flex; gap:10px; flex-wrap:wrap;">
+
+            <div>
+                <label>Month</label><br>
+                <input type="month" name="month">
+            </div>
+
+            <div>
+                <label>Project</label><br>
+
+                <select name="project_id">
+
+                    <option value="">
+                        All Project
+                    </option>
+
+                    {% for p in projects %}
+
+                        <option value="{{ p.id }}"
+                            {% if selected_project.id == p.id %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ p.project_first_name }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div>
+                <button type="submit" class="btn-update">
+                    Change
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- MAIN FORM -->
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <!-- MONTH NAME -->
+        <div class="manual-input no-print">
+
+            <div>
+                <label>Payroll Month Name</label><br>
+
+                <input type="text"
+                       name="manual_month_name"
+                       value="{{ month }}">
+            </div>
+
+        </div>
+
+        <!-- TABLE -->
+        <table class="table">
+
+            <thead>
+
+            <tr>
+
+                <th>Name</th>
+                <th>Designation</th>
+                <th>Salary</th>
+                <th>Total</th>
+                <th>Present</th>
+                <th>Leave</th>
+                <th>Off</th>
+                <th>Absent</th>
+                <th>Payable</th>
+                <th>Basic</th>
+                <th>Allowance</th>
+                <th>Gross</th>
+                <th>Advance</th>
+                <th>Advance Status</th>
+                <th>Loan</th>
+                <th>Loan Status</th>
+                <th>Net</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for item in payrolls %}
+
+                <tr class="payroll-row"
+                    data-id="{{ item.employee.id }}"
+                    data-salary="{{ item.employee.rda_salary }}"
+                    data-allowance="{{ item.allowances }}"
+                    data-advance="{{ item.advance_amount }}"
+                    data-loan="{{ item.loan_amount }}"
+                    data-days="{{ item.days_in_month }}"
+                >
+
+                    <td>
+                        {{ item.employee.rda_emp_name }}
+                    </td>
+
+                    <td>
+                        {{ item.employee.rda_position }}
+                    </td>
+
+                    <td class="text-right salary-total">
+                        {{ item.employee.rda_salary|floatformat:2 }}
+                    </td>
+
+                    <td class="text-center">
+                        {{ item.days_in_month }}
+                    </td>
+
+                    <td class="text-center">
+                        {{ item.present_days }}
+                    </td>
+
+                    <td class="text-center">
+                        {{ item.leave_days }}
+                    </td>
+
+                    <td class="text-center">
+                        {{ item.off_days }}
+                    </td>
+
+                    <td class="text-center">
+                        {{ item.absent_days }}
+                    </td>
+
+                    <!-- PAYABLE -->
+                    <td class="text-center">
+
+                        <input type="number"
+                               name="payable_days_{{ item.employee.id }}"
+                               value="{{ item.working_days }}"
+                               class="payable-days print-clean">
+
+                    </td>
+
+                    <!-- BASIC -->
+                    <td class="text-right basic"
+                        id="basic_{{ item.employee.id }}">
+
+                        {{ item.basic_salary|floatformat:2 }}
+
+                    </td>
+
+                    <!-- ALLOWANCE -->
+                    <td class="text-right allowance">
+                        {{ item.allowances|floatformat:2 }}
+                    </td>
+
+                    <!-- GROSS -->
+                    <td class="text-right gross"
+                        id="gross_{{ item.employee.id }}">
+
+                        {{ item.gross_salary|floatformat:2 }}
+
+                    </td>
+
+                    <!-- ADVANCE -->
+                    <td class="text-right advance">
+                        {{ item.advance_amount|floatformat:2 }}
+                    </td>
+
+                    <!-- ADVANCE STATUS -->
+                    <td>
+
+                        <select name="advance_status_{{ item.employee.id }}"
+                                class="advance-status status-select">
+
+                            <option value="active"
+                                {% if item.advance_status == 'active' %}
+                                    selected
+                                {% endif %}
+                            >
+                                Active
+                            </option>
+
+                            <option value="inactive"
+                                {% if item.advance_status == 'inactive' %}
+                                    selected
+                                {% endif %}
+                            >
+                                Inactive
+                            </option>
+
+                        </select>
+
+                    </td>
+
+                    <!-- LOAN -->
+                    <td class="text-right loan">
+                        {{ item.loan_amount|floatformat:2 }}
+                    </td>
+
+                    <!-- LOAN STATUS -->
+                    <td>
+
+                        <select name="loan_status_{{ item.employee.id }}"
+                                class="loan-status status-select">
+
+                            <option value="active"
+                                {% if item.loan_status == 'active' %}
+                                    selected
+                                {% endif %}
+                            >
+                                Active
+                            </option>
+
+                            <option value="inactive"
+                                {% if item.loan_status == 'inactive' %}
+                                    selected
+                                {% endif %}
+                            >
+                                Inactive
+                            </option>
+
+                        </select>
+
+                    </td>
+
+                    <!-- NET -->
+                    <td class="text-right net"
+                        id="net_{{ item.employee.id }}">
+
+                        <strong>
+                            {{ item.net_salary|floatformat:2 }}
+                        </strong>
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            <!-- TOTAL -->
+            <tr class="total-row">
+
+                <td colspan="2" class="text-right">
+                    TOTAL
+                </td>
+
+                <td class="text-right hide-print" id="total_salary">
+
+                    {{ total_rda_salary|floatformat:2 }}
+
+                </td>
+
+                <td  colspan="6">-</td>
+
+                <td class="text-right"
+                    id="total_basic">
+
+                    {{ total_basic_salary|floatformat:2 }}
+
+                </td>
+
+                <td class="text-right"
+                    id="total_allowance">
+
+                    {{ total_allowances|floatformat:2 }}
+
+                </td>
+
+                <td class="text-right"
+                    id="total_gross">
+
+                    {{ total_gross_salary|floatformat:2 }}
+
+                </td>
+
+                <td class="text-right"
+                    id="total_advance">
+
+                    {{ total_advance|floatformat:2 }}
+
+                </td>
+
+              <td class="hide-print">-</td>
+
+                <td class="text-right"
+                    id="total_loan">
+
+                    {{ total_loans|floatformat:2 }}
+
+                </td>
+
+               <td class="hide-print">-</td>
+
+                <td class="text-right"
+                    id="total_net">
+
+                    {{ total_net_salary|floatformat:2 }}
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+        <!-- FOOTER -->
+        <div class="footer no-print">
+
+            <a href="{% url 'payroll_list' %}"
+               class="btn-back">
+
+                Back
+
+            </a>
+
+            <div>
+
+                <button type="submit"
+                        class="btn-update">
+
+                    Update
+
+                </button>
+
+                <button type="button"
+                        onclick="window.print()"
+                        class="print-btn">
+
+                    Print
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+    <!-- SIGNATURE -->
+    <div class="signature-section">
+
+        <div class="signature-box">
+            Prepared By
+        </div>
+
+        <div class="signature-box">
+            Checked By
+        </div>
+
+        <div class="signature-box">
+            Approved By
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+function calculateTotals(){
+
+    let totalBasic = 0;
+    let totalGross = 0;
+    let totalAdvance = 0;
+    let totalLoan = 0;
+    let totalNet = 0;
+
+    document.querySelectorAll(".payroll-row").forEach(row => {
+
+        totalBasic += parseFloat(
+            row.querySelector(".basic").innerText
+        ) || 0;
+
+        totalGross += parseFloat(
+            row.querySelector(".gross").innerText
+        ) || 0;
+
+        totalAdvance += parseFloat(
+            row.querySelector(".advance").innerText
+        ) || 0;
+
+        totalLoan += parseFloat(
+            row.querySelector(".loan").innerText
+        ) || 0;
+
+        totalNet += parseFloat(
+            row.querySelector(".net").innerText
+        ) || 0;
+
+    });
+
+    document.getElementById("total_basic").innerText =
+        totalBasic.toFixed(2);
+
+    document.getElementById("total_gross").innerText =
+        totalGross.toFixed(2);
+
+    document.getElementById("total_advance").innerText =
+        totalAdvance.toFixed(2);
+
+    document.getElementById("total_loan").innerText =
+        totalLoan.toFixed(2);
+
+    document.getElementById("total_net").innerText =
+        totalNet.toFixed(2);
+
+}
+
+function recalculateRow(row){
+
+    let empId = row.dataset.id;
+
+    let salary = parseFloat(
+        row.dataset.salary || 0
+    );
+
+    let allowance = parseFloat(
+        row.dataset.allowance || 0
+    );
+
+    let advance = parseFloat(
+        row.dataset.advance || 0
+    );
+
+    let loan = parseFloat(
+        row.dataset.loan || 0
+    );
+
+    let days = parseFloat(
+        row.dataset.days || 30
+    );
+
+    let payableDays = parseFloat(
+        row.querySelector(".payable-days").value || 0
+    );
+
+    let advanceStatus =
+        row.querySelector(".advance-status").value;
+
+    let loanStatus =
+        row.querySelector(".loan-status").value;
+
+    // inactive handling
+    if(advanceStatus === "inactive"){
+        advance = 0;
+    }
+
+    if(loanStatus === "inactive"){
+        loan = 0;
+    }
+
+    let dailySalary = salary / days;
+
+    let basicSalary = dailySalary * payableDays;
+
+    let grossSalary = basicSalary + allowance;
+
+    let netSalary =
+        grossSalary - advance - loan;
+
+    row.querySelector(".basic").innerText =
+        basicSalary.toFixed(2);
+
+    row.querySelector(".gross").innerText =
+        grossSalary.toFixed(2);
+
+    row.querySelector(".net").innerText =
+        netSalary.toFixed(2);
+
+    // display zero
+    row.querySelector(".advance").innerText =
+        advance.toFixed(2);
+
+    row.querySelector(".loan").innerText =
+        loan.toFixed(2);
+
+    calculateTotals();
+
+}
+
+document.querySelectorAll(".payroll-row").forEach(row => {
+
+    row.querySelectorAll(
+        ".payable-days, .advance-status, .loan-status"
+    ).forEach(el => {
+
+        el.addEventListener("input", function(){
+
+            recalculateRow(row);
+
+        });
+
+        el.addEventListener("change", function(){
+
+            recalculateRow(row);
+
+        });
+
+    });
+
+});
+
+calculateTotals();
+
+</script>
+
+</body>
+</html>

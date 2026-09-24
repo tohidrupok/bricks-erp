@@ -1,0 +1,465 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Google Drive Files{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --brand:#2563EB; --brand-dark:#1D4ED8; --brand-light:#EFF6FF;
+        --accent:#7C3AED; --success:#059669; --success-light:#ECFDF5;
+        --danger:#DC2626; --danger-light:#FEF2F2;
+        --surface:#FFFFFF; --surface-2:#F8FAFC;
+        --border:#E2E8F0; --text-primary:#0F172A; --text-muted:#64748B;
+        --radius-sm:6px; --radius:12px; --radius-lg:18px;
+        --shadow:0 4px 16px rgba(0,0,0,.08);
+        --shadow-lg:0 12px 40px rgba(0,0,0,.10);
+        --tr:0.18s cubic-bezier(.4,0,.2,1);
+    }
+
+    .page-heading { display:flex; align-items:center; gap:12px; margin:36px 0 4px; }
+    .page-heading-icon {
+        width:42px; height:42px; border-radius:var(--radius-sm);
+        background:linear-gradient(135deg,var(--brand),var(--accent));
+        display:flex; align-items:center; justify-content:center; font-size:20px;
+        box-shadow:0 4px 12px rgba(37,99,235,.3);
+    }
+    .page-heading h2 { font-size:22px; font-weight:700; color:var(--text-primary); margin:0; }
+    .page-heading p  { font-size:13px; color:var(--text-muted); margin:2px 0 0; }
+
+    .breadcrumb { display:flex; align-items:center; gap:6px; margin:10px 0 20px; flex-wrap:wrap; }
+    .breadcrumb a { font-size:13px; color:var(--brand); font-weight:600; text-decoration:none; }
+    .breadcrumb a:hover { text-decoration:underline; }
+    .breadcrumb span { font-size:13px; color:var(--text-muted); }
+    .breadcrumb .current { font-size:13px; color:var(--text-primary); font-weight:600; }
+
+    .alert {
+        padding:12px 18px; border-radius:var(--radius-sm);
+        font-size:13px; font-weight:600; margin-bottom:14px;
+    }
+    .alert-success { background:var(--success-light); color:var(--success); border:1px solid rgba(5,150,105,.2); }
+    .alert-error   { background:var(--danger-light);  color:var(--danger);  border:1px solid rgba(220,38,38,.2); }
+
+    .workspace-split-row { display:flex; gap:24px; margin-top:24px; }
+    .left-col  { flex:1; min-width:0; }
+    .right-col { width:460px; flex-shrink:0; }
+
+    .card {
+        background:var(--surface); border-radius:var(--radius-lg);
+        box-shadow:var(--shadow); border:1.5px solid var(--border);
+        transition:box-shadow var(--tr); padding:28px; margin-bottom:24px;
+    }
+    .card:hover { box-shadow:var(--shadow-lg); }
+
+    .card-header {
+        display:flex; align-items:center; gap:12px;
+        margin-bottom:24px; padding-bottom:16px;
+        border-bottom:1.5px solid var(--border);
+    }
+    .card-icon {
+        width:40px; height:40px; border-radius:var(--radius-sm);
+        background:linear-gradient(135deg,var(--brand),var(--accent));
+        display:flex; align-items:center; justify-content:center; font-size:18px;
+        box-shadow:0 4px 10px rgba(37,99,235,.25);
+    }
+    .card-header h3 { font-size:16px; font-weight:700; color:var(--text-primary); margin:0; }
+    .card-header p  { font-size:12px; color:var(--text-muted); margin:2px 0 0; }
+
+    /* Drive link input */
+    .drive-input-row {
+        display:flex; gap:10px; align-items:flex-start;
+    }
+    .drive-input-wrap { flex:1; }
+    .drive-input-wrap input[type="url"] {
+        width:100%; padding:11px 14px 11px 42px;
+        border:1.5px solid var(--border); border-radius:var(--radius-sm);
+        font-size:14px; color:var(--text-primary);
+        background:var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath fill='%230F9D58' d='M12 2L2 19.5h20L12 2z'/%3E%3Cpath fill='%234285F4' d='M2 19.5l5-8.5h10l5 8.5H2z' opacity='.6'/%3E%3C/svg%3E") no-repeat 12px center;
+        box-sizing:border-box; outline:none;
+        transition:border-color var(--tr), box-shadow var(--tr);
+    }
+    .drive-input-wrap input[type="url"]:focus {
+        border-color:var(--brand); background-color:#fff;
+        box-shadow:0 0 0 3px rgba(37,99,235,.12);
+    }
+    .drive-input-hint { font-size:11px; color:var(--text-muted); margin-top:5px; }
+    .field-error { color:var(--danger); font-size:12px; margin:5px 0 0; list-style:none; padding:0; }
+
+    .btn-save {
+        display:inline-flex; align-items:center; gap:7px;
+        padding:11px 22px; border-radius:var(--radius-sm);
+        background:var(--brand); color:#fff; border:none;
+        font-size:13px; font-weight:600; cursor:pointer;
+        box-shadow:0 2px 8px rgba(37,99,235,.3);
+        transition:all var(--tr); white-space:nowrap;
+    }
+    .btn-save:hover {
+        background:var(--brand-dark);
+        box-shadow:0 4px 14px rgba(37,99,235,.4);
+        transform:translateY(-1px);
+    }
+
+    /* Files list card header */
+    .files-header {
+        display:flex; align-items:center; justify-content:space-between;
+        margin-bottom:18px; padding-bottom:14px;
+        border-bottom:1.5px solid var(--border); flex-wrap:wrap; gap:10px;
+    }
+    .files-header h3 { font-size:15px; font-weight:700; color:var(--text-primary); margin:0; display:flex; align-items:center; gap:8px; }
+    .badge {
+        font-size:11px; font-weight:600; color:var(--brand);
+        background:var(--brand-light); border:1px solid rgba(37,99,235,.2);
+        border-radius:20px; padding:3px 10px;
+    }
+    .header-actions { display:flex; align-items:center; gap:8px; }
+
+    .btn-sync {
+        display:inline-flex; align-items:center; gap:6px;
+        padding:7px 14px; border-radius:var(--radius-sm);
+        background:var(--success-light); color:var(--success);
+        border:1.5px solid rgba(5,150,105,.25);
+        font-size:12px; font-weight:600; cursor:pointer;
+        text-decoration:none; transition:all var(--tr);
+    }
+    .btn-sync:hover { background:var(--success); color:#fff; border-color:var(--success); }
+
+    #fileSearchInput {
+        padding:8px 12px 8px 34px; font-size:13px;
+        border:1.5px solid var(--border); border-radius:var(--radius-sm);
+        background:var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;
+        color:var(--text-primary); width:180px; outline:none;
+        transition:border-color var(--tr), box-shadow var(--tr);
+    }
+    #fileSearchInput:focus {
+        border-color:var(--brand); background-color:#fff;
+        box-shadow:0 0 0 3px rgba(37,99,235,.12);
+    }
+
+    /* Subfolder chips */
+    .subfolder-grid { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+    .subfolder-chip {
+        display:inline-flex; align-items:center; gap:6px;
+        padding:7px 13px; border-radius:var(--radius-sm);
+        background:var(--surface-2); border:1.5px solid var(--border);
+        font-size:13px; font-weight:600; color:var(--text-primary);
+        text-decoration:none; transition:all var(--tr);
+    }
+    .subfolder-chip:hover { border-color:var(--brand); background:var(--brand-light); color:var(--brand); }
+
+    /* File list */
+    .file-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:9px; }
+    .file-item {
+        display:flex; align-items:center; gap:12px;
+        padding:13px 15px; background:var(--surface-2);
+        border:1.5px solid var(--border); border-radius:var(--radius);
+        transition:all var(--tr);
+    }
+    .file-item:hover { border-color:var(--brand); background:var(--brand-light); box-shadow:0 3px 12px rgba(37,99,235,.08); }
+
+    .file-icon {
+        width:36px; height:36px; background:var(--surface);
+        border:1.5px solid var(--border); border-radius:var(--radius-sm);
+        display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+    .file-icon img { width:18px; height:18px; }
+
+    .file-info { flex:1; min-width:0; }
+    .file-name { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .file-meta { font-size:11px; color:var(--text-muted); margin-top:2px; }
+
+    .file-actions { display:flex; align-items:center; gap:5px; flex-shrink:0; }
+    .btn-sm {
+        display:inline-flex; align-items:center; gap:4px;
+        padding:5px 11px; border-radius:var(--radius-sm);
+        font-size:11px; font-weight:600; cursor:pointer;
+        transition:all var(--tr); text-decoration:none;
+        border:1.5px solid transparent; white-space:nowrap;
+    }
+    .btn-view { background:var(--success-light); color:var(--success); border-color:rgba(5,150,105,.2); }
+    .btn-view:hover { background:var(--success); color:#fff; border-color:var(--success); }
+    .btn-edit { background:var(--brand-light); color:var(--brand); border-color:rgba(37,99,235,.2); }
+    .btn-edit:hover { background:var(--brand); color:#fff; border-color:var(--brand); }
+    .btn-del  { background:var(--danger-light); color:var(--danger); border-color:rgba(220,38,38,.2); }
+    .btn-del:hover  { background:var(--danger); color:#fff; border-color:var(--danger); }
+    .file-item form { margin:0; }
+
+    .empty-state {
+        text-align:center; padding:48px 20px;
+        background:var(--surface-2); border:2px dashed var(--border);
+        border-radius:var(--radius); color:var(--text-muted); font-size:13px;
+    }
+    .empty-icon { font-size:36px; display:block; margin-bottom:10px; }
+
+    /* Preview card */
+    .preview-card {
+        background:var(--surface); border-radius:var(--radius-lg);
+        box-shadow:var(--shadow); border:1.5px solid var(--border);
+        padding:22px; position:sticky; top:20px;
+        height:calc(100vh - 140px); display:flex; flex-direction:column;
+    }
+    .preview-card h4 { font-size:14px; font-weight:700; color:var(--text-primary); margin:0 0 12px; }
+    .preview-frame-wrap {
+        flex:1; border:1.5px solid var(--border); border-radius:var(--radius-sm);
+        background:var(--surface-2); overflow:hidden;
+        display:flex; align-items:center; justify-content:center; position:relative;
+    }
+    .preview-placeholder { text-align:center; padding:20px; color:var(--text-muted); font-size:13px; }
+
+    @media(max-width:1024px){
+        .workspace-split-row { flex-direction:column; }
+        .right-col { width:100%; }
+        .preview-card { height:480px; position:static; }
+    }
+    @media(max-width:640px){
+        .card { padding:18px; }
+        .drive-input-row { flex-direction:column; }
+        .btn-save { width:100%; justify-content:center; }
+        #fileSearchInput { width:100%; }
+    }
+    
+    /* Name input */
+.drive-input-wrap input[type="text"] {
+    width:100%; padding:11px 14px 11px 42px;
+    border:1.5px solid var(--border); border-radius:var(--radius-sm);
+    font-size:14px; color:var(--text-primary);
+    background:var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z'/%3E%3C/svg%3E") no-repeat 12px center;
+    box-sizing:border-box; outline:none;
+    transition:border-color var(--tr), box-shadow var(--tr);
+}
+.drive-input-wrap input[type="text"]:focus {
+    border-color:var(--brand); background-color:#fff;
+    box-shadow:0 0 0 3px rgba(37,99,235,.12);
+}
+.input-label {
+    font-size:11px; font-weight:600; color:var(--text-muted);
+    text-transform:uppercase; letter-spacing:.05em; margin-bottom:5px;
+    display:block;
+}
+
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-6 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            {% include 'partials/header.html' %}
+
+            <!-- Page Heading -->
+            <div class="page-heading intro-y">
+                <div class="page-heading-icon">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" style="width:22px;height:22px;" alt="Drive">
+                </div>
+                <div>
+                    <h2>Google Drive · {{ current_folder.name }}</h2>
+                    <p>Paste a Drive link to sync files directly into your ERP</p>
+                </div>
+            </div>
+
+            <!-- Breadcrumb -->
+            <div class="breadcrumb intro-y">
+                <a href="{% url 'google_tracker_file_system' %}">🏠 Root</a>
+                {% for crumb in breadcrumb %}
+                    <span>/</span>
+                    {% if not forloop.last %}
+                        <a href="{% url 'google_tracker_file_system_folder' crumb.id %}">{{ crumb.name }}</a>
+                    {% else %}
+                        <span class="current">{{ crumb.name }}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- Flash messages -->
+            {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %} intro-y">
+                {{ message }}
+            </div>
+            {% endfor %}
+
+            <div class="workspace-split-row intro-y">
+
+                <!-- LEFT COLUMN -->
+                <div class="left-col">
+
+                    <!-- Drive Link Input Card -->
+                    <div class="card">
+                        <div class="card-header" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    
+                        <!-- Left: Icon + Title -->
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div class="card-icon">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" 
+                                     style="width:20px;height:20px;" alt="Drive">
+                            </div>
+                            <div>
+                                <h3>Link Google Drive Resource</h3>
+                                <p>Paste a file or folder link — files sync automatically into this folder</p>
+                            </div>
+                        </div>
+                    
+                        <!-- Right: Back Button -->
+                        <a href="{% url 'tracker_display' %}"
+                           style="display:inline-flex; align-items:center; gap:7px;
+                                  padding:9px 18px; border-radius:8px; text-decoration:none;
+                                  background:#F8FAFC; color:#64748B;
+                                  border:1.5px solid #E2E8F0;
+                                  font-size:13px; font-weight:600;
+                                  transition:all 0.18s ease; white-space:nowrap;"
+                           onmouseover="this.style.background='#EFF6FF'; this.style.color='#2563EB'; this.style.borderColor='#2563EB';"
+                           onmouseout="this.style.background='#F8FAFC'; this.style.color='#64748B'; this.style.borderColor='#E2E8F0';">
+                            <i class="fas fa-arrow-left" style="font-size:11px;"></i>
+                            Back
+                        </a>
+                    
+                    </div>
+
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div style="display:flex; flex-direction:column; gap:12px;">
+                        
+                                <!-- Name Field -->
+                                <div class="drive-input-wrap">
+                                    <label class="input-label">📝 Custom Name <span style="color:var(--text-muted); font-weight:400;">(optional)</span></label>
+                                    <input type="text" name="name"
+                                           value="{{ form.name.value|default:'' }}"
+                                           placeholder="e.g. Q3 Budget Report — auto-filled from Drive if blank">
+                                    {% if form.name.errors %}
+                                    <ul class="field-error">
+                                        {% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </div>
+                        
+                                <!-- Drive Link + Button Row -->
+                                <div>
+                                    <label class="input-label">🔗 Google Drive Link <span style="color:var(--danger);">*</span></label>
+                                    <div class="drive-input-row">
+                                        <div class="drive-input-wrap">
+                                            {{ form.google_drive_link }}
+                                            <div class="drive-input-hint">
+                                                Supports: <code>drive.google.com/file/d/...</code> &nbsp;or&nbsp; <code>/folders/...</code>
+                                            </div>
+                                            {% if form.google_drive_link.errors %}
+                                            <ul class="field-error">
+                                                {% for e in form.google_drive_link.errors %}<li>{{ e }}</li>{% endfor %}
+                                            </ul>
+                                            {% endif %}
+                                        </div>
+                                        <button type="submit" name="save_drive_link" class="btn-save">
+                                            <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg"
+                                                 style="width:14px;height:14px;" alt="">
+                                            Sync & Save
+                                        </button>
+                                    </div>
+                                </div>
+                        
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Files List Card -->
+                    <div class="card">
+                        <div class="files-header">
+                            <h3>
+                                📂 Files in "{{ current_folder.name }}"
+                                <span class="badge">{{ files|length }} file{{ files|length|pluralize }}</span>
+                            </h3>
+                            <div class="header-actions">
+                                <a href="{% url 'google_tracker_sync_drive' current_folder.id %}" class="btn-sync">
+                                    🔄 Re-sync All
+                                </a>
+                                <input type="text" id="fileSearchInput" placeholder="Search files…" value="{{ search_query|default:'' }}">
+                            </div>
+                        </div>
+
+                        <!-- Sub-folders -->
+                        {% if sub_folders %}
+                        <div class="subfolder-grid">
+                            {% for sf in sub_folders %}
+                            <a href="{% url 'google_tracker_file_system_folder' sf.id %}" class="subfolder-chip">📁 {{ sf.name }}</a>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- File list -->
+                        <ul class="file-list" id="fileList">
+                          {% for f in files %}
+                            <li class="file-item" data-name="{{ f.name|lower }}">
+                                <div class="file-icon">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" alt="Drive">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" title="{{ f.name }}">{{ f.name|default:f.google_drive_id }}</div>
+                                    <div class="file-meta">
+                                        Synced {{ f.last_synced_at|date:"M d, Y H:i" }}
+                                        {% if f.google_drive_id %}&nbsp;·&nbsp;<span style="font-family:monospace;">{{ f.google_drive_id|truncatechars:16 }}</span>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="file-actions">
+                                    {% if f.preview_url %}
+                                    <button type="button" class="btn-sm btn-view preview-trigger"
+                                            data-src="{{ f.preview_url }}">👁 View</button>
+                                    {% endif %}
+                                    <a href="{{ f.google_drive_link }}" target="_blank" class="btn-sm btn-edit">↗ Open</a>
+                                    <form action="{% url 'google_tracker_delete_file' f.id %}" method="POST"
+                                          onsubmit="return confirm('Remove this file record?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-sm btn-del">🗑</button>
+                                    </form>
+                                </div>
+                            </li>
+                            {% empty %}
+                            <li>
+                                <div class="empty-state">
+                                    <span class="empty-icon">🔗</span>
+                                    No Drive files yet — paste a Google Drive link above and click <strong>Sync & Save</strong>.
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT PREVIEW COLUMN -->
+                <div class="right-col">
+                    <div class="preview-card">
+                        <h4>🖥️ File Preview</h4>
+                        <div class="preview-frame-wrap">
+                            <iframe id="previewFrame" src="" style="width:100%;height:100%;border:none;display:none;"></iframe>
+                            <div class="preview-placeholder" id="previewPlaceholder">
+                                <span style="font-size:32px;display:block;margin-bottom:8px;">🗂️</span>
+                                Click <strong>View</strong> on any file to preview it here.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Live search filter
+    document.getElementById('fileSearchInput').addEventListener('keyup', function () {
+        const val = this.value.toLowerCase();
+        document.querySelectorAll('.file-item').forEach(row => {
+            row.style.display = (row.getAttribute('data-name') || '').includes(val) ? '' : 'none';
+        });
+    });
+
+    // Preview iframe
+    document.querySelectorAll('.preview-trigger').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const src = this.getAttribute('data-src');
+            const frame = document.getElementById('previewFrame');
+            const placeholder = document.getElementById('previewPlaceholder');
+            if (src) {
+                frame.src = src;
+                frame.style.display = 'block';
+                placeholder.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

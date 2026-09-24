@@ -1,0 +1,274 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Requisition Approval</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      background-color: #eee;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 1024px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .logo img {
+      height: 50px;
+    }
+
+    .label-box {
+      background-color: #e2f0d9;
+      padding: 4px 10px;
+      font-weight: bold;
+      font-size: 14px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .info-block {
+      margin-top: 20px;
+    }
+
+    .info-block p {
+      margin: 4px 0;
+      font-size: 13px;
+    }
+
+    h2.section-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 25px;
+      margin-bottom: 10px;
+      color: #1a202c;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f8f8f8;
+    }
+
+    .left {
+      text-align: left;
+    }
+
+    .summary-box {
+      background: #f9f9f9;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 4px;
+    }
+
+    .summary-box ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .summary-box li {
+      display: flex;
+      justify-content: space-between;
+      margin: 5px 0;
+    }
+
+    .form-section {
+      margin-top: 20px;
+    }
+
+    .form-section label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .form-section select,
+    .form-section textarea {
+      width: 100%;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .form-section textarea {
+      resize: vertical;
+    }
+
+    .btn {
+      margin-top: 15px;
+      padding: 8px 16px;
+      background-color: #1f3bb3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #182f9c;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 11px;
+      text-align: center;
+      color: #777;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+
+    .no-print {
+      text-align: right;
+      margin-top: 10px;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .card {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <!-- Header -->
+  <div class="header-row">
+    <div class="logo">
+      <img src="{% static 'images/BTP_logo_webp.webp' %}" alt="Logo">
+    </div>
+    <div style="text-align: right;">
+      <div class="label-box">Requisition Details</div>
+      <p style="font-size: 11px; margin-top: 4px;">
+          Print Date: {{ print_time|date:"F j, Y, g:i a" }}
+        </p>
+    </div>
+  </div>
+
+  <!-- Project Info -->
+  <div style="margin-top:-10px" class="info-block">
+    <p><strong>Project:</strong> {{ project.project_first_name }}</p>
+  </div>
+  <!-- Form Start -->
+  <form method="POST" style="margin-top:-15px" > 
+    {% csrf_token %}
+    {% for employee, data in requisitions_by_employee.items %}
+      <h2 class="section-title">Created By: {{ employee }}</h2>
+      <table>
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="select-all-{{ forloop.counter }}"></th>
+            <th class="left">Item Name</th>
+            <th>Unit</th>
+            <th>Qty</th>
+            <th>Rate (Tk)</th>
+            <th>Amount (Tk)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in data.items %}
+            <tr>
+              <td><input type="checkbox" name="selected_items" value="{{ item.id }}" checked></td>
+              <td class="left">{{ item.item_name }}</td>
+              <td>{{ item.unit }}</td>
+              <td>{{ item.qty }}</td>
+              <td style="text-align: right;">{{ item.rate|floatformat:2 }}</td>
+              <td style="text-align: right;">{{ item.amount|floatformat:2|intcomma }}</td>
+            </tr>
+          {% endfor %}
+          <tr>
+            <td colspan="5" style="text-align:right; font-weight:bold;">Total</td>
+            <td style="text-align:right;"><strong>৳{{ data.total|floatformat:2|intcomma }}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    {% endfor %}   
+
+    <div class="form-section">
+      <label>Note</label>
+      <textarea name="approv_acct_note" rows="3" placeholder="Write a note...">{{ current_note }}</textarea>
+    </div>
+	<!-- Approval Section -->
+	<div class="form-section">
+	  <div class="flex items-center space-x-6">
+		<!-- Approval Status Radio -->
+		<div class="flex items-center space-x-2">
+		  <label class="inline-flex items-center space-x-1">
+			<input type="radio" name="approv_acct_status" value="approved" checked class="form-radio text-blue-600">
+			<span class="text-sm">Approved</span>
+		  </label>
+		</div>
+
+		<div class="grid grid-cols-12 gap-4 mb-4">
+		  <!-- Employee Dropdown (1 of 4 columns) -->
+		  <div class="col-span-3">
+			<label class="text-sm font-bold block mb-1">Head Cash Received - Employee Name Select:</label>
+			<select name="cash_empl" class="text-sm px-2 py-1 border border-gray-300 rounded w-full">
+			  <option value="">-- Select Employee --</option>
+			  {% for emp in employee_list %}
+				<option value="{{ emp}}">{{ emp }}</option>
+			  {% endfor %}
+			</select>
+		  </div>
+
+		<!-- Action Buttons -->
+		<div align="center" class="flex justify-center space-x-4 mt-4">
+		  <button type="submit" class="btn bg-blue-600 text-white px-4 py-2 rounded">Update</button>
+		</div>	
+	</form>
+  <!-- Back Button -->
+  <div class="no-print">
+    <a href="{% url 'requisition_list' %}" class="btn">← Back to List</a>
+  </div>
+</div>
+
+<!-- Optional JavaScript to handle checkbox "select all" per section -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    {% for employee, data in requisitions_by_employee.items %}
+      const selectAll{{ forloop.counter }} = document.getElementById("select-all-{{ forloop.counter }}");
+      selectAll{{ forloop.counter }}.addEventListener("change", function () {
+        const checkboxes = selectAll{{ forloop.counter }}.closest("table").querySelectorAll('input[name="selected_items"]');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+      });
+    {% endfor %}
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Customer Update- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				    {% include 'partials/header.html' %}
+                <div class="container mx-auto mt-10 ml-10"> 
+                <!-- END: Top Bar -->
+               <form method="POST" enctype="multipart/form-data" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+					{% csrf_token %}
+
+					<!-- Customer Name -->
+					<div class="mb-4">
+						<label for="customer_name" class="font-medium text-lg text-gray-800">Customer Name</label>
+						<input type="text" id="customer_name" name="customer_name"
+							   class="w-full text-sm border-slate-200 shadow-sm rounded-md"
+							   placeholder="Enter Customer Name"
+							   value="{{ form.customer_name.value|default_if_none:'' }}">
+						{% for error in form.customer_name.errors %}
+							<p class="text-red-600 text-sm">{{ error }}</p>
+						{% endfor %}
+					</div>
+
+					<!-- Profession -->
+					<div class="mb-4">
+						<label for="profession" class="font-medium text-lg text-gray-800">Profession</label>
+						<input type="text" id="profession" name="profession"
+							   class="w-full text-sm border-slate-200 shadow-sm rounded-md"
+							   placeholder="Enter Profession"
+							   value="{{ form.profession.value|default_if_none:'' }}">
+						{% for error in form.profession.errors %}
+							<p class="text-red-600 text-sm">{{ error }}</p>
+						{% endfor %}
+					</div>
+
+					<!-- Lead Status -->
+					<div class="mb-4">
+						<label for="lead_status" class="font-medium text-lg text-gray-800">Lead Status</label>
+						<input type="text" id="lead_status" name="lead_status"
+							   class="w-full text-sm border-slate-200 shadow-sm rounded-md"
+							   placeholder="Enter Lead Status"
+							   value="{{ form.lead_status.value|default_if_none:'' }}">
+						{% for error in form.lead_status.errors %}
+							<p class="text-red-600 text-sm">{{ error }}</p>
+						{% endfor %}
+					</div>
+
+					<!-- Lead Source -->
+					<div class="mb-4">
+						<label for="lead_source" class="font-medium text-lg text-gray-800">Lead Source</label>
+						<select id="lead_source" name="lead_source"
+								class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+							<option value="">Select Lead Source</option>
+							<option value="Self" {% if form.lead_source.value == "Self" %}selected{% endif %}>Self</option>
+							<option value="Facebook" {% if form.lead_source.value == "Facebook" %}selected{% endif %}>Facebook</option>
+							<option value="Personal Contact" {% if form.lead_source.value == "Personal Contact" %}selected{% endif %}>Personal Contact</option>
+						</select>
+						{% for error in form.lead_source.errors %}
+							<p class="text-red-600 text-sm">{{ error }}</p>
+						{% endfor %}
+					</div>
+
+					<!-- Project -->
+					<div class="mb-4">
+						<label for="project" class="font-medium text-lg text-gray-800">Project</label>
+						<select id="project" name="project" class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+							<option value="">Select Project</option>
+							{% for project in projects %}
+								<option value="{{ project.id }}" {% if form.project.value|stringformat:"s" == project.id|stringformat:"s" %}selected{% endif %}>
+									{{ project.project_first_name }}
+								</option>
+							{% empty %}
+								<option disabled>No projects found</option>
+							{% endfor %}
+						</select>
+						{% for error in form.project.errors %}
+							<p class="text-red-600 text-sm">{{ error }}</p>
+						{% endfor %}
+					</div>
+
+					<!-- Contact Number -->
+					<div class="mb-4">
+						<label for="contact_no" class="font-medium text-lg text-gray-800">Contact Number</label>
+						<input type="text" id="contact_no" name="contact_no"
+							   class="w-full text-sm border-slate-200 shadow-sm rounded-md"
+							   placeholder="Enter Contact Number"
+							   value="{{ form.contact_no.value|default_if_none:'' }}">
+						{% for error in form.contact_no.errors %}
+							<p class="text-red-600 text-sm">{{ error }}</p>
+						{% endfor %}
+					</div>
+
+					<!-- Address -->
+					<div class="mb-4">
+						<label for="address" class="font-medium text-lg text-gray-800">Address</label>
+						<textarea id="address" name="address" rows="3"
+								  class="w-full text-sm border-slate-200 shadow-sm rounded-md"
+								  placeholder="Enter Address">{{ form.address.value|default_if_none:'' }}</textarea>
+						{% for error in form.address.errors %}
+							<p class="text-red-600 text-sm">{{ error }}</p>
+						{% endfor %}
+					</div>
+
+					<!-- Description -->
+					<div class="mb-4">
+						<label for="description" class="font-medium text-lg text-gray-800">Description</label>
+						<textarea id="description" name="description" rows="3"
+								  class="w-full text-sm border-slate-200 shadow-sm rounded-md"
+								  placeholder="Enter Description">{{ form.description.value|default_if_none:'' }}</textarea>
+						{% for error in form.description.errors %}
+							<p class="text-red-600 text-sm">{{ error }}</p>
+						{% endfor %}
+					</div>
+
+					<!-- Organization -->
+					<div class="mb-4">
+						<label for="organization" class="font-medium text-lg text-gray-800">Organization</label>
+						<input type="text" id="organization" name="organization"
+							   class="w-full text-sm border-slate-200 shadow-sm rounded-md"
+							   placeholder="Enter Organization"
+							   value="{{ form.organization.value|default_if_none:'' }}">
+						{% for error in form.organization.errors %}
+							<p class="text-red-600 text-sm">{{ error }}</p>
+						{% endfor %}
+					</div>
+
+					<!-- Email -->
+					<div class="mb-4">
+						<label for="email" class="font-medium text-lg text-gray-800">Email</label>
+						<input type="email" id="email" name="email"
+							   class="w-full text-sm border-slate-200 shadow-sm rounded-md"
+							   placeholder="Enter Email"
+							   value="{{ form.email.value|default_if_none:'' }}">
+						{% for error in form.email.errors %}
+							<p class="text-red-600 text-sm">{{ error }}</p>
+						{% endfor %}
+					</div>
+
+					<!-- Assign To User -->
+					<div class="mb-4">
+						<label for="assign_to_user" class="font-medium text-lg text-gray-800">Assign To User</label>
+						<select id="assign_to_user" name="assign_to_user"
+								class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+							<option value="">Select Employee</option>
+							{% for employee in employees %}
+								<option value="{{ employee.id }}" 
+									{% if form.assign_to_user.value|stringformat:"s" == employee.id|stringformat:"s" %}selected{% endif %}>
+									{{ employee.employee_name }}
+								</option>
+							{% endfor %}
+						</select>
+						{% for error in form.assign_to_user.errors %}
+							<p class="text-red-600 text-sm">{{ error }}</p>
+						{% endfor %}
+					</div>
+
+					<!-- Date -->					
+					<div class="mb-4">
+                            <label for="date" class="font-medium text-lg text-gray-800">Date</label>
+                            <input type="date" id="date" name="date"
+                                class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                value="{{ form.date.value|date:'Y-m-d' }}">
+                            {% for error in form.date.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>  
+
+					<!-- Current Photo Preview -->
+					{% if form.instance.photo %}
+						<div class="mb-4">
+							<p class="font-medium text-gray-700 mb-1">Current Photo:</p>
+							<img src="{{ form.instance.photo.url }}" alt="Customer Photo" class="h-32 rounded border">
+						</div>
+					{% endif %}
+
+					<!-- Upload New Photo -->
+					<div class="mb-4">
+						<label for="photo" class="font-medium text-lg text-gray-800">Upload New Photo</label>
+						<input type="file" id="photo" name="photo"
+							   class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+						{% for error in form.photo.errors %}
+							<p class="text-red-600 text-sm">{{ error }}</p>
+						{% endfor %}
+					</div>
+
+					<!-- Active Status (Radio Buttons) -->
+					<div class="mb-4">
+						<label class="font-medium text-lg text-gray-800 mb-2 block">Active Status</label>
+						<div class="flex items-center space-x-6">
+							<label class="inline-flex items-center">
+								<input type="radio" name="status" value="True" 
+									{% if form.status.value|stringformat:"s" == "True" or form.status.value == True %}checked{% endif %}
+									class="form-radio text-blue-600">
+								<span class="ml-2">Yes</span>
+							</label>
+							<label class="inline-flex items-center">
+								<input type="radio" name="status" value="False" 
+									{% if form.status.value|stringformat:"s" == "False" or form.status.value == False %}checked{% endif %}
+									class="form-radio text-blue-600">
+								<span class="ml-2">No</span>
+							</label>
+						</div>
+						{% for error in form.status.errors %}
+							<p class="text-red-600 text-sm">{{ error }}</p>
+						{% endfor %}
+					</div>
+
+					<!-- Submit & Back Buttons -->
+					<div class="text-center mt-6">
+						<button type="submit" style="background-color:#1e3c98"
+								class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md">
+							💾 Update Customer
+						</button>
+						<a href="{% url 'customer_list' %}" style="margin-left:0.5%;background-color:#1e3c98"
+						   class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md ml-2">
+							🔙 Back to List
+						</a>
+					</div>
+				</form>
+
+                  </div>    
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

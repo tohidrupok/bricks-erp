@@ -1,0 +1,219 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Purchase Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        .header {
+            text-align: center;
+            color: #1f3bb3;
+            font-weight: bold;
+            font-size: 22px;
+        }
+
+        .sub-header {
+            text-align: center;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .contact {
+            text-align: center;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+
+        .memo-box {
+            position: absolute;
+            right: 40px;
+            top: 40px;
+            border: 2px solid #ccc;
+            padding: 10px;
+            width: 140px;
+            text-align: center;
+        }
+
+        .memo-box h3 {
+            margin: 0;
+            color: green;
+        }
+
+        .memo-box p {
+            color: red;
+            font-weight: bold;
+            margin: 4px 0 0 0;
+        }
+
+        .info {
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .info span {
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #000;
+        }
+
+        th {
+            background: #f0f0f0;
+        }
+
+        th, td {
+            padding: 6px;
+            text-align: center;
+        }
+
+        .description {
+            text-align: left;
+        }
+
+        .amount-word {
+            font-weight: bold;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .note {
+            margin-top: 40px;
+            font-size: 13px;
+        }
+
+        .signature {
+            margin-top: 60px;
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+        }
+
+        .signature div {
+            width: 24%;
+            padding-top: 10px;
+            border-top: 2px solid #000;
+            font-size: 13px;
+        }
+
+        .no-print {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <div class="header">BTP LIMITED</div>
+    <div class="sub-header">
+        For Better Tomorrow Properties <br>
+        House #..., Road #..., Block ..., Area, City - ZIP
+    </div>
+    <div class="contact">
+        +8801XXXXXXXXX | info@btpltd.com | btpltd.com
+    </div>
+
+    <!-- Memo Box -->
+    <div class="memo-box">
+        <h3>Purchase</h3>
+        <p>Invoice</p>
+    </div>
+
+    <!-- Info Section -->
+    <div class="info">
+        <p><span>Voucher No.:</span> {{ voucher.pk }}</p>
+        <p><span>Print Date:</span> {{ print_time|date:"F j, Y, g:i a" }}</p>
+        <p><span>Purchase ID:</span> {{ purch_id }}</p>
+    </div>
+
+    <!-- Table Section -->
+    <table>
+        <thead>
+            <tr>
+                <th>SL</th>
+                <th>Project Name</th>
+                <th>Date</th>
+                <th>Item Name</th>
+                <th>Amount (Tk)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in requisitions %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.project_name.project_first_name }}</td>
+                <td>{{ item.requisition_date }}</td>
+                <td class="description"><b>{{ item.item_name }}</b></td>
+                <td>{{ item.amount|intcomma }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No purchase data found.</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="4" style="text-align: right;"><strong>Total Amount (Tk)</strong></td>
+                <td><strong>{{ total_amount|intcomma }}</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Amount in Words -->
+    <div class="amount-word">
+        In Words: {{ amount_in_words }} Only.
+    </div>
+
+    <!-- Signature Section -->
+    <div class="signature">
+        <div>Prepared by</div>
+        <div>Checked by</div>
+        <div>Approved by</div>
+        <div>Authorized by</div>
+    </div>
+
+    <!-- Print Button -->
+    <div class="no-print">
+        <button onclick="window.print()" style="background-color: #1f3bb3; color: white; padding: 10px 20px; border: none; border-radius: 5px;">Print</button>
+    </div>
+	
+	
+	<!-- File Preview Section (Shown After Print Button) -->
+{% if voucher.purch_file %}
+  <div class="mt-5">
+    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 10px;">Attached File</h3>
+    {% with voucher.purch_file.url|lower as url %}
+      {% if url|slice:"-4:" == ".jpg" or url|slice:"-5:" == ".jpeg" or url|slice:"-4:" == ".png" %}
+        <img src="{{ voucher.purch_file.url }}"
+             alt="Uploaded File"
+             style="width: 200px; height: auto; border-radius: 8px; border: 1px solid #ccc;" />
+      {% else %}
+        <a href="{{ voucher.purch_file.url }}" target="_blank"
+           style="color: #1f3bb3; font-weight: 500; text-decoration: underline;">View Uploaded File</a>
+      {% endif %}
+    {% endwith %}
+  </div>
+{% else %}
+  <p style="margin-top: 10px; color: #666; font-size: 14px;">No file uploaded for this invoice.</p>
+{% endif %}
+
+</body>
+</html>

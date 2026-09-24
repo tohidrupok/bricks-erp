@@ -1,0 +1,214 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Voucher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: #1f3bb3;
+            font-weight: bold;
+            font-size: 22px;
+        }
+
+        .sub-header {
+            text-align: center;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .contact {
+            text-align: center;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+
+        .memo-box {
+            position: absolute;
+            right: 60px;
+            top: 40px;
+            border: 2px solid #ccc;
+            padding: 10px;
+            width: 140px;
+            text-align: center;
+        }
+
+        .memo-box h3 {
+            margin: 0;
+            color: green;
+        }
+
+        .memo-box p {
+            color: red;
+            font-weight: bold;
+            margin: 4px 0 0 0;
+        }
+
+        .info {
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .info span {
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #000;
+        }
+
+        th {
+            background: #f0f0f0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+
+        .description {
+            text-align: left;
+        }
+
+        .amount-word {
+            font-weight: bold;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .signature {
+            margin-top: 60px;
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+        }
+
+        .signature div {
+            width: 24%;
+            padding-top: 10px;
+            border-top: 2px solid #000;
+            font-size: 13px;
+        }
+
+        .no-print {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .no-print button {
+            background-color: #1f3bb3;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">BTP LIMITED</div>
+        <div class="sub-header">
+            For Better Tomorrow Properties<br>
+            House-146 (4th Floor), Road-02, Block-A, Sec-12,<br>
+            Pallabi Bus Stand, Mirpur, Dhaka-1216
+        </div>
+        <div class="contact">
+            01913-222203 | info@btpltd.com | btpltd.com
+        </div>
+
+        <!-- Memo Box -->
+        <div class="memo-box">
+            <h3>Payment</h3>
+            <p>Voucher</p>
+        </div>
+
+        <!-- Info Section -->
+        <div class="info">
+            <p><span>Voucher No.:</span> {{ voucher.pk }}</p>
+            <p><span>Print Date:</span> {{ print_time|date:"F j, Y, g:i a" }}</p>
+            <p><span>Project Name:</span> {{ voucher.project_name }}</p>
+            <p><span>Supplier Name:</span> {{ voucher.vendor }}</p>
+            <p><span>Date:</span> {{ voucher.date|date:"M d, Y" }}</p>
+        </div>
+
+        <!-- Table Section -->
+        <table>
+            <thead>
+                <tr>
+                    <th>SL</th>
+                    <th>Particulars</th>
+                    <th>Method</th>
+                    <th>Head of Accounts</th>
+                    <th>CQ. No</th>
+                    <th>M.R/ Bill No.</th>
+                    <th>Amount (Tk)</th>
+                    <th>Carrier</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td class="description"><b>{{ voucher.particulars }}</b></td>
+                    <td>{{ voucher.cash_type }}</td>
+                    <td>{{ voucher.head_of_account }}</td>
+                    <td>{{ voucher.cheque_number }}</td>
+                    <td>{{ voucher.mr_or_bill_no }}</td>
+                    <td>{{ voucher.amount|intcomma }}</td>
+                    <td>{{ voucher.carrier }}</td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: right;"><strong>Total Amount (Tk)</strong></td>
+                    <td><strong>{{ voucher.amount|intcomma }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Amount in Words -->
+        <div class="amount-word">
+            In Words: {{ amount_in_words }} only.
+        </div>
+
+        <!-- Signature Section -->
+        <div class="signature">
+            <div>Prepared by</div>
+            <div>Checked by</div>
+            <div>Forwarded by</div>
+            <div>Approved by</div>
+        </div>
+
+        <!-- Print Button -->
+        <div class="no-print">
+            <button onclick="window.print()">Print</button>
+        </div>
+    </div>
+</body>
+</html>

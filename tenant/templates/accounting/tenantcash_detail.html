@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ account.account_name }} - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header_dashboard.html' %}
+            <!-- END: Top Bar -->
+            <div class="intro-y flex h-10 items-center">
+                <h2 class="mr-5 truncate text-lg font-medium">Tenant Account Management</h2>
+            
+                <div class="ml-auto flex items-center gap-3">
+                    
+                    <!-- Back Button -->
+                    <a href="javascript:history.back()" class="flex items-center text-primary">
+                        <i data-lucide="arrow-left" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                        Back
+                    </a>
+            
+                    <!-- Dashboard Button -->
+                    <a href="{% url 'tenant_dashboard' %}" class="flex items-center text-primary">
+                        <i data-lucide="layout-dashboard" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                        Dashboard
+                    </a>
+            
+                    <!-- Reload Button -->
+                    <a class="flex items-center text-primary" href="">
+                        <i data-lucide="refresh-ccw" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                        Reload Data
+                    </a>
+            
+                </div>
+            </div>
+            <div class="btp-detail-container mt-10">
+                <div class="btp-detail-header">
+                    <h1>{{ account.account_name }}</h1>
+                    <p class="btp-subtitle">Tenant account details and banking information.</p>
+                </div>
+
+                <div class="btp-detail-box">
+                    <p><b>Type:</b> {{ account.get_account_type_display }}</p>
+                    <p><b>Account No:</b> {{ account.account_number|default:"N/A" }}</p>
+                    <p><b>Bank:</b> {{ account.bank_name|default:"N/A" }}</p>
+                    <p><b>Branch:</b> {{ account.branch_name|default:"N/A" }}</p>
+                    <p><b>Balance:</b> Tk {{ account.balance }}</p>
+                    <p><b>Status:</b> {{ account.is_active|yesno:"Active,Inactive" }}</p>
+                    <p><b>Description:</b> {{ account.description|default:"No description" }}</p>
+                </div>
+
+                <div class="btp-detail-actions">
+                    <!--<a href="{% url 'account_edit' account.id %}" class="btp-btn-edit">✏ Edit</a>-->
+                    <a href="{% url 'account_list' %}" class="btp-btn-back">⬅ Back</a>
+                </div>
+            </div>
+
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+
+<!-- ===== BTP Detail Styles ===== -->
+<style>
+.btp-detail-container {
+    width: 100%;
+    max-width: 650px;
+    margin: 50px auto;
+    padding: 35px 40px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.btp-detail-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.btp-detail-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1e355f;
+}
+
+.btp-subtitle {
+    font-size: 14px;
+    color: #5a6a85;
+    margin-top: 4px;
+}
+
+.btp-detail-box {
+    background: #f8faff;
+    border: 1px solid #e0e7f3;
+    padding: 25px 30px;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #34495e;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.btp-detail-box p b {
+    color: #2c3e50;
+    width: 120px;
+    display: inline-block;
+}
+
+.btp-detail-actions {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.btp-btn-edit,
+.btp-btn-back {
+    display: inline-block;
+    margin: 5px 10px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.btp-btn-edit {
+    background: #2c6fff;
+    color: #fff;
+}
+
+.btp-btn-edit:hover {
+    background: #204ecf;
+    transform: translateY(-1px);
+}
+
+.btp-btn-back {
+    background: #6c757d;
+    color: #fff;
+}
+
+.btp-btn-back:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+</style>
+<!-- ===== END BTP Detail Styles ===== -->
+{% endblock %}

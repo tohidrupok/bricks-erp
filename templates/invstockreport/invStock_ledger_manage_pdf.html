@@ -1,0 +1,225 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Inventory Stock Ledger Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: #ccc;
+      padding: 20px;
+      color: #000;
+    }
+    .invoice-box {
+      background: #fff;
+      max-width: 960px;
+      margin: auto;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+    .header-row {
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .logo img {
+      height: 50px;
+      float: left;
+    }
+    .header-info {
+      float: right;
+      text-align: right;
+      margin-top: 10px;
+      font-size: 11px;
+    }
+    .sub-head {
+      clear: both;
+      font-size: 11px;
+      margin-bottom: 10px;
+      color: #444;
+    }
+    hr {
+      margin: 8px 0;
+      border-color: #ccc;
+    }
+    p {
+      margin: 4px 0;
+    }
+    .label-group {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 11px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    th {
+      background-color: #f1f5f9;
+      font-weight: bold;
+    }
+    td.description {
+      text-align: left;
+    }
+    .group-label-row {
+      background-color: #007b83;
+      color: white;
+      font-weight: bold;
+      font-size: 13px;
+      text-align: left;
+      padding-left: 10px;
+    }
+    .group-summary {
+      font-weight: bold;
+      text-align: right;
+      margin-top: 4px;
+      font-size: 12px;
+    }
+    .amount-words {
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 12px;
+      text-align: right;
+      font-style: italic;
+    }
+    .no-print {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .no-print a,
+    .no-print button {
+      display: inline-block;
+      margin: 0 8px;
+      padding: 8px 16px;
+      color: white;
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: bold;
+      border: none;
+    }
+    .btn-back {
+      background-color: #3490dc;
+    }
+    .btn-print {
+      background-color: #38c172;
+    }
+    .print-time {
+      font-style: italic;
+      margin-top: 8px;
+      text-align: right;
+      font-size: 11px;
+      color: #555;
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      .invoice-box {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        max-width: 100%;
+      }
+      body {
+        background-color: white;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="invoice-box">
+  <div class="header-row">
+    <div class="logo">
+      <img src="{% static 'images/BTP_logo_webp.webp' %}" alt="Company Logo" />
+    </div>
+    <div class="header-info">
+      <div style="background-color:#e2f0d9;font-size:18px">&nbsp; Inventory Stock Ledger Report &nbsp;</div>
+      <div>Print Date: {{ print_time|date:"F j, Y, g:i a" }}</div>
+    </div>
+  </div>
+
+  <div class="sub-head">
+    House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br />
+    +880191322203 | info@btpltd.com | btpltd.com
+  </div>
+
+  <hr />
+
+    <p style="color:blue;font-size:18px">
+      Date Range:
+      {% if filters.from_date %} {{ filters.from_date|date:"d M Y" }} {% endif %}
+      {% if filters.to_date %} to {{ filters.to_date|date:"d M Y" }} {% endif %}
+    </p>
+
+      {% if summary %}
+        {% if filters.project %}
+          <p style="font-size:16px; font-weight:bold; color:#000;">
+            Project Name: {{ summary.0.project_name }}
+          </p>
+        {% else %}
+          <p style="font-size:16px; font-weight:bold; color:#000;">
+            Project Name: All Projects
+          </p>
+        {% endif %}
+    
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Item</th>
+            <th>Description</th>
+            <th>Purchase Qty</th>
+            <th>Use Qty</th>
+            <th>Balance Qty</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in summary %}
+          <tr>
+            <td>{{ row.date|date:"d M Y" }}</td>
+            <td style="text-align:left">{{ row.item_name }}</td>
+            <td style="text-align:left;width:350px">{{ row.remark }}</td>
+            <td>{{ row.purchase_qty|floatformat:2 }}</td>
+            <td>{{ row.use_qty|floatformat:2 }}</td>
+            <td>{{ row.balance_qty|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+          <tr style="font-weight:bold; background-color:#f1f5f9;">
+            <td colspan="3" style="text-align:right;">Total:</td>
+            <td>{{ total_purchase|floatformat:2 }}</td>
+            <td>{{ total_use|floatformat:2 }}</td>
+            <td>{{ total_balance|floatformat:2 }}</td>
+          </tr>
+        </tbody>
+      </table>
+    
+      <!--<div class="amount-words">-->
+      <!--  Total Balance in Words: {{ total_in_words }}-->
+      <!--</div>-->
+    {% else %}
+      <p>No records found for the selected filters.</p>
+    {% endif %}
+
+
+
+  <div class="no-print">
+    <a href="{% url 'invStock_ledger_manage' %}" class="btn-back">← Back</a>
+    <button onclick="window.print()" class="btn-print">🖨️ Print</button>
+  </div>
+</div>
+
+</body>
+</html>

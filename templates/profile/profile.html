@@ -1,0 +1,126 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Breck Time - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-lg font-medium">Breck Time</h2>
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                        <a href="{% url 'break_history' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Breck History</button>
+                        </a>
+                        <br/><br/>
+                      <div id="break-screen" class="p-4 border rounded-md
+                        {% if user_break.is_on_break %}
+                            bg-gray-200
+                        {% endif %}
+                        ">
+                            {% if user_break.is_on_break %}
+                                <p class="mb-2 text-red-600 font-semibold">
+                                    You are on break since: {{ user_break.break_start }}
+                                </p>
+                                <button id="unlock-btn"
+                                        style="background-color:red;color:white"
+                                        class="bg-red-600 text-white px-4 py-2 rounded">
+                                    Unlock
+                                </button>
+                            {% else %}
+                                <button id="break-btn"
+                                        style="background-color:green;color:white"
+                                        class="bg-green-600 text-white px-4 py-2 rounded">
+                                    Start Break
+                                </button>
+                            {% endif %}
+                            
+                            <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                // Unlock button
+                                const unlockBtn = document.getElementById("unlock-btn");
+                                if (unlockBtn) {
+                                    unlockBtn.addEventListener("click", function () {
+                                        fetch("{% url 'end_break' %}", { method: "POST", headers: {"X-CSRFToken": "{{ csrf_token }}"} })
+                                            .then(() => location.reload()); // reload page after request
+                                    });
+                                }
+                            
+                                // Start break button
+                                const breakBtn = document.getElementById("break-btn");
+                                if (breakBtn) {
+                                    breakBtn.addEventListener("click", function () {
+                                        fetch("{% url 'start_break' %}", { method: "POST", headers: {"X-CSRFToken": "{{ csrf_token }}"} })
+                                            .then(() => location.reload()); // reload page after request
+                                    });
+                                }
+                            });
+                            </script>
+
+                        </div>
+                        
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const breakBtn = document.getElementById('break-btn');
+                                const unlockBtn = document.getElementById('unlock-btn');
+                                const overlay = document.getElementById('overlay');
+                            
+                                if (breakBtn) {
+                                    breakBtn.addEventListener('click', function() {
+                                        fetch("{% url 'start_break' %}", {
+                                            method: 'POST',
+                                            headers: {'X-CSRFToken': '{{ csrf_token }}'}
+                                        })
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            if (data.status === 'success') {
+                                                // reload page so UI updates
+                                                location.reload();
+                                            }
+                                        });
+                                    });
+                                }
+                            
+                                if (unlockBtn) {
+                                    unlockBtn.addEventListener('click', function() {
+                                        fetch("{% url 'end_break' %}", {
+                                            method: 'POST',
+                                            headers: {'X-CSRFToken': '{{ csrf_token }}'}
+                                        })
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            if (data.status === 'success') {
+                                                // reload page so UI updates
+                                                location.reload();
+                                            }
+                                        });
+                                    });
+                                }
+                            
+                                // Show overlay immediately if user is already on break
+                                {% if user_break and user_break.is_on_break %}
+                                    overlay.classList.remove('hidden');
+                                {% endif %}
+                            });
+                            </script>
+                            
+                    </div>
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

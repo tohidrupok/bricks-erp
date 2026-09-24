@@ -1,0 +1,785 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}First Level Add - BM ERP{% endblock %}
+
+{% block content %} 
+
+    <!-- ===================== ICON SPRITE (inline SVG, no library needed) ===================== -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <symbol id="i-building" viewBox="0 0 24 24"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/></symbol>
+        <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+        <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+        <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+        <symbol id="i-ruler" viewBox="0 0 24 24"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2M11.5 9.5l2-2M8.5 6.5l2-2M17.5 15.5l2-2"/></symbol>
+        <symbol id="i-rows" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 9H3M21 15H3"/></symbol>
+        <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></symbol>
+        <symbol id="i-hash" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></symbol>
+        <symbol id="i-upload" viewBox="0 0 24 24"><path d="M4 14.9A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.24"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></symbol>
+        <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8M16 13H8M16 17H8"/></symbol>
+        <symbol id="i-flask" viewBox="0 0 24 24"><path d="M10 2v7.53a2 2 0 0 1-.21.9L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.07-10.13a2 2 0 0 1-.21-.9V2"/><path d="M8.5 2h7M7 16h10"/></symbol>
+        <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/></symbol>
+        <symbol id="i-check" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></symbol>
+        <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+        <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/></symbol>
+        <symbol id="i-up" viewBox="0 0 24 24"><path d="M5 3h14"/><path d="m18 13-6-6-6 6"/><path d="M12 7v14"/></symbol>
+        <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></symbol>
+        <symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></symbol>
+        <symbol id="i-back" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+        <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+        <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6M14 11v6"/></symbol>
+        <symbol id="i-tag" viewBox="0 0 24 24"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42Z"/><circle cx="7.5" cy="7.5" r="1" fill="currentColor"/></symbol>
+        <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1Z"/><path d="M4 22v-7"/></symbol>
+        <symbol id="i-tasks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8M13 12h8M13 18h8"/></symbol>
+        <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    </svg>
+
+    <!-- ===================== PAGE STYLES ===================== -->
+    <style>
+        .pf {
+            --pf-brand: #1e3c98;
+            --pf-brand-2: #3557d1;
+            --pf-ink: #0f172a;
+            --pf-muted: #64748b;
+            --pf-line: #e2e8f0;
+            --pf-card: #ffffff;
+            --pf-soft: #f8fafc;
+            --pf-tint: #eef2ff;
+            --pf-danger: #dc2626;
+            --pf-danger-tint: #fef2f2;
+            width: 100%;
+            max-width: 960px;
+            margin: 0 auto;
+            color: var(--pf-ink);
+        }
+        .dark .pf {
+            --pf-ink: #e2e8f0;
+            --pf-muted: #94a3b8;
+            --pf-line: #334155;
+            --pf-card: #1e293b;
+            --pf-soft: #0f172a;
+            --pf-tint: #1e2a52;
+            --pf-danger-tint: #3b1a1f;
+        }
+
+        .pf-i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+        /* ---------- Card ---------- */
+        .pf-card { background: var(--pf-card); border: 1px solid var(--pf-line); border-radius: 18px; box-shadow: 0 10px 30px -14px rgba(15, 23, 42, .22); overflow: hidden; }
+
+        /* ---------- Banner ---------- */
+        .pf-banner { position: relative; display: flex; align-items: center; gap: 14px; padding: 20px 28px; color: #fff; background: linear-gradient(120deg, var(--pf-brand) 0%, var(--pf-brand-2) 100%); overflow: hidden; }
+        .pf-banner::after { content: ""; position: absolute; right: -40px; top: -60px; width: 200px; height: 200px; border-radius: 50%; background: rgba(255, 255, 255, .09); }
+        .pf-banner::before { content: ""; position: absolute; right: 90px; bottom: -80px; width: 140px; height: 140px; border-radius: 50%; background: rgba(255, 255, 255, .06); }
+        .pf-banner-ico { position: relative; z-index: 1; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 12px; background: rgba(255, 255, 255, .18); border: 1px solid rgba(255, 255, 255, .25); }
+        .pf-banner-ico .pf-i { width: 24px; height: 24px; }
+        .pf-banner > div { position: relative; z-index: 1; }
+        .pf-banner h3 { font-size: 19px; font-weight: 700; line-height: 1.25; margin: 0; letter-spacing: -.01em; }
+        .pf-banner p { font-size: 13px; opacity: .85; margin: 2px 0 0; }
+
+        /* ---------- Sections ---------- */
+        .pf-section { padding: 24px 28px; }
+        .pf-section + .pf-section { border-top: 1px solid var(--pf-line); }
+        .pf-sec-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+        .pf-sec-ico { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; background: var(--pf-tint); color: var(--pf-brand-2); box-shadow: inset 0 0 0 1px rgba(53, 87, 209, .12); }
+        .dark .pf-sec-ico { color: #93a8ff; }
+        .pf-sec-head h4 { font-size: 16px; font-weight: 650; margin: 0; letter-spacing: -.005em; }
+        .pf-sec-head p { font-size: 12.5px; color: var(--pf-muted); margin: 2px 0 0; }
+        .pf-sec-head .pf-sec-side { margin-left: auto; }
+
+        /* ---------- Grid ---------- */
+        .pf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 20px; }
+        .pf-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 20px; }
+        .pf-full { grid-column: 1 / -1; }
+        @media (max-width: 767px) { .pf-grid-3 { grid-template-columns: 1fr; } }
+        @media (max-width: 640px) { .pf-grid { grid-template-columns: 1fr; } .pf-section { padding: 20px 16px; } .pf-banner { padding: 18px 16px; } }
+
+        /* ---------- Fields ---------- */
+        .pf-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 7px; color: var(--pf-ink); }
+        .pf-wrap { position: relative; }
+        .pf-wrap > .pf-i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; transition: color .15s; z-index: 1; }
+        .pf-wrap:focus-within > .pf-i { color: var(--pf-brand-2); }
+
+        .pf-wrap input:not([type="file"]),
+        .pf-wrap select {
+            width: 100%;
+            height: 44px;
+            padding: 0 14px 0 44px;
+            font-size: 14px;
+            color: var(--pf-ink);
+            background-color: var(--pf-soft);
+            border: 1px solid var(--pf-line);
+            border-radius: 11px;
+            outline: none;
+            transition: border-color .15s, box-shadow .15s, background-color .15s;
+        }
+        .pf-wrap select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 40px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            cursor: pointer;
+        }
+        .pf-wrap input::placeholder { color: #a3aec0; }
+        .pf-wrap input:not([type="file"]):hover,
+        .pf-wrap select:hover { border-color: #c3cde0; }
+        .pf-wrap input:not([type="file"]):focus,
+        .pf-wrap select:focus {
+            background-color: var(--pf-card);
+            border-color: var(--pf-brand-2);
+            box-shadow: 0 0 0 4px rgba(53, 87, 209, .14);
+        }
+
+        .pf-errors, .pf .errorlist { list-style: none; margin: 7px 0 0; padding: 0; font-size: 12.5px; color: var(--pf-danger); }
+        .pf-errors li, .pf .errorlist li { display: flex; align-items: center; gap: 6px; }
+        .pf-errors li::before, .pf .errorlist li::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--pf-danger); flex-shrink: 0; }
+
+        /* ---------- Upload boxes ---------- */
+        .pf-drop { position: relative; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1.5px dashed #cbd5e1; border-radius: 13px; background: var(--pf-soft); cursor: pointer; transition: border-color .15s, background-color .15s; }
+        .pf-drop:hover, .pf-drop:focus-within { border-color: var(--pf-brand-2); background: var(--pf-tint); }
+        .pf-drop.has-files { border-style: solid; border-color: #22c55e; background: rgba(34, 197, 94, .07); }
+        .pf-drop input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .pf-drop-ico { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 11px; background: var(--pf-card); border: 1px solid var(--pf-line); color: var(--pf-brand-2); flex-shrink: 0; }
+        .pf-drop.has-files .pf-drop-ico { color: #16a34a; border-color: #86efac; }
+        .pf-drop-title { font-size: 13.5px; font-weight: 600; }
+        .pf-drop-hint { font-size: 12px; color: var(--pf-muted); margin-top: 2px; word-break: break-word; }
+        .pf-drop-add { margin-left: auto; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--pf-tint); color: var(--pf-brand-2); flex-shrink: 0; }
+        .pf-drop-add .pf-i { width: 15px; height: 15px; }
+
+        /* ---------- Dynamic schedule rows ---------- */
+        #schedule-container { counter-reset: schedrow; display: flex; flex-direction: column; gap: 12px; }
+        .schedule-row { counter-increment: schedrow; position: relative; padding: 16px 16px 16px 56px; border: 1px solid var(--pf-line); border-radius: 14px; background: var(--pf-soft); transition: border-color .15s, box-shadow .15s; }
+        .schedule-row:hover { border-color: #c3cde0; box-shadow: 0 6px 16px -10px rgba(15, 23, 42, .25); }
+        .schedule-row::before { content: counter(schedrow); position: absolute; left: 14px; top: 16px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9px; font-size: 12.5px; font-weight: 700; color: var(--pf-brand-2); background: var(--pf-tint); }
+        .dark .schedule-row::before { color: #93a8ff; }
+        .pf-row-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.1fr) auto; gap: 14px; align-items: end; }
+        .pf-row-grid .pf-label { font-size: 12.5px; margin-bottom: 6px; }
+        .pf-row-grid .pf-wrap input:not([type="file"]),
+        .pf-row-grid .pf-wrap select { height: 40px; font-size: 13.5px; }
+        @media (max-width: 1023px) { .pf-row-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 640px) { .pf-row-grid { grid-template-columns: 1fr; } .schedule-row { padding: 14px 14px 14px 14px; } .schedule-row::before { position: static; margin-bottom: 10px; } }
+
+        /* ---------- Buttons ---------- */
+        .pf-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; padding: 0 13px; font-size: 13px; font-weight: 600; line-height: 1; border-radius: 9px; border: 1px solid transparent; cursor: pointer; text-decoration: none; white-space: nowrap; transition: transform .12s, box-shadow .15s, background-color .15s, border-color .15s; }
+        .pf-btn .pf-i { width: 15px; height: 15px; }
+        .pf-btn:active { transform: translateY(1px); }
+        .pf-btn:focus-visible { outline: 3px solid rgba(53, 87, 209, .45); outline-offset: 2px; }
+        .pf-btn-primary { color: #fff; background: linear-gradient(120deg, var(--pf-brand), var(--pf-brand-2)); box-shadow: 0 6px 14px -8px rgba(30, 60, 152, .8); }
+        .pf-btn-primary:hover { box-shadow: 0 8px 18px -8px rgba(30, 60, 152, .95); color: #fff; }
+        .pf-btn-ghost { color: var(--pf-ink); background: var(--pf-card); border-color: var(--pf-line); }
+        .pf-btn-ghost:hover { background: var(--pf-soft); border-color: #c3cde0; color: var(--pf-ink); }
+        .pf-btn-soft { color: var(--pf-brand-2); background: var(--pf-tint); border-color: transparent; }
+        .pf-btn-soft:hover { background: var(--pf-brand-2); color: #fff; }
+        .dark .pf-btn-soft { color: #93a8ff; }
+        .pf-btn-danger { height: 40px; color: var(--pf-danger); background: var(--pf-danger-tint); border-color: transparent; }
+        .pf-btn-danger:hover { background: var(--pf-danger); color: #fff; }
+        @media (max-width: 640px) { .pf-btn-danger { width: 100%; } }
+
+        /* ---------- Bottom actions (compact, not sticky) ---------- */
+        .pf-actions { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 10px 28px; border-top: 1px solid var(--pf-line); background: var(--pf-soft); }
+        @media (max-width: 640px) { .pf-actions { padding: 10px 16px; } }
+
+                /* ---------- Django messages ---------- */
+        .pf-messages { list-style: none; width: 100%; max-width: 960px; margin: 0 auto 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+        .pf-messages .message { display: flex; align-items: center; gap: 10px; padding: 11px 14px; font-size: 13.5px; font-weight: 500; border-radius: 11px; border: 1px solid #bfdbfe; background: #eff6ff; color: #1e40af; }
+        .pf-messages .message.success { border-color: #bbf7d0; background: #f0fdf4; color: #166534; }
+        .pf-messages .message.error { border-color: #fecaca; background: #fef2f2; color: #991b1b; }
+        .pf-messages .message.warning { border-color: #fde68a; background: #fffbeb; color: #92400e; }
+        .dark .pf-messages .message { background: #1e2a52; border-color: #334155; color: #c7d2fe; }
+        .dark .pf-messages .message.success { background: #14301f; color: #86efac; }
+        .dark .pf-messages .message.error { background: #3b1a1f; color: #fca5a5; }
+        .dark .pf-messages .message.warning { background: #3b2f12; color: #fcd34d; }
+
+    </style>
+
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}              
+                <!-- END: Top Bar -->
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                         {% if messages %}
+                            <ul class="pf-messages">
+                                {% for message in messages %}
+                                <li class="message {{ message.tags }}">
+                                    <svg class="pf-i"><use href="#i-{% if message.tags == 'success' %}check{% elif message.tags == 'error' %}flag{% else %}sparkle{% endif %}"/></svg>
+                                    <span>{{ message }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                          {% endif %}
+                        <form method="POST" class="pf pf-card" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <!-- Banner -->
+                            <div class="pf-banner">
+                                <span class="pf-banner-ico"><svg class="pf-i"><use href="#i-building"/></svg></span>
+                                <div>
+                                    <h3>New Project</h3>
+                                    <p>Fill in the project details, upload documents and set the schedule.</p>
+                                </div>
+                            </div>
+
+                            <!-- ================================= -->
+                            <!-- PROJECT DETAILS -->
+                            <!-- ================================= -->
+                            <div class="pf-section">
+                                <div class="pf-sec-head">
+                                    <span class="pf-sec-ico"><svg class="pf-i"><use href="#i-building"/></svg></span>
+                                    <div>
+                                        <h4>Project Intro</h4>
+                                        <p>Basic information about the project</p>
+                                    </div>
+                                </div>
+
+                                <div class="pf-grid">
+
+                                    <!-- Project First Level Name Field -->
+                                    <div class="pf-full">
+                                      <label for="project_first_name" class="pf-label">Project Name</label>
+                                      <div class="pf-wrap">
+                                        <svg class="pf-i"><use href="#i-building"/></svg>
+                                        <input type="text" id="project_first_name" name="project_first_name" placeholder="Enter Project Name" value="{{ form.project_first_name.value|default_if_none:'' }}">
+                                      </div>
+                                      {% if form.project_first_name.errors %}
+                                        <ul class="pf-errors">
+                                          {% for error in form.project_first_name.errors %}
+                                            <li>{{ error }}</li>
+                                          {% endfor %}
+                                        </ul>
+                                      {% endif %}
+                                    </div>
+
+                                    <!-- Project Location Dropdown -->
+                                    <div>
+                                      <label for="id_location" class="pf-label">Project Location</label>
+                                      <div class="pf-wrap">
+                                        <svg class="pf-i"><use href="#i-pin"/></svg>
+                                        <select id="id_location" name="location">
+                                          <option value="">Select Location</option>
+                                          {% for location in form.fields.location.queryset %}
+                                            <option value="{{ location.id }}" {% if form.data.location == location.id|stringformat:"s" %}selected{% endif %}>
+                                              {{ location.location_name }}
+                                            </option>
+                                          {% endfor %}
+                                        </select>
+                                      </div>
+                                      {% if form.errors.location %}
+                                        <ul class="pf-errors">
+                                          {% for error in form.errors.location %}
+                                            <li>{{ error }}</li>
+                                          {% endfor %}
+                                        </ul>
+                                      {% endif %}
+                                    </div>
+
+                                    <!-- Project Type -->
+                                    <div>
+                                      <label for="project_type" class="pf-label">Project Type</label>
+                                      <div class="pf-wrap">
+                                        <svg class="pf-i"><use href="#i-layers"/></svg>
+                                        <select id="project_type" name="project_type">
+                                          <option value="Own Project" {% if form.project_type.value == 'Own Project' %}selected{% endif %}>Own Project</option>
+                                          <option value="Joint Venture Project" {% if form.project_type.value == 'Joint Venture Project' %}selected{% endif %}>Joint Venture Project</option>
+                                          <option value="Only Construction Company" {% if form.project_type.value == 'Only Construction Company' %}selected{% endif %}>Only Construction Company</option>
+                                        </select>
+                                      </div>
+                                      {% if form.project_type.errors %}
+                                        <ul class="pf-errors">
+                                          {% for error in form.project_type.errors %}
+                                            <li>{{ error }}</li>
+                                          {% endfor %}
+                                        </ul>
+                                      {% endif %}
+                                    </div>
+
+                                    <!-- Project Owner Dropdown -->
+                                    <div>
+                                      <label for="project_owner" class="pf-label">Project Owner</label>
+                                      <div class="pf-wrap">
+                                        <svg class="pf-i"><use href="#i-user"/></svg>
+                                        <select id="project_owner" name="project_owner">
+                                          <option value="">Select Owner</option>
+                                          {% for owner in form.fields.project_owner.queryset %}
+                                            <option value="{{ owner.id }}" {% if form.project_owner.value|stringformat:"s" == owner.id|stringformat:"s" %}selected{% endif %}>{{ owner.owner_name }}</option>
+                                          {% endfor %}
+                                        </select>
+                                      </div>
+                                      {% if form.project_owner.errors %}
+                                        <ul class="pf-errors">
+                                          {% for error in form.project_owner.errors %}
+                                            <li>{{ error }}</li>
+                                          {% endfor %}
+                                        </ul>
+                                      {% endif %}
+                                    </div>
+
+                                    <!-- Project Size (sq ft) Field -->
+                                    <div>
+                                      <label for="project_size_sq_ft" class="pf-label">Project Size (in sq ft)</label>
+                                      <div class="pf-wrap">
+                                        <svg class="pf-i"><use href="#i-ruler"/></svg>
+                                        <input type="number" id="project_size_sq_ft" name="project_size_sq_ft" placeholder="Enter Project Size" value="{{ form.project_size_sq_ft.value|default_if_none:'' }}">
+                                      </div>
+                                      {% if form.project_size_sq_ft.errors %}
+                                        <ul class="pf-errors">
+                                          {% for error in form.project_size_sq_ft.errors %}
+                                            <li>{{ error }}</li>
+                                          {% endfor %}
+                                        </ul>
+                                      {% endif %}
+                                    </div>
+
+                                    <!-- Number of Floors Field -->
+                                    <div>
+                                      <label for="number_of_floors" class="pf-label">Number of Floors</label>
+                                      <div class="pf-wrap">
+                                        <svg class="pf-i"><use href="#i-rows"/></svg>
+                                        <input type="number" id="number_of_floors" name="number_of_floors" placeholder="Enter Number of Floors" value="{{ form.number_of_floors.value|default_if_none:'' }}">
+                                      </div>
+                                      {% if form.number_of_floors.errors %}
+                                        <ul class="pf-errors">
+                                          {% for error in form.number_of_floors.errors %}
+                                            <li>{{ error }}</li>
+                                          {% endfor %}
+                                        </ul>
+                                      {% endif %}
+                                    </div>
+
+                                    <!-- Units Per Floor Field -->
+                                    <div>
+                                      <label for="units_per_floor" class="pf-label">Units per Floor</label>
+                                      <div class="pf-wrap">
+                                        <svg class="pf-i"><use href="#i-grid"/></svg>
+                                        <input type="number" id="units_per_floor" name="units_per_floor" placeholder="Enter Units per Floor" value="{{ form.units_per_floor.value|default_if_none:'' }}">
+                                      </div>
+                                      {% if form.units_per_floor.errors %}
+                                        <ul class="pf-errors">
+                                          {% for error in form.units_per_floor.errors %}
+                                            <li>{{ error }}</li>
+                                          {% endfor %}
+                                        </ul>
+                                      {% endif %}
+                                    </div>
+
+                                    <!-- Number of Units Field -->
+                                    <div>
+                                      <label for="number_of_units" class="pf-label">Number of Units</label>
+                                      <div class="pf-wrap">
+                                        <svg class="pf-i"><use href="#i-hash"/></svg>
+                                        <input type="number" id="number_of_units" name="number_of_units" placeholder="Enter Number of Units" value="{{ form.number_of_units.value|default_if_none:'' }}">
+                                      </div>
+                                      {% if form.number_of_units.errors %}
+                                        <ul class="pf-errors">
+                                          {% for error in form.number_of_units.errors %}
+                                            <li>{{ error }}</li>
+                                          {% endfor %}
+                                        </ul>
+                                      {% endif %}
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                            <!-- ================================= -->
+                            <!-- PROJECT DOCUMENTS -->
+                            <!-- ================================= -->
+                            <div class="pf-section">
+
+                                <div class="pf-sec-head">
+                                    <span class="pf-sec-ico"><svg class="pf-i"><use href="#i-file"/></svg></span>
+                                    <div>
+                                        <h4>Project Documents</h4>
+                                        <p>You can select multiple files in each box</p>
+                                    </div>
+                                </div>
+
+                                <div class="pf-grid">
+
+                                    <!-- Agreement / Land Papers -->
+                                    <div>
+                                        <label class="pf-label">Agreement / Land Papers</label>
+                                        <label class="pf-drop">
+                                            <span class="pf-drop-ico"><svg class="pf-i"><use href="#i-file"/></svg></span>
+                                            <span>
+                                                <span class="pf-drop-title">Choose files</span>
+                                                <span class="pf-drop-hint" style="display:block">Upload agreement or land paper documents</span>
+                                            </span>
+                                            <span class="pf-drop-add"><svg class="pf-i"><use href="#i-plus"/></svg></span>
+                                            <input type="file" name="agreement_documents" multiple>
+                                        </label>
+                                    </div>
+
+                                    <!-- Test -->
+                                    <div>
+                                        <label class="pf-label">Test Documents</label>
+                                        <label class="pf-drop">
+                                            <span class="pf-drop-ico"><svg class="pf-i"><use href="#i-flask"/></svg></span>
+                                            <span>
+                                                <span class="pf-drop-title">Choose files</span>
+                                                <span class="pf-drop-hint" style="display:block">Upload multiple test documents</span>
+                                            </span>
+                                            <span class="pf-drop-add"><svg class="pf-i"><use href="#i-plus"/></svg></span>
+                                            <input type="file" name="test_documents" multiple>
+                                        </label>
+                                    </div>
+
+                                    <!-- Drawing -->
+                                    <div>
+                                        <label class="pf-label">Drawing Documents</label>
+                                        <label class="pf-drop">
+                                            <span class="pf-drop-ico"><svg class="pf-i"><use href="#i-ruler"/></svg></span>
+                                            <span>
+                                                <span class="pf-drop-title">Choose files</span>
+                                                <span class="pf-drop-hint" style="display:block">Upload multiple drawing files</span>
+                                            </span>
+                                            <span class="pf-drop-add"><svg class="pf-i"><use href="#i-plus"/></svg></span>
+                                            <input type="file" name="drawing_documents" multiple>
+                                        </label>
+                                    </div>
+
+                                    <!-- Certification -->
+                                    <div>
+                                        <label class="pf-label">Certification Documents</label>
+                                        <label class="pf-drop">
+                                            <span class="pf-drop-ico"><svg class="pf-i"><use href="#i-award"/></svg></span>
+                                            <span>
+                                                <span class="pf-drop-title">Choose files</span>
+                                                <span class="pf-drop-hint" style="display:block">Upload multiple certification documents</span>
+                                            </span>
+                                            <span class="pf-drop-add"><svg class="pf-i"><use href="#i-plus"/></svg></span>
+                                            <input type="file" name="certification_documents" multiple>
+                                        </label>
+                                    </div>
+
+                                    <!-- Approvals -->
+                                    <div class="pf-full">
+                                        <label class="pf-label">Approval Documents</label>
+                                        <label class="pf-drop">
+                                            <span class="pf-drop-ico"><svg class="pf-i"><use href="#i-check"/></svg></span>
+                                            <span>
+                                                <span class="pf-drop-title">Choose files</span>
+                                                <span class="pf-drop-hint" style="display:block">Upload multiple approval documents</span>
+                                            </span>
+                                            <span class="pf-drop-add"><svg class="pf-i"><use href="#i-plus"/></svg></span>
+                                            <input type="file" name="approval_documents" multiple>
+                                        </label>
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                            <!-- ================================= -->
+                            <!-- PROJECT SCHEDULE -->
+                            <!-- ================================= -->
+                            <div class="pf-section">
+
+                                <div class="pf-sec-head">
+                                    <span class="pf-sec-ico"><svg class="pf-i"><use href="#i-calendar"/></svg></span>
+                                    <div>
+                                        <h4>Project Schedule</h4>
+                                        <p>Estimated duration of each phase, in months</p>
+                                    </div>
+                                </div>
+
+                                <div class="pf-grid-3">
+
+                                    <div>
+                                        <label class="pf-label">Sub Structure (Months)</label>
+                                        <div class="pf-wrap">
+                                            <svg class="pf-i"><use href="#i-down"/></svg>
+                                            {{ schedule_form.sub_structure }}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="pf-label">Super Structure (Months)</label>
+                                        <div class="pf-wrap">
+                                            <svg class="pf-i"><use href="#i-up"/></svg>
+                                            {{ schedule_form.super_structure }}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="pf-label">Finishing (Months)</label>
+                                        <div class="pf-wrap">
+                                            <svg class="pf-i"><use href="#i-sparkle"/></svg>
+                                            {{ schedule_form.finishing }}
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                {% if schedule_form.errors %}
+                                    <div class="pf-errors" style="margin-top:14px">
+                                        {{ schedule_form.errors }}
+                                    </div>
+                                {% endif %}
+
+                            </div>
+
+                            <!-- ================================= -->
+                            <!-- DYNAMIC PROJECT SCHEDULE -->
+                            <!-- ================================= -->
+                            <div class="pf-section">
+
+                                <div class="pf-sec-head">
+                                    <span class="pf-sec-ico"><svg class="pf-i"><use href="#i-tasks"/></svg></span>
+                                    <div>
+                                        <h4>Project Schedule</h4>
+                                        <p>Add each task with its start and end date</p>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onclick="addScheduleRow()"
+                                        class="pf-btn pf-btn-soft pf-sec-side"
+                                    >
+                                        <svg class="pf-i"><use href="#i-plus"/></svg>
+                                        Add New Row
+                                    </button>
+                                </div>
+
+                                <div id="schedule-container">
+
+                                    <div class="schedule-row">
+
+                                        <div class="pf-row-grid">
+
+                                            <!-- Subject Name -->
+                                            <div>
+                                                <label class="pf-label">
+                                                    Subject Name
+                                                </label>
+
+                                                <div class="pf-wrap">
+                                                    <svg class="pf-i"><use href="#i-tag"/></svg>
+                                                    <input
+                                                        type="text"
+                                                        name="subject_name[]"
+                                                        placeholder="Subject Name"
+                                                    >
+                                                </div>
+                                            </div>
+
+                                            <!-- Start Date -->
+                                            <div>
+                                                <label class="pf-label">
+                                                    Start Date
+                                                </label>
+
+                                                <div class="pf-wrap">
+                                                    <svg class="pf-i"><use href="#i-calendar"/></svg>
+                                                    <input
+                                                        type="date"
+                                                        name="start_date[]"
+                                                    >
+                                                </div>
+                                            </div>
+
+                                            <!-- End Date -->
+                                            <div>
+                                                <label class="pf-label">
+                                                    End Date
+                                                </label>
+
+                                                <div class="pf-wrap">
+                                                    <svg class="pf-i"><use href="#i-flag"/></svg>
+                                                    <input
+                                                        type="date"
+                                                        name="end_date[]"
+                                                    >
+                                                </div>
+                                            </div>
+
+                                            <!-- Schedule Type -->
+                                            <div>
+                                                <label class="pf-label">
+                                                    Option
+                                                </label>
+
+                                                <div class="pf-wrap">
+                                                    <svg class="pf-i"><use href="#i-layers"/></svg>
+                                                    <select
+                                                        name="schedule_type[]"
+                                                    >
+                                                        <option value="">Select Option</option>
+                                                        <option value="sub_structure">
+                                                            Sub Structure
+                                                        </option>
+                                                        <option value="super_structure">
+                                                            Super Structure
+                                                        </option>
+                                                        <option value="finishing">
+                                                            Finishing
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <!-- Remove -->
+                                            <div>
+                                                <button
+                                                    type="button"
+                                                    onclick="removeScheduleRow(this)"
+                                                    class="pf-btn pf-btn-danger"
+                                                >
+                                                    <svg class="pf-i"><use href="#i-trash"/></svg>
+                                                    Remove
+                                                </button>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <script>
+
+                              function addScheduleRow() {
+
+                                  const container = document.getElementById(
+                                      'schedule-container'
+                                  );
+
+                                  const firstRow = document.querySelector(
+                                      '.schedule-row'
+                                  );
+
+                                  const newRow = firstRow.cloneNode(true);
+
+                                  // Clear all input values
+                                  newRow.querySelectorAll('input').forEach(function(input) {
+                                      input.value = '';
+                                  });
+
+                                  // Reset select
+                                  newRow.querySelectorAll('select').forEach(function(select) {
+                                      select.selectedIndex = 0;
+                                  });
+
+                                  container.appendChild(newRow);
+                              }
+
+
+                              function removeScheduleRow(button) {
+
+                                  const rows = document.querySelectorAll(
+                                      '.schedule-row'
+                                  );
+
+                                  // At least one row will remain
+                                  if (rows.length > 1) {
+
+                                      button.closest('.schedule-row').remove();
+
+                                  } else {
+
+                                      alert('At least one schedule row is required.');
+
+                                  }
+                              }
+
+                            </script>
+                            <!--  SCRIPT -->
+                            <script>
+                              function toggleFileUpload(fieldName, show) {
+                                const fileInput = document.getElementById(`${fieldName}_upload`);
+                                if (show) {
+                                  fileInput.classList.remove('hidden');
+                                } else {
+                                  fileInput.classList.add('hidden');
+                                }
+                              }
+
+                              // Show selected file names inside each upload box
+                              document.querySelectorAll('.pf-drop input[type="file"]').forEach(function (input) {
+                                input.addEventListener('change', function () {
+                                  const box = input.closest('.pf-drop');
+                                  const title = box.querySelector('.pf-drop-title');
+                                  const hint = box.querySelector('.pf-drop-hint');
+                                  if (!box.dataset.hint) { box.dataset.hint = hint.textContent; }
+                                  if (input.files.length) {
+                                    box.classList.add('has-files');
+                                    title.textContent = input.files.length + (input.files.length === 1 ? ' file selected' : ' files selected');
+                                    hint.textContent = Array.from(input.files).map(function (f) { return f.name; }).join(', ');
+                                  } else {
+                                    box.classList.remove('has-files');
+                                    title.textContent = 'Choose files';
+                                    hint.textContent = box.dataset.hint;
+                                  }
+                                });
+                              });
+                            </script>
+
+                            <!-- Bottom action bar: compact, sits at the end of the form only -->
+                            <div class="pf-actions">
+                              <a href="{% url 'first_level_list' %}" class="pf-btn pf-btn-ghost">
+                                  <svg class="pf-i"><use href="#i-back"/></svg>
+                                  Back to List
+                              </a>
+                              <button type="submit" class="pf-btn pf-btn-primary">
+                                  <svg class="pf-i"><use href="#i-save"/></svg>
+                                  Save Project
+                              </button>
+                            </div>
+
+                          </form>
+
+
+                            <script>
+                                function calculateUnitCost() {
+                                    // Get the values of the input fields for construction, labor, material, and other costs
+                                    const constructionCost = parseFloat(document.getElementById("construction_cost").value) || 0;
+                                    const laborCost = parseFloat(document.getElementById("labor_cost").value) || 0;
+                                    const materialCost = parseFloat(document.getElementById("material_cost").value) || 0;
+                                    const otherCosts = parseFloat(document.getElementById("other_costs").value) || 0;
+                            
+                                    // Calculate unit cost by summing all costs
+                                    const unitCost = constructionCost + laborCost + materialCost + otherCosts;
+                            
+                                    // Update the unit cost field
+                                    document.getElementById("unit_cost").value = unitCost.toFixed(2);
+                                }
+                            
+                                function calculateSalesPrice() {
+                                    // Get the unit cost and profit margin
+                                    const unitCost = parseFloat(document.getElementById("unit_cost").value) || 0;
+                                    const profitMargin = parseFloat(document.getElementById("profit_margin").value) || 0;
+                            
+                                    // Calculate profit amount
+                                    const profitAmount = unitCost * (profitMargin / 100);
+                            
+                                    // Calculate sales price
+                                    const salesPrice = unitCost + profitAmount;
+                            
+                                    // Update the sales price and profit amount fields
+                                    document.getElementById("profit_amount").value = profitAmount.toFixed(2);
+                                    document.getElementById("sales_price").value = salesPrice.toFixed(2);
+                                }
+                            </script>
+                    </div>
+                </div>
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+
+body{
+    background:#eef2f7;
+}
+
+/* CONTAINER */
+
+.delete-container{
+    max-width:650px;
+    margin:40px auto;
+}
+
+/* CARD */
+
+.delete-card{
+    background:#fff;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+
+/* HEADER */
+
+.card-header{
+    background:linear-gradient(135deg,#dc3545,#ff6b6b);
+    color:white;
+    padding:22px 25px;
+}
+
+.card-header h3{
+    margin:0;
+    font-size:25px;
+    font-weight:600;
+}
+
+.card-header p{
+    margin-top:5px;
+    opacity:.9;
+    font-size:14px;
+}
+
+/* BODY */
+
+.card-body{
+    padding:35px;
+    text-align:center;
+}
+
+.warning-icon{
+    width:90px;
+    height:90px;
+    margin:auto;
+    background:#fff3f4;
+    color:#dc3545;
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:40px;
+    margin-bottom:20px;
+}
+
+.message{
+    font-size:18px;
+    color:#444;
+    margin-bottom:10px;
+}
+
+.expense-name{
+    color:#dc3545;
+    font-weight:700;
+    font-size:22px;
+    margin-bottom:30px;
+}
+
+/* BUTTONS */
+
+.button-group{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.btn{
+    border:none;
+    padding:12px 22px;
+    border-radius:8px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    text-decoration:none;
+    transition:.3s;
+}
+
+.btn-delete{
+    background:#dc3545;
+    color:white;
+}
+
+.btn-delete:hover{
+    background:#bb2d3b;
+}
+
+.btn-cancel{
+    background:#6c757d;
+    color:white;
+}
+
+.btn-cancel:hover{
+    background:#5c636a;
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+    .card-body{
+        padding:25px;
+    }
+
+    .button-group{
+        flex-direction:column;
+    }
+
+    .btn{
+        width:100%;
+    }
+
+}
+
+</style>
+
+
+<div class="delete-container">
+
+    <div class="delete-card">
+
+        <div class="card-header">
+            <h3>🗑 Delete Expense</h3>
+            <p>This action cannot be undone.</p>
+        </div>
+
+        <div class="card-body">
+
+            <div class="warning-icon">
+                ⚠
+            </div>
+
+            <div class="message">
+                Are you sure you want to delete this expense?
+            </div>
+
+            <div class="expense-name">
+                {{ expense.restu_expense_name }}
+            </div>
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="button-group">
+
+                    <button type="submit"
+                            class="btn btn-delete">
+                        🗑 Yes, Delete
+                    </button>
+
+                    <a href="{% url 'restaurant_expense_public_list' %}"
+                       class="btn btn-cancel">
+                        ← Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

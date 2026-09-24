@@ -1,0 +1,273 @@
+<!-- templates/employee_access_assignment.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Assign Access - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+    .message.success {
+        color: #047857;
+        background-color: #ecfdf5;
+        border: 1px solid #10b981;
+        padding: 10px 14px;
+        border-radius: 8px;
+    }
+    
+    .message.error {
+        color: #b91c1c;
+        background-color: #fef2f2;
+        border: 1px solid #ef4444;
+        padding: 10px 14px;
+        border-radius: 8px;
+    }
+
+    .uga-wrap { max-width: 100%; margin: 0 auto; }
+    .uga-header h1 { font-size: 22px; font-weight: 700; color: #1e293b; margin: 0 0 4px; }
+    .uga-header p { color: #64748b; font-size: 14px; margin: 0 0 24px; }
+
+    .uga-steps { display: flex; flex-direction: column; gap: 16px; }
+
+    .uga-step {
+        display: flex; gap: 16px; background: #ffffff; border: 1px solid #e2e8f0;
+        border-radius: 12px; padding: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    .uga-step-num {
+        flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+        background: #d9480f; color: #fff; font-weight: 700; font-size: 13px;
+        display: flex; align-items: center; justify-content: center;
+    }
+
+    .uga-step-body { flex: 1; min-width: 0; }
+
+    .uga-label {
+        display: block; font-size: 12px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.04em; color: #64748b; margin-bottom: 8px;
+    }
+
+    .uga-select {
+        width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px;
+        font-size: 14px; color: #1e293b; background: #f8fafc;
+    }
+    .uga-select:focus { outline: none; border-color: #d9480f; background: #fff; }
+
+    .uga-current-groups { margin-top: 10px; font-size: 13px; color: #64748b; }
+    .uga-chip {
+        display: inline-block; background: #1e3a8a12; color: #1e3a8a;
+        padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+        margin-left: 4px;
+    }
+
+    .uga-select-all-bar {
+        background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 14px;
+        border-radius: 8px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .uga-tree { display: flex; flex-direction: column; gap: 4px; max-height: 480px; overflow-y: auto; padding-right: 4px; }
+
+    .uga-parent { border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 4px; }
+    .uga-parent:last-child { border-bottom: none; }
+
+    .uga-check {
+        display: flex; align-items: center; gap: 8px; padding: 8px 6px;
+        border-radius: 6px; cursor: pointer; font-size: 14px; color: #334155;
+        user-select: none;
+    }
+    .uga-check:hover { background: #f8fafc; }
+    .uga-check-parent { font-weight: 700; color: #1e293b; }
+
+    .uga-check input[type="checkbox"] { display: none; }
+    .uga-checkmark {
+        width: 18px; height: 18px; border: 2px solid #cbd5e1; border-radius: 5px;
+        flex-shrink: 0; position: relative; transition: all 0.15s ease;
+    }
+    .uga-check input:checked + .uga-checkmark {
+        background: #d9480f; border-color: #d9480f;
+    }
+    .uga-check input:checked + .uga-checkmark::after {
+        content: ""; position: absolute; left: 5px; top: 1px;
+        width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .uga-icon { width: 15px; height: 15px; flex-shrink: 0; opacity: 0.7; }
+
+    .uga-children { margin-left: 26px; display: flex; flex-direction: column; gap: 2px; }
+
+    .uga-save-btn {
+        margin-top: 18px; display: inline-flex; align-items: center; gap: 8px;
+        background: #d9480f; color: #fff; border: none; padding: 11px 20px;
+        border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+        transition: background 0.15s ease;
+    }
+    .uga-save-btn:hover { background: #b8380a; }
+    .uga-save-btn .uga-icon { opacity: 1; }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+        
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            <!-- BEGIN: Top Bar -->  
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+        
+            <div class="uga-wrap mt-8">
+                <div class="uga-header">
+                    <h2 class="intro-y text-lg font-medium">Assign User Access</h2>
+                    <p>Pick a person, select their departments, then configure their menu and feature permissions.</p>
+                </div>
+
+                {% if messages %}
+                    <ul style="list-style: none; padding: 0; margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px;">
+                        {% for message in messages %}
+                            <li class="message {{ message.tags }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <!-- COMBINED FORM FOR SAVING BOTH GROUPS AND MENUS -->
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="uga-steps">
+                        <!-- STEP 1: USER -->
+                        <div class="uga-step">
+                            <div class="uga-step-num">1</div>
+                            <div class="uga-step-body">
+                                <label class="uga-label">User</label>
+                                <!-- Using a regular GET form or script submission to change user -->
+                                <select name="user_id" class="uga-select" onchange="window.location.href='?user_id=' + this.value">
+                                    <option value="">-- Select a user --</option>
+                                    {% for u in users %}
+                                        <option value="{{ u.pk }}" {% if selected_user and selected_user.pk == u.pk %}selected{% endif %}>
+                                            {{ u.get_username }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if selected_user and user_current_groups %}
+                                    <div class="uga-current-groups">
+                                        Currently in:
+                                        {% for g in user_current_groups %}
+                                            <span class="uga-chip">{{ g.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if selected_user %}
+                        <!-- STEP 2: DEPARTMENTS (GROUPS CHECKBOX LIST) -->
+                        <div class="uga-step">
+                            <input type="hidden" name="user_id" value="{{ selected_user.pk }}">
+                            <div class="uga-step-num">2</div>
+                            <div class="uga-step-body">
+                                <label class="uga-label">Departments (Groups)</label>
+                                <div class="uga-tree" style="max-height: 200px;">
+                                    {% for g in groups %}
+                                        <label class="uga-check">
+                                            <input type="checkbox" name="groups" value="{{ g.pk }}" {% if g in selected_groups %}checked{% endif %}>
+                                            <span class="uga-checkmark"></span>
+                                            <i data-lucide="shield" class="uga-icon"></i>
+                                            {{ g.name }}
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STEP 3: FEATURES / MENUS TREE -->
+                        <div class="uga-step uga-step-features">
+                            <div class="uga-step-num">3</div>
+                            <div class="uga-step-body">
+                                <label class="uga-label">Menus &amp; Features for "{{ selected_user.get_username }}"</label>
+
+                                <!-- MASTER CHECK/UNCHECK ALL BAR -->
+                                <div class="uga-select-all-bar">
+                                    <label class="uga-check" style="margin: 0; font-weight: 600;">
+                                        <input type="checkbox" id="selectAllMenus">
+                                        <span class="uga-checkmark"></span>
+                                        <span>Select / Uncheck All Menus & Features</span>
+                                    </label>
+                                </div>
+
+                                <div class="uga-tree">
+                                    {% for node in tree %}
+                                        <div class="uga-parent">
+                                            <label class="uga-check uga-check-parent">
+                                                <input type="checkbox" name="menu_items" value="{{ node.parent.pk }}" class="parent-checkbox" {% if node.parent_checked %}checked{% endif %}>
+                                                <span class="uga-checkmark"></span>
+                                                <i data-lucide="{{ node.parent.icon|default:'circle' }}" class="uga-icon"></i>
+                                                {{ node.parent.title }}
+                                            </label>
+                                            {% if node.children %}
+                                                <div class="uga-children">
+                                                    {% for c in node.children %}
+                                                        <label class="uga-check">
+                                                            <input type="checkbox" name="menu_items" value="{{ c.item.pk }}" class="child-checkbox" {% if c.checked %}checked{% endif %}>
+                                                            <span class="uga-checkmark"></span>
+                                                            <i data-lucide="{{ c.item.icon|default:'zap' }}" class="uga-icon"></i>
+                                                            {{ c.item.title }}
+                                                        </label>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <button type="submit" class="uga-save-btn">
+                                    <i data-lucide="check" class="uga-icon"></i>
+                                    Save Access for {{ selected_user.get_username }}
+                                </button>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    if (window.lucide) lucide.createIcons();
+
+    // 1. Master "Select All" Checkbox logic for menus
+    const selectAllCheckbox = document.getElementById('selectAllMenus');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function () {
+            const allCheckboxes = document.querySelectorAll('.uga-step-features input[type="checkbox"]');
+            allCheckboxes.forEach(cb => {
+                cb.checked = selectAllCheckbox.checked;
+            });
+        });
+    }
+
+    // 2. Parent-to-Child Checkbox Logic
+    const parentNodes = document.querySelectorAll('.uga-parent');
+    parentNodes.forEach(parentEl => {
+        const parentCb = parentEl.querySelector('.parent-checkbox');
+        const childCbs = parentEl.querySelectorAll('.child-checkbox');
+
+        if (parentCb) {
+            parentCb.addEventListener('change', function () {
+                childCbs.forEach(child => {
+                    child.checked = parentCb.checked;
+                });
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

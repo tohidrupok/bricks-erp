@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Requisition List - BM ERP</title>
+<style>
+body{ font-family:Arial,sans-serif; background:#eef2f7; margin:0; padding:0; }
+.top-header{ max-width:1200px; margin:20px auto; padding:20px; background:#fff; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.08); }
+.header-row{ display:flex; justify-content:space-between; align-items:center; gap:15px; flex-wrap:wrap; }
+.page-title{ margin:0; font-size:28px; color:#198754; font-weight:bold; }
+.page-subtitle{ margin-top:5px; color:#6c757d; font-size:14px; }
+.header-buttons{ display:flex; gap:10px; flex-wrap:wrap; }
+.header-btn{ padding:10px 18px; border-radius:8px; text-decoration:none; color:#fff; font-size:14px; font-weight:bold; transition:.3s; }
+.header-btn:hover{ opacity:.9; }
+.home-btn{ background:#0d6efd; }
+.refresh-btn{ background:#6c757d; }
+.store-btn{ background:green; }
+.container{ max-width:1200px; margin:20px auto; padding:0 15px; }
+.card{ background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.08); }
+.header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+.header h2{ margin:0; color:#0d6efd; }
+.btn{ padding:8px 12px; border-radius:6px; text-decoration:none; color:#fff; font-size:14px; display:inline-block; }
+.btn-green{ background:#28a745; }
+.filter{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+.filter input, .filter select{ padding:10px; border:1px solid #ddd; border-radius:6px; min-width:250px; font-size:14px; background:#fff; }
+.table-responsive{ overflow-x:auto; }
+table{ width:100%; border-collapse:collapse; }
+th{ background:#0d6efd; color:#fff; padding:12px 10px; text-align:left; font-size:14px; }
+td{ padding:12px 10px; border-bottom:1px solid #eee; font-size:14px; vertical-align: middle; }
+tbody tr:hover{ background:#f1f5ff; }
+
+/* 🌟 Clickable Status Button Styles */
+.status-pending{ background:#dc3545; color:#fff; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:bold; border:none; cursor:pointer; transition:0.2s ease; display:inline-block; text-align:center; }
+.status-pending:hover{ background:#bd2130; transform: scale(1.05); }
+
+/* 🛠️ Table Inline Field Inputs Layout Styles */
+table input[type="number"], table select {
+    width: 100%;
+    max-width: 160px;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 13px;
+}
+
+/* 🔔 Toast Layout Container */
+#toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+.toast-message { background: #333; color: #fff; padding: 12px 25px; border-radius: 6px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: bold; font-size: 14px; animation: slideIn 0.3s ease forwards; }
+.toast-success { background: #198754; border-left: 5px solid #0f5132; }
+.toast-error { background: #dc3545; border-left: 5px solid #842029; }
+@keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; } to { transform: translateX(0); opacity: 0; } }
+
+@media(max-width:768px){
+    .header, .header-row{ flex-direction:column; align-items:flex-start; }
+    .header-buttons{ width:100%; }
+    .header-btn{ flex:1; text-align:center; }
+    .filter input, .filter select{ width:100%; min-width:100%; }
+}
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<div class="navbar">
+    <div class="top-header">
+        <div class="header-row">
+            <div>
+                <h2 class="page-title">📋 Requisition Store</h2>
+                <div class="page-subtitle">Requisition Management System</div>
+            </div>
+            <div class="header-buttons">
+                <a href="{% url 'public_restaurant_home' %}" class="header-btn home-btn">🏠 Home</a>
+                <a href="{% url 'rest_inventory_project_wise' %}" class="header-btn store-btn">📦 Store</a>
+                <a href="" id="dynamicRefreshBtn" class="header-btn refresh-btn">🔄 Refresh</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="header">
+            <h2>Requisition List (Row by Row Pending)</h2>
+            <button type="button" id="bulkApproveBtn" class="btn btn-green" style="border: none; cursor: pointer; display: none; font-weight: bold;">
+                ✅ Approve Selected Items
+            </button>
+        </div>
+
+        <div class="filter">
+            <input type="text" id="searchInput" placeholder="🔍 Search row content..." onkeyup="handleFilter()">
+            
+            <select id="projectFilter" onchange="executeWorkspaceRouting(this.value)">
+                <option value="">All Projects</option>
+                {% for project in projects_firts %}
+                    <option value="{{ project.id }}" {% if current_project|slugify == project.id|slugify %}selected{% endif %}>{{ project.project_first_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <form id="bulkApproveForm" method="POST" action="{% url 'restau_requisition_bulk_approve' %}">
+            {% csrf_token %}
+            
+            <input type="hidden" name="current_project" value="{{ current_project }}">
+            <input type="hidden" name="current_employee" value="{{ current_employee }}">
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 40px; text-align: center;">
+                                <input type="checkbox" id="selectAll" style="transform: scale(1.2); cursor: pointer;">
+                            </th>
+                            <th>SL</th>
+                            <th>Date</th>
+                            <th>Project Name</th>
+                            <th>Employee Name</th>
+                            <th>Item Name</th>
+                            <th>Supplier/Vendor</th>
+                            <th>Qty</th>
+                            <th>Rate</th>
+                            <th>Amount</th>
+                            <th>Status Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        {% for req in requisitions %}
+                        <tr id="req-row-{{ req.id }}" data-project="{{ req.project_name.project_first_name|lower }}">
+                            <td style="text-align: center;">
+                                <input type="checkbox" name="requisition_ids" value="{{ req.id }}" class="row-checkbox" style="transform: scale(1.2); cursor: pointer;">
+                            </td>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ req.requisition_date }}</td>
+                            <td>{{ req.project_name.project_first_name }}</td>
+                            <td>
+                                {% if req.employee_name.rda_emp_name %}
+                                    {{ req.employee_name.rda_emp_name }}
+                                {% else %}
+                                    {{ req.employee_name }}
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ req.item_name.item_name|default:req.item_name }}</strong></td>
+                            
+                            <!--<td>-->
+                            <!--    <select onchange="updateRowInline({{ req.id }}, 'vendor_name', this.value)">-->
+                            <!--        <option value="">-- Select Supplier --</option>-->
+                            <!--        {% for supplier in suppliers %}-->
+                            <!--            <option value="{{ supplier.rest_supplier_name }}" {% if req.vendor_name == supplier.rest_supplier_name %}selected{% endif %}>-->
+                            <!--                {{ supplier.rest_supplier_name }}-->
+                            <!--            </option>-->
+                            <!--        {% endfor %}-->
+                            <!--    </select>-->
+                            <!--</td>-->
+                             <td>
+                               -- NO--
+                            </td>
+                            
+                            <td>
+                                <input type="number" min="0.01" step="0.01" value="{{ req.qty }}" 
+                                       onchange="updateRowInline({{ req.id }}, 'qty', this.value); recalculateLineAmount({{ req.id }});">
+                            </td>
+                            
+                            <td>
+                                <input type="number" min="0.00" step="0.01" value="{{ req.rate }}" 
+                                       onchange="updateRowInline({{ req.id }}, 'rate', this.value); recalculateLineAmount({{ req.id }});" readonly>
+                            </td>
+                            
+                            <td><strong id="amount-label-{{ req.id }}">৳{{ req.amount }}</strong></td>
+                            
+                            <td>
+                                <button type="button" class="status-pending" title="Click to instantly approve this single item row" 
+                                        onclick="approveSingleRowInline({{ req.id }})">
+                                    Pending
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="11" class="no-data">No pending item configurations match criteria selection.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// --- Single Row Click Status Approval Workflow ---
+function approveSingleRowInline(rowId) {
+    if (!confirm(`Are you sure you want to approve requisition row #${rowId}?`)) {
+        return;
+    }
+    
+    fetch(window.location.pathname, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+        },
+        body: JSON.stringify({
+            action: "update_field",
+            id: rowId,
+            field: "approv_store",
+            value: "approved"
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === "success") {
+            displayToast(`Row #${rowId} approved successfully!`, "success");
+            
+            // Fade out and cleanly remove the approved item row from current pending matrix display screen
+            const targetingRow = document.getElementById(`req-row-${rowId}`);
+            if(targetingRow) {
+                targetingRow.style.transition = "all 0.4s ease";
+                targetingRow.style.opacity = "0";
+                targetingRow.style.transform = "translateX(-20px)";
+                setTimeout(() => {
+                    targetingRow.remove();
+                    if(typeof toggleBulkButton === "function") toggleBulkButton();
+                }, 400);
+            }
+        } else {
+            displayToast(`Error approving status: ${data.message}`, "error");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        displayToast("Network integration exception processing approval operation.", "error");
+    });
+}
+
+// --- Project cross navigation routing matrix engine ---
+function executeWorkspaceRouting(projectId) {
+    let employeeId = "";
+    if (String(projectId) === "36") { employeeId = "24"; } 
+    else if (String(projectId) === "60") { employeeId = "54"; }
+
+    let baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    let params = [];
+    if (projectId) params.push(`project=${projectId}`);
+    if (employeeId) params.push(`employee=${employeeId}`);
+    
+    window.location.href = baseUrl + (params.length > 0 ? "?" + params.join("&") : "");
+}
+
+// --- Dynamic Toast Container Messaging Interface ---
+function displayToast(message, alertType = "success") {
+    const container = document.getElementById("toast-container");
+    const el = document.createElement("div");
+    el.className = `toast-message toast-${alertType}`;
+    el.innerHTML = alertType === "success" ? `✓ ${message}` : `⚠️ ${message}`;
+    container.appendChild(el);
+    
+    setTimeout(() => {
+        el.style.animation = "fadeOut 0.4s ease forwards";
+        setTimeout(() => el.remove(), 400);
+    }, 2500);
+}
+
+// --- Standard AJAX Cell Fields Submission Engine ---
+function updateRowInline(rowId, fieldName, fieldValue) {
+    fetch(window.location.pathname, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+        },
+        body: JSON.stringify({
+            action: "update_field",
+            id: rowId,
+            field: fieldName,
+            value: fieldValue
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === "success") {
+            displayToast(`Row #${rowId}: '${fieldName}' saved successfully!`, "success");
+        } else {
+            displayToast(`Error: ${data.message}`, "error");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        displayToast("Network interaction issue tracking changes.", "error");
+    });
+}
+
+function recalculateLineAmount(rowId) {
+    const row = document.getElementById(`req-row-${rowId}`);
+    if(!row) return;
+    const inputs = row.querySelectorAll('input[type="number"]');
+    const qty = parseFloat(inputs[0].value) || 0;
+    const rate = parseFloat(inputs[1].value) || 0;
+    document.getElementById(`amount-label-${rowId}`).innerText = "৳" + (qty * rate).toFixed(2);
+}
+
+function handleFilter(){
+    let searchValue = document.getElementById("searchInput").value.toLowerCase().trim();
+    let rows = document.querySelectorAll("#tableBody tr");
+    rows.forEach(function(row){
+        if(row.classList.contains('no-data')) return;
+        let rowText = row.textContent.toLowerCase();
+        row.style.display = searchValue === "" || rowText.includes(searchValue) ? "" : "none";
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const refreshBtn = document.getElementById("dynamicRefreshBtn");
+    if (refreshBtn) {
+        refreshBtn.setAttribute("href", window.location.pathname + window.location.search);
+    }
+
+    const selectAllCheckbox = document.getElementById("selectAll");
+    const bulkApproveBtn = document.getElementById("bulkApproveBtn");
+    const bulkApproveForm = document.getElementById("bulkApproveForm");
+
+    window.toggleBulkButton = function() {
+        const rowCheckboxes = document.querySelectorAll(".row-checkbox");
+        const anyChecked = Array.from(rowCheckboxes).some(cb => cb.checked);
+        bulkApproveBtn.style.display = anyChecked ? "inline-block" : "none";
+    };
+
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener("change", function() {
+            const rowCheckboxes = document.querySelectorAll(".row-checkbox");
+            rowCheckboxes.forEach(cb => {
+                if (cb.closest("tr").style.display !== "none") {
+                    cb.checked = selectAllCheckbox.checked;
+                }
+            });
+            toggleBulkButton();
+        });
+    }
+
+    document.getElementById("tableBody").addEventListener("change", function(e) {
+        if (e.target && e.target.classList.contains("row-checkbox")) {
+            if (!e.target.checked && selectAllCheckbox) {
+                selectAllCheckbox.checked = false;
+            }
+            toggleBulkButton();
+        }
+    });
+
+    bulkApproveBtn.addEventListener("click", function() {
+        if (confirm("Are you sure you want to approve all selected individual store rows?")) {
+            bulkApproveForm.submit();
+        }
+    });
+});
+</script>
+</body>
+</html>

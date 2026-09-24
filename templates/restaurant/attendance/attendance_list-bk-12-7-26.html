@@ -1,0 +1,493 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Restaurant Attendance List - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Restaurant Attendance List</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{% url 'restaurant_attendance_add' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Add Attendance</button>
+                        </a>
+                        <a href="{% url 'restaurant_attendance_list' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Refresh</button>
+                        </a> 
+						<a href="javascript:void(0);" onclick="openPopupSummary()">
+							<button
+								class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer
+								focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50
+								bg-primary border-primary text-white mr-2 shadow-md">
+								Attendance Summarys
+							</button>
+						</a>
+						<a href="{% url 'rest_attendance_add_holiday' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Holy Day</button>
+                        </a>
+                        <div class="mx-auto hidden text-slate-500 md:block">                             </div>
+            
+                        <div class="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">                           
+                            <div class="relative w-56 text-slate-500 mb-4">
+                                <input id="searchInput" type="text" placeholder="Search..." class="w-full p-2 text-sm border rounded-md shadow-sm focus:ring-4 focus:ring-primary" oninput="handleSearch()">
+                                <i class="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4">🔍</i>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- BEGIN: Property Owners List -->
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                       <div class="flex items-center gap-6 mb-4">
+                            <form method="get" class="flex items-center gap-3">
+                                <label for="date" class="font-semibold">Select Date:</label>
+                                <input type="date" id="date" name="date"
+                                       value="{{ selected_date }}"
+                                       class="border p-2 rounded">
+                        
+                                <button type="submit" style="background-color:green"
+                                        class="bg-blue-600 text-white px-4 py-2 rounded">
+                                    Filter
+                                </button>
+                            </form>
+                        
+                            <p class="text-lg font-semibold">
+                                To Day - Date: {{ selected_date }}
+                            </p>
+                        </div>
+
+					<table class="w-full text-left border-separate border-spacing-y-[10px]">
+                        <thead style="background-color:green;color:white">
+                            <tr>
+                                <th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">SL</th>
+                                <th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Employee</th>
+                                <th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Check_In</th>
+                                <th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Check_Out</th>
+                                <th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Duration</th>
+                                <th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Status</th>
+                                <th class="font-medium px-5 py-3 border-b dark:border-darkmode-300 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            {% for r in records %}
+                            <tr class="bg-white shadow-sm rounded-md hover:bg-gray-50">
+                                <!-- Serial Number -->
+                                <td class="px-5 py-3 border-b text-center">
+                                    {{ forloop.counter }}
+                                </td>
+                    
+                                <td class="px-5 py-3 border-b">{{ r.employee }}</td>
+                    
+                                <!-- Check In with Late Punch -->
+                                <td class="px-5 py-3 border-b">
+                                    {{ r.check_in }}
+                                    {% if r.is_late %}
+                                        <span class="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded ml-2">
+                                            🔴 Late Punch
+                                        </span>
+                                    {% endif %}
+                                </td>
+                    
+                                <td class="px-5 py-3 border-b">
+                                    {{ r.check_out }}
+                                    {% if r.left_early %}
+                                        <span class="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded ml-2">
+                                            ⚠️ Left Early
+                                        </span>
+                                    {% endif %}
+         <!--                           <a href="{% url 'restaurant_attendance_checkout_update' r.pk %}"-->
+									<!--	style="display: inline-flex; align-items: center; justify-content: center; gap: 4px;-->
+									<!--	background-color: #84cc16; color: white; padding: 6px 12px; border-radius: 5px;-->
+									<!--	min-width: 50px; text-decoration: none;">-->
+								 <!--   	Update-->
+									<!--</a>-->
+                                </td>
+                    
+                                <td class="px-5 py-3 border-b">
+                                    {{ r.duration }}
+                                </td>
+                    
+                                <td class="px-5 py-3 border-b">
+                                    <span 
+                                        class="px-2 py-1 rounded font-bold"
+                                        style="color: {% if r.att_status == 'Present' %}green{% else %}red{% endif %};"
+                                    >
+                                        {{ r.att_status }}
+                                    </span>
+                                </td>
+                    
+                                <!-- Actions -->
+                                <td class="px-5 py-3 border-b text-center">
+                                     <a href="{% url 'restaurant_attendance_edit' r.pk %}"
+										style="display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+										background-color: #1e3a8a; color: white; padding: 6px 12px; border-radius: 5px;
+										min-width: 40px; text-decoration: none;">
+								    	Edit
+									</a>
+                                    <a href="{% url 'restaurant_attendance_delete' r.pk %}"
+										onclick="return confirm('Are you sure you want to delete this attendance record?');"
+										style="display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+											background-color: red; color: white; padding: 6px 12px; border-radius: 5px;
+											min-width: 60px; text-decoration: none;">
+									     Delete
+									</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-gray-500">No attendance records found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                    <script>
+                        function handleSearch() {
+                            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+                            const rows = document.querySelectorAll("#tableBody tr");
+                    
+                            rows.forEach(row => {
+                                let match = false;
+                                const cells = row.querySelectorAll("td");
+                    
+                                cells.forEach(cell => {
+                                    const text = cell.textContent.trim().toLowerCase();
+                                    if (text.includes(searchValue)) {
+                                        match = true;
+                                    }
+                                });
+                    
+                                row.style.display = match ? "" : "none";
+                            });
+                        }
+                    </script>
+
+
+                    </div>
+                    
+                    <!-- END: Balance Transfer List -->
+					
+					<!-- Popup -->
+					<div id="popupsummary" style="display: none;">
+						<div class="popup-content">
+							<h3>Attendance Summary</h3>
+							<form id="popup-form" onsubmit="return false;">
+							    <label for="project-input" class="form-label">Project Name:</label>
+                                <select id="project-select" class="form-select" required>
+                                    <option value="">Select a Project</option>
+                                    {% for projectFirst in projects_firts %}
+                                        <option value="{{ projectFirst.id }}">{{ projectFirst.project_first_name }}</option>
+                                    {% endfor %}
+                                </select>
+								<!-- Employee Name Input -->
+								<label for="employee-select-summary" class="form-label">Employee Name:</label>
+								<select id="employee-select-summary" class="form-select" required>
+									<option value="">Select an Employee</option>
+									{% for employee in employees %}
+									<option value="{{ employee.id }}">{{ employee.rda_emp_name }}</option>
+									{% endfor %}
+								</select>							
+
+								<!-- Month Dropdown -->
+								<label for="month-select-summary" class="form-label mt-4">Select Month:</label>
+								<select id="month-select-summary" class="form-select" required>
+									<option value="">Select a Month</option>
+									<option value="01">January</option>
+									<option value="02">February</option>
+									<option value="03">March</option>
+									<option value="04">April</option>
+									<option value="05">May</option>
+									<option value="06">June</option>
+									<option value="07">July</option>
+									<option value="08">August</option>
+									<option value="09">September</option>
+									<option value="10">October</option>
+									<option value="11">November</option>
+									<option value="12">December</option>
+								</select>
+								
+								<!-- Date Picker -->
+								<label for="date-select" class="form-label mt-4">Select Date:</label>
+                                <input type="date" id="date-select" class="w-full border border-gray-300 rounded px-3 py-2 mb-4">
+								
+								<!-- Year Dropdown -->
+								<label for="year-select-summary" class="form-label mt-4">Select Year:</label>
+								<select id="year-select-summary" class="form-select" required>
+									<option value="">Select a Year</option>
+								</select>
+								
+								<div class="popup-actions mt-4">
+									<!-- Cancel Button -->
+									<button type="button" class="cancel-btn" onclick="closePopupSummary()">Cancel</button>
+
+									<!-- Submit Button -->
+									<button type="button" class="submit-btn" onclick="submitPopupSummary()">Submit</button>
+								</div>
+							</form>
+						</div>
+					</div>
+
+					<style>
+						#popupsummary{
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background: rgba(0, 0, 0, 0.5);
+                            display: none;
+                            justify-content: center;
+                            align-items: center;
+                            z-index: 1000;
+                        }
+                    
+                        .popup-content {
+                            background: white;
+                            padding: 30px;
+                            border-radius: 10px;
+                            width: 400px;
+                            text-align: center;
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        }
+                    
+                        .popup-content h3 {
+                            margin-bottom: 20px;
+                            font-size: 20px;
+                            font-weight: bold;
+                            color: #333;
+                        }
+                    
+                        .form-label {
+                            display: block;
+                            margin-bottom: 8px;
+                            text-align: left;
+                            font-size: 14px;
+                            color: #555;
+                        }
+                    
+                        .form-select {
+                            width: 100%;
+                            padding: 10px;
+                            margin-bottom: 15px;
+                            border: 1px solid #ddd;
+                            border-radius: 5px;
+                            font-size: 14px;
+                            transition: border 0.3s;
+                        }
+                    
+                        .form-select:focus {
+                            border-color: #4caf50;
+                            outline: none;
+                        }
+                    
+                        .popup-actions {
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                    
+                        .popup-actions button {
+                            padding: 10px 20px;
+                            border: none;
+                            border-radius: 5px;
+                            font-size: 14px;
+                            cursor: pointer;
+                            transition: background 0.3s;
+                            width: 45%;
+                        }
+                    
+                        .cancel-btn {
+                            background-color: #f44336;
+                            color: white;
+                        }
+                    
+                        .submit-btn {
+                            background-color: #4caf50;
+                            color: white;
+                        }
+                    
+                        .cancel-btn:hover {
+                            background-color: #d32f2f;
+                        }
+                    
+                        .submit-btn:hover {
+                            background-color: #45a049;
+                        }
+                    
+                        @media (max-width: 600px) {
+                            .popup-content {
+                                width: 90%;
+                            }
+                        }
+                    </style>
+
+					<script>
+						// Populate years dropdown on page load
+						document.addEventListener('DOMContentLoaded', function() {
+							const yearSelect = document.getElementById('year-select-summary');
+							const currentYear = new Date().getFullYear();
+							const startYear = currentYear - 5;
+							const endYear = currentYear + 5;
+
+							for (let year = startYear; year <= endYear; year++) {
+								const option = document.createElement('option');
+								option.value = year;
+								option.textContent = year;
+								if (year === currentYear) {
+									option.selected = true;  // Default select current year
+								}
+								yearSelect.appendChild(option);
+							}
+						});
+
+						function openPopupSummary() {
+							document.getElementById('popupsummary').style.display = 'flex';
+						}
+
+						function closePopupSummary() {
+							document.getElementById('popupsummary').style.display = 'none';
+						}
+
+						function submitPopupSummary() {
+						    const project_id = document.getElementById('project-select').value;
+							const employee_id = document.getElementById('employee-select-summary').value;
+							const year_id = document.getElementById('year-select-summary').value;
+							const month_id = document.getElementById('month-select-summary').value;
+							const date = document.getElementById('date-select').value;
+							//const month_id = document.getElementById('month-select-summary').value;
+                            
+                            if (!project_id) {
+								alert('Please select an Project!');
+								return;
+							}
+							
+							if (!year_id) {
+								alert('Please select a year!');
+								return;
+							}
+							if (!month_id) {
+								alert('Please select a month!');
+								return;
+							}
+
+							const url = "{% url 'restaurant_employee_attendance_summary' %}?employee_id=" + encodeURIComponent(employee_id) + 
+										"&project_id=" + encodeURIComponent(project_id) + 
+										"&year_id=" + encodeURIComponent(year_id) +
+										"&month_id=" + encodeURIComponent(month_id) +
+										"&date=" + encodeURIComponent(date);
+
+							window.open(url, '_blank');
+							closePopupSummary();
+						}
+					</script>
+                    <!-- End of Popup for selecting Project for Attendance Summary -->
+				
+                    <!-- BEGIN: Pagination -->
+                    <div class="intro-y col-span-12 flex flex-wrap items-center sm:flex-row sm:flex-nowrap">
+                        <!-- Showing entries text -->
+                        <div class="mx-auto hidden text-slate-500 md:block">
+                            Showing {{ tenants.start_index }} to {{ tenants.end_index }} of {{ tenants.paginator.count }} entries
+                        </div>
+                    
+                        <!-- Pagination navigation -->
+                        <nav class="w-full sm:mr-auto sm:w-auto">
+                            <ul class="flex w-full mr-0 sm:mr-auto sm:w-auto">
+                                <!-- Previous Page -->
+                                {% if tenants.has_previous %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <a href="?page={{ tenants.previous_page_number }}&page_size={{ tenants.paginator.per_page }}" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer">
+                                            <i class="chevrons-left h-4 w-4"></i> <!-- Left Chevron icon -->
+                                            Previous
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <span class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-not-allowed">
+                                            <i class="chevrons-left h-4 w-4"></i>
+                                            Previous
+                                        </span>
+                                    </li>
+                                {% endif %}
+                    
+                                <!-- Page Numbers -->
+                                {% for num in tenants.paginator.page_range %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        {% if num == tenants.number %}
+                                            <a href="#" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer bg-primary text-white">{{ num }}</a>
+                                        {% else %}
+                                            <a href="?page={{ num }}&page_size={{ tenants.paginator.per_page }}" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer">{{ num }}</a>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                    
+                                <!-- Next Page -->
+                                {% if tenants.has_next %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <a href="?page={{ tenants.next_page_number }}&page_size={{ tenants.paginator.per_page }}" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer">
+                                            Next
+                                            <i class="chevron-right h-4 w-4"></i> <!-- Right Chevron icon -->
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <span class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-not-allowed">
+                                            Next
+                                            <i class="chevron-right h-4 w-4"></i>
+                                        </span>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    
+                        <!-- Page Size Selector -->
+                        <form method="get" action="" class="inline-block">
+                            <select name="page_size" onchange="this.form.submit()" class="transition duration-200 ease-in-out text-sm border-slate-200 shadow-sm rounded-md py-2 px-3 pr-8 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+                                <option value="10" {% if tenants.paginator.per_page == 10 %}selected{% endif %}>10</option>
+                                <option value="25" {% if tenants.paginator.per_page == 25 %}selected{% endif %}>25</option>
+                                <option value="50" {% if tenants.paginator.per_page == 50 %}selected{% endif %}>50</option>
+                            </select>
+                        </form>
+                    </div>
+                    
+                    <!-- END: Pagination -->
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

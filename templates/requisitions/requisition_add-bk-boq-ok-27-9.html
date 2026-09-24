@@ -1,0 +1,436 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Requisition Add - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>    
+ <!-- Insert table design css-->
+<style>
+    /* Ensure the table fits well inside the container */
+table {
+    width: 100%;
+    table-layout: auto; /* Automatically adjust table cell width */
+    overflow-wrap: break-word; /* Prevent word overflow */
+}
+
+td, th {
+    padding: 8px 10px;
+    text-align: left;
+}
+
+/* Input fields */
+input[type="text"], input[type="number"] {
+    width: 100%; /* Make inputs take up the full width */
+    max-width: 200px; /* Limit the maximum width */
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+}
+
+/* Buttons */
+button {
+    padding: 8px 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #4CAF50; /* Change background on hover */
+}
+
+/* Add Row and Save Button Container */
+.button-container {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+/* Button Styles */
+.btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-success {
+    background-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+    .intro-y {
+        padding: 10px;
+    }
+
+    .button-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    input[type="text"], input[type="number"] {
+        max-width: 100%; /* Inputs take full width on small screens */
+    }
+}
+ </style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Requisition Add</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+             <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+  <div class="category-section" id="pile-work">
+    <br />
+    <input type="text" id="project-first-name" value="{{ project_first_name }}" style="border:none;font-weight:bold;" readonly>
+    <input type="text" id="employee_name" value="{{ employee_name }}" style="border:none;font-weight:bold;" readonly>
+
+   <form id="pile-work-form" method="POST">
+      {% csrf_token %}
+      <input type="hidden" id="type-input" name="type" value="{{ type }}">
+
+      <table class="w-full text-left border-separate border-spacing-y-[10px]">
+        <thead>
+          <tr>
+            <th>SL</th>
+            <th>Head_of_Requisi</th>
+            <th>{{ type }}</th>
+            <th>Unit</th>
+            <th>Qty</th>
+            <th>Rate</th>
+            <th>Amount</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="pile-work-body">
+          <tr>
+            <td>1</td>
+        <td>
+			<div class="relative dropdown w-full max-w-xs">
+				<!-- Visible text field -->
+				<input type="text" placeholder="Select Head" class="input input-bordered w-full" autocomplete="off" readonly onclick="toggleDropdown(this)">
+				
+				<!-- Hidden input -->
+				<input type="hidden" name="item_name_1" required>
+				
+				<div class="dropdown-content border bg-white w-full shadow-lg hidden absolute mt-1 max-h-60 overflow-y-auto z-50 rounded-md">
+				{% for headRequist in headRequists %}
+				<div onclick="selectDropdownItem(this)" 
+					data-id="{{ headRequist.id }}" 
+					data-qty="{{ headRequist.qty }}"
+					data-rate="{{ headRequist.rate }}">
+					{{ headRequist.item_name }} (Qty: {{ headRequist.qty }}, Rate: {{ headRequist.rate }})
+				</div>
+				{% endfor %}
+				</div>
+			</div>
+			</td>
+
+
+            <td>
+              <select name="vendor_name_1" required class="select select-bordered w-full max-w-xs">
+                <option value="">Select Type</option>
+                {% if type == "Supplier" %}
+                  {% for spplier in sppliers %}
+                    <option value="{{ spplier.supplier_name }}">{{ spplier.supplier_name }}</option>
+                  {% endfor %}
+                {% elif type == "Conductor" %}
+                  {% for conductor in conductors %}
+                    <option value="{{ conductor.supervisor_name }}">{{ conductor.supervisor_name }}</option>
+                  {% endfor %}
+                {% elif type == "Expense" %}
+                  {% for headExpense in headExpenses %}
+                    <option value="{{ headExpense.head_exp_name }}">{{ headExpense.head_exp_name }}</option>
+                  {% endfor %}
+                {% elif type == "Others" %}
+                  <option value="other">Other</option>
+                {% endif %}
+              </select>
+            </td>
+
+            <td><input type="text" name="unit_1" required placeholder="Unit" class="w-full max-w-xs" /></td>
+            <td><input type="number" step="any" name="qty_1" required placeholder="Qty" class="w-full max-w-xs" oninput="calculateAmount(this, 'pile-work')" /></td>
+            <td><input type="number" step="any" name="rate_1" required placeholder="Rate" class="w-full max-w-xs" oninput="calculateAmount(this, 'pile-work')" /></td>
+            <td><input type="number" step="any" name="amount_1" placeholder="Amount" class="w-full max-w-xs" disabled /></td>
+            <td><button type="button" class="text-red-600" onclick="deleteRow(this, 'pile-work')">🗑️</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="my-4">
+        <label for="remark" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <textarea id="remark" name="remark" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
+      </div>
+
+      <div class="button-container mt-4 flex justify-between">
+        <button type="button" onclick="addRow('pile-work')" class="btn btn-primary">Add Row</button>
+        <button type="submit" class="btn btn-success">Save</button>
+      </div>
+    </form>
+
+    <p class="mt-4">Total Amount: <span id="pile-work-total">0.00</span></p>
+
+    <input type="hidden" id="employee" value="{{ employee }}">
+    <input type="hidden" id="project-id" value="{{ project_id }}">
+
+    <style>
+      .dropdown-content div {
+        padding: 0.5rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+      .dropdown-content div:hover { background-color: #f3f4f6; }
+      .dropdown-content div.selected { background-color: #e0f2fe; }
+    </style>
+
+    <script>
+		const vendorOptions = {
+		'Supplier': [{% for spplier in sppliers %}{ id: "{{ spplier.supplier_name }}", name: "{{ spplier.supplier_name }}" },{% endfor %}],
+		'Conductor': [{% for conductor in conductors %}{ id: "{{ conductor.supervisor_name }}", name: "{{ conductor.supervisor_name }}" },{% endfor %}],
+		'Expense': [{% for headExpense in headExpenses %}{ id: "{{ headExpense.head_exp_name }}", name: "{{ headExpense.head_exp_name }}" },{% endfor %}],
+		'Others': [{ id: "other", name: "Other" }]
+		};
+
+		const currentType = "{{ type }}";
+
+		function toggleDropdown(input) {
+		const wrapper = input.closest('.dropdown');
+		const dropdown = wrapper.querySelector('.dropdown-content');
+		dropdown.classList.toggle('hidden');
+		}
+
+		function filterDropdown(input) {
+		const dropdown = input.closest('.dropdown').querySelector('.dropdown-content');
+		const filter = input.value.toLowerCase();
+		dropdown.querySelectorAll('div').forEach(item => {
+			item.style.display = item.textContent.toLowerCase().includes(filter) ? '' : 'none';
+		});
+		}
+
+		function selectDropdownItem(div) {
+		const wrapper = div.closest('.dropdown');
+		const textInput = wrapper.querySelector('input[type="text"]');
+		const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+
+		// Show text in input
+		textInput.value = div.textContent.trim();
+		
+		// Store only the ID in hidden input
+		hiddenInput.value = div.dataset.id;
+
+		// Auto-fill qty and rate
+		const row = wrapper.closest('tr');
+		const qtyInput = row.querySelector('input[name^="qty_"]');
+		const rateInput = row.querySelector('input[name^="rate_"]');
+		const amountField = row.querySelector('input[name^="amount_"]');
+
+		if (qtyInput && div.dataset.qty) qtyInput.value = div.dataset.qty;
+		if (rateInput && div.dataset.rate) rateInput.value = div.dataset.rate;
+
+		const qty = parseFloat(qtyInput.value) || 0;
+		const rate = parseFloat(rateInput.value) || 0;
+		amountField.value = (qty * rate).toFixed(2);
+
+		updateCategoryTotal('pile-work');
+
+		// Hide dropdown
+		wrapper.querySelector('.dropdown-content').classList.add('hidden');
+		}
+
+
+		function syncHiddenInput(input) {
+		const hidden = input.closest('.dropdown').querySelector('input[type="hidden"]');
+		hidden.value = input.value.trim(); // always sync typed value
+		}
+
+		function addRow(itemname) {
+		const tbody = document.getElementById(`${itemname}-body`);
+		const rowCount = tbody.rows.length + 1;
+
+		let optionsHtml = `<option value="">Select Type</option>`;
+		if (vendorOptions[currentType]) {
+			vendorOptions[currentType].forEach(opt => { optionsHtml += `<option value="${opt.id}">${opt.name}</option>`; });
+		}
+
+		const newRow = tbody.insertRow();
+		newRow.innerHTML = `
+			<td>${rowCount}</td>
+			<td>
+			<div class="relative dropdown w-full max-w-xs">
+				<input type="text" oninput="syncHiddenInput(this)" onclick="toggleDropdown(this)" placeholder="Select Head" class="input input-bordered w-full" autocomplete="off">
+				<input type="hidden" name="item_name_${rowCount}" required>
+				<div class="dropdown-content border bg-white w-full shadow-lg hidden absolute mt-1 max-h-60 overflow-y-auto z-50 rounded-md">
+				{% for headRequist in headRequists %}
+				<div onclick="selectDropdownItem(this)" data-id="{{ headRequist.id }}" data-qty="{{ headRequist.qty }}" data-rate="{{ headRequist.rate }}">
+					{{ headRequist.item_name }} (Qty: {{ headRequist.qty }}, Rate: {{ headRequist.rate }})
+				</div>
+				{% endfor %}
+				</div>
+			</div>
+			</td>
+			<td>
+			<select name="vendor_name_${rowCount}" required class="select select-bordered w-full max-w-xs">${optionsHtml}</select>
+			</td>
+			<td><input type="text" name="unit_${rowCount}" required placeholder="Unit" class="w-full max-w-xs" /></td>
+			<td><input type="number" step="any" name="qty_${rowCount}" required placeholder="Qty" class="w-full max-w-xs" oninput="calculateAmount(this, '${itemname}')" /></td>
+			<td><input type="number" step="any" name="rate_${rowCount}" required placeholder="Rate" class="w-full max-w-xs" oninput="calculateAmount(this, '${itemname}')" /></td>
+			<td><input type="number" step="any" name="amount_${rowCount}" placeholder="Amount" class="w-full max-w-xs" disabled /></td>
+			<td><button type="button" class="text-red-600" onclick="deleteRow(this, '${itemname}')">🗑️</button></td>
+		`;
+		}
+
+		function calculateAmount(input, itemname) {
+		const row = input.closest('tr');
+		const qty = parseFloat(row.querySelector(`input[name^="qty_"]`).value) || 0;
+		const rate = parseFloat(row.querySelector(`input[name^="rate_"]`).value) || 0;
+		row.querySelector(`input[name^="amount_"]`).value = (qty * rate).toFixed(2);
+		updateCategoryTotal(itemname);
+		}
+
+		function updateCategoryTotal(itemname) {
+		let total = 0;
+		document.querySelectorAll(`#${itemname}-body input[name^="amount_"]`).forEach(input => {
+			const value = parseFloat(input.value);
+			if (!isNaN(value)) total += value;
+		});
+		document.getElementById(`${itemname}-total`).textContent = total.toFixed(2);
+		}
+
+		function deleteRow(button, itemname) {
+		button.closest('tr').remove();
+		updateCategoryTotal(itemname);
+		}
+
+		function getCookie(name) {
+		const value = `; ${document.cookie}`;
+		const parts = value.split(`; ${name}=`);
+		if (parts.length === 2) return parts.pop().split(';').shift();
+		}
+
+		document.getElementById('pile-work-form').addEventListener('submit', function(e) {
+		e.preventDefault();
+		const data = [];
+		const rows = document.querySelectorAll(`#pile-work-body tr`);
+
+		rows.forEach(row => {
+			const itemInput = row.querySelector('input[type="hidden"][name^="item_name_"]'); // use hidden input
+			const vendorSelect = row.querySelector('select[name^="vendor_name_"]');
+			const unitInput = row.querySelector('input[name^="unit_"]');
+			const qtyInput = row.querySelector('input[name^="qty_"]');
+			const rateInput = row.querySelector('input[name^="rate_"]');
+
+			const item_id = itemInput ? itemInput.value : '';
+			const vendor_name = vendorSelect ? vendorSelect.value : '';
+			const unit = unitInput ? unitInput.value : '';
+			const qty = parseFloat(qtyInput ? qtyInput.value : 0);
+			const rate = parseFloat(rateInput ? rateInput.value : 0);
+
+			// Skip rows if any required field is missing
+			if (!item_id || !vendor_name || !unit || isNaN(qty) || isNaN(rate)) return;
+
+			data.push({
+			item_name: item_id, // send only ID
+			vendor_name,
+			unit,
+			qty,
+			rate
+			});
+		});
+
+		if (data.length === 0) {
+			alert("Please fill all fields with valid data.");
+			return;
+		}
+
+		const project_id = document.getElementById('project-id').value;
+		const type = document.getElementById('type-input').value;
+		const employee = document.getElementById('employee').value;
+		const remark = document.getElementById('remark').value;
+
+		fetch("{% url 'requisitions_create' %}", {
+			method: 'POST',
+			headers: {
+			'Content-Type': 'application/json',
+			'X-CSRFToken': getCookie('csrftoken')
+			},
+			body: JSON.stringify({ data, project_id, employee_id: employee, type, remark })
+		})
+		.then(res => res.json())
+		.then(res => {
+			if (res.status === 'success') {
+				alert(res.message);
+				window.location.href = '/dashboard/requisitions/list/';
+			} else if (res.status === 'warning') {
+				alert(res.message); // "Low Qty for items..."
+				window.location.href = '/dashboard/requisitions/list/';
+			} else {
+				alert("Error saving data: " + res.message);
+			}
+		})
+
+		.catch(err => {
+			console.error(err);
+			alert("An unexpected error occurred.");
+		});
+		});
+
+		</script>
+
+  </div>
+</div>
+
+
+
+
+
+        </div>
+    </div>
+{% endblock %}

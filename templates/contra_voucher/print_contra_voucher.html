@@ -1,0 +1,247 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Debit Voucher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #0A8754;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            height: 60px;
+        }
+
+        .voucher-info {
+            text-align: right;
+        }
+
+        .voucher-info p {
+            margin: 3px 0;
+            font-size: 14px;
+            color: #0A8754;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #0A8754;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .category-title {
+            font-size: 16px;
+            background-color: #f2f2f2;
+            padding: 10px;
+            border-left: 5px solid #0A8754;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background-color: #0A8754;
+            color: white;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+
+        .total-row td {
+            font-weight: bold;
+        }
+
+        .amount-in-words {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 30px;
+        }
+
+        .amount-in-words span {
+            color: #0A8754;
+        }
+
+        .signature {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+        }
+
+        .signature div {
+            width: 22%;
+            padding: 10px;
+            border-top: 2px solid #0A8754;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-top: 40px;
+            border-top: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        input[readonly] {
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            padding: 0;
+            margin: 5px 0;
+        }
+
+        .readonly-fields {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .readonly-fields input {
+            width: 32%;
+        }
+
+        .grid-4 {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            font-size: 14px;
+        }
+
+        .grid-4 div {
+            width: 22%;
+            text-align: center;
+            border-top: 2px solid #0A8754;
+            padding-top: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <img src="http://127.0.0.1:8000/static/images/BTP_logo_webp.webp" alt="Company Logo">
+            </div>
+            <div class="voucher-info">
+                <p>Voucher No.: {{ voucher.pk }}</p>
+                <p>Printing Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+            </div>
+        </div>
+
+        <!-- Title -->
+        <div class="section-title">
+            Debit Voucher
+        </div>
+
+        <!-- Basic Voucher Info -->
+        <div class="readonly-fields">
+            <input type="text" value="Project Name: {{ voucher.project }}" readonly>
+            <input type="text" value="Cash Type: {{ voucher.cash_type }}" readonly>
+            <input type="text" value="Date: {{ voucher.date|date:'M d, Y' }}" readonly>
+        </div>
+
+        <!-- Table Section -->
+        <div class="category-title">Details</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>SL. No.</th>
+                    <th>Particulars</th>
+                    <th>Bank Name</th>
+                    <th>Head Of Accounts</th>
+                    <th>CQ. No</th>
+                    <th>M.R/ Bill No.</th>
+                    <th>Amount (TK)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>{{ voucher.particulars }}</td>
+                    <td>{{ voucher.cash_type }}</td>
+                    <td>{{ voucher.head_of_account }}</td>
+                    <td></td>
+                    <td>{{ voucher.mr_or_bill_no }}</td>
+                    <td>{{ voucher.amount|intcomma }}/-</td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="6" class="text-right">Total =</td>
+                    <td>{{ voucher.amount|intcomma }}/-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Amount in Words -->
+        <p class="amount-in-words">In words: <span>{{ amount_in_words }}</span> only.</p>
+
+        <!-- Signatures -->
+        <div class="grid-4">
+            <div>
+                <p>Prepared by</p>
+            </div>
+            <div>
+                <p>Checked by</p>
+            </div>
+            <div>
+                <p>Forwarded by</p>
+            </div>
+            <div>
+                <p>Approved by</p>
+            </div>
+        </div>
+        <!-- Footer -->
+        <style>
+			@media print {
+			  .no-print {
+				display: none !important;
+			  }
+			}
+		</style>
+		<div class="footer text-center mt-6">
+			<p>© 2025 BTP LIMITED. | This is a system-generated document.</p>
+			<div class="no-print">
+				<button onclick="window.print()" class="inline-block mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+					Print
+				</button>
+			</div>
+		</div>           
+    </div>
+</body>
+</html>

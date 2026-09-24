@@ -1,0 +1,110 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Customer Update- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				    {% include 'partials/header.html' %}
+                <div class="container mx-auto mt-10 ml-10"> 
+                <!-- END: Top Bar -->
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+            
+                    <!-- Customer Name -->
+                    <div class="mb-4">
+                        <label for="customer_name" class="block font-medium text-lg text-gray-700">Customer Name</label>
+                        <input type="text" id="customer_name" name="customer_name"
+                               class="w-full text-sm border-gray-300 shadow-sm rounded-md"
+                               placeholder="Enter Customer Name"
+                               value="{{ form.customer_name.value|default_if_none:'' }}">
+                        {% if form.customer_name.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.customer_name.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+            
+                    <!-- Contact Number -->
+                    <div class="mb-4">
+                        <label for="contact_no" class="block font-medium text-lg text-gray-700">Contact Number</label>
+                        <input type="text" id="contact_no" name="contact_no"
+                               class="w-full text-sm border-gray-300 shadow-sm rounded-md"
+                               placeholder="Enter Contact Number"
+                               value="{{ form.contact_no.value|default_if_none:'' }}">
+                        {% if form.contact_no.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.contact_no.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+            
+                    <!-- Address -->
+                    <div class="mb-4">
+                        <label for="address" class="block font-medium text-lg text-gray-700">Address</label>
+                        <textarea id="address" name="address" rows="3"
+                                  class="w-full text-sm border-gray-300 shadow-sm rounded-md"
+                                  placeholder="Enter Address">{{ form.address.value|default_if_none:'' }}</textarea>
+                        {% if form.address.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.address.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+            
+                    <!-- Current Photo Preview -->
+                    {% if form.instance.photo %}
+                    <div class="mb-4">
+                        <p class="font-medium text-gray-700 mb-1">Current Photo:</p>
+                        <img src="{{ form.instance.photo.url }}" alt="Customer Photo" class="h-32 rounded border">
+                    </div>
+                    {% endif %}
+            
+                    <!-- Upload New Photo -->
+                    <div class="mb-6">
+                        <label for="photo" class="block font-medium text-lg text-gray-700">Upload New Photo</label>
+                        {{ form.photo }}
+                        {% if form.photo.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.photo.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+            
+                    <!-- Submit + Cancel -->
+                    <div class="text-center">
+                        <button type="submit" style="background-color:#1e3c98"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md">
+                            💾 Update Customer
+                        </button>
+                        <a href="{% url 'customer_list' %}" style="margin-left:0.5%;background-color:#1e3c98"
+                           class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md ml-2">
+                            🔙 Back to List
+                        </a>
+                    </div>
+                </form>
+                  </div>    
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

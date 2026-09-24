@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profit Ledger Manage - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- Sidebar -->
+        {% include 'partials/sidebar_list.html' %}
+
+        <!-- Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+            <!-- Top Bar -->
+            {% include 'partials/header.html' %}
+
+            <!-- Page Header -->
+            <div class="intro-y mt-10 mb-5 flex items-center justify-between">
+                <h2 class="text-lg font-medium">Profit Ledger Manage</h2>
+            </div>
+            <div class="mx-auto hidden text-slate-500 md:block">                             </div>
+            
+            <div class="mt-1 w-full flex flex-wrap justify-between items-center gap-4">
+            <!-- Left Side: Button -->
+            <div class="flex items-center space-x-2">
+                <a href="{% url 'profit_ledger_list' %}">
+                    <button class="bg-success border-success text-white font-medium px-3 py-2 rounded-md shadow-md">
+                        Refresh
+                    </button>
+                </a>
+            </div>
+            <div class="flex items-center space-x-2">
+                <a href="{% url 'profit_ledger_manage' %}">
+                    <button class="bg-primary border-primary text-white font-medium px-3 py-2 rounded-md shadow-md">
+                        Profit Report
+                    </button>
+                </a>
+            </div>
+            <div class="flex items-center space-x-2">
+                <a href="{% url 'profit_shareamount_list' %}">
+                    <button class="bg-success border-success text-white font-medium px-3 py-2 rounded-md shadow-md">
+                        Profit Amount
+                    </button>
+                </a>
+            </div>
+        
+            <!-- Right Side: Balance + Search -->
+            <div class="mb-4">
+              <input type="text" id="searchInput" placeholder="Search by Project Name or Location..." class="px-4 py-2 border rounded w-full" />
+            </div>
+        
+        </div>
+
+            <!-- Messages -->
+            {% if messages %}
+            <ul class="mb-4">
+                {% for message in messages %}
+                <li class="message {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <!-- Table Section -->
+          <div class="grid grid-cols-12 gap-6">
+            <div class="col-span-12">
+        
+                <h1 class="text-3xl font-bold text-center text-gray-800 mb-1">
+                    Project Profit Report
+                </h1>
+                <p class="text-sm text-gray-500 mb-6 text-center">As of {{ today }}</p>
+        
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white shadow-lg rounded-xl overflow-hidden border border-gray-300">
+                        <thead style="background-color:#1e3a8a;color:#FFFFFF" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-b border-gray-300">
+                            <tr class="border border-gray-300">
+                                <th class="px-4 py-3 text-left text-sm font-semibold border border-gray-300">Project_Name</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold border border-gray-300">Land_Owner</th>
+                                <th class="px-4 py-3 text-right text-sm font-semibold border border-gray-300">Land_Purchase</th>
+                                <th class="px-4 py-3 text-right text-sm font-semibold border border-gray-300">Sales</th>
+                                <th class="px-4 py-3 text-right text-sm font-semibold border border-gray-300">Profit</th>
+                                <th class="px-4 py-3 text-right text-sm font-semibold border border-gray-300">25%_of_Profit</th>
+                                <th class="px-4 py-3 text-right text-sm font-semibold border border-gray-300">Final_Profit</th>
+                            </tr>
+                        </thead>
+        
+                        <tbody id="tableBody" class="divide-y divide-gray-300">
+                            {% for row in rows %}
+                                <tr class="hover:bg-gray-50 transition border border-gray-300">
+                                    <td class="px-4 py-3 border border-gray-300 text-gray-800 font-medium">{{ row.project_name }}</td>
+                                    <td class="px-4 py-3 border border-gray-300 text-gray-600">{{ row.project_owner }}</td>
+        
+                                    <td class="px-4 py-3 border border-gray-300 text-right text-blue-600 font-semibold">
+                                        {{ row.land_total }}
+                                    </td>
+        
+                                    <td class="px-4 py-3 border border-gray-300 text-right text-green-600 font-semibold">
+                                        {{ row.sales_total }}
+                                    </td>
+        
+                                    <td class="px-4 py-3 border border-gray-300 text-right font-bold 
+                                               {% if row.profit > 0 %}text-green-700{% else %}text-red-600{% endif %}">
+                                        {{ row.profit }}
+                                    </td>
+        
+                                    <td class="px-4 py-3 border border-gray-300 text-right font-semibold text-purple-700">
+                                        {{ row.profit_25 }}
+                                    </td>
+        
+                                    <td class="px-4 py-3 border border-gray-300 text-right font-bold text-indigo-700">
+                                        {{ row.final_profit }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+        
+            </div>
+        </div>
+
+            <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                              const searchInput = document.getElementById("searchInput");
+                              const tableBody = document.getElementById("tableBody");
+                              const rows = tableBody.getElementsByTagName("tr");
+                            
+                              searchInput.addEventListener("keyup", function () {
+                                const filter = searchInput.value.toLowerCase();
+                            
+                                for (let i = 0; i < rows.length; i++) {
+                                  const cells = rows[i].getElementsByTagName("td");
+                                  let found = false;
+                            
+                                  // Check only relevant columns: Project Name (1), Location (2)
+                                  for (let j = 1; j <= 2; j++) {
+                                    if (cells[j] && cells[j].textContent.toLowerCase().includes(filter)) {
+                                      found = true;
+                                      break;
+                                    }
+                                  }
+                            
+                                  rows[i].style.display = found ? "" : "none";
+                                }
+                              });
+                            });
+                            </script>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

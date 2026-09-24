@@ -1,0 +1,419 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Month & Project Wise Collection Summary</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --success: #10b981;
+      --bg-slate: #f8fafc;
+      --border-color: #e2e8f0;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 12px;
+      background-color: #f1f5f9;
+      color: var(--text-main);
+      padding: 24px;
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 28px;
+      max-width: 1100px;
+      margin: auto;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border-color);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .logo img {
+      height: 48px;
+      object-fit: contain;
+    }
+
+    .header-right {
+      text-align: right;
+    }
+
+    .label-box {
+      background-color: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+      padding: 6px 12px;
+      font-weight: 600;
+      font-size: 13px;
+      border-radius: 6px;
+      display: inline-block;
+      letter-spacing: -0.01em;
+    }
+
+    .print-date {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .sub-head {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      background: var(--bg-slate);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--border-color);
+      margin: 20px 0;
+    }
+
+    /* Action & Filter Bar */
+    .filter-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .filter-left, .filter-right, .form-group-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      transition: all 0.2s ease-in-out;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-success {
+      background-color: #10b981;
+      border-color: #10b981;
+      color: white;
+    }
+    .btn-success:hover { background-color: #059669; }
+
+    .btn-primary {
+      background-color: #4f46e5;
+      border-color: #4f46e5;
+      color: white;
+    }
+    .btn-primary:hover { background-color: #4338ca; }
+
+    .btn-secondary {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #334155;
+    }
+    .btn-secondary:hover { background-color: #e2e8f0; }
+
+    .form-control {
+      padding: 7px 12px;
+      font-size: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background-color: #fff;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+
+    .search-wrapper {
+      position: relative;
+    }
+    .search-wrapper input {
+      padding-right: 32px;
+      width: 200px;
+    }
+    .search-wrapper i {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-style: normal;
+      pointer-events: none;
+    }
+
+    /* Table Styles */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .table th,
+    .table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .table th {
+      background-color: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 10.5px;
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+
+    .table td {
+      text-align: center;
+      color: #334155;
+    }
+
+    .table tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    .table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Table Footer Summary */
+    .table tfoot tr td {
+      font-weight: 600;
+      padding: 12px;
+    }
+
+    .filtered-total {
+      background-color: #f8fafc;
+      color: #0369a1;
+    }
+
+    .grand-total {
+      background-color: #f0fdf4;
+      color: #15803d;
+    }
+
+    /* Footer / Bottom controls */
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background: white;
+        padding: 0;
+      }
+      .card {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+
+    <!-- Header -->
+    <div class="card-header">
+      <div class="logo">
+        <img src="{% static '/images/resturant-logo.png' %}" alt="Company Logo">
+      </div>
+      <div class="header-right">
+        <div class="label-box">Month & Project Wise Collection Summary</div>
+        <div class="print-date">Printing Date: {% now "F j, Y, g:i a" %}</div>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="sub-head">
+      <strong>Corporate Office:</strong> House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br>
+      <strong>Contact:</strong> 01993005558, 09639246230, 09639246231 &nbsp;|&nbsp; 
+      <strong>Email:</strong> md2bayid@gmail.com, thebtplimited@gmail.com &nbsp;|&nbsp; 
+      <strong>Web:</strong> www.btplimited.com
+    </div>
+
+    <!-- Action Bar with Filters and Search -->
+    <div class="filter-container no-print">
+        
+        <!-- Left Side: Buttons & Filters -->
+        <div class="filter-left">
+            <a href="{% url 'month_collection_list' %}" class="btn btn-success">
+                Refresh
+            </a>    
+            <a href="{% url 'collection_list' %}" class="btn btn-primary">
+                Collection List
+            </a>
+
+            <!-- Project & Month Wise Filter Form -->
+            <form method="GET" action="{% url 'month_collection_list' %}" class="form-group-inline" style="margin-left: 4px;">
+                <select name="project" class="form-control">
+                    <option value="">-- All Projects --</option>
+                    {% for proj in projects %}
+                        <option value="{{ proj.id }}" {% if selected_project == proj.id|stringformat:"s" %}selected{% endif %}>
+                            {{ proj.project_first_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <input type="month" name="month" value="{{ selected_month }}" class="form-control">
+                
+                <button type="submit" class="btn btn-primary">
+                    View
+                </button>
+                
+                {% if selected_month or selected_project %}
+                    <a href="{% url 'month_collection_list' %}" class="btn btn-secondary">
+                        Reset
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Right Side: Search Bar -->
+        <div class="filter-right">
+            <div class="search-wrapper">
+                <input id="searchInput" type="text" placeholder="Search records..." class="form-control" oninput="handleSearch()">
+                <i>🔍</i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Info Table -->
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Project</th>
+            <th>Type</th>
+            <th>Name</th>
+            <th>Sales Type</th>
+            <th>Cash Type</th>
+            <th>Amount</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          {% for item in collections %}
+            <tr>
+              <td>{{ item.date }}</td>
+              <td>{% if item.project %}{{ item.project.project_first_name }}{% endif %}</td>
+              <td>{{ item.type }}</td>
+              <td>
+                {% if item.type == "Employee" %}
+                  {{ item.employee }}
+                {% elif item.type == "Customer" %}
+                  {{ item.customer_name }}
+                {% endif %}
+              </td>
+              <td>{{ item.sales_type }}</td>
+              <td>{{ item.cash_type }}</td>
+              <td style="text-align: right; font-weight: 500;">{{ item.amount|intcomma }}</td>
+              <td>{{ item.created_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 24px;">No Collection Records Found</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr class="filtered-total">
+            <td colspan="6" style="text-align: right;">Total Amount (Filtered View):</td>
+            <td style="text-align: right;">{{ total_amount|intcomma }}</td>
+            <td></td>
+          </tr>
+          <tr class="grand-total">
+            <td colspan="6" style="text-align: right;">Final Total Amount (Grand Total):</td>
+            <td style="text-align: right;">{{ final_total_amount|intcomma }}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Footer with Back and Print -->
+    <div class="footer no-print">
+      <div>
+        <a href="{% url 'collection_list' %}" class="btn btn-secondary" style="background-color: #16a34a; color: white; border-color: #16a34a;">
+          ← Back to Collection List
+        </a>
+      </div>
+      <div>
+        <button onclick="window.print()" class="btn btn-primary" style="background-color: #1e3c98; border-color: #1e3c98;">
+          🖨️ Print Statement
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function handleSearch() {
+      let searchValue = document.getElementById('searchInput').value.toLowerCase();
+      let rows = document.querySelectorAll("#tableBody tr");
+
+      rows.forEach(row => {
+        let rowText = row.textContent.toLowerCase();
+        if (rowText.includes(searchValue)) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>

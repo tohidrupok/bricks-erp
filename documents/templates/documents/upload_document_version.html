@@ -1,0 +1,10 @@
+<h2>Upload Version for {{ document.title }}</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Upload Version</button>
+</form>
+
+<!-- Link to go back to document versions -->
+<a href="{% url 'document_versions' document_id=document.id %}">Back to Versions</a>

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rent Search — BM ERP</title>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ══════════════════════════════════
+     RSD — Rent Search & Deactivate
+  ══════════════════════════════════ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --rsd-ink:        #0d1b2a;
+    --rsd-ink-soft:   #2d3e52;
+    --rsd-muted:      #64748b;
+    --rsd-rule:       #dde6f0;
+    --rsd-rule-soft:  #f1f6fb;
+    --rsd-bg:         #edf2f9;
+    --rsd-surface:    #ffffff;
+    --rsd-primary:    #1549c1;
+    --rsd-primary-lt: #3b6ef0;
+    --rsd-primary-bg: #eef3ff;
+    --rsd-teal:       #0694a2;
+    --rsd-teal-bg:    #ecfeff;
+    --rsd-rose:       #dc2626;
+    --rsd-rose-bg:    #fff1f2;
+    --rsd-amber:      #b45309;
+    --rsd-amber-bg:   #fffbeb;
+    --rsd-green:      #059669;
+    --rsd-green-bg:   #ecfdf5;
+    --rsd-font:       'Sora', sans-serif;
+    --rsd-mono:       'JetBrains Mono', monospace;
+    --rsd-r:          10px;
+    --rsd-r-lg:       16px;
+    --rsd-r-xl:       20px;
+    --rsd-shadow:     0 2px 8px rgba(13,27,42,0.07), 0 1px 2px rgba(13,27,42,0.04);
+    --rsd-shadow-md:  0 6px 24px rgba(13,27,42,0.10);
+  }
+
+  body {
+    font-family: var(--rsd-font);
+    background: var(--rsd-bg);
+    color: var(--rsd-ink);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ══ TOPBAR ══ */
+  .rsd-topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--rsd-rule);
+    height: 54px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px; gap: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .rsd-topbar-left  { display: flex; align-items: center; gap: 10px; }
+  .rsd-topbar-right { display: flex; align-items: center; gap: 6px; }
+
+  .rsd-brand {
+    display: flex; align-items: center; gap: 8px; text-decoration: none;
+  }
+  .rsd-brand-mark {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, #1549c1, #3b6ef0);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(21,73,193,0.28);
+  }
+  .rsd-brand-mark svg {
+    width: 15px; height: 15px; stroke: #fff; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .rsd-brand-label {
+    font-size: 14.5px; font-weight: 800; color: var(--rsd-ink); letter-spacing: -0.2px;
+  }
+  .rsd-brand-label span { color: var(--rsd-primary); }
+
+  .rsd-sep { width: 1px; height: 20px; background: var(--rsd-rule); }
+
+  .rsd-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 600;
+    color: var(--rsd-ink-soft);
+    background: var(--rsd-rule-soft); border: 1px solid var(--rsd-rule);
+    border-radius: 20px; padding: 3px 11px 3px 7px;
+  }
+  .rsd-pill svg {
+    width: 12px; height: 12px; stroke: var(--rsd-teal); fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .rsd-nav-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 13px; border-radius: var(--rsd-r);
+    font-family: var(--rsd-font); font-size: 12.5px; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    border: 1px solid var(--rsd-rule); transition: all 0.14s;
+    white-space: nowrap;
+  }
+  .rsd-nav-btn svg {
+    width: 13px; height: 13px; stroke: currentColor; fill: none;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+    transition: transform 0.14s;
+  }
+  .rsd-btn-dash { background: var(--rsd-rule-soft); color: var(--rsd-ink-soft); }
+  .rsd-btn-dash:hover { background: #e2e8f0; color: var(--rsd-ink); }
+  .rsd-btn-back { background: transparent; color: var(--rsd-muted); }
+  .rsd-btn-back:hover { background: var(--rsd-rule-soft); color: var(--rsd-ink); }
+  .rsd-btn-back:hover svg { transform: translateX(-2px); }
+  .rsd-dot { width: 4px; height: 4px; background: var(--rsd-rule); border-radius: 50%; }
+
+  /* ══ HERO ══ */
+  .rsd-hero {
+    background: linear-gradient(120deg, #0a2157 0%, #1549c1 50%, #38bdf8 100%);
+    padding: 26px 28px 22px;
+    position: relative; overflow: hidden;
+  }
+  .rsd-hero::before {
+    content: ''; position: absolute; right: -50px; top: -50px;
+    width: 220px; height: 220px;
+    background: rgba(255,255,255,0.05); border-radius: 50%;
+  }
+  .rsd-hero::after {
+    content: ''; position: absolute; left: 50%; bottom: -70px;
+    width: 200px; height: 200px;
+    background: rgba(56,189,248,0.09); border-radius: 50%;
+  }
+  .rsd-hero-inner {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  }
+  .rsd-hero-left { display: flex; align-items: center; gap: 14px; }
+  .rsd-hero-icon {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.13);
+    border: 1.5px solid rgba(255,255,255,0.22);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(6px); flex-shrink: 0;
+  }
+  .rsd-hero-icon svg {
+    width: 20px; height: 20px; stroke: #fff; fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .rsd-hero-title { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.4px; line-height: 1.1; }
+  .rsd-hero-sub   { font-size: 11.5px; color: rgba(255,255,255,0.6); font-family: var(--rsd-mono); margin-top: 3px; }
+  .rsd-hero-stat {
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px; padding: 9px 16px; text-align: center; backdrop-filter: blur(4px);
+  }
+  .rsd-hero-stat-val   { font-size: 20px; font-weight: 800; color: #fff; line-height: 1; }
+  .rsd-hero-stat-label { font-size: 9.5px; color: rgba(255,255,255,0.6); font-family: var(--rsd-mono); margin-top: 2px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+  /* ══ PAGE BODY ══ */
+  .rsd-page { padding: 24px 28px; max-width: 1200px; margin: 0 auto; }
+
+  /* ══ FILTER CARD ══ */
+  .rsd-filter-card {
+    background: var(--rsd-surface);
+    border-radius: var(--rsd-r-xl);
+    border: 1px solid var(--rsd-rule);
+    box-shadow: var(--rsd-shadow);
+    overflow: hidden;
+    margin-bottom: 22px;
+    animation: rsd-up 0.3s ease both;
+  }
+
+  .rsd-filter-head {
+    padding: 14px 22px;
+    background: linear-gradient(135deg, #f8fbff 0%, #eef4fd 100%);
+    border-bottom: 1px solid var(--rsd-rule);
+    display: flex; align-items: center; gap: 9px;
+  }
+  .rsd-filter-head-icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--rsd-primary-bg);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .rsd-filter-head-icon svg {
+    width: 13px; height: 13px; stroke: var(--rsd-primary); fill: none;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .rsd-filter-head-title { font-size: 13px; font-weight: 700; color: var(--rsd-ink); }
+  .rsd-filter-head-sub   { font-size: 10.5px; color: var(--rsd-muted); font-family: var(--rsd-mono); margin-top: 1px; }
+
+  .rsd-filter-body {
+    padding: 20px 22px 22px;
+  }
+
+  .rsd-filter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 14px;
+    align-items: end;
+  }
+
+  .rsd-field-wrap { display: flex; flex-direction: column; gap: 6px; }
+
+  .rsd-field-label {
+    font-size: 10.5px; font-weight: 700;
+    color: var(--rsd-muted); letter-spacing: 0.8px;
+    text-transform: uppercase; font-family: var(--rsd-mono);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .rsd-field-label svg {
+    width: 11px; height: 11px; stroke: var(--rsd-teal); fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .rsd-select {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    padding: 9px 34px 9px 12px;
+    border: 1.5px solid var(--rsd-rule);
+    border-radius: var(--rsd-r);
+    background: #f8fbff;
+    font-family: var(--rsd-font);
+    font-size: 13px;
+    color: var(--rsd-ink);
+    outline: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 11px center;
+    background-size: 12px;
+  }
+  .rsd-select:focus {
+    border-color: var(--rsd-primary-lt);
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(59,110,240,0.11);
+  }
+  .rsd-select:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .rsd-btn-search {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 22px;
+    background: linear-gradient(135deg, var(--rsd-primary), var(--rsd-primary-lt));
+    color: #fff; border: none; border-radius: var(--rsd-r);
+    font-family: var(--rsd-font); font-size: 13px; font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(21,73,193,0.28);
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .rsd-btn-search:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(21,73,193,0.36); }
+  .rsd-btn-search svg {
+    width: 14px; height: 14px; stroke: currentColor; fill: none;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* Loading spinner on room select */
+  .rsd-select-wrap { position: relative; }
+  .rsd-select-spinner {
+    display: none; position: absolute; right: 32px; top: 50%;
+    transform: translateY(-50%);
+    width: 14px; height: 14px;
+    border: 2px solid var(--rsd-rule);
+    border-top-color: var(--rsd-primary);
+    border-radius: 50%;
+    animation: rsd-spin 0.7s linear infinite;
+  }
+  .rsd-loading .rsd-select-spinner { display: block; }
+  @keyframes rsd-spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+  /* ══ RESULTS CARD ══ */
+  .rsd-results-card {
+    background: var(--rsd-surface);
+    border-radius: var(--rsd-r-xl);
+    border: 1px solid var(--rsd-rule);
+    box-shadow: var(--rsd-shadow);
+    overflow: hidden;
+    animation: rsd-up 0.36s ease 0.05s both;
+  }
+
+  .rsd-results-head {
+    padding: 14px 22px;
+    background: linear-gradient(135deg, #f8fbff 0%, #eef4fd 100%);
+    border-bottom: 1px solid var(--rsd-rule);
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .rsd-results-head-left { display: flex; align-items: center; gap: 9px; }
+  .rsd-results-head-icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--rsd-teal-bg);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .rsd-results-head-icon svg {
+    width: 13px; height: 13px; stroke: var(--rsd-teal); fill: none;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .rsd-results-head-title { font-size: 13px; font-weight: 700; color: var(--rsd-ink); }
+  .rsd-results-head-sub   { font-size: 10.5px; color: var(--rsd-muted); font-family: var(--rsd-mono); margin-top: 1px; }
+
+  .rsd-count-tag {
+    font-size: 11px; font-weight: 700; font-family: var(--rsd-mono);
+    background: var(--rsd-primary-bg); color: var(--rsd-primary);
+    border: 1px solid #bfdbfe; border-radius: 20px; padding: 3px 11px;
+  }
+
+  /* ══ TABLE ══ */
+  .rsd-table-scroll { overflow-x: auto; }
+
+  .rsd-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 13px; min-width: 700px;
+  }
+
+  .rsd-table thead tr {
+    background: var(--rsd-rule-soft);
+    border-bottom: 1px solid var(--rsd-rule);
+  }
+  .rsd-table thead th {
+    padding: 11px 16px;
+    text-align: left;
+    font-size: 10px; font-weight: 700; font-family: var(--rsd-mono);
+    color: var(--rsd-muted); letter-spacing: 0.9px; text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .rsd-table tbody tr {
+    border-bottom: 1px solid #f0f4fa;
+    transition: background 0.12s;
+  }
+  .rsd-table tbody tr:last-child { border-bottom: none; }
+  .rsd-table tbody tr:hover { background: #f6f9ff; }
+
+  .rsd-table td {
+    padding: 12px 16px; vertical-align: middle;
+    color: var(--rsd-ink-soft);
+  }
+
+  /* Project cell */
+  .rsd-proj-cell { display: flex; align-items: center; gap: 7px; }
+  .rsd-proj-dot  {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--rsd-primary), var(--rsd-primary-lt));
+  }
+  .rsd-proj-name { font-weight: 600; color: var(--rsd-ink); font-size: 13px; }
+
+  /* Flat chip */
+  .rsd-flat-chip {
+    display: inline-flex; align-items: center;
+    padding: 2px 9px;
+    background: var(--rsd-rule-soft); border: 1px solid var(--rsd-rule);
+    border-radius: 20px; font-family: var(--rsd-mono); font-size: 11px; color: var(--rsd-ink-soft);
+  }
+
+  /* Room cell */
+  .rsd-room-name { font-weight: 700; color: var(--rsd-ink); }
+
+  /* Tenant */
+  .rsd-tenant-cell { display: flex; align-items: center; gap: 8px; }
+  .rsd-tenant-av {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, #c8d8ef, #dbeafe);
+    border: 1.5px solid #bfdbfe;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: var(--rsd-primary); flex-shrink: 0;
+  }
+  .rsd-tenant-name { font-weight: 600; font-size: 13px; color: var(--rsd-ink); }
+
+  /* Date */
+  .rsd-date {
+    font-family: var(--rsd-mono); font-size: 11.5px; color: var(--rsd-muted);
+  }
+
+  /* Status badge */
+  .rsd-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; font-family: var(--rsd-mono); white-space: nowrap;
+  }
+  .rsd-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+  .rsd-badge-active   { background: var(--rsd-green-bg); color: var(--rsd-green); }
+  .rsd-badge-deactive { background: var(--rsd-rose-bg);  color: var(--rsd-rose);  }
+  .rsd-badge-warning  { background: var(--rsd-amber-bg); color: var(--rsd-amber); }
+
+  /* Deactivate button */
+  .rsd-deact-form { margin: 0; }
+  .rsd-deact-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 7px;
+    font-family: var(--rsd-font); font-size: 12px; font-weight: 700;
+    color: var(--rsd-rose); background: var(--rsd-rose-bg);
+    border: 1.5px solid #fecdd3; cursor: pointer;
+    transition: all 0.13s;
+  }
+  .rsd-deact-btn:hover { background: #fee2e2; transform: translateY(-1px); }
+  .rsd-deact-btn svg {
+    width: 11px; height: 11px; stroke: currentColor; fill: none;
+    stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .rsd-deact-dash { color: var(--rsd-rule); font-size: 18px; display: block; text-align: center; }
+
+  /* Empty state */
+  .rsd-empty {
+    text-align: center; padding: 52px 24px; color: var(--rsd-muted);
+  }
+  .rsd-empty svg {
+    width: 40px; height: 40px; stroke: #c8d8ef; fill: none;
+    stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round;
+    display: block; margin: 0 auto 14px;
+  }
+  .rsd-empty p { font-size: 13px; }
+
+  /* No-results state (before search) */
+  .rsd-pre-search {
+    text-align: center; padding: 40px 24px;
+  }
+  .rsd-pre-search svg {
+    width: 40px; height: 40px; stroke: #c8d8ef; fill: none;
+    stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round;
+    display: block; margin: 0 auto 12px;
+  }
+  .rsd-pre-search p { font-size: 13px; color: var(--rsd-muted); }
+
+  /* ══ ANIMATION ══ */
+  @keyframes rsd-up {
+    from { opacity: 0; transform: translateY(9px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ══ RESPONSIVE ══ */
+  @media (max-width: 860px) {
+    .rsd-filter-grid { grid-template-columns: 1fr 1fr; }
+    .rsd-btn-search  { width: 100%; justify-content: center; }
+    .rsd-page { padding: 16px; }
+    .rsd-topbar { padding: 0 16px; }
+    .rsd-hero   { padding: 20px 16px; }
+    .rsd-hero-stat { display: none; }
+  }
+  @media (max-width: 560px) {
+    .rsd-filter-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══ -->
+<nav class="rsd-topbar">
+  <div class="rsd-topbar-left">
+    <a href="{% url 'dashboard' %}" class="rsd-brand">
+      <div class="rsd-brand-mark">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      </div>
+      <span class="rsd-brand-label">BM <span>ERP</span></span>
+    </a>
+    <div class="rsd-sep"></div>
+    <span class="rsd-pill">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Rent Search
+    </span>
+  </div>
+  <div class="rsd-topbar-right">
+    <a href="{% url 'tenant_dashboard' %}" class="rsd-nav-btn rsd-btn-dash">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <div class="rsd-dot"></div>
+    <a href="javascript:history.back()" class="rsd-nav-btn rsd-btn-back">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </a>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<div class="rsd-hero">
+  <div class="rsd-hero-inner">
+    <div class="rsd-hero-left">
+      <div class="rsd-hero-icon">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <div>
+        <div class="rsd-hero-title">Rent Search & Deactivate</div>
+        <div class="rsd-hero-sub">Property Management · Rent Control</div>
+      </div>
+    </div>
+    {% if rents %}
+    <div class="rsd-hero-stat">
+      <div class="rsd-hero-stat-val">{{ rents|length }}</div>
+      <div class="rsd-hero-stat-label">Results Found</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ══ PAGE BODY ══ -->
+<div class="rsd-page">
+
+  <!-- FILTER CARD -->
+  <div class="rsd-filter-card">
+    <div class="rsd-filter-head">
+      <div class="rsd-filter-head-icon">
+        <svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      </div>
+      <div>
+        <div class="rsd-filter-head-title">Filter Rent Records</div>
+        <div class="rsd-filter-head-sub">Select project, flat and room to search</div>
+      </div>
+    </div>
+
+    <div class="rsd-filter-body">
+      <form method="GET" id="rentFilterForm">
+        <div class="rsd-filter-grid">
+
+          <!-- Project -->
+          <div class="rsd-field-wrap">
+            <label class="rsd-field-label" for="id_projectref">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+              Project
+            </label>
+            <select name="projectref" id="id_projectref" class="rsd-select">
+              <option value="">— Select Project —</option>
+              {% for project in projects %}
+                <option value="{{ project.id }}" {% if project.id|stringformat:"s" == selected_project %}selected{% endif %}>{{ project.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Flat -->
+          <div class="rsd-field-wrap">
+            <label class="rsd-field-label" for="id_flat">
+              <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              Flat
+            </label>
+            <select name="flat" id="id_flat" class="rsd-select">
+              <option value="">— Select Flat —</option>
+              {% for f in flats %}
+                <option value="{{ f }}" {% if f == selected_flat %}selected{% endif %}>{{ f }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Room -->
+          <div class="rsd-field-wrap">
+            <label class="rsd-field-label" for="id_room">
+              <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+              Room
+            </label>
+            <div class="rsd-select-wrap">
+              <select name="room" id="id_room" class="rsd-select">
+                <option value="">— Select Room —</option>
+                {% for room in rooms %}
+                  <option value="{{ room.id }}" {% if room.id|stringformat:"s" == selected_room %}selected{% endif %}>
+                    {{ room.room_name }} ({{ room.flat }})
+                  </option>
+                {% endfor %}
+              </select>
+              <span class="rsd-select-spinner" id="rsdRoomSpinner"></span>
+            </div>
+          </div>
+
+          <!-- Search Button -->
+          <div class="rsd-field-wrap">
+            <label class="rsd-field-label" style="visibility:hidden;">Action</label>
+            <button type="submit" class="rsd-btn-search">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Search
+            </button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- RESULTS CARD -->
+  <div class="rsd-results-card">
+    <div class="rsd-results-head">
+      <div class="rsd-results-head-left">
+        <div class="rsd-results-head-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div>
+          <div class="rsd-results-head-title">Rent Records</div>
+          <div class="rsd-results-head-sub">Search results listed below</div>
+        </div>
+      </div>
+      {% if rents %}
+      <span class="rsd-count-tag">{{ rents|length }} record{{ rents|length|pluralize }}</span>
+      {% endif %}
+    </div>
+
+    <div class="rsd-table-scroll">
+      {% if rents %}
+      <table class="rsd-table">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Flat</th>
+            <th>Room</th>
+            <th>Tenant</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rent in rents %}
+          <tr>
+            <td>
+              <div class="rsd-proj-cell">
+                <div class="rsd-proj-dot"></div>
+                <span class="rsd-proj-name">{{ rent.projectref.name }}</span>
+              </div>
+            </td>
+            <td><span class="rsd-flat-chip">{{ rent.room.flat }}</span></td>
+            <td><span class="rsd-room-name">{{ rent.room.room_name }}</span></td>
+            <td>
+              <div class="rsd-tenant-cell">
+                <div class="rsd-tenant-av">{{ rent.varatiya.name|slice:":1"|upper }}</div>
+                <span class="rsd-tenant-name">{{ rent.varatiya.name }}</span>
+              </div>
+            </td>
+            <td><span class="rsd-date">{{ rent.startmonths }}</span></td>
+            <td><span class="rsd-date">{{ rent.endmonths }}</span></td>
+            <td>
+              {% if rent.status == "Active" %}
+                <span class="rsd-badge rsd-badge-active"><span class="rsd-badge-dot"></span>Active</span>
+              {% elif rent.status == "Deactive" %}
+                <span class="rsd-badge rsd-badge-deactive"><span class="rsd-badge-dot"></span>Deactive</span>
+              {% else %}
+                <span class="rsd-badge rsd-badge-warning"><span class="rsd-badge-dot"></span>{{ rent.status }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if rent.status != 'Deactive' %}
+              <form class="rsd-deact-form" method="POST" action="{% url 'deactivate_rent' rent.id %}">
+                {% csrf_token %}
+                <button type="submit" class="rsd-deact-btn"
+                  onclick="return confirm('Are you sure you want to deactivate this Rent & Room?');">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                  Deactivate
+                </button>
+              </form>
+              {% else %}
+                <span class="rsd-deact-dash">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% elif request.GET %}
+      <!-- Searched but no results -->
+      <div class="rsd-empty">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <p>No rent records found for this filter.<br>Try adjusting your selection.</p>
+      </div>
+
+      {% else %}
+      <!-- Before first search -->
+      <div class="rsd-pre-search">
+        <svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        <p>Use the filters above and click <strong>Search</strong> to find rent records.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div><!-- /rsd-page -->
+
+<!-- ══ AJAX: Load rooms on project + flat change ══ -->
+<script>
+  function loadRooms() {
+    var projectrefId = $('#id_projectref').val();
+    var flat         = $('#id_flat').val();
+    var $roomSelect  = $('#id_room');
+    var $spinner     = $('#rsdRoomSpinner').closest('.rsd-select-wrap');
+
+    if (projectrefId && flat) {
+      $spinner.addClass('rsd-loading');
+      $.ajax({
+        url: "{% url 'ajax_load_deactive_rooms' %}",
+        data: { 'projectref_id': projectrefId, 'flat': flat },
+        success: function(data) {
+          var options = '<option value="">— Select Room —</option>';
+          data.rooms.forEach(function(room) {
+            options += `<option value="${room.id}">${room.name}</option>`;
+          });
+          $roomSelect.html(options);
+          $spinner.removeClass('rsd-loading');
+        },
+        error: function() {
+          $spinner.removeClass('rsd-loading');
+        }
+      });
+    } else {
+      $roomSelect.html('<option value="">— Select Room —</option>');
+    }
+  }
+
+  $('#id_projectref, #id_flat').change(loadRooms);
+</script>
+
+</body>
+</html>

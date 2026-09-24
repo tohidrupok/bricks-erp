@@ -1,0 +1,195 @@
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[92vh] overflow-hidden flex flex-col">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center px-6 py-3 border-b">
+            <h3 class="text-lg font-bold text-slate-800 flex items-center space-x-2">
+                <span>{{ lead.name }}</span>
+                <span class="w-2.5 h-2.5 bg-blue-600 rounded-full inline-block"></span>
+            </h3>
+            <button onclick="document.getElementById('activityModalContainer').innerHTML=''" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 flex-1 overflow-y-auto">
+            
+            <!-- LEFT PROFILE COLUMN (4 Cols) -->
+            <div class="md:col-span-4 bg-slate-50 border-r p-5 space-y-4">
+                <div class="text-center">
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-amber-400 text-white font-bold text-2xl rounded-full shadow-md mb-2">
+                        SE
+                    </div>
+                    <div class="text-xs text-slate-400 cursor-pointer hover:underline">Click to upload image</div>
+                    
+                    <!-- Quick Communication Icons -->
+                    <div class="flex justify-center items-center space-x-3 mt-3">
+                        <a href="https://wa.me/{{ lead.phone }}" target="_blank" class="p-2 bg-emerald-100 text-emerald-600 rounded-full hover:bg-emerald-200">
+                            💬
+                        </a>
+                        <a href="tel:{{ lead.phone }}" class="p-2 bg-sky-100 text-sky-600 rounded-full hover:bg-sky-200">
+                            📞
+                        </a>
+                        <a href="#" class="p-2 bg-purple-100 text-purple-600 rounded-full hover:bg-purple-200">
+                            ✉️
+                        </a>
+                    </div>
+                </div>
+
+                <div class="text-xs text-center font-bold text-slate-700 border-b pb-2">
+                    ID: {{ lead.lead_code }} <br>
+                    <span class="font-normal text-slate-500">Added By: {{ lead.assign_user|default:"Admin" }}</span>
+                </div>
+
+                <!-- Form Field Rows -->
+                <div class="space-y-2 text-xs">
+                    <div class="grid grid-cols-2 gap-1 items-center">
+                        <span class="font-semibold text-slate-600">Category</span>
+                        <select class="border p-1 rounded w-full"><option>Select Category</option></select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1 items-center">
+                        <span class="font-semibold text-slate-600">Phone</span>
+                        <input type="text" value="{{ lead.phone }}" class="border p-1 rounded w-full bg-white">
+                    </div>
+                    <div class="grid grid-cols-2 gap-1 items-center">
+                        <span class="font-semibold text-slate-600">Organization</span>
+                        <input type="text" value="{{ lead.organization|default:'' }}" class="border p-1 rounded w-full bg-white">
+                    </div>
+                    <div class="grid grid-cols-2 gap-1 items-center">
+                        <span class="font-semibold text-slate-600">Profession</span>
+                        <select class="border p-1 rounded w-full"><option>Select Profession</option></select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1 items-center">
+                        <span class="font-semibold text-slate-600">Address</span>
+                        <textarea class="border p-1 rounded w-full bg-white h-12">{{ lead.address|default:'' }}</textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1 items-center">
+                        <span class="font-semibold text-slate-600">SR</span>
+                        <span class="bg-slate-100 border p-1 rounded">Admin</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1 items-center">
+                        <span class="font-semibold text-slate-600">Created At</span>
+                        <span class="text-slate-500">{{ lead.created_at|date:"d-m-Y h:i A" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT ACTION & ACTIVITY TAB COLUMN (8 Cols) -->
+            <div class="md:col-span-8 p-5 space-y-5">
+                
+                <!-- Activity Counter Tabs Header -->
+                <div class="flex items-center space-x-2 border-b pb-3 text-xs overflow-x-auto">
+                    <span class="px-3 py-1 bg-emerald-100 text-emerald-800 font-semibold rounded-md">Upcoming/Pending</span>
+                    <button class="px-2 py-1 text-slate-600 hover:bg-slate-100 rounded">Requirements <span class="bg-rose-500 text-white px-1.5 py-0.5 rounded-full text-[10px]">0</span></button>
+                    <button class="px-2 py-1 text-slate-600 hover:bg-slate-100 rounded">Deal Negotiation <span class="bg-rose-500 text-white px-1.5 py-0.5 rounded-full text-[10px]">0</span></button>
+                    <button class="px-2 py-1 text-slate-600 hover:bg-slate-100 rounded">Property <span class="bg-rose-500 text-white px-1.5 py-0.5 rounded-full text-[10px]">1</span></button>
+                    <button class="px-2 py-1 text-slate-600 hover:bg-slate-100 rounded">Follow-up <span class="bg-rose-500 text-white px-1.5 py-0.5 rounded-full text-[10px]">4</span></button>
+                </div>
+
+                <form method="POST" action="{% url 'add_lead_activity' lead.id %}" class="space-y-4">
+                    {% csrf_token %}
+
+                    <!-- Stage Row -->
+                    <div class="flex flex-wrap items-center gap-3 text-xs">
+                        <span class="font-bold text-emerald-700">Stage</span>
+                        <select name="stage" class="border border-indigo-400 p-1.5 rounded text-indigo-700 font-semibold">
+                            <option value="Booked" {% if lead.stage == "Booked" %}selected{% endif %}>Stage: Booked</option>
+                            <option value="New">Stage: New</option>
+                        </select>
+                        <label class="flex items-center space-x-1 bg-rose-100 text-rose-700 px-3 py-1.5 rounded cursor-pointer">
+                            <input type="checkbox" name="junk"> <span>Move to junk</span>
+                        </label>
+                        <label class="flex items-center space-x-1 bg-emerald-600 text-white px-3 py-1.5 rounded cursor-pointer font-semibold">
+                            <input type="checkbox" name="sold"> <span>Mark as Sold</span>
+                        </label>
+                        <div class="flex items-center border rounded">
+                            <span class="bg-slate-100 px-2 py-1 text-slate-500">Possibility</span>
+                            <input type="text" name="possibility" class="w-12 p-1 text-center">
+                        </div>
+                    </div>
+
+                    <!-- Radio Toggle: Current Activity -->
+                    <div class="flex items-center space-x-4 text-xs font-semibold text-slate-700 bg-slate-50 p-2.5 rounded-lg border">
+                        <span>Current Activity:</span>
+                        <label class="flex items-center space-x-1 cursor-pointer">
+                            <input type="radio" name="activity_type" value="followup" checked onclick="toggleActivityForm('followup')">
+                            <span class="text-indigo-600">Followup</span>
+                        </label>
+                        <label class="flex items-center space-x-1 cursor-pointer">
+                            <input type="radio" name="activity_type" value="task_visit" onclick="toggleActivityForm('task')">
+                            <span>Task/Visit</span>
+                        </label>
+                    </div>
+
+                    <!-- Followup Section -->
+                    <div id="followupSection" class="space-y-3">
+                        <div class="text-xs font-bold text-emerald-700">Add Followup</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <select name="status" class="border p-2 rounded text-xs">
+                                <option value="">Select Communication Status</option>
+                                <option value="Call">Call</option>
+                                <option value="Meeting">Meeting</option>
+                            </select>
+                            <textarea name="comment" placeholder="Comment *" class="border p-2 rounded text-xs h-16 w-full"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Task / Visit Section (Hidden by default) -->
+                    <div id="taskSection" class="space-y-3 hidden">
+                        <div class="text-xs font-bold text-emerald-700">Add Task/Visit</div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <select name="task_type" class="border p-2 rounded text-xs"><option>Select Task Type</option></select>
+                            <input type="date" name="task_date" class="border p-2 rounded text-xs">
+                            <select name="task_status" class="border p-2 rounded text-xs"><option>Select Status</option></select>
+                        </div>
+                    </div>
+
+                    <!-- Next Activity Radio Toggle -->
+                    <div class="flex items-center space-x-4 text-xs font-semibold text-slate-700 border-t pt-3">
+                        <span>Next Activity:</span>
+                        <label class="flex items-center space-x-1 cursor-pointer">
+                            <input type="radio" name="next_activity_type" value="Followup" checked>
+                            <span class="text-indigo-600">Followup</span>
+                        </label>
+                        <label class="flex items-center space-x-1 cursor-pointer">
+                            <input type="radio" name="next_activity_type" value="Task/Visit">
+                            <span>Task/Visit</span>
+                        </label>
+                    </div>
+
+                    <!-- Next Followup Date & Admin -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-50 p-3 rounded border">
+                        <div>
+                            <label class="text-[11px] font-semibold text-slate-500">Date</label>
+                            <input type="datetime-local" name="next_date" class="w-full border p-1.5 rounded text-xs bg-white">
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-semibold text-slate-500">Assignee</label>
+                            <input type="text" value="Admin" readonly class="w-full border p-1.5 rounded text-xs bg-slate-100">
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-semibold text-slate-500">Note</label>
+                            <input type="text" name="next_note" placeholder="Next action note" class="w-full border p-1.5 rounded text-xs bg-white">
+                        </div>
+                    </div>
+
+                    <!-- Save / Close Footer -->
+                    <div class="flex justify-end space-x-2 pt-3 border-t">
+                        <button type="button" onclick="document.getElementById('activityModalContainer').innerHTML=''" class="px-5 py-2 bg-slate-400 text-white text-xs font-semibold rounded-md">Close</button>
+                        <button type="submit" class="px-5 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-md hover:bg-indigo-700">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleActivityForm(type) {
+    if (type === 'followup') {
+        document.getElementById('followupSection').classList.remove('hidden');
+        document.getElementById('taskSection').classList.add('hidden');
+    } else {
+        document.getElementById('followupSection').classList.add('hidden');
+        document.getElementById('taskSection').classList.remove('hidden');
+    }
+}
+</script>

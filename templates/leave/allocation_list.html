@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Leave Allocations - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            {% include 'partials/header.html' %}
+
+            <h2 class="intro-y mt-10 text-lg font-medium">Leave Allocations</h2>
+
+            <div class="mt-5 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                    <a href="{% url 'allocation_create' %}">
+                        <button class="bg-primary text-white border-primary py-2 px-3 rounded-md mr-2 shadow-md">Add New Allocation</button>
+                    </a>
+                    <a href="{% url 'leave_list' %}">
+                        <button class="bg-secondary text-gray-700 border-secondary py-2 px-3 rounded-md shadow-md">Back to Leave List</button>
+                    </a>
+                </div>
+
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                    <table class="w-full text-left border-separate border-spacing-y-[0px]">
+                        <thead>
+                            <tr class="bg-gray-200">
+                                <th class="font-medium px-5 py-3 border-b">Employee</th>
+                                <th class="font-medium px-5 py-3 border-b text-center">Year</th>
+                                <th class="font-medium px-5 py-3 border-b text-center">CL (Alloc / Used)</th>
+                                <th class="font-medium px-5 py-3 border-b text-center">SL (Alloc / Used)</th>
+                                <th class="font-medium px-5 py-3 border-b text-center">EL (Alloc / Used)</th>
+                                <th class="font-medium px-5 py-3 border-b text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alloc in allocations %}
+                            <tr class="bg-white shadow-sm rounded-md hover:bg-gray-50 transition">
+                                <td class="px-5 py-3 border-b font-medium">{{ alloc.employee.rda_emp_name }}</td>
+                                <td class="px-5 py-3 border-b text-center font-bold">{{ alloc.year }}</td>
+                                <td class="px-5 py-3 border-b text-center">{{ alloc.casual_leave_allocated }} / <span class="text-red-600">{{ alloc.casual_leave_used }}</span></td>
+                                <td class="px-5 py-3 border-b text-center">{{ alloc.sick_leave_allocated }} / <span class="text-red-600">{{ alloc.sick_leave_used }}</span></td>
+                                <td class="px-5 py-3 border-b text-center">{{ alloc.total_earned_leave }} / <span class="text-red-600">{{ alloc.earned_leave_used }}</span></td>
+                                <td class="px-5 py-3 border-b text-center">
+                                    <a href="{% url 'allocation_edit' alloc.pk %}" class="text-blue-600 hover:text-blue-800 font-medium">✏️ Edit</a> |
+                                    <a href="{% url 'allocation_delete' alloc.pk %}" class="text-red-600 hover:text-red-800 font-medium" onclick="return confirm('Are you sure you want to delete this allocation?');">🗑️ Delete</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-gray-500">No leave allocations found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

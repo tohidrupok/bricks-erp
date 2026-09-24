@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Dashboard - IncomIT</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased">
+
+    <div class="min-h-screen flex flex-col justify-between">
+        
+        <!-- MAIN CONTAINER -->
+        <div class="flex flex-col flex-1">
+
+            <!-- TOP NAVBAR -->
+            <header class="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center justify-between shadow-sm">
+                <div class="flex items-center space-x-6">
+                    <!-- Logo / Brand -->
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">S</div>
+                        <span class="text-xs font-bold text-slate-700 tracking-wider">IncomIT</span>
+                    </div>
+
+                    <!-- Navigation Links -->
+                    <nav class="hidden lg:flex items-center space-x-1 text-xs font-semibold text-slate-600">
+                        <a href="{% url 'crm_dashboard' %}" class="flex items-center space-x-1 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg"><i class="fa-solid fa-chart-pie"></i><span>CRM</span></a>
+                        <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-gear"></i><span>Configuration</span></a>
+                        <a href="{% url 'lead_list' %}" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-user-plus"></i><span>Lead</span></a>
+                        <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-headset"></i><span>Call Center</span></a>
+                        <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-car"></i><span>Task/Visit</span></a>
+                        <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-building"></i><span>Property</span></a>
+                        <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-chart-line"></i><span>Reports</span></a>
+                        <a href="#" class="flex items-center space-x-1 px-3 py-1.5 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-gauge"></i><span>KPI</span></a>
+                    </nav>
+                </div>
+
+                <!-- Right Search, Home Button & User Settings / Logout Dropdown -->
+                <div class="flex items-center space-x-3">
+                    <!-- Home Button -->
+                    <a href="{% url 'home' %}" class="flex items-center space-x-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition" title="Back to Home Page">
+                        <i class="fa-solid fa-house"></i>
+                        <span class="hidden sm:inline">Home</span>
+                    </a>
+
+                    <div class="relative hidden sm:block">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-search text-xs"></i>
+                        </span>
+                        <input type="text" placeholder="Search Metrics..." class="pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48">
+                    </div>
+                    <button class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"><i class="fa-solid fa-gear text-xs"></i></button>
+                    <button class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"><i class="fa-solid fa-bell text-xs"></i></button>
+                    
+                    <!-- User Profile & Logout Dropdown Menu -->
+                    <div class="relative group">
+                        <button class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs focus:outline-none">
+                            {{ request.user.username|slice:":1"|upper|default:"U" }}
+                        </button>
+                        <!-- Dropdown Content -->
+                        <div class="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg py-1 hidden group-hover:block hover:block z-50">
+                            <div class="px-4 py-2 border-b border-slate-100 text-xs">
+                                <span class="block font-bold text-slate-700">{{ request.user.username|default:"User Account" }}</span>
+                            </div>
+                            <a href="{% url 'home' %}" class="flex items-center space-x-2 px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 transition">
+                                <i class="fa-solid fa-house w-4"></i>
+                                <span>Home Page</span>
+                            </a>
+                            <form action="{% url 'logout' %}" method="post" class="block">
+                                {% csrf_token %}
+                                <button type="submit" class="w-full flex items-center space-x-2 px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 transition text-left">
+                                    <i class="fa-solid fa-right-from-bracket w-4"></i>
+                                    <span>Logout</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </header>
+
+            <!-- DASHBOARD CONTENT AREA -->
+            <div class="p-4 grid grid-cols-1 xl:grid-cols-12 gap-4">
+
+                <!-- LEFT / MAIN STATS & LISTS (8 Cols on XL) -->
+                <div class="xl:col-span-8 space-y-4">
+                    
+                    <!-- TOP METRICS GRID (Image-Matched Full Row Count) -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-orange-500 to-rose-600">
+                            <span class="text-[11px] font-medium opacity-90">Total Leads</span>
+                            <span class="text-lg font-bold text-right">{{ total_leads_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-emerald-600 to-teal-800">
+                            <span class="text-[11px] font-medium opacity-90">Junk Leads</span>
+                            <span class="text-lg font-bold text-right">{{ junk_leads_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-blue-600 to-indigo-900">
+                            <span class="text-[11px] font-medium opacity-90">Sold</span>
+                            <span class="text-lg font-bold text-right">{{ sold_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-emerald-700 to-green-900">
+                            <span class="text-[11px] font-medium opacity-90">High Prospect</span>
+                            <span class="text-lg font-bold text-right">{{ high_prospect_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-amber-600 to-yellow-800">
+                            <span class="text-[11px] font-medium opacity-90">Priority</span>
+                            <span class="text-lg font-bold text-right">{{ priority_count|default:0 }}</span>
+                        </div>
+
+                        <!-- Row 2 -->
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-purple-500 to-fuchsia-700">
+                            <span class="text-[11px] font-medium opacity-90">Lost</span>
+                            <span class="text-lg font-bold text-right">{{ lost_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-lime-600 to-emerald-700">
+                            <span class="text-[11px] font-medium opacity-90">Closed</span>
+                            <span class="text-lg font-bold text-right">{{ closed_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-amber-800 to-yellow-950">
+                            <span class="text-[11px] font-medium opacity-90">Negotiation</span>
+                            <span class="text-lg font-bold text-right">{{ negotiation_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-red-500 to-orange-600">
+                            <span class="text-[11px] font-medium opacity-90">Hot</span>
+                            <span class="text-lg font-bold text-right">{{ hot_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-cyan-700 to-blue-900">
+                            <span class="text-[11px] font-medium opacity-90">Query</span>
+                            <span class="text-lg font-bold text-right">{{ query_count|default:0 }}</span>
+                        </div>
+
+                        <!-- Row 3 -->
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-yellow-600 to-amber-800">
+                            <span class="text-[11px] font-medium opacity-90">New Call</span>
+                            <span class="text-lg font-bold text-right">{{ new_call_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-teal-500 to-cyan-700">
+                            <span class="text-[11px] font-medium opacity-90">Follow Up</span>
+                            <span class="text-lg font-bold text-right">{{ followup_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-emerald-500 to-teal-700">
+                            <span class="text-[11px] font-medium opacity-90">Lead</span>
+                            <span class="text-lg font-bold text-right">{{ lead_metric_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-stone-500 to-yellow-700">
+                            <span class="text-[11px] font-medium opacity-90">Booked</span>
+                            <span class="text-lg font-bold text-right">{{ booked_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-violet-600 to-purple-900">
+                            <span class="text-[11px] font-medium opacity-90">Potential</span>
+                            <span class="text-lg font-bold text-right">{{ potential_count|default:0 }}</span>
+                        </div>
+
+                        <!-- Row 4 -->
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-fuchsia-600 to-pink-900">
+                            <span class="text-[11px] font-medium opacity-90">High Potential</span>
+                            <span class="text-lg font-bold text-right">{{ high_potential_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-green-700 to-lime-900">
+                            <span class="text-[11px] font-medium opacity-90">Token Lead</span>
+                            <span class="text-lg font-bold text-right">{{ token_lead_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-orange-600 to-red-800">
+                            <span class="text-[11px] font-medium opacity-90">Booking</span>
+                            <span class="text-lg font-bold text-right">{{ booking_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-rose-500 to-red-700">
+                            <span class="text-[11px] font-medium opacity-90">Registration & Handover</span>
+                            <span class="text-lg font-bold text-right">{{ reg_handover_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-blue-700 to-sky-900">
+                            <span class="text-[11px] font-medium opacity-90">Exchange</span>
+                            <span class="text-lg font-bold text-right">{{ exchange_count|default:0 }}</span>
+                        </div>
+
+                        <!-- Row 5 -->
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-amber-700 to-yellow-900">
+                            <span class="text-[11px] font-medium opacity-90">EMI Hold</span>
+                            <span class="text-lg font-bold text-right">{{ emi_hold_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-teal-700 to-emerald-900">
+                            <span class="text-[11px] font-medium opacity-90">Hold For Later</span>
+                            <span class="text-lg font-bold text-right">{{ hold_later_count|default:0 }}</span>
+                        </div>
+                        <div class="p-3 rounded-xl text-white shadow-sm flex flex-col justify-between bg-gradient-to-br from-emerald-600 to-green-800">
+                            <span class="text-[11px] font-medium opacity-90">Token Hold</span>
+                            <span class="text-lg font-bold text-right">{{ token_hold_count|default:0 }}</span>
+                        </div>
+                    </div>
+
+                    <!-- TO-DO LIST BANNER -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-3">
+                        <div class="text-xs font-bold text-slate-700 mb-2.5 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-list-check text-indigo-600"></i>
+                            <span>To-Do List</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-center">
+                            <div class="p-2 border border-slate-100 rounded-lg bg-slate-50">
+                                <span class="block text-[10px] text-slate-500 font-medium">Today's Followup</span>
+                                <span class="text-sm font-bold text-slate-700">{{ todays_followups|default:0 }}</span>
+                            </div>
+                            <div class="p-2 border border-slate-100 rounded-lg bg-slate-50">
+                                <span class="block text-[10px] text-slate-500 font-medium">Today's Call</span>
+                                <span class="text-sm font-bold text-slate-700">{{ todays_calls|default:0 }}</span>
+                            </div>
+                            <div class="p-2 border border-slate-100 rounded-lg bg-slate-50">
+                                <span class="block text-[10px] text-slate-500 font-medium">Today's Visit</span>
+                                <span class="text-sm font-bold text-slate-700">{{ todays_visits|default:0 }}</span>
+                            </div>
+                            <div class="p-2 border border-slate-100 rounded-lg bg-rose-50 border-rose-100">
+                                <span class="block text-[10px] text-rose-600 font-medium">Missed Followup</span>
+                                <span class="text-sm font-bold text-rose-600">{{ missed_followups|default:0 }}</span>
+                            </div>
+                            <div class="p-2 border border-slate-100 rounded-lg bg-slate-50">
+                                <span class="block text-[10px] text-slate-500 font-medium">Missed Visit</span>
+                                <span class="text-sm font-bold text-slate-700">{{ missed_visits|default:0 }}</span>
+                            </div>
+                            <div class="p-2 border border-slate-100 rounded-lg bg-slate-50">
+                                <span class="block text-[10px] text-slate-500 font-medium">Next Followup</span>
+                                <span class="text-sm font-bold text-slate-700">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- THREE COLUMN LEAD/FOLLOWUP/TASK TABLES -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        
+                        <!-- New Lead Column -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div class="bg-indigo-100 text-indigo-900 font-bold text-xs py-2 px-3 text-center border-b border-indigo-200">New Lead</div>
+                            <div class="p-3 space-y-3 text-xs max-h-72 overflow-y-auto">
+                                {% for lead in new_leads %}
+                                <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                                    <div>
+                                        <span class="text-indigo-600 font-semibold">{{ lead.lead_code }}</span><br>
+                                        <span class="text-slate-600 font-medium">Name: {{ lead.customer.customer_name }}</span><br>
+                                        <span class="text-[10px] text-slate-400">Caller: - {{ lead.customer.assign_to_user|default:"Admin" }}</span>
+                                    </div>
+                                    <a href="tel:{{ lead.customer.contact_no }}" class="w-7 h-7 bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-emerald-600 rounded-full flex items-center justify-center transition"><i class="fa-solid fa-phone text-[10px]"></i></a>
+                                </div>
+                                {% empty %}
+                                <div class="text-center text-slate-400 italic py-4">No New Leads</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Followup Column -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div class="bg-indigo-100 text-indigo-900 font-bold text-xs py-2 px-3 text-center border-b border-indigo-200">Followup</div>
+                            <div class="p-3 space-y-3 text-xs max-h-72 overflow-y-auto">
+                                {% for lead in followup_leads %}
+                                <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                                    <div>
+                                        <span class="text-indigo-600 font-semibold">{{ lead.lead_code }}</span><br>
+                                        <span class="text-slate-600 font-medium">Name: {{ lead.customer.customer_name }}</span><br>
+                                        <span class="text-[10px] text-slate-400">Caller: - {{ lead.customer.assign_to_user|default:"Admin" }}</span>
+                                    </div>
+                                    <a href="tel:{{ lead.customer.contact_no }}" class="w-7 h-7 bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-emerald-600 rounded-full flex items-center justify-center transition"><i class="fa-solid fa-phone text-[10px]"></i></a>
+                                </div>
+                                {% empty %}
+                                <div class="text-center text-slate-400 italic py-4">No Followups</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Task/Visit Column -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div class="bg-indigo-100 text-indigo-900 font-bold text-xs py-2 px-3 text-center border-b border-indigo-200">Task/Visit</div>
+                            <div class="p-3 space-y-3 text-xs max-h-72 overflow-y-auto">
+                                {% for task in tasks_visits %}
+                                <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                                    <div>
+                                        <span class="text-indigo-600 font-semibold">{{ task.visit_place|default:"Task" }}</span><br>
+                                        <span class="text-slate-600 font-medium">Date: {{ task.task_date }}</span>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="p-6 text-center text-slate-400 text-xs italic">
+                                    No Visit
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- RIGHT / CALENDAR & SIDEBAR -->
+                <div class="xl:col-span-4 space-y-4">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md">User</span>
+                                <select class="text-xs border border-slate-200 rounded-lg p-1 bg-white outline-none font-medium text-slate-600">
+                                    <option>Select User</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Calendar Filter Tabs (Today, Weekly, Monthly, Yearly, All) -->
+                        <div class="flex items-center space-x-1 mb-3 overflow-x-auto pb-1">
+                            <button class="px-2.5 py-1 bg-indigo-600 text-white rounded-md text-[10px] font-bold">Today</button>
+                            <button class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-md text-[10px] font-bold transition">Weekly</button>
+                            <button class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-md text-[10px] font-bold transition">Monthly</button>
+                            <button class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-md text-[10px] font-bold transition">Yearly</button>
+                            <button class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-md text-[10px] font-bold transition">All</button>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2 pb-3 border-b border-slate-100">
+                            <span class="text-sm font-bold text-slate-800">September 2026</span>
+                            <div class="flex items-center space-x-1">
+                                <button class="px-2 py-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded text-[10px] font-bold transition">today</button>
+                                <button class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded flex items-center justify-center transition"><i class="fa-solid fa-chevron-left text-[10px]"></i></button>
+                                <button class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded flex items-center justify-center transition"><i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-7 text-center text-[10px] font-bold text-slate-400 py-2">
+                            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="bg-white border-t border-slate-200 px-6 py-2.5 flex justify-between items-center text-[11px] text-slate-500">
+            <span>2026 © Incomit Solution</span>
+            <span>Design & Developed by Incomit Solution</span>
+        </footer>
+
+    </div>
+
+</body>
+</html>

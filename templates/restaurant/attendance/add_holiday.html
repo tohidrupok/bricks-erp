@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="max-w-lg mx-auto bg-white p-6 rounded-xl shadow-lg">
+
+    <h2 class="text-2xl font-bold mb-4 text-center text-primary">
+        Monthly Friday Holiday Setup
+    </h2>
+
+    <!-- Month Select -->
+    <form method="get" class="mb-4">
+        <label class="block mb-2 font-semibold">Select Month</label>
+        <input type="month" name="month" required
+               class="w-full border rounded-lg p-2"
+               value="{{ request.GET.month }}">
+
+        <button type="submit" style="background-color:green"
+            class="mt-3 w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700">
+            Show Fridays
+        </button>
+    </form>
+
+    <!-- Friday Preview -->
+    {% if fridays %}
+        <div class="bg-gray-100 p-4 rounded-lg mb-4">
+            <h3 class="font-semibold mb-2">
+                Fridays in {{ selected_month }}
+            </h3>
+
+            <ul class="list-disc list-inside text-sm">
+                {% for day in fridays %}
+                    <li>{{ day }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Save Form -->
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="month" value="{{ request.GET.month }}">
+            <button type="submit" style="background-color:green"
+                class="w-full bg-primary text-white py-2 rounded-lg shadow-md hover:bg-primary/90">
+                Save Friday Off Day
+            </button>
+        </form>
+    {% endif %}
+
+</div>
+
+{% endblock %}
+

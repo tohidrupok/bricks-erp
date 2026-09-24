@@ -1,0 +1,306 @@
+<!-- templates/BOQ Edit.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Requisition  Update- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                <div class="container mx-auto mt-10 ml-10"> 
+                <!-- END: Top Bar -->
+               <h1 class="text-3xl font-semibold text-gray-900 mb-6">Edit Restaurant Requisitions</h1>
+
+                <form method="POST" enctype="multipart/form-data" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                    {% csrf_token %}
+
+                    <!-- Project Name -->
+                    <div class="mb-6">
+                        <label for="project_name" class="block text-sm font-medium text-gray-700">Project Name</label>
+                        <select id="project_name" name="project_name" class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                            {% for project in project_list %}
+                                <option value="{{ project.id }}"
+                                    {% if form.instance.project_name.id == project.id %}selected{% endif %}>
+                                    {{ project.project_first_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.project_name.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.project_name.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                    <!-- Employee Name -->
+                    <div class="mb-6">
+                        <label for="employee_name" class="block text-sm font-medium text-gray-700">Employee Name</label>
+                        <select id="employee_name" name="employee_name" class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                            {% for emp in employee_names %}
+                                <option value="{{ emp.id }}"
+                                    {% if form.instance.employee_name.id == emp.id %}
+                                        selected
+                                    {% endif %}
+                                >{{ emp.employee_name }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if form.employee_name.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.employee_name.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+					<!-- Spplier Name -->
+			        <!-- Type -->
+                    <div class="mb-4">
+                        <label for="id_type" class="font-medium text-lg text-gray-800">
+                            Type
+                        </label>
+                    
+                        <select id="id_type"
+                                name="type"
+                                class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                            <option value="Supplier" selected>Supplier</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Supplier -->
+                    <div class="mb-6">
+                        <label for="vendor_name"
+                               class="block text-sm font-medium text-gray-700">
+                            Supplier Name
+                        </label>
+                    
+                        <select id="vendor_name"
+                                name="vendor_name"
+                                class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                    
+                            <option value="">Select Supplier</option>
+                    
+                            {% for supplier in supplier_list %}
+                                <option value="{{ supplier.rest_supplier_name }}"
+                                    {% if form.instance.vendor_name == supplier.rest_supplier_name %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ supplier.rest_supplier_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    
+                        {% if form.vendor_name.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.vendor_name.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+				
+                    <!-- Item Name -->
+                    <div class="mb-6">
+                        <label for="item_name" class="block text-sm font-medium text-gray-700">Item Name</label>
+                        <select id="item_name" name="item_name" class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                            {% for item in requisition_list %}
+                                <option value="{{ item.id }}" 
+                                    {% if form.instance.item_name and form.instance.item_name.id == item.id %}
+                                        selected
+                                    {% endif %}
+                                >{{ item.rest_item_name }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if form.item_name.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.item_name.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+					<div class="mb-6">
+						<label for="requisition_date" class="block text-sm font-medium text-gray-700">Requisition Date</label>
+						<input type="date" id="requisition_date" name="requisition_date"
+							   value="{{ form.instance.requisition_date|date:'Y-m-d' }}"
+							   class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+						{% if form.requisition_date.errors %}
+							<ul class="text-red-600 mt-1">
+								{% for error in form.requisition_date.errors %}
+									<li>{{ error }}</li>
+								{% endfor %}
+							</ul>
+						{% endif %}
+					</div>
+										<!-- Unit -->
+                    <div class="mb-6">
+                        <label for="unit" class="block text-sm font-medium text-gray-700">Unit</label>
+                        <input type="text" id="unit" name="unit" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.unit.value|default_if_none:'' }}" placeholder="Enter Unit (e.g., pcs, kg)">
+                        {% if form.unit.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.unit.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="mb-6">
+                        <label for="qty" class="block text-sm font-medium text-gray-700">Quantity</label>
+                        <input type="number" id="qty" name="qty" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.qty.value|default_if_none:'' }}" min="1">
+                        {% if form.qty.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.qty.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                    <!-- Rate -->
+                    <div class="mb-6">
+                        <label for="rate" class="block text-sm font-medium text-gray-700">Rate</label>
+                        <input type="number" step="0.01" id="rate" name="rate" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.rate.value|default_if_none:'' }}">
+                        {% if form.rate.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.rate.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                    
+                    <div class="mb-6">
+                        <label for="amount" class="block text-sm font-medium text-gray-700">Amount</label>
+                        <input type="text" id="id_amount" name="amount" readonly 
+                               class="w-full text-sm bg-gray-100 border-slate-200 shadow-sm rounded-md" 
+                               value="{{ form.amount.value|default_if_none:'' }}">
+                        {% if form.amount.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.amount.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Discount -->
+                    <div class="mb-6">
+                        <label for="discount" class="block text-sm font-medium text-gray-700">Discount</label>
+                        <input type="number" step="0.01" id="id_discount" name="discount" 
+                               class="w-full text-sm border-slate-200 shadow-sm rounded-md" 
+                               value="{{ form.discount.value|default_if_none:'' }}">
+                        {% if form.discount.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.discount.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    <div class="mb-6">
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea id="description" name="description" class="w-full text-sm border-slate-200 shadow-sm rounded-md" placeholder="Enter any remarks">{{ form.description.value }}</textarea>
+                        {% if form.description.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.description.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    <!-- Remark -->
+                    <div class="mb-6">
+                        <label for="remark" class="block text-sm font-medium text-gray-700">Remark</label>
+                        <textarea id="remark" name="remark" class="w-full text-sm border-slate-200 shadow-sm rounded-md" placeholder="Enter any remarks">{{ form.remark.value }}</textarea>
+                        {% if form.remark.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.remark.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    <!-- Submit Button -->
+                    <div class="mt-8 text-center flex justify-center space-x-4">
+                        <button type="submit" style="background-color:#1e3c98" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            Update Requisition
+                        </button>
+                        <a href="{% url 'restau_requisition_list' %}" style="margin-left:0.5%; background-color:#1e3c98" class="px-8 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-300 ease-in-out shadow-md">
+                            Back to List
+                        </a>
+                    </div>
+                </form>
+
+				 <!-- Type Fields -->
+                         <script>
+                            // Function to toggle visibility of Contructor and Vendor fields
+                            function toggleFields() {
+                                var type = document.getElementById("id_type").value;
+                                
+                                // Show and hide fields based on selection
+                                if (type == "Contructor") {
+                                    document.getElementById("contructor_field").style.display = "block";
+                                    document.getElementById("supplier_field").style.display = "none";
+                                } else if (type == "Supplier") {
+                                    document.getElementById("supplier_field").style.display = "block";
+                                    document.getElementById("contructor_field").style.display = "none";
+                                } else {
+                                    document.getElementById("supplier_field").style.display = "none";
+                                    document.getElementById("contructor_field").style.display = "none";
+                                }
+                            }
+                        </script>
+
+                
+                <!-- JavaScript for Auto Calculation -->
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                const qtyField = document.getElementById("id_qty");
+                                const rateField = document.getElementById("id_rate");
+                                const amountField = document.getElementById("id_amount");
+                                const discountField = document.getElementById("id_discount");
+                            
+                                // Function to update the amount
+                                function updateAmount() {
+                                    const qty = parseFloat(qtyField.value) || 0;
+                                    const rate = parseFloat(rateField.value) || 0;
+                                    const discount = parseFloat(discountField.value) || 0;
+                            
+                                    let amount = qty * rate;
+                                    amount = amount - discount; // Apply discount
+                            
+                                    if (amount < 0) amount = 0; // prevent negative values
+                                    amountField.value = amount.toFixed(2);
+                                }
+                            
+                                // Event listeners
+                                qtyField.addEventListener("input", updateAmount);
+                                rateField.addEventListener("input", updateAmount);
+                                discountField.addEventListener("input", updateAmount);
+                            
+                                // Initial calculation on load
+                                updateAmount();
+                            });
+                        </script>
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

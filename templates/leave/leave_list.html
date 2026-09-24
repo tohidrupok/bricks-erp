@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Leave List - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success { color: green; background-color: #d4edda; padding: 10px; border-radius: 5px; }
+    .message.warning { color: #856404; background-color: #fff3cd; padding: 10px; border-radius: 5px; }
+    .message.error { color: red; background-color: #f8d7da; padding: 10px; border-radius: 5px; }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            {% include 'partials/header.html' %}
+
+            <h2 class="intro-y mt-10 text-lg font-medium">Leave Applications</h2>
+            
+            {% if messages %}
+            <ul class="mt-3">
+                {% for message in messages %}
+                <li class="message {{ message.tags }} mb-2">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <div class="mt-5 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                    <a href="{% url 'leave_apply' %}">
+                        <button class="bg-primary text-white border-primary py-2 px-3 rounded-md mr-2 shadow-md">Add Leave Apply</button>
+                    </a>
+                    <a href="{% url 'leave_list' %}">
+                        <button class="bg-success text-white border-success py-2 px-3 rounded-md mr-2 shadow-md">Refresh</button>
+                    </a> 
+                    <a href="javascript:void(0);" onclick="openPopupSummary()">
+                        <button class="bg-primary text-white border-primary py-2 px-3 rounded-md mr-2 shadow-md">
+                            Employee Leave Summary
+                        </button>
+                    </a>
+
+                    <div class="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto"> 
+                        <div class="relative w-56 text-slate-500 mb-4">
+                            <input id="searchInput" type="text" placeholder="Search..." class="w-full p-2 text-sm border rounded-md shadow-sm" oninput="handleSearch()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                    <table class="w-full text-left border-separate border-spacing-y-[0px]">
+                        <thead>
+                            <tr>
+                                <th class="font-medium px-5 py-3 border-b">Employee</th>
+                                <th class="font-medium px-5 py-3 border-b">Type</th>
+                                <th class="font-medium px-5 py-3 border-b">Start Date</th>
+                                <th class="font-medium px-5 py-3 border-b">End Date</th>
+                                <th class="font-medium px-5 py-3 border-b">Days</th>
+                                <th class="font-medium px-5 py-3 border-b">Approved</th>
+                                <th class="font-medium px-5 py-3 border-b text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            {% for leave in leaves %}
+                            <tr class="bg-white shadow-sm rounded-md hover:bg-gray-50 transition">
+                                <td class="px-5 py-3 border-b">{{ leave.employee.rda_emp_name }}</td>
+                                <td class="px-5 py-3 border-b"><span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">{{ leave.get_leave_type_display }}</span></td>
+                                <td class="px-5 py-3 border-b">{{ leave.start_date }}</td>
+                                <td class="px-5 py-3 border-b">{{ leave.end_date }}</td>
+                                <td class="px-5 py-3 border-b font-bold">{{ leave.total_days }}</td>
+                                <td class="px-5 py-3 border-b">
+                                    {% if leave.approved %}
+                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">✔️ Approved</span>
+                                    {% else %}
+                                        <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">❌ Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-5 py-3 border-b text-center">
+                                    <a href="{% url 'leave_approval' leave.pk %}" class="text-blue-600 hover:text-blue-800 font-medium">Toggle Approval</a> |
+                                    <a href="{% url 'leave_edit' leave.pk %}" class="text-blue-600 hover:text-blue-800 font-medium">✏️ Edit</a> |
+                                    <a href="{% url 'leave_delete' leave.pk %}" class="text-red-600 hover:text-red-800 font-medium" onclick="return confirm('Are you sure?');">🗑️ Delete</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-gray-500">No leave records found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Popup Summary Modal -->
+<div id="popupsummary" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
+    <div class="w-30 max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+        <h3 class="text-lg font-bold mb-4">Leave Summary</h3>
+        <select id="employee-select-summary" class="w-full border p-2 rounded mb-3" required>
+            <option value="">Select Employee</option>
+            {% for employee in employees %}
+            <option value="{{ employee.id }}">{{ employee.rda_emp_name }}</option>
+            {% endfor %}
+        </select>
+        <select id="year-select-summary" class="w-full border p-2 rounded mb-4">
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+        </select>
+        <div class="flex justify-between">
+            <button class="bg-red-500 text-white px-4 py-2 rounded" style="background-color:#1e3ea2" onclick="closePopupSummary()">Cancel</button>
+            <button class="bg-green-600 text-white px-4 py-2 rounded" style="margin-left:0.5%;background-color:#1e3ea2" onclick="submitPopupSummary()">Submit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openPopupSummary() { document.getElementById('popupsummary').style.display = 'flex'; }
+    function closePopupSummary() { document.getElementById('popupsummary').style.display = 'none'; }
+    function submitPopupSummary() {
+        const emp = document.getElementById('employee-select-summary').value;
+        const year = document.getElementById('year-select-summary').value;
+        if(!emp) return alert('Select an Employee!');
+        window.open("{% url 'employee_leave_summary' %}?employee_id=" + emp + "&year_id=" + year, '_blank');
+        closePopupSummary();
+    }
+    function handleSearch() {
+        let val = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll("#tableBody tr").forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(val) ? "" : "none";
+        });
+    }
+</script>
+{% endblock %}

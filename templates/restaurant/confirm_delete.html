@@ -1,0 +1,19 @@
+{% extends 'restaurant/base.html' %}
+{% block title %}Confirm Deletion{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md border text-center">
+    <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+    </div>
+    <h2 class="text-xl font-bold text-gray-800 mb-2">Are you sure?</h2>
+    <p class="text-gray-500 text-sm mb-6">You are about to delete entry: <br><strong class="text-gray-700">{{ object }}</strong>. This choice cannot be undone.</p>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <div class="flex justify-center gap-4">
+            <button type="submit" class="bg-red-600 text-white px-6 py-2 rounded font-medium hover:bg-red-700 transition">Yes, Delete</button>
+            <a href="{% url cancel_url %}" class="border bg-gray-50 px-6 py-2 rounded text-gray-700 hover:bg-gray-100">Go Back</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

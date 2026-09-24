@@ -1,0 +1,35 @@
+{% extends 'restaurant/base.html' %}
+{% block title %}Approval Ranges{% endblock %}
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow-sm border">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">User Approval Limits</h1>
+        <a href="{% url 'approval_range_create' %}" class="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700">+ Add Range</a>
+    </div>
+    <table class="w-full border-collapse text-left text-sm text-gray-500">
+        <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+            <tr>
+                <th class="p-4">User</th>
+                <th class="p-4">Min Amount</th>
+                <th class="p-4">Max Amount</th>
+                <th class="p-4 text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            {% for item in ranges %}
+                <tr class="hover:bg-gray-50">
+                    <td class="p-4 font-medium text-gray-900">{{ item.user.username }}</td>
+                    <td class="p-4">${{ item.min_amount }}</td>
+                    <td class="p-4">${{ item.max_amount }}</td>
+                    <td class="p-4 text-right space-x-2">
+                        <a href="{% url 'approval_range_edit' item.pk %}" class="text-blue-600 hover:underline">Edit</a>
+                        <a href="{% url 'approval_range_delete' item.pk %}" class="text-red-600 hover:underline">Delete</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4" class="p-4 text-center text-gray-400">No approval ranges found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}File System{% endblock %}
+
+{% block content %}
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-6 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                {% include 'partials/header.html' %}
+                <h2 class="intro-y mt-10 text-3xl font-bold text-gray-800 dark:text-white">File Upload</h2>
+                <!-- File Upload Section -->
+                <div class="bg-white rounded-lg shadow-lg p-8 mt-8 mb-8 transform transition duration-200 hover:scale-105">
+                    
+                    <!-- File Upload Form -->
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- File Form Fields -->
+                        <div class="mb-6">
+                            {% for field in file_form %}
+                                <div class="mb-4">
+                                    <label for="{{ field.id_for_label }}" class="block text-lg font-medium text-gray-700">{{ field.label }}</label>
+                                    <div class="mt-1">
+                                        {{ field }}
+                                    </div>
+                                    <!-- Optional field error handling -->
+                                    {% if field.errors %}
+                                        <ul class="text-red-600 text-sm mt-1">
+                                            {% for error in field.errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Action Buttons (Submit and Back) -->
+                        <div class="flex justify-center gap-4 mt-6">
+                            <!-- Upload File Button -->
+                            <button 
+                                type="submit" 
+                                name="upload_file" style="background-color:#1e3c98"
+                                class="px-8 py-3 text-lg text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-indigo-600 hover:to-blue-500 rounded-xl shadow-lg transform hover:scale-110 transition duration-300 ease-in-out focus:outline-none">
+                                Upload File
+                            </button>
+                    
+                            <!-- Back Button -->
+                            <a 
+                                href="{% url 'display' %}" 
+                                style="margin-left:0.5%;background-color:#1e3c98" class="px-8 py-3 text-lg text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-indigo-600 hover:to-blue-500 rounded-xl shadow-lg transform hover:scale-110 transition duration-300 ease-in-out focus:outline-none">
+                                Back
+                            </a>
+                        </div>
+                    </form>
+                    
+                </div>
+
+                <!-- Files List Section -->
+                <div class="bg-white rounded-lg shadow-lg p-8 mt-8 transform transition duration-200 hover:scale-105">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-5">Files in this Folder:</h3>
+                    <ul class="space-y-4">
+                        {% for file in files %}
+                        <li class="flex items-center p-3 rounded-lg border border-gray-300 shadow-md hover:shadow-lg">
+                            <!-- Display File Icon -->
+                            <img src="{% static 'icons/file.png' %}" alt="File Icon" class="w-6 h-6 mr-3">
+                            
+                            <!-- File Link -->
+                            <a href="{{ file.file.url }}" target="_blank" class="text-xl text-blue-600 hover:underline focus:outline-none">
+                                {{ file.file.name }}
+                            </a>
+                            
+                            <!-- Delete Icon -->
+							<form id="delete-form-{{ file.id }}" action="{% url 'delete_file' file.id %}" method="POST" onsubmit="return confirmDelete();">
+								{% csrf_token %}
+								<button 
+									type="submit" 
+									class="ml-auto text-red-600 hover:text-red-800 text-2xl focus:outline-none transition-transform transform hover:scale-125"
+									aria-label="Delete file {{ file.file.name }}">
+									<span class="material-icons" style="color:red;margin-left:20%">Delete</span>
+								</button>
+							</form>
+
+							<script>
+								function confirmDelete() {
+									return confirm("Are you sure you want to delete this file?");
+								}
+							</script>
+
+                        </li>                    
+                        
+                        
+                        {% empty %}
+                            <li class="text-gray-500">No files uploaded yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+{% endblock %}

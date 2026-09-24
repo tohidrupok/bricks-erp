@@ -1,0 +1,232 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Property Add Record - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Property Add Record</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{{ request.get_full_path }}">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">
+                                Refresh
+                            </button>
+                        </a>
+                        <a href="{% url 'flat_plot_property_list' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Property List</button>
+                        </a>
+                        <div class="mx-auto hidden text-slate-500 md:block"> </div>            
+                    </div>
+            
+                  <!-- BEGIN: Property Sales List -->
+					<div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                         <div class="mt-5 grid grid-cols-12 gap-6">
+                            <div class="intro-y col-span-12">
+                                <!-- Filter Form (GET) -->
+                                <form method="get" class="flex flex-wrap gap-4 items-end mb-4">
+                                    <div class="flex-1 min-w-[200px]">
+                                        <label for="project_name">Select Project Name</label>
+                                        <select name="project_name" id="project_name" class="form-select w-full" required>
+                                            <option value="">-- Select Project --</option>
+                                            {% for project in project_names %}
+                                            <option value="{{ project.id }}" {% if project.id == selected_project_id %}selected{% endif %}>
+                                                {{ project.project_first_name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <div class="flex-1 min-w-[150px]">
+                                        <label for="type">Select Type</label>
+                                        <select name="type" id="type" class="form-select w-full" required>
+                                            <option value="flat" {% if selected_type == 'flat' %}selected{% endif %}>Floor</option>
+                                            <option value="plot" {% if selected_type == 'plot' %}selected{% endif %}>Plot</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <button type="submit" style="background-color:#1e3c98" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Filter</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            {% if plots %}
+                            <div class="intro-y col-span-12 overflow-auto">
+                                <h2 class="text-xl font-semibold mb-4">Flat/Plot Property Details</h2>
+
+                                <!-- POST Form for Saving Properties -->
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="project_name" value="{{ selected_project_id }}">
+                                    <input type="hidden" name="type" value="{{ selected_type }}">
+                                    <input type="hidden" name="save_properties" value="true">
+
+                                    <table class="min-w-full text-sm border border-gray-300">
+                                        <thead class="bg-gray-100">
+                                            <tr>
+                                                <th class="border p-2">Floor/Plot</th>
+                                                <th class="border p-2">A No</th>
+                                                <th class="border p-2">Property Name</th>
+                                                <th class="border p-2">Property Code</th>
+                                                <th class="border p-2">Sq. Ft</th>
+                                                <th class="border p-2">Rate/Sqft</th>
+                                                <th class="border p-2">Total Amount</th>
+                                                <th class="border p-2">Details</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for plot in plots %}
+                                            <tr>
+                                               <td class="border p-2">
+                                                    {% if plot.type == "flat" %}
+                                                        Floor-{{ plot.flat_no }}
+                                                    {% elif plot.type == "plot" %}
+                                                        Plot-{{ plot.flat_no }}
+                                                    {% else %}
+                                                        {{ plot.flat_no }}
+                                                    {% endif %}
+                                                </td>
+                                                <td width="80" class="border p-2">
+                                                    A-{{ plot.unit_no }}
+                                                </td>
+                                                <td class="border p-2">
+                                                    <input type="text" name="property_name_{{ plot.id }}" class="form-input w-full">
+                                                </td>
+                                                <td class="border p-2">
+                                                    <input type="text" name="property_code_{{ plot.id }}" class="form-input w-full">
+                                                </td>
+                                                <td class="border p-2">
+                                                    <input type="number" step="0.01" name="square_fit_{{ plot.id }}" class="form-input w-full square" data-id="{{ plot.id }}">
+                                                </td>
+                                                <td class="border p-2">
+                                                    <input type="number" step="0.01" name="per_square_rate_{{ plot.id }}" class="form-input w-full rate" data-id="{{ plot.id }}">
+                                                </td>
+                                                <td class="border p-2">
+                                                    <input type="number" step="0.01" name="total_amount_{{ plot.id }}" class="form-input w-full total" data-id="{{ plot.id }}" readonly>
+                                                </td>
+                                                <td class="border p-2">
+                                                    <input type="text" name="details_{{ plot.id }}" class="form-input w-full">
+                                                </td>                                                
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+
+                                    <div class="mt-4">
+                                        <button type="submit" style="background-color:#1e3c98" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                            Save Properties
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                const squareInputs = document.querySelectorAll(".square");
+                                const rateInputs = document.querySelectorAll(".rate");
+
+                                function calculateTotal(id) {
+                                    const square = parseFloat(document.querySelector(`.square[data-id="${id}"]`).value) || 0;
+                                    const rate = parseFloat(document.querySelector(`.rate[data-id="${id}"]`).value) || 0;
+                                    const total = square * rate;
+
+                                    const totalInput = document.querySelector(`.total[data-id="${id}"]`);
+                                    totalInput.value = total.toFixed(2);
+                                }
+
+                                squareInputs.forEach(input => {
+                                    input.addEventListener("input", function () {
+                                        const id = this.dataset.id;
+                                        calculateTotal(id);
+                                    });
+                                });
+
+                                rateInputs.forEach(input => {
+                                    input.addEventListener("input", function () {
+                                        const id = this.dataset.id;
+                                        calculateTotal(id);
+                                    });
+                                });
+                            });
+                        </script>
+	
+					</div>                    
+                    
+                    <!-- END: Pagination -->
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+    <!--<div id="plot_table" class="overflow-x-auto" style="display:none;">-->
+                                <!--    <table class="min-w-full border border-black text-center text-sm">-->
+                                <!--        <thead>-->
+                                <!--            <tr class="bg-gray-200">-->
+                                <!--                <th class="border border-black px-4 py-2">sl</th>-->
+                                <!--                <th class="border border-black px-4 py-2">Share-Persion</th>-->
+                                <!--                <th class="border border-black px-4 py-2">Decimal</th>-->
+                                <!--                <th class="border border-black px-4 py-2">Area</th>-->
+                                <!--                <th class="border border-black px-4 py-2">Value</th>-->
+                                <!--                <th class="border border-black px-4 py-2">Share_val</th>-->
+                                <!--                <th class="border border-black px-4 py-2">persion_one</th>-->
+                                <!--                <th class="border border-black px-4 py-2">persion_two</th>-->
+                                <!--                <th class="border border-black px-4 py-2">persion_three</th>-->
+                                <!--                <th class="border border-black px-4 py-2">persion_forth</th>-->
+                                <!--            </tr>-->
+                                <!--        </thead>-->
+                                <!--        <tbody>-->
+                                <!--            <tr>-->
+                                <!--                <td class="border border-black px-4 py-2">1</td>-->
+                                <!--                <td class="border border-black px-4 py-2">4</td>-->
+                                <!--                <td class="border border-black px-4 py-2">10</td>-->
+                                <!--                <td class="border border-black px-4 py-2">2.5</td>-->
+                                <!--                <td class="border border-black px-4 py-2">100000</td>-->
+                                <!--                <td class="border border-black px-4 py-2">25000</td>-->
+                                <!--                <td class="border border-black px-4 py-2">Mamun</td>-->
+                                <!--                <td class="border border-black px-4 py-2">Rahman</td>-->
+                                <!--                <td class="border border-black px-4 py-2">Faruk</td>-->
+                                <!--                <td class="border border-black px-4 py-2">Josim</td>-->
+                                <!--            </tr>-->
+                                <!--        </tbody>-->
+                                <!--    </table>-->
+                                <!--</div>-->
+{% endblock %}

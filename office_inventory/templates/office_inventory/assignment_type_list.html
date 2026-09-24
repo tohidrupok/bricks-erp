@@ -1,0 +1,30 @@
+{% extends 'office_inventory/base.html' %}
+{% block header %}Assignment Types{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+  <div class="text-muted small align-self-center">
+    Define who/what an item can be assigned to - Employee, Restaurant, Department Pool, Warehouse, anything you need.
+  </div>
+  <a href="{% url 'office_inventory:assignment_type_create' %}" class="btn btn-sm btn-primary"><i class="bi bi-plus"></i> Add Assign Type</a>
+</div>
+<div class="card card-stat p-3">
+<table class="table table-hover align-middle">
+<thead><tr><th>Name</th><th>Target</th><th>Description</th><th>Active</th><th>Assignments</th><th class="text-end">Actions</th></tr></thead>
+<tbody>
+{% for t in types %}
+<tr>
+  <td>{{ t.name }}</td>
+  <td>{% if t.requires_employee %}<span class="badge bg-primary">Employee</span>{% else %}<span class="badge bg-info text-dark">Free-text target</span>{% endif %}</td>
+  <td class="small text-muted">{{ t.description|default:"-" }}</td>
+  <td>{% if t.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}</td>
+  <td><a href="{% url 'office_inventory:assignment_type_profile' t.pk %}" class="badge bg-light text-dark border">{{ t.assignment_count }} record(s)</a></td>
+  <td class="text-end">
+    <a href="{% url 'office_inventory:assignment_type_update' t.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+    <a href="{% url 'office_inventory:assignment_type_delete' t.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+  </td>
+</tr>
+{% empty %}<tr><td colspan="6" class="text-center text-muted">No assignment types yet - add "Employee" to get started.</td></tr>{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

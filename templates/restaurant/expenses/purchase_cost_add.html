@@ -1,0 +1,99 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Restaurant Purchase Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+				<h2 class="intro-y mt-10 text-lg font-semibold text-gray-900">Restaurant Purchase Entry</h2>
+
+				<div class="mt-5 grid grid-cols-12 gap-6">
+				  <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+					<div class="mt-5 grid grid-cols-12 gap-6">
+				  <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                    <form method="POST" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                    
+                    {% csrf_token %}
+                    
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">Add Purchase</h2>
+                    
+                    <!-- Purchase Name -->
+                    <div class="mb-6">
+                    <label for="id_pur_cost_name" class="block mb-2 font-semibold text-gray-700">
+                    Purchase Name
+                    </label>
+                    
+                    <input type="text"
+                           name="pur_cost_name"
+                           id="id_pur_cost_name"
+                           value="{{ form.pur_cost_name.value|default:'' }}"
+                           class="w-full border border-slate-300 shadow-sm rounded-md p-2 text-sm"
+                           placeholder="Enter Purchase Name">
+                    
+                    {% for error in form.pur_cost_name.errors %}
+                    <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                    </div>
+                    
+                    
+                    <!-- Purchase Code -->
+                    <div class="mb-6">
+                    <label for="id_pur_cost_code" class="block mb-2 font-semibold text-gray-700">
+                    Purchase Code
+                    </label>
+                    
+                    <input type="text"
+                           name="pur_cost_code"
+                           id="id_pur_cost_code"
+                           value="{{ form.pur_cost_code.value|default:'' }}"
+                           class="w-full border border-slate-300 shadow-sm rounded-md p-2 text-sm"
+                           placeholder="Enter Purchase Code">
+                    
+                    {% for error in form.pur_cost_code.errors %}
+                    <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                    </div>
+                    
+                    
+                    <!-- Buttons -->
+                    <div class="flex justify-center space-x-4 mt-8">
+                    
+                    <button type="submit"
+                    style="background-color:#1e3c98"
+                    class="text-white px-6 py-2 rounded-md font-semibold hover:opacity-90">
+                    Save Purchase
+                    </button>
+                    
+                    <a href="{% url 'rest_purchase_cost_list' %}"
+                    style="margin-left:0.5%;background-color:#1e3c98"
+                    class="text-white px-6 py-2 rounded-md font-semibold hover:opacity-90">
+                    Back to List
+                    </a>
+                    
+                    </div>
+                    
+                    </form>
+                    
+                    </div>
+				</div>
+
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

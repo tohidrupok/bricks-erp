@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    body { background: #eef2f7; }
+    .form-wrapper { max-width: 700px; margin: 40px auto; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,.08); overflow: hidden; }
+    .card-header { background: #dc3545; color: white; padding: 20px; font-weight: bold; font-size: 18px; }
+    .card-body { padding: 30px; }
+    
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #e2e8f0; }
+    .info-label { font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold; }
+    .info-value { font-size: 15px; color: #1e293b; font-weight: 600; margin-top: 2px; }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 8px; }
+    .form-input { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: border-color 0.2s; }
+    .form-input:focus { border-color: #dc3545; outline: none; }
+    
+    .action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; }
+    .btn-submit { background: #dc3545; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+    .btn-submit:hover { background: #b21f2d; }
+    .btn-cancel { color: #64748b; text-decoration: none; font-size: 14px; font-weight: 500; }
+    .btn-cancel:hover { text-decoration: underline; }
+</style>
+
+<div class="form-wrapper">
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding: 12px 20px; margin-bottom: 20px; border-radius: 8px; font-weight: 500; font-size: 14px; {% if message.tags == 'error' %} background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; {% else %} background: #dcfce7; color: #166534; border: 1px solid #86efac; {% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header">
+            📉 Record Stock Consumption Item Usage
+        </div>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="card-body">
+                
+                <div class="info-grid">
+                    <div>
+                        <div class="info-label">Target Item Description</div>
+                        <div class="info-value" style="color:#0284c7;">{{ source_inventory.item_name }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Active Operational Branch Node</div>
+                        <div class="info-value">{{ source_inventory.project_name.project_first_name }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Current Row Availability</div>
+                        <div class="info-value" style="color: #16a34a;">{{ source_inventory.qty }} {{ source_inventory.unit }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Global Total Available System Stock</div>
+                        <div class="info-value" style="color: #ea580c;">{{ total_available_stock }} {{ source_inventory.unit }}</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="deduct_qty">Quantity to Deduct / Consume</label>
+                    <input type="number" id="deduct_qty" name="deduct_qty" min="1" max="{{ total_available_stock }}" class="form-input" placeholder="e.g. 5" required>
+                    <small style="color: #64748b; display:block; margin-top:5px;">This reduction value will be deducted sequentially from batches matching your branch's specific FIFO patterns.</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="details">Consumption Details / Purpose</label>
+                    <textarea id="details" name="details" rows="3" class="form-input" placeholder="What was this item used for? (e.g. Daily Kitchen preparation, Banquets...)"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="remark">Operational Remarks</label>
+                    <input type="text" id="remark" name="remark" class="form-input" placeholder="Any additional notes or staff confirmations...">
+                </div>
+
+                <div class="action-row">
+                    <a href="{% url 'rest_inventory_project_wise_filtered' source_inventory.project_name.id %}" class="btn-cancel">
+                        ❌ Cancel and Discard
+                    </a>
+                    <button type="submit" class="btn-submit">
+                        ✔ Execute Stock Deduction
+                    </button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

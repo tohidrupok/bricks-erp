@@ -1,0 +1,251 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ledger Book Report (Print)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: silver;
+      padding: 20px;
+      color: #000;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+
+    .card-header .logo img {
+      height: 45px;
+    }
+
+    .card-header .title-block {
+      text-align: right;
+    }
+
+    .label-box {
+      background-color: #e2f0d9;
+      color: #000;
+      padding: 3px 8px;
+      font-weight: bold;
+      font-size: 12px;
+      display: inline-block;
+      border-radius: 3px;
+    }
+
+    .sub-head {
+      font-size: 10.5px;
+      color: #555;
+      line-height: 1.4;
+      margin-top: -20px;
+      margin-bottom: 5px;
+    }
+
+    .voucher-header {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px;
+      flex-wrap: wrap;
+    }
+
+    .project-info p {
+      margin: 3px 0;
+      font-size: 11px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 11px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 5px 7px;
+      vertical-align: middle;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f1f1f1;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .bg-inventory {
+      background-color: #fffce0;
+    }
+
+    .footer {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .print-btn, .back-btn {
+      padding: 6px 12px;
+      margin-left: 10px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      color: white;
+    }
+
+    .print-btn {
+      background-color: #1e3c98;
+    }
+
+    .back-btn {
+      background-color: #555;
+    }
+
+    .no-print {
+      display: block;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: #fff;
+        padding: 0;
+        color: #000;
+      }
+
+      .card {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 10px;
+      }
+
+      .print-btn, .back-btn {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <!-- Header Section -->
+    <div class="card-header">
+      <div class="logo">
+        <img src="{% static 'images/BTP_logo_bricks.webp' %}" alt="Company Logo">
+      </div>
+      <div class="title-block">
+        <div class="label-box">Ledger Book Report</div>
+        <p style="font-size: 10px; margin-top: 4px;">Printing Date: {{ print_time|date:"d-M-Y, g:i a" }}</p>
+      </div>
+    </div>
+
+    <!-- Company Info -->
+    <div class="sub-head">
+      Bonanai, Dhaka-1216<br>
+      01993005558, 09639246230, 09639246231 <br>
+      bricks@gmail.com, bricks@gmail.com, www.bricks.com
+    </div>
+    <hr>
+
+  <!-- Filter Info -->
+    <div class="voucher-header">
+      <div class="project-info">
+        {% if entry_data %}
+          <p style="font-weight:bold;font-size:18px"> {{ entry_data.0.name }}</p>
+        {% else %}
+          <p><strong>-</strong> -</p>
+        {% endif %}
+        <p><strong>Project:</strong> {{ selected_filters.project_name|default:"All" }}</p>
+        <p>
+          <strong>From:</strong> {{ selected_filters.from_date|date:"d-M-Y"|default:"-" }} &nbsp;
+          <strong>To:</strong> {{ selected_filters.to_date|date:"d-M-Y"|default:"-" }}
+        </p>
+      </div>
+    </div>
+
+
+
+
+   <!-- Ledger Table -->
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Description</th>
+      <th>Cheque No.</th>
+      <th class="text-right">Payment (Dr)</th>
+      <th class="text-right">Received (Cr)</th>
+      <th class="text-right">Balance</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in entry_data %}
+      <tr class="{% if item.source == 'inventory' %}bg-inventory{% endif %}">
+        <td>{{ item.date|date:"d-M-Y" }}</td>
+        <td width="400">{{ item.description|default:"-" }}</td>
+        <td>{{ item.cheque_number|default:"-" }}</td>
+        <td class="text-right">{{ item.payment|floatformat:2 }}</td>
+        <td class="text-right">{{ item.received|floatformat:2 }}</td>
+        <td class="text-right">{{ item.balance|floatformat:2 }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="6" style="text-align:center; color:#999;">No entries found.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3" class="text-right"><strong>Totals:</strong></td>
+      <td class="text-right"><strong>{{ total_payment|floatformat:2 }}</strong></td>
+      <td class="text-right"><strong>{{ total_received|floatformat:2 }}</strong></td>
+      <td class="text-right"><strong>{{ final_balance|floatformat:2 }}</strong></td>
+    </tr>
+  </tfoot>
+</table>
+
+<!-- Final Balance Status Row -->
+<div style="margin-top: 10px; padding: 10px; text-align: right; font-weight: bold;font-size:13px;
+     background-color: {% if final_balance > 0 %}#d1fae5{% elif final_balance < 0 %}#fee2e2{% else %}#fef9c3{% endif %};
+     color: {% if final_balance > 0 %}#065f46{% elif final_balance < 0 %}#991b1b{% else %}#92400e{% endif %}; border-radius: 6px;">
+  Amount 
+  {% if final_balance > 0 %}
+    Payable (৳ {{ final_balance|floatformat:2 }})
+  {% elif final_balance < 0 %}
+    Receivable (৳ {{ final_balance|floatformat:2 }})
+  {% else %}
+    Zero
+  {% endif %}
+</div>
+
+
+    <div class="footer no-print">
+      <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+      <button onclick="window.location.href='{% url 'ledger_manage' %}'" class="back-btn">⬅️ Back</button>
+    </div>
+
+  </div>
+</body>
+</html>

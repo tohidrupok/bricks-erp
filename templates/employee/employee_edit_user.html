@@ -1,0 +1,63 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Employee Edit - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+				<div class="mt-5 grid grid-cols-12 gap-6">
+					<div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+					    <h2 class="text-xl font-bold mb-5">Update Salary and Allowances for {{ employee.employee_name }}</h2>
+
+						<form method="post" enctype="multipart/form-data" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+							{% csrf_token %}
+						
+							<!-- Show current image -->
+							{% if employee.photo %}
+								<div class="mb-4">
+									<label class="block text-lg font-medium mb-2">Current Photo:</label>
+									<img src="{{ employee.photo.url }}" alt="Current Photo" class="h-24 mb-2 border rounded">
+								</div>
+							{% endif %}
+
+							<!-- Photo Field -->
+							<div class="mb-4">
+								<label for="id_photo" class="font-medium text-lg">New Photo (optional)</label>
+								{{ form.photo }}
+								{% if form.photo.errors %}
+									<ul class="text-red-600 mt-1">
+										{% for error in form.photo.errors %}
+											<li>{{ error }}</li>
+										{% endfor %}
+									</ul>
+								{% endif %}
+							</div>						
+							
+
+							<!-- Submit -->
+							<div class="flex justify-between items-center mt-6">
+								<a href="{% url 'employee_list' %}" style="color:#FFFFFF;background-color:#1e3c98" style="color:#FFFFFF;background-color:#1e3c98"class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-800">Back</a>
+								<button type="submit" style="margin-left:0.5%;color:#FFFFFF;background-color:#1e3c98" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Update</button>
+							</div>
+						</form>
+					</div>
+				</div>
+            </div>           
+        </div>
+            <!-- END: Content -->
+    </div>
+{% endblock %}

@@ -1,0 +1,402 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Land Purchase Update- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+               <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                    {% csrf_token %}
+
+                    <!-- Land Supplier -->
+                    <div class="mb-4">
+                        <label for="id_land_supplier" class="font-medium text-lg text-gray-800">Land Supplier</label>
+                        <input type="text" name="land_supplier" id="id_land_supplier"
+                            value="{{ form.land_supplier.value|default_if_none:'' }}"
+                            class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.land_supplier.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    
+                     <!-- Mouza Name -->
+                    <div class="mb-4">
+                        <label for="id_file_name" class="font-medium text-lg text-gray-800">File No</label>
+                        <input type="text" name="file_name" id="id_file_name"
+                            value="{{ form.file_name.value|default_if_none:'' }}"
+                            class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.file_name.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Mouza Name -->
+                    <div class="mb-4">
+                        <label for="id_mouza_name" class="font-medium text-lg text-gray-800">Mouza Name</label>
+                        <input type="text" name="mouza_name" id="id_mouza_name"
+                            value="{{ form.mouza_name.value|default_if_none:'' }}"
+                            class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.mouza_name.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- CS Dag No -->
+                    <div class="mb-4">
+                        <label for="id_cs_dag_no" class="font-medium text-lg text-gray-800">CS Dag No</label>
+                        <input type="text" name="cs_dag_no" id="id_cs_dag_no"
+                            value="{{ form.cs_dag_no.value|default_if_none:'' }}"
+                            class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.cs_dag_no.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- SA Dag No -->
+                    <div class="mb-4">
+                        <label for="id_sa_dag_no" class="font-medium text-lg text-gray-800">SA Dag No</label>
+                        <input type="text" name="sa_dag_no" id="id_sa_dag_no"
+                            value="{{ form.sa_dag_no.value|default_if_none:'' }}"
+                            class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.sa_dag_no.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- RS Dag No -->
+                    <div class="mb-4">
+                        <label for="id_rs_dag_no" class="font-medium text-lg text-gray-800">RS Dag No</label>
+                        <input type="text" name="rs_dag_no" id="id_rs_dag_no"
+                            value="{{ form.rs_dag_no.value|default_if_none:'' }}"
+                            class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.rs_dag_no.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- CT Dag No -->
+                    <div class="mb-4">
+                        <label for="id_ct_dag_no" class="font-medium text-lg text-gray-800">CT Dag No</label>
+                        <input type="text" name="ct_dag_no" id="id_ct_dag_no"
+                            value="{{ form.ct_dag_no.value|default_if_none:'' }}"
+                            class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.ct_dag_no.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Did Agreement -->
+                    <div class="mb-4">
+                        <label for="id_did_agreement" class="font-medium text-lg text-gray-800">Did Agreement</label>
+                        <select name="did_agreement" id="id_did_agreement" class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            {% for value, label in form.did_agreement.field.choices %}
+                                <option value="{{ value }}" {% if value == form.did_agreement.value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        {% for error in form.did_agreement.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Agreement Date -->
+                    <div class="mb-4">
+                        <label for="id_agreement_date" class="font-medium text-lg text-gray-800">Agreement Date</label>
+                        <input type="date" name="agreement_date" id="id_agreement_date"
+                            value="{{ form.agreement_date.value|default_if_none:'' }}"
+                            class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.agreement_date.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Land Area -->
+                    <div class="mb-4">
+                        <label for="id_land_area" class="font-medium text-lg text-gray-800">Land Area (decimal)</label>
+                        <input type="number" step="0.01" name="land_area" id="id_land_area"
+                            value="{{ form.land_area.value|default_if_none:'' }}"
+                            class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.land_area.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Land Type -->
+                    <div class="mb-4">
+                        <label for="id_land_type" class="font-medium text-lg text-gray-800">Land Type</label>
+                        <select name="land_type" id="id_land_type" class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            {% for value, label in form.land_type.field.choices %}
+                                <option value="{{ value }}" {% if value == form.land_type.value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        {% for error in form.land_type.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Price Per Decimal -->
+                    <div class="mb-4">
+                        <label for="id_price_per_decimal" class="font-medium text-lg text-gray-800">Price per Decimal</label>
+                        <input type="number" step="0.01" name="price_per_decimal" id="id_price_per_decimal"
+                               value="{{ form.price_per_decimal.value|default_if_none:'' }}"
+                               oninput="calculateTotalPrice()"
+                               class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.price_per_decimal.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Total Price -->
+                    <div class="mb-4">
+                        <label for="id_total_price" class="font-medium text-lg text-gray-800">Net Amount</label>
+                        <input type="number" step="0.01" name="total_price" id="id_total_price"
+                               value="{{ form.total_price.value|default_if_none:'' }}"
+                               class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.total_price.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Lilahetalah Per -->
+                    <div class="mb-4">
+                        <label for="id_lilahetalah_per" class="font-medium text-lg text-gray-800">Lilahetalah Per (%)</label>
+                        <input type="number" name="lilahetalah_per" id="id_lilahetalah_per"
+                               value="{{ form.lilahetalah_per.value|default_if_none:'' }}"
+                               oninput="calculateLilahetalahPer()"
+                               class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.lilahetalah_per.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Lilahetalah Amount -->
+                    <div class="mb-4">
+                        <label for="id_lilahetalah_amount" class="font-medium text-lg text-gray-800">Lillahitaala Amount</label>
+                        <input type="number" step="0.01" name="lilahetalah_amount" id="id_lilahetalah_amount"
+                               value="{{ form.lilahetalah_amount.value|default_if_none:'' }}"
+                               class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.lilahetalah_amount.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+					<!-- Lilahetalah Per -->
+                    <div class="mb-4">
+                        <label for="id_media_per" class="font-medium text-lg text-gray-800">Media Persion Per (%)</label>
+                        <input type="number" name="media_per" id="id_media_per"
+                               value="{{ form.media_per.value|default_if_none:'' }}"
+                               oninput="calculateMediaPer()"
+                               class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.media_per.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Lilahetalah Amount -->
+                    <div class="mb-4">
+                        <label for="id_media_amount" class="font-medium text-lg text-gray-800">Media Persion Amount</label>
+                        <input type="number" step="0.01" name="media_amount" id="id_media_amount"
+                               value="{{ form.media_amount.value|default_if_none:'' }}"
+                               class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.media_amount.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>					
+					<div class="mb-4">
+                        <label for="id_gross_amount" class="font-medium text-lg text-gray-800">Gross Amount</label>
+                        <input type="number" step="0.01" name="gross_amount" id="id_gross_amount"
+                               value="{{ form.gross_amount.value|default_if_none:'' }}"
+                               class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.gross_amount.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Deed Number -->
+                    <div class="mb-4">
+                        <label for="id_deed_number" class="font-medium text-lg text-gray-800">Deed Number</label>
+                        <input type="text" name="deed_number" id="id_deed_number"
+                            value="{{ form.deed_number.value|default_if_none:'' }}"
+                            class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.deed_number.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Registration Date -->
+                    <div class="mb-4">
+                        <label for="id_registration_date" class="font-medium text-lg text-gray-800">Registration Date</label>
+                        <input type="date" name="registration_date" id="id_registration_date"
+                            value="{{ form.registration_date.value|default_if_none:'' }}"
+                            class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.registration_date.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Registration Office -->
+                    <div class="mb-4">
+                        <label for="id_registration_office" class="font-medium text-lg text-gray-800">Registration Office</label>
+                        <input type="text" name="registration_office" id="id_registration_office"
+                            value="{{ form.registration_office.value|default_if_none:'' }}"
+                            class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        {% for error in form.registration_office.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Mutation Done -->
+                    <div class="mb-4">
+                        <label for="id_mutation_done" class="font-medium text-lg text-gray-800">Mutation Done</label>
+                        <select name="mutation_done" id="id_mutation_done" class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            {% for value, label in form.mutation_done.field.choices %}
+                                <option value="{{ value }}" {% if value == form.mutation_done.value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        {% for error in form.mutation_done.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Legal Dispute -->
+                    <div class="mb-4">
+                        <label for="id_legal_dispute" class="font-medium text-lg text-gray-800">Legal Dispute</label>
+                        <select name="legal_dispute" id="id_legal_dispute" class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            {% for value, label in form.legal_dispute.field.choices %}
+                                <option value="{{ value }}" {% if value == form.legal_dispute.value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        {% for error in form.legal_dispute.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-4">
+                        <label for="id_notes" class="font-medium text-lg text-gray-800">Notes</label>
+                        <textarea name="notes" id="id_notes" rows="3"
+                                class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ form.notes.value|default_if_none:'' }}</textarea>
+                        {% for error in form.notes.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>                    
+					<!-- Mutation & Legal Dispute -->
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="id_signature" class="block font-medium">Upload Signature</label>
+							<input type="file" name="signature" id="id_signature"
+                            class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+							{% if form.instance.signature %}
+								<p class="text-sm text-green-700 mt-1">Existing file: <a href="{{ form.instance.signature.url }}" class="text-blue-600 underline" target="_blank">View</a></p>
+							{% endif %}
+							{% for error in form.signature.errors %}
+								<p class="text-red-600 text-sm">{{ error }}</p>
+							{% endfor %}
+                        </div>
+                        <div>
+                            <label for="documents" class="block font-medium">Upload Documents</label>
+							<input type="file" name="documents" id="id_documents"
+                            class="w-full text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+							{% if form.instance.documents %}
+								<p class="text-sm text-green-700 mt-1">Existing file: <a href="{{ form.instance.documents.url }}" class="text-blue-600 underline" target="_blank">View</a></p>
+							{% endif %}
+							{% for error in form.documents.errors %}
+								<p class="text-red-600 text-sm">{{ error }}</p>
+							{% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Submit -->                    
+                    <div class="text-center mt-6">
+                        <button type="submit" style="background-color:#1e3c98"
+                                class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 rounded-md">
+                                💾 Update Land
+                        </button>
+                            <a href="{% url 'land_list' %}" style="margin-left:0.5%;background-color:#1e3c98"
+                               class="ml-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md">
+                                🔙 Back to List
+                            </a>
+                    </div>
+                </form>
+                <!--<script>
+                    function calculateTotalPrice() {
+                        const landArea = parseFloat(document.getElementById('id_land_area')?.value) || 0;
+                        const pricePerDecimal = parseFloat(document.getElementById('id_price_per_decimal')?.value) || 0;
+                        const total = landArea * pricePerDecimal;
+                        document.getElementById('id_total_price').value = total.toFixed(2);
+                
+                        // Update Lilahetalah if percentage is entered
+                        calculateLilahetalahPer();
+                    }
+                
+                    function calculateLilahetalahPer() {
+                        const totalPrice = parseFloat(document.getElementById('id_total_price')?.value) || 0;
+                        const lilahetalahPer = parseFloat(document.getElementById('id_lilahetalah_per')?.value) || 0;
+                        const lilahetalahAmount = (totalPrice * lilahetalahPer) / 100;
+                        document.getElementById('id_lilahetalah_amount').value = lilahetalahAmount.toFixed(2);
+                    }
+                </script>-->
+				<script>
+					function calculateTotalPrice() {
+						const landArea = parseFloat(document.getElementById('id_land_area')?.value) || 0;
+						const pricePerDecimal = parseFloat(document.getElementById('id_price_per_decimal')?.value) || 0;
+						const total = landArea * pricePerDecimal;
+						document.getElementById('id_total_price').value = total.toFixed(2);
+
+						calculateLilahetalahPer();
+						calculateMediaPer();
+						updateGrossAmount();
+					}
+
+					function calculateLilahetalahPer() {
+						const totalPrice = parseFloat(document.getElementById('id_total_price')?.value) || 0;
+						const lilaPer = parseFloat(document.getElementById('id_lilahetalah_per')?.value) || 0;
+						const lilaAmount = (totalPrice * lilaPer) / 100;
+						document.getElementById('id_lilahetalah_amount').value = lilaAmount.toFixed(2);
+
+						updateGrossAmount();
+					}
+
+					function calculateMediaPer() {
+						const totalPrice = parseFloat(document.getElementById('id_total_price')?.value) || 0;
+						const mediaPer = parseFloat(document.getElementById('id_media_per')?.value) || 0;
+						const mediaAmount = (totalPrice * mediaPer) / 100;
+						document.getElementById('id_media_amount').value = mediaAmount.toFixed(2);
+
+						updateGrossAmount();
+					}
+
+					function updateGrossAmount() {
+						const totalPrice = parseFloat(document.getElementById('id_total_price')?.value) || 0;
+						const lilaAmount = parseFloat(document.getElementById('id_lilahetalah_amount')?.value) || 0;
+						const mediaAmount = parseFloat(document.getElementById('id_media_amount')?.value) || 0;
+
+						const grossAmount = totalPrice + lilaAmount + mediaAmount;
+						document.getElementById('id_gross_amount').value = grossAmount.toFixed(2);
+					}
+
+					// Optional: auto-update whenever inputs change
+					document.getElementById('id_land_area')?.addEventListener('input', calculateTotalPrice);
+					document.getElementById('id_price_per_decimal')?.addEventListener('input', calculateTotalPrice);
+					document.getElementById('id_lilahetalah_per')?.addEventListener('input', calculateLilahetalahPer);
+					document.getElementById('id_media_per')?.addEventListener('input', calculateMediaPer);
+				</script>
+
+
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

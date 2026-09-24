@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Requisition List - BM ERP</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; padding: 0; }
+    .top-header { max-width: 1200px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .header-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; }
+    .page-title { margin: 0; color: #198754; font-size: 28px; font-weight: bold; }
+    .page-subtitle { margin-top: 5px; color: #6c757d; font-size: 14px; }
+    .nav-links { display: flex; gap: 10px; flex-wrap: wrap; }
+    .nav-btn { text-decoration: none; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: bold; transition: .3s; }
+    .nav-btn:hover { opacity: .9; }
+    .home-btn { background: #0d6efd; }
+    .supplier-btn { background: #198754; }
+    .category-btn { background: #fd7e14; }
+    .req-btn { background: #6f42c1; }
+    .refresh-btn { background: #6c757d; }
+    .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th { background: #0d6efd; color: #fff; padding: 10px; text-align: left; }
+    td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
+    tbody tr:hover { background: #f1f5ff; }
+    .inline-input, .inline-select { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+    .inline-input:focus, .inline-select:focus { border-color: #0d6efd; outline: none; background-color: #fff; }
+    .readonly-input { background-color: #f3f4f6; cursor: not-allowed; font-weight: bold; }
+
+    /* 🔔 Floating Toast Layout Display */
+    #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+    .toast-message { background: #333; color: #fff; padding: 12px 25px; border-radius: 6px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: bold; font-size: 14px; animation: slideIn 0.3s ease forwards; }
+    .toast-success { background: #198754; border-left: 5px solid #0f5132; }
+    .toast-error { background: #dc3545; border-left: 5px solid #842029; }
+    @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { transform: translateX(0); opacity: 0; } }
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<div class="top-header">
+    <div class="header-row">
+        <div>
+            <h2 class="page-title">🍽 Restaurant Supplier</h2>
+            <div class="page-subtitle">Public Requisition Management</div>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'public_restaurant_home' %}{{ url_suffix }}" class="nav-btn home-btn">🏠 Home</a>
+            <a href="{% url 'restaurant_expense_public_list' %}{{ url_suffix }}" class="nav-btn refresh-btn">💰 Expense</a>
+            <a href="{% url 'public_restaurant_supplier_list' %}{{ url_suffix }}" class="nav-btn supplier-btn">🏢 Supplier</a>
+            <a href="{% url 'public_restaurant_requisition_category' %}{{ url_suffix }}" class="nav-btn category-btn">📂 Category</a>
+            <a href="{% url 'public_restaurant_item_name' %}{{ url_suffix }}" class="nav-btn req-btn">📦 Item List</a>
+            <a href="" id="dynamicRefreshBtn" class="nav-btn refresh-btn">🔄 Refresh</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>Requisition List (Purchase Pending)</h2>
+
+        <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+            <input type="text" id="searchInput" placeholder="🔍 Search table row content..." onkeyup="handleFilter()" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc; flex: 1;">
+            
+            <select id="projectFilter" onchange="executeWorkspaceRouting(this.value)" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc; width: 250px;">
+                <option value="">All Projects</option>
+                {% for project in projects_firts %}
+                    <option value="{{ project.id }}" {% if current_project|slugify == project.id|slugify %}selected{% endif %}>
+                        {{ project.project_first_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>SL</th>
+                    <th>Requisition Date</th>
+                    <th>Project Name</th>
+                    <th>Supplier Vendor</th>
+                    <th>Qty</th>
+                    <th>Rate</th>
+                    <th>Total Amount</th>
+                    <th>Purchase Approval Status</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for row in grouped_data %}
+                <tr data-project="{{ row.project_name|lower }}" data-id="{{ row.id }}">
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ row.requisition_date }}</td>
+                    <td>{{ row.project_name }}</td>
+                    
+                    <td>
+                        <select class="inline-select" onchange="updateDatabaseField(this, 'vendor_name')">
+                            <option value="">Choose Supplier</option>
+                            {% for supplier in suppliers %}
+                                <option value="{{ supplier.rest_supplier_name }}" {% if supplier.rest_supplier_name == row.vendor_name %}selected{% endif %}>
+                                    {{ supplier.rest_supplier_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+
+                    <td>
+                        <input type="number" step="0.01" class="inline-input qty-field" value="{{ row.total_qty }}" oninput="calculateRowAndSave(this)">
+                    </td>
+                    
+                    <td>
+                        <input type="number" step="0.01" class="inline-input rate-field" value="{{ row.rate }}" oninput="calculateRowAndSave(this)">
+                    </td>
+                    
+                    <td>
+                        <input type="number" step="0.01" class="inline-input amount-field readonly-input" value="{{ row.total_amount }}" readonly>
+                    </td>
+
+                    <td>
+                        <select class="inline-select" onchange="updateDatabaseField(this, 'approv_purch_status')">
+                            <option value="pending" {% if row.purch_status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="approved" {% if row.purch_status == 'approved' %}selected{% endif %}>Approved</option>
+                            <option value="rejected" {% if row.purch_status == 'rejected' %}selected{% endif %}>Rejected</option>
+                        </select>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align: center; color: #9ca3af; font-style: italic; padding: 20px;">
+                        No pending purchase requisitions displayed.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+// --- Project wise Employee Auto-mapping Navigation Logic ---
+function executeWorkspaceRouting(projectId) {
+    let employeeId = "";
+    if (String(projectId) === "36") {
+        employeeId = "24";  
+    } else if (String(projectId) === "60") {
+        employeeId = "54";  
+    }
+
+    let baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    let params = [];
+    if (projectId) params.push(`project=${projectId}`);
+    if (employeeId) params.push(`employee=${employeeId}`);
+    
+    window.location.href = baseUrl + (params.length > 0 ? "?" + params.join("&") : "");
+}
+
+// --- Live Floating Toast Engine ---
+function displayToast(message, alertType = "success") {
+    const container = document.getElementById("toast-container");
+    const el = document.createElement("div");
+    el.className = `toast-message toast-${alertType}`;
+    el.innerHTML = alertType === "success" ? `✓ ${message}` : `⚠️ ${message}`;
+    container.appendChild(el);
+    
+    setTimeout(() => {
+        el.style.animation = "fadeOut 0.4s ease forwards";
+        setTimeout(() => el.remove(), 400);
+    }, 2500);
+}
+
+function handleFilter(){
+    let searchValue = document.getElementById("searchInput").value.toLowerCase().trim();
+    let rows = document.querySelectorAll("#tableBody tr");
+
+    rows.forEach(function(row){
+        if (row.cells.length === 1) return; // Ignore 'No Data' rows
+        let rowText = row.textContent.toLowerCase();
+        row.style.display = searchValue === "" || rowText.includes(searchValue) ? "" : "none";
+    });
+}
+
+// ─── ROW-WISE AUTO CALCULATION & SAVE ENGINE ───
+function calculateRowAndSave(element) {
+    let row = element.closest('tr');
+    let qtyInput = row.querySelector('.qty-field');
+    let rateInput = row.querySelector('.rate-field');
+    let amountInput = row.querySelector('.amount-field');
+
+    let qty = parseFloat(qtyInput.value) || 0;
+    let rate = parseFloat(rateInput.value) || 0;
+
+    let amount = qty * rate;
+    amountInput.value = amount.toFixed(2);
+
+    let fieldName = element.classList.contains('qty-field') ? 'qty' : 'rate';
+    updateDatabaseField(element, fieldName);
+}
+
+function updateDatabaseField(element, fieldName) {
+    let row = element.closest('tr');
+    let recordId = row.getAttribute('data-id'); 
+    let targetValue = element.value;
+    
+    // Set posting URL path target directly back into this view's router logic
+    let postUrl = window.location.pathname; 
+
+    element.style.borderColor = "#ffc107"; // Orange = Saving status border indication
+
+    fetch(postUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            'id': recordId,
+            'field': fieldName,
+            'value': targetValue
+        })
+    })
+    .then(res => {
+        if(!res.ok) throw new Error('API failure encountered.');
+        return res.json();
+    })
+    .then(data => {
+        element.style.borderColor = "#28a745"; // Green indication
+        
+        // Trigger explicit success toast alerting what field changed row wise
+        displayToast(`Row #${recordId}: Successfully saved updated '${fieldName}'!`, "success");
+        
+        setTimeout(() => { element.style.borderColor = "#ccc"; }, 800);
+    })
+    .catch(err => {
+        console.error('Submission failed:', err);
+        element.style.borderColor = "#dc3545"; // Red error tracking indication
+        displayToast(`Failed updating Row #${recordId}. Check entry formatting parameters.`, "error");
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        let cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const refreshBtn = document.getElementById("dynamicRefreshBtn");
+    if (refreshBtn) {
+        refreshBtn.setAttribute("href", window.location.pathname + window.location.search);
+    }
+});
+</script>
+</body>
+</html>

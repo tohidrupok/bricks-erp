@@ -1,0 +1,665 @@
+{% extends "lands/base.html" %}
+{% block title %}{{ record.file_no }} — {{ record.area }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  #tree-root { overflow: auto; padding: 20px 0; }
+  svg#tree-svg { display: block; }
+  .tree-node rect { stroke-width: 1.5; transition: filter .15s; }
+  .tree-node:hover rect { filter: brightness(.92); }
+  .tree-node { cursor: pointer; }
+  .tree-edge { stroke: #94a3b8; stroke-width: 1.8; fill: none; }
+  .tree-edge-join { stroke: #f59e0b; stroke-width: 2; fill: none; stroke-dasharray: 6 3; }
+
+  #node-tooltip {
+    position:fixed; background:#1e1d1a; color:#f0ede8;
+    padding:10px 14px; border-radius:10px; font-size:13px;
+    max-width:280px; pointer-events:none; z-index:9999;
+    opacity:0; transition:opacity .15s; line-height:1.5;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);
+  }
+  #node-tooltip.show { opacity:1; }
+
+  #node-panel {
+    position:fixed; right:0; top:56px; bottom:0; width:300px;
+    background:var(--surface); border-left:1px solid var(--border);
+    padding:20px; transform:translateX(100%); transition:transform .25s;
+    overflow-y:auto; z-index:200;
+  }
+  #node-panel.open { transform:translateX(0); }
+  #panel-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,.25);
+    opacity:0; pointer-events:none; transition:opacity .25s; z-index:199;
+  }
+  #panel-overlay.show { opacity:1; pointer-events:all; }
+
+  .view-toggle { display:flex; gap:4px; padding:3px; background:var(--bg); border-radius:8px; border:1px solid var(--border); }
+  .view-toggle button { padding:5px 12px; border:none; background:none; border-radius:6px; font-size:13px; cursor:pointer; color:var(--text-2); }
+  .view-toggle button.active { background:var(--surface); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.1); }
+
+  /* PDF group */
+  .pdf-btn-group { display:flex; border-radius:7px; overflow:hidden; border:1px solid #b91c1c; }
+  .pdf-btn-group a { display:inline-flex; align-items:center; gap:4px; padding:6px 12px; background:#dc2626; color:#fff; font-size:12px; font-weight:600; text-decoration:none; white-space:nowrap; transition:background .15s; }
+  .pdf-btn-group a:first-child { border-right:1px solid #991b1b; }
+  .pdf-btn-group a:hover { background:#b91c1c; color:#fff; }
+
+  /* Join modal */
+  #join-modal-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,.5);
+    z-index:500; display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .2s;
+  }
+  #join-modal-overlay.show { opacity:1; pointer-events:all; }
+  #join-modal {
+    background:var(--surface,#fff); border-radius:14px;
+    width:min(580px,95vw); max-height:92vh; overflow-y:auto;
+    padding:24px; box-shadow:0 24px 64px rgba(0,0,0,.35);
+    transform:translateY(14px); transition:transform .2s;
+  }
+  #join-modal-overlay.show #join-modal { transform:translateY(0); }
+
+  .jm-title  { font-size:16px; font-weight:700; margin-bottom:3px; }
+  .jm-sub    { font-size:12px; color:var(--text-2,#888); margin-bottom:14px; line-height:1.6; }
+  .jm-label  { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-2,#888); margin:14px 0 7px; }
+
+  .jm-tree-wrap { border:1px solid var(--border,#e2e8f0); border-radius:8px; max-height:220px; overflow-y:auto; background:var(--bg,#f8fafc); padding:5px; margin-bottom:6px; }
+
+  /* tree nodes inside modal */
+  .jt-node { user-select:none; }
+  .jt-row  { display:flex; align-items:center; padding:5px 6px; border-radius:6px; transition:background .1s; }
+  .jt-row:hover   { background:#eff6ff; }
+  .jt-row.checked { background:#dbeafe; }
+  .jt-toggle { width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#bbb;flex-shrink:0;cursor:pointer;transition:transform .15s;margin-right:2px; }
+  .jt-toggle.open { transform:rotate(90deg); }
+  .jt-toggle.leaf { color:#e2e8f0; cursor:default; }
+  .jt-cb   { width:15px;height:15px;flex-shrink:0;cursor:pointer;margin-right:7px;accent-color:#2563eb; }
+  .jt-indent { display:flex; flex-shrink:0; }
+  .jt-line { width:16px; border-left:1.5px solid #e2e8f0; margin-left:8px; flex-shrink:0; align-self:stretch; }
+  .jt-name { font-size:13px; font-weight:600; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .jt-depth-0 .jt-name { color:#1e3a5f; }
+  .jt-depth-1 .jt-name { color:#1d4ed8; }
+  .jt-depth-2 .jt-name { color:#0369a1; }
+  .jt-depth-3 .jt-name { color:#0f766e; }
+  .jt-depth-4 .jt-name { color:#7c3aed; }
+  .jt-tag  { font-size:10px; padding:1px 5px; border-radius:3px; background:#dbeafe; color:#1d4ed8; margin-left:4px; }
+  .jt-children { list-style:none; margin:0; padding:0; }
+  .jt-children .jt-children { padding-left:18px; }
+
+  .jm-summary { font-size:12px; padding:7px 10px; border-radius:6px; margin-bottom:10px; border:1px solid; }
+  .jm-summary.ok   { background:#dcfce7; border-color:#86efac; color:#166534; }
+  .jm-summary.warn { background:#fef9c3; border-color:#fde68a; color:#854d0e; }
+
+  /* diagram preview inside modal */
+  #jm-preview { margin:10px 0 14px; background:var(--bg,#f8fafc); border:1px solid var(--border,#e2e8f0); border-radius:8px; overflow:auto; min-height:80px; display:flex; align-items:center; justify-content:center; padding:12px; }
+  #jm-preview svg { display:block; }
+  #jm-preview .jm-preview-empty { font-size:12px; color:#aaa; }
+
+  .jm-form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .jm-fg { margin-bottom:10px; }
+  .jm-fg label { display:block; font-size:12px; font-weight:600; margin-bottom:4px; }
+  .jm-fg input, .jm-fg textarea { width:100%; padding:8px 10px; border:1px solid var(--border,#ddd); border-radius:7px; font-size:13px; font-family:inherit; background:var(--bg,#fff); color:var(--text,#111); box-sizing:border-box; }
+  .jm-fg input:focus, .jm-fg textarea:focus { outline:none; border-color:#2563eb; box-shadow:0 0 0 2px rgba(37,99,235,.15); }
+  .jm-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; flex-wrap:wrap; }
+  .jm-ctrl { display:flex; gap:6px; margin-bottom:7px; }
+  .jm-ctrl button { padding:4px 10px; font-size:11px; border:1px solid var(--border,#ddd); border-radius:5px; background:var(--bg,#fff); cursor:pointer; color:var(--text-2,#666); }
+  .jm-ctrl button:hover { border-color:#2563eb; color:#2563eb; }
+
+  /* join legend */
+  .join-legend { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--text-2,#888); margin-left:8px; }
+  .join-legend-line { width:24px; height:2px; background:#f59e0b; border-top:2px dashed #f59e0b; }
+
+  @media(max-width:640px) {
+    #node-panel { width:100%; top:0; }
+    .jm-form-row { grid-template-columns:1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="breadcrumb">
+    <a href="{% url 'tracker:list' %}">Records</a> / {{ record.file_no }}
+  </div>
+
+  <!-- Header -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+    <div class="page-header" style="margin-bottom:0">
+      <h1>{{ record.file_no }}</h1>
+      <div class="subtitle">{{ record.area }} &middot; <span class="badge badge-gray">দাগ: {{ record.land_dag_no }}</span></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <div class="pdf-btn-group">
+        <a href="{% url 'tracker:pdf_view' record.pk %}" target="_blank">📄 View PDF</a>
+        <a href="{% url 'tracker:pdf_download' record.pk %}">⬇ Download</a>
+      </div>
+      <a href="{% url 'tracker:update' record.pk %}" class="btn btn-secondary btn-sm">Edit Record</a>
+      <a href="{% url 'tracker:delete' record.pk %}" class="btn btn-danger btn-sm">Delete</a>
+    </div>
+  </div>
+
+  <div class="meta-grid">
+    <div class="meta-item"><div class="label">File No / ফাইল নং</div><div class="value">{{ record.file_no }}</div></div>
+    <div class="meta-item"><div class="label">Date / তারিখ</div><div class="value">{{ record.date|date:"d M Y" }}</div></div>
+    <div class="meta-item"><div class="label">Area / এলাকা</div><div class="value">{{ record.area }}</div></div>
+    <div class="meta-item"><div class="label">Dag No / দাগ নং</div><div class="value">{{ record.land_dag_no }}</div></div>
+    <div class="meta-item"><div class="label">Total Owners / মোট মালিক</div><div class="value">{{ record.owners.count }}</div></div>
+  </div>
+
+  {% if record.description %}
+  <div class="card" style="margin-bottom:20px;font-size:14px;color:var(--text-2)">
+    <strong>Description / বিবরণ:</strong> {{ record.description }}
+  </div>
+  {% endif %}
+
+  <!-- Tree section -->
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div>
+        <span style="font-weight:600;font-size:15px">Inheritance Tree</span>
+        <span style="color:var(--text-3);font-size:13px;margin-left:8px">উত্তরাধিকার গাছ</span>
+        <span class="join-legend"><span class="join-legend-line"></span>= join link</span>
+      </div>
+      <div style="flex:1"></div>
+      <div class="view-toggle">
+        <button class="active" id="btn-tree" onclick="setView('tree')">🌳 Tree</button>
+        <button id="btn-list" onclick="setView('list')">📋 List</button>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="openJoinModal()">🔗 Join Root</button>
+      <a href="{% url 'tracker:owner_add' record.pk %}" class="btn btn-primary btn-sm">+ Add Root Owner</a>
+    </div>
+
+    <div id="view-tree">
+      <div id="tree-root"><svg id="tree-svg"></svg></div>
+      {% if not root_owners %}
+      <div class="empty" style="padding:40px">
+        <h3>No owners yet</h3>
+        <p><a href="{% url 'tracker:owner_add' record.pk %}" style="color:var(--accent)">Add the first owner →</a></p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div id="view-list" style="display:none;padding:4px 0">
+      {% if record.owners.all %}
+      <table>
+        <thead><tr>
+          <th>Name / নাম</th><th>Step / ধাপ</th><th>Relation / সম্পর্ক</th>
+          <th>Parent / পূর্বসূরী</th><th>Note / নোট</th><th>Actions</th>
+        </tr></thead>
+        <tbody>
+          {% for owner in record.owners.all %}
+          <tr id="row-{{ owner.pk }}">
+            <td><strong>{{ owner.name }}</strong></td>
+            <td>{% if owner.step_label %}<span class="badge badge-green">{{ owner.step_label }}</span>{% else %}—{% endif %}</td>
+            <td style="color:var(--text-2)">{{ owner.relation|default:"—" }}</td>
+            <td style="color:var(--text-2)">{{ owner.parent.name|default:"Root" }}</td>
+            <td style="color:var(--text-2);font-size:13px">{{ owner.note|default:"—"|truncatechars:50 }}</td>
+            <td>
+              <div style="display:flex;gap:4px">
+                <a href="{% url 'tracker:owner_add' record.pk %}?parent_id={{ owner.pk }}" class="btn btn-xs btn-primary">+ Heir</a>
+                <a href="{% url 'tracker:owner_update' record.pk owner.pk %}" class="btn btn-xs btn-secondary">Edit</a>
+                <a href="{% url 'tracker:owner_delete' record.pk owner.pk %}" class="btn btn-xs btn-danger">Del</a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">No owners added yet.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Side panel -->
+<div id="panel-overlay" onclick="closePanel()"></div>
+<div id="node-panel">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h3 id="panel-name" style="font-size:16px;font-weight:700"></h3>
+    <button onclick="closePanel()" style="border:none;background:none;cursor:pointer;padding:4px;color:var(--text-2)">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div id="panel-meta" style="margin-bottom:16px;font-size:13px;color:var(--text-2)"></div>
+  <div style="display:flex;flex-direction:column;gap:8px" id="panel-actions"></div>
+</div>
+<div id="node-tooltip"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     JOIN ROOT MODAL
+══════════════════════════════════════════════════════════ -->
+<div id="join-modal-overlay" onclick="overlayClick(event)">
+  <div id="join-modal">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px">
+      <div>
+        <div class="jm-title">🔗 Join Root — নতুন সন্তান নোড</div>
+        <div class="jm-sub">
+          Select <strong>2 or more existing nodes</strong> — a new node will appear
+          <strong>below all of them</strong>, connected by arrows from each.<br>
+          <span style="font-size:11px">২+ নোড নির্বাচন করুন → নতুন নোড সবার নিচে তৈরি হবে।</span>
+        </div>
+      </div>
+      <button onclick="closeJoinModal()" style="border:none;background:none;cursor:pointer;padding:4px;color:#888;flex-shrink:0;margin-left:8px">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="jm-label">Select parent nodes — অভিভাবক নোড নির্বাচন</div>
+    <div class="jm-ctrl">
+      <button onclick="jmExpand()">⊞ Expand All</button>
+      <button onclick="jmCollapse()">⊟ Collapse All</button>
+      <button onclick="jmClear()" style="color:#dc2626">✕ Clear</button>
+    </div>
+    <div class="jm-tree-wrap" id="jmTreeWrap">
+      <div style="padding:14px;text-align:center;color:#aaa;font-size:13px">Loading…</div>
+    </div>
+    <div id="jmSummary" class="jm-summary warn" style="display:none"></div>
+
+    <!-- Live mini-preview of how it will look -->
+    <div class="jm-label">Preview — কীভাবে দেখাবে</div>
+    <div id="jm-preview"><span class="jm-preview-empty">Select nodes above to see preview</span></div>
+
+    <form method="post" action="{% url 'tracker:owner_add' record.pk %}" id="joinRootForm">
+      {% csrf_token %}
+      <input type="hidden" name="mode"         value="join_below">
+      <input type="hidden" name="join_parents" id="joinParentsInput">
+
+      <div class="jm-label">New node details — নতুন নোডের তথ্য</div>
+
+      <div class="jm-fg">
+        <label>Name * <span style="font-weight:400;color:#888">নাম</span></label>
+        <input type="text" name="name" id="jmNameInput" required
+               placeholder="e.g. Manun / মানুন / হেবা দলিল নং ৬০৯৮"
+               oninput="updatePreview()">
+      </div>
+      <div class="jm-form-row">
+        <div class="jm-fg">
+          <label>Step Label</label>
+          <input type="text" name="step_label" placeholder="e.g. Deed 20-8-1988">
+        </div>
+        <div class="jm-fg">
+          <label>Relation</label>
+          <input type="text" name="relation" placeholder="e.g. Joint Heir">
+        </div>
+      </div>
+      <div class="jm-fg">
+        <label>Notes</label>
+        <textarea name="note" rows="2" placeholder="e.g. হেবা দলিল নং …"></textarea>
+      </div>
+
+      <div class="jm-actions">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeJoinModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm" id="jmSubmit" disabled>
+          🔗 Create Below / নিচে তৈরি করুন
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const TREE_DATA = {{ tree_json|safe }};
+const LAND_PK   = {{ record.pk }};
+const URLS = {
+  owner_add: "{% url 'tracker:owner_add' record.pk %}",
+  tree_json: "{% url 'tracker:tree_json' record.pk %}",
+};
+
+// ── View toggle ──────────────────────────────────────────────────
+function setView(v) {
+  document.getElementById('view-tree').style.display = v==='tree'?'block':'none';
+  document.getElementById('view-list').style.display = v==='list'?'block':'none';
+  document.getElementById('btn-tree').classList.toggle('active', v==='tree');
+  document.getElementById('btn-list').classList.toggle('active', v==='list');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  MAIN TREE RENDERER
+//  Supports multi-parent nodes (extra_parent_ids) — draws dashed
+//  yellow arrows from each extra parent to the join node.
+// ═══════════════════════════════════════════════════════════════════
+const NW=160, NH=52, GAPX=28, GAPY=100, PX=40, PY=28;
+
+const COLORS=[
+  {fill:'#2d6a4f',text:'#fff',stroke:'#1a4a35'},
+  {fill:'#1e4d8c',text:'#fff',stroke:'#133268'},
+  {fill:'#7c3aed',text:'#fff',stroke:'#5b1ec0'},
+  {fill:'#b45309',text:'#fff',stroke:'#8a3d07'},
+  {fill:'#0f766e',text:'#fff',stroke:'#095f59'},
+  {fill:'#be185d',text:'#fff',stroke:'#9d1451'},
+];
+const col = d => COLORS[d % COLORS.length];
+
+function layoutTree(data) {
+  // 1. Flatten all nodes breadth-first, assign depth from primary parent chain
+  const all = [], byId = {};
+  function walk(node, depth) {
+    node = Object.assign({}, node);   // clone
+    node._depth = depth;
+    all.push(node);
+    byId[node.id] = node;
+    if (node.children) node.children.forEach(c => walk(c, depth+1));
+  }
+  data.forEach(n => walk(n, 0));
+
+  // 2. Group by depth-level for x positioning
+  const levels = {};
+  all.forEach(n => {
+    if (!levels[n._depth]) levels[n._depth] = [];
+    levels[n._depth].push(n);
+  });
+
+  // 3. Assign x/y
+  Object.keys(levels).forEach(d => {
+    levels[d].forEach((n, i) => {
+      n._x = PX + i*(NW+GAPX);
+      n._y = PY + d*GAPY;
+    });
+  });
+
+  // 4. For join nodes that have extra_parent_ids, push their y further down
+  //    so they clearly appear below ALL their parents
+  all.forEach(n => {
+    if (n.extra_parent_ids && n.extra_parent_ids.length > 0) {
+      // find max depth among all parents
+      let maxParentDepth = n._depth - 1;
+      n.extra_parent_ids.forEach(pid => {
+        if (byId[pid]) maxParentDepth = Math.max(maxParentDepth, byId[pid]._depth);
+      });
+      if (byId[n.parent_id]) maxParentDepth = Math.max(maxParentDepth, byId[n.parent_id]._depth);
+      // place this node at max_parent_depth + 1
+      if (n._depth <= maxParentDepth) {
+        n._depth = maxParentDepth + 1;
+        n._y     = PY + n._depth * GAPY;
+      }
+    }
+  });
+
+  let maxX=0, maxY=0;
+  all.forEach(n => { maxX=Math.max(maxX,n._x+NW); maxY=Math.max(maxY,n._y+NH); });
+
+  return { nodes:all, byId, width:maxX+PX, height:maxY+PY };
+}
+
+function trunc(s, max) {
+  if(!s) return ''; return s.length>max ? s.slice(0,max-1)+'…' : s;
+}
+
+function renderTree(data) {
+  const svg = document.getElementById('tree-svg');
+  if (!data || data.length===0) { svg.style.display='none'; return; }
+  svg.style.display='block';
+
+  const {nodes, byId, width, height} = layoutTree(JSON.parse(JSON.stringify(data)));
+  const W = Math.max(width,600), H = height+10;
+  svg.setAttribute('width',W); svg.setAttribute('height',H);
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+
+  let html = `<defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+    </marker>
+    <marker id="arr-join" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+    </marker>
+  </defs>`;
+
+  // ── Draw edges ──
+  nodes.forEach(n => {
+    // Primary parent edge (solid)
+    if (n.parent_id && byId[n.parent_id]) {
+      const p = byId[n.parent_id];
+      html += bezier(p._x+NW/2, p._y+NH, n._x+NW/2, n._y, false);
+    }
+    // Extra parent edges (dashed amber — the "join" lines)
+    if (n.extra_parent_ids && n.extra_parent_ids.length) {
+      n.extra_parent_ids.forEach(pid => {
+        if (byId[pid]) {
+          const p = byId[pid];
+          html += bezier(p._x+NW/2, p._y+NH, n._x+NW/2, n._y, true);
+        }
+      });
+    }
+  });
+
+  // ── Draw nodes ──
+  nodes.forEach(n => {
+    const c   = col(n._depth);
+    const cx  = n._x+NW/2, cy = n._y+NH/2;
+    const tY  = n.relation ? cy-7 : cy+1;
+    const hasNote = n.note && n.note.trim();
+    const isJoin  = n.extra_parent_ids && n.extra_parent_ids.length > 0;
+    const editUrl   = `/lands/${LAND_PK}/owner/${n.id}/edit/`;
+    const deleteUrl = `/lands/${LAND_PK}/owner/${n.id}/delete/`;
+    const addUrl    = `${URLS.owner_add}?parent_id=${n.id}`;
+    const esc = s => (s||'').replace(/'/g,"&#39;").replace(/"/g,"&quot;").substring(0,120);
+
+    html += `<g class="tree-node"
+      data-id="${n.id}" data-name="${esc(n.name)}" data-label="${esc(n.step_label)}"
+      data-relation="${esc(n.relation)}" data-note="${esc(n.note)}"
+      data-edit="${editUrl}" data-delete="${deleteUrl}" data-add="${addUrl}"
+      onclick="openPanel(this)">`;
+
+    // join-node gets a gold border to signal it has multiple parents
+    const strokeC = isJoin ? '#f59e0b' : c.stroke;
+    const strokeW = isJoin ? 2.5       : 1.5;
+    html += `<rect x="${n._x}" y="${n._y}" width="${NW}" height="${NH}"
+      rx="9" fill="${c.fill}" stroke="${strokeC}" stroke-width="${strokeW}"/>`;
+
+    html += `<text x="${cx}" y="${tY}" text-anchor="middle" dominant-baseline="middle"
+      fill="${c.text}" font-size="13" font-weight="600" font-family="'Segoe UI',system-ui,sans-serif">
+      ${trunc(n.name,18)}</text>`;
+
+    if (n.relation) {
+      html += `<text x="${cx}" y="${cy+11}" text-anchor="middle" dominant-baseline="middle"
+        fill="${c.text}" font-size="10.5" opacity=".8" font-family="'Segoe UI',system-ui,sans-serif">
+        ${trunc(n.relation,22)}</text>`;
+    }
+    if (hasNote) {
+      html += `<circle cx="${n._x+NW-8}" cy="${n._y+8}" r="5" fill="rgba(255,255,255,.3)"/>
+        <text x="${n._x+NW-8}" y="${n._y+9}" text-anchor="middle" dominant-baseline="middle"
+          fill="${c.fill}" font-size="8" font-weight="700">N</text>`;
+    }
+    // gold dot top-left marks join nodes
+    if (isJoin) {
+      html += `<circle cx="${n._x+8}" cy="${n._y+8}" r="5" fill="#f59e0b"/>
+        <text x="${n._x+8}" y="${n._y+9}" text-anchor="middle" dominant-baseline="middle"
+          fill="#fff" font-size="7" font-weight="700">J</text>`;
+    }
+    html += `</g>`;
+  });
+
+  svg.innerHTML = html;
+}
+
+function bezier(x1,y1,x2,y2,isJoin) {
+  const mid = (y1+y2)/2;
+  const cls  = isJoin ? 'tree-edge-join' : 'tree-edge';
+  const arr  = isJoin ? 'url(#arr-join)' : 'url(#arr)';
+  return `<path d="M${x1},${y1} C${x1},${mid} ${x2},${mid} ${x2},${y2}"
+    class="${cls}" marker-end="${arr}"/>`;
+}
+
+// ── Side panel ───────────────────────────────────────────────────
+function openPanel(el) {
+  const d = el.dataset;
+  document.getElementById('panel-name').textContent = d.name;
+  let meta = '';
+  if (d.label)    meta += `<div style="margin-bottom:4px"><strong>Step:</strong> ${d.label}</div>`;
+  if (d.relation) meta += `<div style="margin-bottom:4px"><strong>Relation:</strong> ${d.relation}</div>`;
+  if (d.note)     meta += `<div style="margin-top:8px;padding:10px;background:var(--bg);border-radius:8px;font-size:13px">${d.note}</div>`;
+  document.getElementById('panel-meta').innerHTML = meta || '<span style="color:var(--text-3)">No extra info</span>';
+  document.getElementById('panel-actions').innerHTML = `
+    <a href="${d.add}"    class="btn btn-primary btn-sm">+ Add Heir / উত্তরাধিকারী যোগ করুন</a>
+    <a href="${d.edit}"   class="btn btn-secondary btn-sm">✎ Edit / সম্পাদনা</a>
+    <a href="${d.delete}" class="btn btn-danger btn-sm">🗑 Delete / মুছুন</a>`;
+  document.getElementById('node-panel').classList.add('open');
+  document.getElementById('panel-overlay').classList.add('show');
+}
+function closePanel() {
+  document.getElementById('node-panel').classList.remove('open');
+  document.getElementById('panel-overlay').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  JOIN MODAL
+// ═══════════════════════════════════════════════════════════════════
+let jmRendered=false, jmSelected=new Set(), jmNodeMap={};
+
+function openJoinModal() {
+  document.getElementById('join-modal-overlay').classList.add('show');
+  if (!jmRendered) { jmRendered=true; jmBuildTree(); }
+}
+function closeJoinModal() {
+  document.getElementById('join-modal-overlay').classList.remove('show');
+}
+function overlayClick(e) {
+  if (e.target===document.getElementById('join-modal-overlay')) closeJoinModal();
+}
+
+function jmFlatten(list,depth) {
+  list.forEach(o => {
+    o._depth=depth; jmNodeMap[String(o.id)]=o;
+    if (o.children && o.children.length) jmFlatten(o.children,depth+1);
+  });
+}
+
+function jmBuildTree() {
+  const wrap=document.getElementById('jmTreeWrap');
+  if (!TREE_DATA || TREE_DATA.length===0) {
+    wrap.innerHTML='<p style="padding:14px;text-align:center;color:#aaa;font-size:13px">No owners yet.</p>';
+    return;
+  }
+  jmFlatten(TREE_DATA,0);
+  wrap.innerHTML='';
+  wrap.appendChild(jmUL(TREE_DATA,0));
+}
+
+function jmUL(nodes,depth) {
+  const ul=document.createElement('ul'); ul.className='jt-children';
+  nodes.forEach(n=>ul.appendChild(jmLI(n,depth))); return ul;
+}
+function jmLI(node,depth) {
+  const li=document.createElement('li');
+  li.className=`jt-node jt-depth-${Math.min(depth,4)}`;
+  const hasKids=node.children&&node.children.length>0;
+  const row=document.createElement('div'); row.className='jt-row';
+
+  if (depth>0) {
+    const ind=document.createElement('div'); ind.className='jt-indent';
+    for(let i=0;i<depth;i++){const l=document.createElement('div');l.className='jt-line';ind.appendChild(l);}
+    row.appendChild(ind);
+  }
+  const tog=document.createElement('span');
+  tog.className='jt-toggle'+(hasKids?'':' leaf');
+  tog.textContent=hasKids?'▶':'·'; row.appendChild(tog);
+
+  const cb=document.createElement('input');
+  cb.type='checkbox'; cb.className='jt-cb'; cb.value=String(node.id);
+  cb.addEventListener('change',()=>jmCheck(cb,row)); row.appendChild(cb);
+
+  const nm=document.createElement('span'); nm.className='jt-name';
+  nm.textContent=node.name; row.appendChild(nm);
+  if (node.relation){const t=document.createElement('span');t.className='jt-tag';t.textContent=node.relation;row.appendChild(t);}
+
+  li.appendChild(row);
+  if (hasKids) {
+    const cUL=jmUL(node.children,depth+1); cUL.style.display='none'; li.appendChild(cUL);
+    tog.addEventListener('click',e=>{e.stopPropagation();const o=cUL.style.display!=='none';cUL.style.display=o?'none':'';tog.classList.toggle('open',!o);});
+    row.addEventListener('click',e=>{if(e.target===cb)return;const o=cUL.style.display!=='none';cUL.style.display=o?'none':'';tog.classList.toggle('open',!o);});
+  } else {
+    row.addEventListener('click',e=>{if(e.target===cb)return;cb.checked=!cb.checked;jmCheck(cb,row);});
+  }
+  return li;
+}
+
+function jmCheck(cb,row) {
+  if(cb.checked){jmSelected.add(cb.value);row.classList.add('checked');}
+  else{jmSelected.delete(cb.value);row.classList.remove('checked');}
+  jmUpdateSummary(); updatePreview();
+}
+
+function jmUpdateSummary() {
+  const count=jmSelected.size;
+  document.getElementById('joinParentsInput').value=[...jmSelected].join(',');
+  document.getElementById('jmSubmit').disabled=count<2;
+  const el=document.getElementById('jmSummary');
+  if(count===0){el.style.display='none';return;}
+  el.style.display='block';
+  const names=[...jmSelected].map(pk=>jmNodeMap[pk]?.name||pk);
+  el.className='jm-summary '+(count>=2?'ok':'warn');
+  el.textContent=count>=2
+    ? `✓ ${count} parents selected: ${names.join(' + ')} — new node will appear below all`
+    : `${count} selected: ${names.join(', ')} — select at least 2`;
+}
+
+// ── Live preview SVG ──────────────────────────────────────────────
+function updatePreview() {
+  const wrap=document.getElementById('jm-preview');
+  const newName=document.getElementById('jmNameInput')?.value.trim()||'New Node';
+  const pks=[...jmSelected];
+  if(pks.length===0){
+    wrap.innerHTML='<span class="jm-preview-empty">Select nodes above to see preview</span>';
+    return;
+  }
+  const parents=pks.map(pk=>jmNodeMap[pk]).filter(Boolean);
+  // mini SVG: parent boxes on top row, new node centred below
+  const bW=110, bH=38, gX=16, rowY=10, childY=90;
+  const totalW=parents.length*(bW+gX)-gX;
+  const childX=(totalW-bW)/2;
+  const svgW=Math.max(totalW,bW)+20, svgH=childY+bH+16;
+
+  const depthColors=['#2d6a4f','#1e4d8c','#7c3aed','#b45309','#0f766e'];
+  let svg=`<svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg">`;
+
+  parents.forEach((p,i)=>{
+    const px=i*(bW+gX)+10, py=rowY;
+    const fc=depthColors[(p._depth||0)%depthColors.length];
+    const cx2=px+bW/2;
+    // arrow to child
+    const x1=cx2, y1=py+bH, x2=childX+bW/2+10, y2=childY;
+    const mid=(y1+y2)/2;
+    const isExtra=i>0;
+    svg+=`<path d="M${x1},${y1} C${x1},${mid} ${x2},${mid} ${x2},${y2}"
+      stroke="${isExtra?'#f59e0b':'#94a3b8'}" stroke-width="1.8" fill="none"
+      stroke-dasharray="${isExtra?'5 3':'none'}"
+      marker-end="url(#prev-arr${isExtra?'-j':''})"/>`;
+    svg+=`<rect x="${px}" y="${py}" width="${bW}" height="${bH}" rx="7"
+      fill="${fc}" stroke="${isExtra?'#f59e0b':'#1a4a35'}" stroke-width="${isExtra?2:1.5}"/>`;
+    svg+=`<text x="${cx2}" y="${py+bH/2+1}" text-anchor="middle" dominant-baseline="middle"
+      fill="#fff" font-size="11" font-weight="600" font-family="'Segoe UI',sans-serif">
+      ${(p.name||'').length>13?p.name.slice(0,12)+'…':p.name}</text>`;
+  });
+
+  // new child node
+  const ncX=childX+10, ncCX=ncX+bW/2;
+  svg+=`<rect x="${ncX}" y="${childY}" width="${bW}" height="${bH}" rx="7"
+    fill="#0f766e" stroke="#f59e0b" stroke-width="2.5"/>`;
+  svg+=`<circle cx="${ncX+8}" cy="${childY+8}" r="5" fill="#f59e0b"/>
+    <text x="${ncX+8}" y="${childY+9}" text-anchor="middle" dominant-baseline="middle"
+      fill="#fff" font-size="7" font-weight="700">J</text>`;
+  svg+=`<text x="${ncCX}" y="${childY+bH/2+1}" text-anchor="middle" dominant-baseline="middle"
+    fill="#fff" font-size="11" font-weight="600" font-family="'Segoe UI',sans-serif">
+    ${newName.length>13?newName.slice(0,12)+'…':newName}</text>`;
+
+  svg+=`<defs>
+    <marker id="prev-arr"   viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M2 1L8 5L2 9" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/></marker>
+    <marker id="prev-arr-j" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M2 1L8 5L2 9" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/></marker>
+  </defs></svg>`;
+
+  wrap.innerHTML=svg;
+}
+
+function jmExpand() { document.getElementById('jmTreeWrap').querySelectorAll('.jt-children').forEach(u=>u.style.display=''); document.getElementById('jmTreeWrap').querySelectorAll('.jt-toggle:not(.leaf)').forEach(t=>t.classList.add('open')); }
+function jmCollapse() { document.getElementById('jmTreeWrap').querySelectorAll('.jt-children').forEach(u=>u.style.display='none'); document.getElementById('jmTreeWrap').querySelectorAll('.jt-toggle').forEach(t=>t.classList.remove('open')); }
+function jmClear() {
+  jmSelected.clear();
+  document.getElementById('jmTreeWrap').querySelectorAll('.jt-cb').forEach(c=>c.checked=false);
+  document.getElementById('jmTreeWrap').querySelectorAll('.jt-row').forEach(r=>r.classList.remove('checked'));
+  jmUpdateSummary(); updatePreview();
+}
+
+// Init
+renderTree(TREE_DATA);
+</script>
+{% endblock %}

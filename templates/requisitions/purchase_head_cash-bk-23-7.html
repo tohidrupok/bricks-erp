@@ -1,0 +1,461 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Purchase Order List - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    background-color: silver;
+    padding: 20px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 10px 0;
+    text-align: left;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-top: 10px;
+  }
+
+  .table th,
+  .table td {
+    border: 1px solid #ccc;
+    padding: 6px 8px;
+    text-align: left;
+  }
+
+  .btn-check {
+    background-color: green;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 11px;
+  }
+
+  .btn-check-wait {
+    background-color: red;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 11px;
+  }
+  .btn-print {
+    background-color: #1e3a8a;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 11px;
+  }
+
+  .top-buttons a button {
+    padding: 6px 12px;
+    font-size: 11px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn-refresh {
+    background-color: #1e3a8a;
+    color: white;
+  }
+
+  .btn-confirm {
+    background-color: #84cc16;
+    color: white;
+  }
+
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    body {
+      background: white;
+      padding: 0;
+    }
+    .card {
+      box-shadow: none;
+      border: none;
+      margin: 0;
+      padding: 0;
+    }
+  }
+</style>
+
+		<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+		  {% include 'partials/mobile.html' %}
+		  <div class="mt-[4.7rem] flex md:mt-0">
+			{% include 'partials/sidebar_list.html' %}
+			<div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+			  {% include 'partials/header.html' %}
+			  
+			  <div class="card mt-10">
+				<!-- Top Buttons -->
+				<div class="top-buttons flex flex-wrap items-center space-x-2 no-print mb-3">
+				  <a href="{% url 'purchase_list' %}">
+					<button class="btn-refresh h-9 px-4 text-sm">🔄 Refresh</button>
+				  </a>
+				  &nbsp;
+				  <button type="button" class="btn-confirm h-9 px-4 text-sm" onclick="openPopupRequis()">
+					✅ Purchase Confirmation
+				  </button>
+				  &nbsp;
+				  <div class="flex-grow"></div>
+				  &nbsp;
+				  <!-- Search Input -->
+				  <div class="relative w-48">
+					<input id="searchInput" type="text" placeholder="🔍 Search..." class="w-full text-xs py-1.5 pl-3 pr-8 border rounded-md shadow-sm focus:ring focus:ring-blue-300 focus:outline-none" oninput="handleSearch()">
+				  </div>
+				</div>
+
+
+				<div class="section-title">Purchase Orders</div>
+
+				<table class="table" id="purchaseTable">
+				  <thead>
+					<tr>
+					  <th>Order ID</th>
+					  <th>Project</th>
+					  <th>Date</th>
+					  <th>Supplier</th>
+					  <th>Amount</th>
+					  <th>CK & APOVL</th>
+					  <th>Action</th>
+					</tr>
+				  </thead>
+				  <tbody id="tableBody">
+					{% for groupdata in grouped_data %}
+					  <tr>
+						<td>{{ groupdata.requi_id }}</td>
+						<td>{{ groupdata.project_name.project_first_name }}</td>
+						<td>{{ groupdata.requisition_date }}</td>
+						<td>{{ groupdata.vendor_name }}</td>
+						<td>{{ groupdata.total_amount|intcomma }}</td>
+						<!--<td>-->
+						<!--	{% if groupdata.purch_id %}-->
+						<!--	  <a href="{% url 'purchase_check_details' groupdata.requi_id groupdata.purch_id %}" class="btn-check">Check</a>-->
+						<!--	{% else %}-->
+						<!--	  <span style="color: gray;">No Purchase</span>-->
+						<!--	{% endif %}-->
+						<!--</td>-->
+						<td>
+                          {% if groupdata.purch_id %}
+                            {% if groupdata.purch_appov|stringformat:"s" == "Wait" %}
+                              <a href="{% url 'purchase_check_details' groupdata.requi_id groupdata.purch_id %}" class="btn-check-wait">Check</a>
+                            {% else %}
+                              <a href="{% url 'purchase_check_details' groupdata.requi_id groupdata.purch_id %}" class="btn-check">Check</a>
+                            {% endif %}
+                          {% else %}
+                            <span style="color: gray;">No Purchase</span>
+                          {% endif %}
+                        </td>
+						<td>
+						  {% if groupdata.requi_id %}
+						  <a href="{% url 'purchase_cash_details' pk=groupdata.requi_id %}" class="btn-print">🖨️ Print</a>
+						  {% else %}
+						  <span style="color: gray;">No Print</span>
+						  {% endif %}
+						</td>
+					  </tr>
+					{% empty %}
+					  <tr>
+						<td colspan="6" style="text-align:center; color:gray;">No Purchase Orders available.</td>
+					  </tr>
+					{% endfor %}
+				  </tbody>
+				</table>
+			  </div>
+
+			<script>
+			  function handleSearch() {
+				const input = document.getElementById('searchInput').value.toLowerCase();
+				const rows = document.querySelectorAll('#purchaseTable tbody tr');
+				rows.forEach(row => {
+				  const text = row.innerText.toLowerCase();
+				  row.style.display = text.includes(input) ? '' : 'none';
+				});
+			  }
+			</script>   
+
+                    <!-- Popup Container -->
+				<div id="popuprequis">
+				  <div class="popup-content">
+					<h3 style="font-size:20px;font-weight:bold">Purchase Item Entry</h3>
+					<form method="get" action="{% url 'requisition_approv_list' %}" class="mt-4" id="popup-form">
+					  <!-- Project Selector -->
+					  <label for="project-select-requis" class="block text-gray-700 font-semibold mb-2 text-left">
+						Select Project:
+					  </label>
+					  <select id="project-select-requis" name="project_id" class="form-select block w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+						<option value="">-- Select a Project --</option>
+						{% for projectFirst in projects_firts %}
+						  <option value="{{ projectFirst.id }}">{{ projectFirst.project_first_name }}</option>
+						{% endfor %}
+					  </select>
+
+					  <!-- Requisition ID Display + Dropdown -->
+					  <div id="rid-container" class="hidden relative mt-4">
+						<label for="rid-input" class="block text-gray-700 font-semibold text-left">
+						  Select or Search Requisition ID:
+						</label>
+
+						<!-- Visible Input for UI (NO name!) -->
+						<input type="text" id="rid-input" class="form-input block w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Type to search..." autocomplete="off" />
+
+						<!-- Hidden input for actual form submission -->
+						<input type="hidden" name="requi_uniq_id" id="requi-hidden-id" />
+
+						<ul id="rid-dropdown" class="absolute z-50 bg-white w-full mt-1 max-h-48 overflow-y-auto rounded border border-gray-300 shadow-lg hidden"></ul>
+					  </div>
+
+					  <!-- Buttons -->
+					  <div class="popup-actions mt-6 flex justify-center space-x-4">
+					  <button type="button" style="background-color:#84cc16" class="submit-btn text-white py-2 px-4 rounded hover:bg-green-700" onclick="submitPopupRequis()">Submit</button>
+					  <button type="button" style="margin-left:1%;background-color:#1e3a8a" class="cancel-btn text-white py-2 px-4 rounded hover:bg-red-700" onclick="closePopupRequis()">Cancel</button>
+					</div>
+
+					</form>
+
+					<style>
+					  #popuprequis {
+						position: fixed;
+						top: 0;
+						left: 0;
+						right: 0;
+						bottom: 0;
+						background: rgba(0, 0, 0, 0.5);
+						display: none;
+						justify-content: center;
+						align-items: center;
+						z-index: 1000;
+					  }
+
+					  .popup-content {
+						background: white;
+						padding: 30px;
+						border-radius: 10px;
+						width: 400px;
+						max-width: 95%;
+					  }
+
+					  .status-badge {
+						font-size: 12px;
+						font-weight: 600;
+						padding: 2px 8px;
+						border-radius: 9999px;
+						border: 1px solid #ccc;
+						display: inline-block;
+					  }
+
+					  .badge-approved {
+						background-color: #d1fae5;
+						color: #065f46;
+						border-color: #6ee7b7;
+					  }
+
+					  .badge-pending {
+						background-color: #fee2e2;
+						color: #991b1b;
+						border-color: #fca5a5;
+					  }
+
+					  .badge-wait {
+						background-color: #e0f2fe;
+						color: #1e40af;
+						border-color: #60a5fa;
+					  }
+
+					  .dropdown-item {
+						padding: 8px 12px;
+						cursor: pointer;
+						display: flex;
+						justify-content: space-between;
+						align-items: center;
+					  }
+
+					  .dropdown-item:hover {
+						background-color: #ebf8ff;
+					  }
+					</style>
+					<script>
+					document.addEventListener('DOMContentLoaded', () => {
+					  const popup = document.getElementById('popuprequis');
+					  if (popup) popup.style.display = 'none';
+
+					  const projectSelect = document.getElementById('project-select-requis');
+					  const ridContainer = document.getElementById('rid-container');
+					  const input = document.getElementById('rid-input');
+					  const dropdown = document.getElementById('rid-dropdown');
+					  const hiddenInput = document.getElementById('requi-hidden-id');
+
+					  const projectRequisitions = {
+						{% for projectFirst in projects_firts %}
+						  "{{ projectFirst.id }}": [
+							{% for group in grouped_data %}
+							  {% if group.project_name.id == projectFirst.id %}
+								{
+								  id: "{{ group.requi_uniq_id }}",
+								  status: "{{ group.purch_appov|default_if_none:'Pending' }}"
+								},
+							  {% endif %}
+							{% endfor %}
+						  ],
+						{% endfor %}
+					  };
+
+					  let currentOptions = [];
+
+					  function showDropdown(filteredOptions) {
+						dropdown.innerHTML = '';
+						if (filteredOptions.length === 0) {
+						  dropdown.classList.add('hidden');
+						  return;
+						}
+
+						// Sort: Wait (0), Pending (1), Approved (2)
+						const statusOrder = {
+						  'wait': 0,
+						  'pending': 1,
+						  'yes': 2
+						};
+
+						filteredOptions.sort((a, b) => {
+						  const aVal = statusOrder[a.status?.toLowerCase()] ?? 3;
+						  const bVal = statusOrder[b.status?.toLowerCase()] ?? 3;
+						  return aVal - bVal;
+						});
+
+						filteredOptions.forEach(opt => {
+						  const rawStatus = (opt.status || '').toLowerCase();
+						  let statusText = 'Pending';
+						  let badgeClass = 'badge-pending';
+
+						  if (rawStatus === 'yes') {
+							statusText = 'Approved';
+							badgeClass = 'badge-approved';
+						  } else if (rawStatus === 'wait') {
+							statusText = 'Wait for Approval';
+							badgeClass = 'badge-wait';
+						  }
+
+						  const label = `${opt.id} - ${statusText}`;
+
+						  const li = document.createElement('li');
+						  li.className = 'dropdown-item';
+						  li.innerHTML = `
+							<span>${opt.id}</span>
+							<span class="status-badge ${badgeClass}">${statusText}</span>
+						  `;
+
+						  li.addEventListener('click', () => {
+							input.value = label;
+							hiddenInput.value = opt.id;
+							dropdown.classList.add('hidden');
+						  });
+
+						  dropdown.appendChild(li);
+						});
+
+						dropdown.classList.remove('hidden');
+					  }
+
+					  input.addEventListener('input', () => {
+						const val = input.value.toLowerCase();
+						if (!val) {
+						  showDropdown(currentOptions);
+						  return;
+						}
+
+						const filtered = currentOptions.filter(opt => {
+						  let rawStatus = (opt.status || '').toLowerCase();
+						  let statusText = rawStatus === 'yes' ? 'Approved' : (rawStatus === 'wait' ? 'Wait for Approval' : 'Pending');
+						  const label = `${opt.id} - ${statusText}`;
+						  return label.toLowerCase().includes(val);
+						});
+
+						showDropdown(filtered);
+					  });
+
+					  document.addEventListener('click', e => {
+						if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+						  dropdown.classList.add('hidden');
+						}
+					  });
+
+					  projectSelect.addEventListener('change', () => {
+						const projectId = projectSelect.value;
+						if (!projectId || !projectRequisitions[projectId] || projectRequisitions[projectId].length === 0) {
+						  ridContainer.classList.add('hidden');
+						  input.value = '';
+						  hiddenInput.value = '';
+						  currentOptions = [];
+						  return;
+						}
+
+						currentOptions = projectRequisitions[projectId];
+						input.value = '';
+						hiddenInput.value = '';
+						ridContainer.classList.remove('hidden');
+						showDropdown(currentOptions);
+					  });
+					});
+
+					function closePopupRequis() {
+					  const popup = document.getElementById('popuprequis');
+					  if (popup) popup.style.display = 'none';
+					}
+
+					function openPopupRequis() {
+					  const popup = document.getElementById('popuprequis');
+					  if (popup) popup.style.display = 'flex';
+					}
+
+					function submitPopupRequis() {
+					  const project_id = document.getElementById('project-select-requis').value;
+					  const requisition_id = document.getElementById('requi-hidden-id').value;
+
+					  if (!project_id) {
+						alert('Please select a project!');
+						return;
+					  }
+
+					  if (!requisition_id) {
+						alert('Please select a requisition ID!');
+						return;
+					  }
+
+					  window.location.href = "{% url 'requisition_approv_list' %}?project_id=" + encodeURIComponent(project_id) + "&requi_uniq_id=" + encodeURIComponent(requisition_id);
+					}
+					</script>
+
+
+
+				  </div>
+				</div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

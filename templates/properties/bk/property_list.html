@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Listings</title>
+</head>
+<body>
+    <h1>Property Listings</h1>
+    <ul>
+        {% for property in properties %}
+        <li><a href="{% url 'property_detail' property.id %}">{{ property.title }}</a> - ৳{{ property.price }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

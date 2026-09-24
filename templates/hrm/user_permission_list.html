@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Permission List - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        {% include 'partials/mobile.html' %}
+        <div class="mt-[4.7rem] flex md:mt-0">
+            {% include 'partials/sidebar_list.html' %}
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                {% include 'partials/header.html' %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <a href="{% url 'employee_list' %}">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 bg-success border-success text-white mr-2 shadow-md">Back</button>
+                        </a>
+                        <a href="{% url 'user_permissions_list' %}">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 bg-primary border-primary text-white mr-2 shadow-md">Refresh</button>
+                        </a>
+
+                        <div class="p-6 bg-white rounded shadow mt-4">
+                            <h2 class="text-xl font-bold mb-4">User List (Permission Management)</h2>
+                            <table class="min-w-full text-sm border border-gray-300">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="border px-4 py-2 text-left">Username</th>
+                                        <th class="border px-4 py-2 text-left">Email</th>
+                                        <th class="border px-4 py-2 text-left">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                    <tr class="border-t">
+                                        <td class="px-4 py-2">{{ user.username }}</td>
+                                        <td class="px-4 py-2">{{ user.email }}</td>
+                                        <td class="px-4 py-2">
+                                            <a href="{% url 'edit_user_permissions' user.id %}"
+                                               style="display: inline-flex; align-items: center; justify-content: center; gap: 4px; background-color: #1e3a8a; color: white; padding: 6px 12px; border-radius: 5px; min-width: 90px; text-decoration: none;">
+                                                ✏️ Edit Permissions
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="px-4 py-2 text-center text-gray-500">No users found.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>           
+        </div>
+    </div>
+{% endblock %}

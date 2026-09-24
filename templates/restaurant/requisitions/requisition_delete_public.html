@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Requisition</title>
+<style>
+body{font-family:Arial;background:#eef2f7;margin:0;padding:0;}
+.navbar{background:#198754;padding:12px 20px;color:white;}
+.navbar a{color:white;text-decoration:none;}
+.container{max-width:500px;margin:20px auto;padding:0 15px;}
+.card{background:#fff;padding:25px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.08);text-align:center;}
+.details{text-align:left;margin:15px 0;font-size:13px;}
+.details p{margin:4px 0;}
+.actions{display:flex;justify-content:center;gap:10px;margin-top:20px;}
+.btn{padding:10px 20px;border-radius:6px;text-decoration:none;color:white;font-size:13px;border:none;cursor:pointer;display:inline-block;}
+.btn-red{background:#dc3545;}
+.btn-gray{background:#6c757d;}
+.warning{color:#dc3545;font-weight:bold;}
+h2{margin:0;}
+</style>
+</head>
+<body>
+<div class="navbar">
+    <a href="{% url 'restau_requisition_list_public' %}">Requisitions</a>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>Delete Requisition</h2>
+        <p class="warning">Are you sure you want to delete this requisition?</p>
+
+        <div class="details">
+            <p><strong>Project:</strong> {{ requisition.project_name }}</p>
+            <p><strong>Item:</strong> {{ requisition.item_name }}</p>
+            <p><strong>Vendor:</strong> {{ requisition.vendor_name|default:"-" }}</p>
+            <p><strong>Qty:</strong> {{ requisition.qty }} {{ requisition.unit }}</p>
+            <p><strong>Rate:</strong> {{ requisition.rate }}</p>
+            <p><strong>Amount:</strong> ৳{{ requisition.amount }}</p>
+            <p><strong>Date:</strong> {{ requisition.requisition_date }}</p>
+            <p><strong>Status:</strong> {{ requisition.get_approv_status_display }}</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="actions">
+                <button type="submit" class="btn btn-red">Yes, Delete</button>
+                <a href="javascript:history.back()" class="btn btn-gray">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

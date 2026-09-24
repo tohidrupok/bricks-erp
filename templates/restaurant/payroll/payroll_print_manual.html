@@ -1,0 +1,361 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payroll Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: silver;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 960px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo img {
+      height: 50px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .label-box {
+      background-color: #e2f0d9;
+      color: #000;
+      padding: 4px 10px;
+      font-weight: bold;
+      font-size: 13px;
+      border-radius: 4px;
+    }
+
+    .sub-head {
+      font-size: 11px;
+      color: #555;
+      margin-top: -18px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .section-title {
+      font-weight: bold;
+      font-size: 14px;
+      color: #0A8754;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 10px;
+    }
+
+    .table th,
+    .table td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .table th {
+      background-color: #0A8754;
+      color: white;
+      text-align: center;
+    }
+
+    .table td.text-center {
+      text-align: center;
+    }
+
+    .table td.text-right {
+      text-align: right;
+    }
+
+    .total-row td {
+      font-weight: bold;
+      background-color: #e3f1e6;
+      text-align: right;
+    }
+
+    .amount-in-words {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #0A8754;
+      font-size: 12px;
+    }
+
+    .signature-section {
+      margin-top: 100px;
+      display: flex;
+      justify-content: space-between;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .signature-box {
+      flex: 1;
+      padding: 8px;
+      border-top: 1.5px solid #0A8754;
+      margin: 0 5px;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #333;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+      flex-wrap: wrap;
+    }
+
+    .print-btn {
+      background-color: #1e3c98;
+      color: white;
+      padding: 5px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .btn-back {
+      background-color: #e2e8f0;
+      color: #333;
+      padding: 5px 12px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 11px;
+      border: 1px solid #ccc;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .card {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+    
+    @media print {
+  .print-clean {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+}
+  </style>
+</head>
+<body>
+
+ <div class="card">
+
+    <!-- Header -->
+    <div class="card-header">
+      <div class="logo">
+        <img src="{% static 'images/resturant-logo.png' %}" alt="Company Logo" />
+      </div>
+
+      <div style="text-align: right;">
+        <div class="label-box">Payroll Report</div>
+        <p style="font-size: 11px; margin-top: 4px;">
+          Printing Date: {{ print_time|date:"F j, Y, g:i a" }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="sub-head">
+      House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br />
+      +880191322203<br />
+      md2bayid@gmail.com
+    </div>
+
+    <hr style="margin: 8px 0;" />
+
+    <!-- TITLE -->
+    {% if selected_project %}
+      <h2>
+        Payroll Report – {{ selected_project.project_first_name }} ({{ month }})
+      </h2>
+    {% else %}
+      <h2>
+        Payroll Report – {{ month }}
+      </h2>
+    {% endif %}
+
+    <!-- FORM START -->
+    <form method="POST">
+      {% csrf_token %}
+
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th>Employee Name</th>
+            <th>Designation</th>
+            <th>Salary</th>
+            <th>Total Days</th>
+            <th>Present</th>
+            <th>Leave</th>
+            <th>Off Day</th>
+            <th>Absent</th>
+
+            <!-- ✔ MANUAL INPUT COLUMN -->
+            <th>Payable Days</th>
+            <th>Allowance (+)</th>
+            <th>Gross Salary</th>
+            <th>Advance (-)</th>
+            <th>FoodBill (-)</th>
+            <th>Loan (-)</th>
+            <th>Net Salary</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+        {% for item in payrolls %}
+          <tr>
+
+            <td>{{ item.employee.rda_emp_name }}</td>
+            <td>{{ item.employee.rda_position }}</td>
+            <td class="text-right">{{ item.employee.rda_salary|floatformat:2 }}</td>
+
+            <td class="text-center">{{ item.days_in_month }}</td>
+            <td class="text-center">{{ item.present_days }}</td>
+            <td class="text-center">{{ item.leave_days }}</td>
+            <td class="text-center">{{ item.off_days }}</td>
+            <td class="text-center">{{ item.absent_days }}</td>
+
+            <!-- ✔ PAYABLE DAYS INPUT -->
+            <td class="text-center">
+              <input type="number"
+                     name="payable_days_{{ item.employee.id }}"
+                     value="{{ item.working_days }}"
+                     class="payable-days print-clean"
+                     data-id="{{ item.employee.id }}"
+                     data-salary="{{ item.employee.rda_salary }}"
+                     data-allowance="{{ item.allowances }}"
+                     data-advance="{{ item.advance_amount }}"
+                     data-loan="{{ item.loan_amount }}"
+                     data-days="{{ item.days_in_month }}"
+                     style="width:70px;text-align:center;">
+            </td>
+            <td class="text-right">{{ item.allowances|floatformat:2 }}</td>
+            <!-- ✔ GROSS -->
+            <td class="text-right gross" id="gross_{{ item.employee.id }}">
+              {{ item.basic_salary|floatformat:2 }}
+            </td>
+            <td class="text-right">{{ item.advance_amount|floatformat:2 }}</td>
+            <td class="text-right">{{ item.foodPay_amount|floatformat:2 }}</td>
+            <td class="text-right">{{ item.loan_amount|floatformat:2 }}</td>
+
+            <!-- ✔ NET -->
+            <td class="text-right">
+              <strong id="net_{{ item.employee.id }}">
+                {% if item.employee.id == 70 %}
+                  0.00
+                {% else %}
+                  {{ item.net_salary|floatformat:2 }}
+                {% endif %}
+              </strong>
+            </td>
+
+          </tr>
+        {% endfor %}
+
+      <tr class="total-row">
+          <td colspan="2" class="text-right">Total</td>
+        
+          <td class="text-right">{{ total_rda_salary|default:0|floatformat:2 }}</td>
+        
+          <td colspan="6">-</td>
+        
+          <td class="text-right">{{ total_allowances|default:0|floatformat:2 }}</td>
+          <td class="text-right">{{ total_basic_salary|default:0|floatformat:2 }}</td>
+          <td class="text-right">{{ total_advance|default:0|floatformat:2 }}</td>
+          <td class="text-right">{{ total_loans|default:0|floatformat:2 }}</td>
+        
+          <td class="text-right">
+            <strong>{{ total_net_salary|default:0|floatformat:2 }}</strong>
+          </td>
+        </tr>
+
+        </tbody>
+      </table>
+
+      <!-- BUTTONS -->
+     
+
+    </form>
+
+    <!-- SIGNATURE -->
+    <div class="signature-section">
+      <div class="signature-box">Prepared by</div>
+      <div class="signature-box">Checked by</div>
+      <div class="signature-box">Forwarded by</div>
+      <div class="signature-box">Approved by</div>
+    </div>
+ <div class="footer no-print">
+        <a href="{% url 'restaurant_payroll_list' %}" class="btn-back">← Back</a>
+        
+        <button type="button" onclick="window.print()" class="print-btn">Print</button>
+      </div>
+</div>
+<script>
+document.querySelectorAll(".payable-days").forEach(input => {
+  input.addEventListener("input", function () {
+
+    let id = this.dataset.id;
+    let salary = parseFloat(this.dataset.salary || 0);
+    let allowance = parseFloat(this.dataset.allowance || 0);
+    let advance = parseFloat(this.dataset.advance || 0);
+    let loan = parseFloat(this.dataset.loan || 0);
+    let days = parseFloat(this.dataset.days || 30);
+    let payDays = parseFloat(this.value || 0);
+
+    if (payDays > days) payDays = days;
+    if (payDays < 0) payDays = 0;
+
+    let daily = salary / days;
+
+    // ✔ GROSS = (Daily × Payable) + Allowance
+    let gross = (daily * payDays) + allowance;
+
+    let net = gross - advance - loan;
+
+    document.getElementById("gross_" + id).innerText = gross.toFixed(2);
+    document.getElementById("net_" + id).innerText = net.toFixed(2);
+  });
+});
+</script>
+</body>
+</html>

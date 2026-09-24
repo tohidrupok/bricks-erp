@@ -1,0 +1,349 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Use Item Add - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>    
+ <!-- Insert table design css-->
+<style>
+    /* Ensure the table fits well inside the container */
+table {
+    width: 100%;
+    table-layout: auto; /* Automatically adjust table cell width */
+    overflow-wrap: break-word; /* Prevent word overflow */
+}
+
+td, th {
+    padding: 8px 10px;
+    text-align: left;
+}
+
+/* Input fields */
+input[type="text"], input[type="number"] {
+    width: 100%; /* Make inputs take up the full width */
+    max-width: 200px; /* Limit the maximum width */
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+}
+
+/* Buttons */
+button {
+    padding: 8px 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #4CAF50; /* Change background on hover */
+}
+
+/* Add Row and Save Button Container */
+.button-container {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+/* Button Styles */
+.btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-success {
+    background-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+    .intro-y {
+        padding: 10px;
+    }
+
+    .button-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    input[type="text"], input[type="number"] {
+        max-width: 100%; /* Inputs take full width on small screens */
+    }
+}
+ </style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Use Item Add</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+              <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                  <!-- Refresh Button -->
+                 <a href="{% url 'inventory_use_list' %}">
+                     <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">
+                         Back
+                      </button>
+                 </a> 
+                  <a href="?project_id={{ project_id }}">
+                  <button type="button" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">
+                    Refresh
+                  </button>
+                </a>
+               <div class="category-section" id="pile-work">
+              <br />
+              <input type="text" id="project-first-name" value="{{ project_first_name }}" style="border:none;font-weight:bold;" readonly>
+            
+              <form id="pile-work-form" method="POST">
+                {% csrf_token %}
+                <table class="w-full text-left border-separate border-spacing-y-[10px]">
+                  <thead>
+                    <tr>
+                      <th>SL</th>
+                      <th>Item Name</th>
+                      <th>Qty</th>
+                      <th>Details</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pile-work-body">
+                    <tr>
+                      <td>1</td>
+                      <td>
+                        <div class="relative dropdown w-full max-w-xs">
+                          <input type="text" oninput="filterDropdown(this)" onclick="toggleDropdown(this)" placeholder="Select Head"
+                                 class="input input-bordered w-full" autocomplete="off" readonly>
+                          <input type="hidden" name="item_name_1">
+                          <div class="dropdown-content border bg-white w-full shadow-lg hidden absolute mt-1 max-h-60 overflow-y-auto z-50 rounded-md">
+                            {% for headRequist in headRequists %}
+                              <div onclick="selectDropdownItem(this)" data-id="{{ headRequist.id }}" data-name="{{ headRequist.head_requi_name }}">
+                                {{ headRequist.head_requi_name }} (Stock: {{ headRequist.total_stock|default:"0" }})
+                              </div>
+                            {% endfor %}
+                          </div>
+                        </div>
+                      </td>
+                      <td><input type="number" step="any" name="qty_1" required placeholder="Qty" class="w-full max-w-xs" /></td>
+                      <td><input type="text" name="details_1" required placeholder="Details" class="w-full max-w-xs" /></td>
+                      <td><button type="button" class="text-red-600" onclick="deleteRow(this, 'pile-work')">🗑️</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+            
+                <div class="my-4">
+                  <label for="remark" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea id="remark" name="remark" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
+                </div>
+            
+                <div class="button-container mt-4 flex justify-between">
+                  <button type="button" onclick="addRow('pile-work')" class="btn btn-primary">Add Row</button>
+                  <button type="submit" class="btn btn-success">Save</button>
+                </div>
+              </form>
+            </div>
+            
+            <input type="hidden" id="project-id" value="{{ project_id }}">
+            
+            <!-- Template to reuse headRequist options -->
+            <script type="text/template" id="head-options-template">
+              {% for headRequist in headRequists %}
+                <div onclick="selectDropdownItem(this)" data-id="{{ headRequist.id }}" data-name="{{ headRequist.head_requi_name }}">
+                  {{ headRequist.head_requi_name }} (Stock: {{ headRequist.total_stock|default:"0" }})
+                </div>
+              {% endfor %}
+            </script>
+            
+            <style>
+              .dropdown-content div {
+                padding: 0.5rem;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+              }
+              .dropdown-content div:hover {
+                background-color: #f3f4f6;
+              }
+              .dropdown-content div.selected {
+                background-color: #e0f2fe;
+              }
+            </style>
+            
+            <script>
+              function toggleDropdown(input) {
+                const dropdown = input.closest('.dropdown').querySelector('.dropdown-content');
+                dropdown.classList.toggle('hidden');
+              }
+            
+              function filterDropdown(input) {
+                const dropdown = input.closest('.dropdown').querySelector('.dropdown-content');
+                const filter = input.value.toLowerCase();
+                dropdown.querySelectorAll('div').forEach(item => {
+                  item.style.display = item.textContent.toLowerCase().includes(filter) ? '' : 'none';
+                });
+                dropdown.classList.remove('hidden');
+              }
+            
+              function selectDropdownItem(div) {
+                const wrapper = div.closest('.dropdown');
+                const input = wrapper.querySelector('input[type="text"]');
+                const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+            
+                input.value = div.dataset.name;
+                hiddenInput.value = div.dataset.id;
+            
+                wrapper.querySelector('.dropdown-content').classList.add('hidden');
+              }
+            
+              function addRow(section) {
+                const tbody = document.getElementById(`${section}-body`);
+                const rowCount = tbody.rows.length + 1;
+                const headOptions = document.getElementById("head-options-template").innerHTML;
+            
+                const newRow = tbody.insertRow();
+                newRow.innerHTML = `
+                  <td>${rowCount}</td>
+                  <td>
+                    <div class="relative dropdown w-full max-w-xs">
+                      <input type="text" oninput="filterDropdown(this)" onclick="toggleDropdown(this)" placeholder="Select Head"
+                             class="input input-bordered w-full" autocomplete="off" readonly>
+                      <input type="hidden" name="item_name_${rowCount}">
+                      <div class="dropdown-content border bg-white w-full shadow-lg hidden absolute mt-1 max-h-60 overflow-y-auto z-50 rounded-md">
+                        ${headOptions}
+                      </div>
+                    </div>
+                  </td>
+                  <td><input type="number" step="any" name="qty_${rowCount}" required placeholder="Qty" class="w-full max-w-xs" /></td>
+                  <td><input type="text" name="details_${rowCount}" required placeholder="Details" class="w-full max-w-xs" /></td>
+                  <td><button type="button" class="text-red-600" onclick="deleteRow(this, '${section}')">🗑️</button></td>
+                `;
+              }
+            
+              function deleteRow(button, section) {
+                const row = button.closest('tr');
+                row.remove();
+              }
+            
+              // Close dropdowns on outside click
+              document.addEventListener('click', function (event) {
+                document.querySelectorAll('.dropdown-content').forEach(dd => {
+                  if (!dd.parentElement.contains(event.target)) {
+                    dd.classList.add('hidden');
+                  }
+                });
+              });
+            
+              // Form submit handler
+              document.getElementById('pile-work-form').addEventListener('submit', function (event) {
+                event.preventDefault();
+            
+                const rows = document.querySelectorAll("#pile-work-body tr");
+                let data = [];
+            
+                rows.forEach(row => {
+                  const itemInput = row.querySelector('input[type="hidden"][name^="item_name_"]');
+                  const qtyInput = row.querySelector('input[name^="qty_"]');
+                  const detailsInput = row.querySelector('input[name^="details_"]');
+            
+                  const item_name = itemInput ? itemInput.value : '';
+                  const qty = qtyInput ? qtyInput.value : '';
+                  const details = detailsInput ? detailsInput.value : '';
+            
+                  const qtyNumber = parseFloat(qty);
+            
+                  // Only push if item_name is present and qty is a positive number
+                  if (item_name && !isNaN(qtyNumber) && qtyNumber > 0) {
+                    data.push({ item_name, qty: qtyNumber, details });
+                  }
+                });
+            
+                if (data.length === 0) {
+                  alert("Please select at least one item with a valid quantity.");
+                  return;
+                }
+            
+                const payload = {
+                  project_id: document.getElementById('project-id').value,
+                  remark: document.getElementById('remark').value,
+                  data: data
+                };
+            
+                fetch("{% url 'inventory_use_create' %}", {
+                  method: "POST",
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                  },
+                  body: JSON.stringify(payload)
+                }).then(response => response.json().then(json => {
+  if (!response.ok) {
+    throw new Error(json.message || 'Unknown server error');
+  }
+  return json;
+}))
+.then(json => {
+  if (json.status === "success") {
+    alert("Saved successfully!");
+    window.location.href = "{% url 'inventory_use_list' %}";
+  } else {
+    alert("Error: " + json.message);
+  }
+})
+.catch(error => {
+  alert("Error occurred: " + error.message);
+});
+              });
+            </script>
+
+
+
+        </div>
+    </div>
+{% endblock %}

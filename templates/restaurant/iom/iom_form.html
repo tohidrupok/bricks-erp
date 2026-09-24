@@ -1,0 +1,153 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IOM Apply - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-lg font-medium">Restaurant IOM Apply</h2>
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                       <form method="post" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                        {% csrf_token %}
+                    
+                        <!-- Employee -->
+                        <div class="mb-4">
+                            <label for="id_employee" class="font-medium text-lg">Employee</label>
+                            {{ form.employee }}
+                            {% if form.employee.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.employee.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    
+                        <!-- Start Date -->
+                        <div class="mb-4">
+                            <label for="id_start_date" class="font-medium text-lg">Start Date</label>
+                            {{ form.start_date }}
+                            {% if form.start_date.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.start_date.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                         <!-- End Date -->
+                        <div class="mb-4">
+                            <label for="id_end_date" class="font-medium text-lg">End Date</label>
+                            {{ form.end_date }}
+                            {% if form.end_date.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.end_date.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                         <!-- Device -->
+                        <div class="mb-4">
+                            <label for="id_device_sn" class="font-medium text-lg">Branch</label>
+                            {{ form.device_sn }}
+                            {% if form.device_sn.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.device_sn.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <!-- Check In -->
+                        <div class="mb-4">
+                            <label for="id_check_in" class="font-medium text-lg">Check In</label>
+                            {{ form.check_in }}
+                            {% if form.check_in.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.check_in.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    
+                        <!-- Check Out -->
+                        <div class="mb-4">
+                            <label for="id_check_out" class="font-medium text-lg">Check Out</label>
+                            {{ form.check_out }}
+                            {% if form.check_out.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.check_out.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    
+                        <!-- Reason -->
+                        <div class="mb-4">
+                            <label for="id_reason" class="font-medium text-lg">Reason</label>
+                            {{ form.reason }}
+                            {% if form.reason.errors %}
+                                <ul class="text-red-600 mt-1">
+                                    {% for error in form.reason.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    
+                       <!-- Submit -->
+                        <div class="flex justify-between items-center pt-4">
+                            <a href="{% url 'restau_iom_list' %}"  style="background-color:#84cc16" class="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">Cancel</a>
+                            <button type="submit" style="margin-left:0.5%;background-color:#1e3a8a" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Save</button>
+                        </div>
+                    </form>
+                    <script>
+                        function fetchAttendance() {
+                            const employee = document.getElementById("id_employee").value;
+                            const date = document.getElementById("id_start_date").value;
+                    
+                            if (employee && date) {
+                                fetch(`/get-attendance/?employee=${employee}&date=${date}`)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        document.getElementById("id_check_in").value = data.check_in || "";
+                                        document.getElementById("id_check_out").value = data.check_out || "";
+                                    });
+                            }
+                        }
+                    
+                        document.getElementById("id_employee").addEventListener("change", fetchAttendance);
+                        document.getElementById("id_start_date").addEventListener("change", fetchAttendance);
+                    </script>
+
+
+                        <br>  
+                    </div>
+                    
+                    
+                </div>
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

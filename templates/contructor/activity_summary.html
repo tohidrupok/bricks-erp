@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Contractor Activity Summary- BM ERP{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    background-color: silver;
+    padding: 20px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .table th, .table td {
+    border: 1px solid #ccc;
+    padding: 6px 8px;
+    text-align: left;
+  }
+
+  .btn {
+    padding: 6px 12px;
+    font-size: 11px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .btn-add {
+    background-color: #1e3a8a;
+    color: white;
+  }
+
+  .btn-save {
+    background-color: #84cc16;
+    color: white;
+  }
+
+  .btn-delete {
+    color: red;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    background: none;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+  {% include 'partials/mobile.html' %}
+  <div class="mt-[4.7rem] flex md:mt-0">
+    {% include 'partials/sidebar_list.html' %}
+    <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+      {% include 'partials/header.html' %}
+
+      <div class="card mt-10">
+		<div class="top-buttons flex flex-wrap items-center space-x-2 no-print mb-3">  
+		  <!-- 🔄 Refresh Button -->
+		  <a href="{{ request.get_full_path }}">
+			<button type="button" style="background-color:#1e3a8a" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
+			  🔄 Refresh
+			</button>
+		  </a>
+
+		  <!-- 🔙 Back Button -->
+		  <a href="{% url 'activity_list' %}">
+			<button type="button" style="background-color:#84cc16" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition ml-2">
+			  ⬅️ Back
+			</button>
+		  </a>
+		</div>
+	  
+        <h2 class="text-lg font-bold mb-4">Contractor Activity Summary</h2>
+        {% for group in data %}
+		  <div class="bg-white shadow rounded-lg p-4 mb-6">
+			<h3 class="text-lg font-semibold text-blue-800">{{ group.project.name }}</h3>
+			<p style="color:#84cc16;font-weight:bold" class="text-sm text-gray-600">Duration: {{ group.start }} to {{ group.end }} ({{ group.duration }} days)</p>
+
+			<table class="w-full mt-3 border border-gray-300 text-sm">
+			  <thead class="bg-gray-100">
+				<tr>
+				  <th class="border px-2 py-1">#</th>
+				  <th class="border px-2 py-1">Working Head</th>
+				  <th class="border px-2 py-1">Start</th>
+				  <th class="border px-2 py-1">End</th>
+				  <th class="border px-2 py-1">Paid</th>
+				  <th class="border px-2 py-1">Status</th>
+				  <th class="border px-2 py-1">Remarks</th>
+				  <th class="border px-2 py-1">Update</th>
+				</tr>
+			  </thead>
+			  <tbody id="tableBody">
+				{% for a in group.activities %}
+				<tr>
+				  <td class="border px-2 py-1">{{ forloop.counter }}</td>
+				  <td class="border px-2 py-1">{{ a.working_head }}</td>
+				  <td class="border px-2 py-1">{{ a.work_start_date }}</td>
+				  <td class="border px-2 py-1">{{ a.work_end_date }}</td>
+				  <td class="border px-2 py-1 text-right">{{ a.amount_paid }}</td>
+				  <td class="border px-2 py-1">
+					<form method="post" action="{% url 'update_activity_status' a.pk %}">
+					  {% csrf_token %}
+					  <select name="status" class="border p-1 text-sm">
+						<option value="ongoing" {% if a.status == 'ongoing' %}selected{% endif %}>Ongoing</option>
+						<option value="completed" {% if a.status == 'completed' %}selected{% endif %}>Completed</option>
+						<option value="paused" {% if a.status == 'paused' %}selected{% endif %}>Paused</option>
+					  </select>
+				  </td>
+				  <td class="border px-2 py-1">{{ a.remarks }}</td>
+				  <td class="border px-2 py-1 text-center">
+					  <button type="submit" style="background-color:#84cc16" class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 text-xs">Update</button>
+					</form>
+				  </td>
+				</tr>
+				{% empty %}
+				<tr>
+				  <td colspan="8" class="text-center text-gray-500 py-2">No activity found.</td>
+				</tr>
+				{% endfor %}
+			  </tbody>
+			</table>
+		  </div>
+		{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+                            function handleSearch() {
+                                let searchValue = document.getElementById('searchInput').value.toLowerCase();
+                                let rows = document.querySelectorAll("#tableBody tr");
+                    
+                                rows.forEach(row => {
+                                    let columns = row.getElementsByTagName("td");
+                                    let rowText = "";
+                                    
+                                    // Combine text content of all columns in the row for searching
+                                    for (let i = 0; i < columns.length; i++) {
+                                        rowText += columns[i].textContent.toLowerCase(); // Get all text in row
+                                    }
+                    
+                                    // If search term is found in the row's combined text, show the row, else hide it
+                                    if (rowText.includes(searchValue)) {
+                                        row.style.display = ""; // Show row
+                                    } else {
+                                        row.style.display = "none"; // Hide row
+                                    }
+                                });
+                            }
+                        </script>
+{% endblock %}

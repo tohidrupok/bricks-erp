@@ -1,0 +1,121 @@
+{% extends 'office_inventory/base.html' %}
+{% block header %}Reports{% endblock %}
+{% block content %}
+<p class="text-muted">Filter each report below, then download as Excel or PDF.</p>
+
+<div class="row g-3">
+
+  <div class="col-md-6">
+    <div class="card card-stat p-3 h-100">
+      <h6><i class="bi bi-boxes me-1"></i> Inventory Stock Report</h6>
+      <form class="row g-2 mt-1" method="get" action="{% url 'office_inventory:items_report_excel' %}" id="itemsForm">
+        <div class="col-6">
+          <select name="category" class="form-select form-select-sm">
+            <option value="">All Categories</option>
+            {% for c in categories %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-6">
+          <select name="location" class="form-select form-select-sm">
+            <option value="">All Locations</option>
+            {% for l in locations %}<option value="{{ l.id }}">{{ l.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-12 form-check ms-1">
+          <input type="checkbox" class="form-check-input" name="low_stock_only" value="1" id="lowStockOnly">
+          <label class="form-check-label small" for="lowStockOnly">Low stock items only</label>
+        </div>
+        <div class="col-12 d-flex gap-2 mt-2">
+          <button type="submit" class="btn btn-sm btn-outline-success flex-grow-1"><i class="bi bi-file-earmark-excel"></i> Excel</button>
+          <button type="submit" formaction="{% url 'office_inventory:items_report_pdf' %}" class="btn btn-sm btn-outline-danger flex-grow-1"><i class="bi bi-file-earmark-pdf"></i> PDF</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card card-stat p-3 h-100">
+      <h6><i class="bi bi-clipboard-check me-1"></i> Requisitions Report</h6>
+      <form class="row g-2 mt-1" method="get" action="{% url 'office_inventory:requisitions_report_excel' %}">
+        <div class="col-6">
+          <select name="status" class="form-select form-select-sm">
+            <option value="">All Status</option>
+            {% for value, label in status_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-3"><input type="date" name="date_from" class="form-control form-control-sm" placeholder="From"></div>
+        <div class="col-3"><input type="date" name="date_to" class="form-control form-control-sm" placeholder="To"></div>
+        <div class="col-12 d-flex gap-2 mt-2">
+          <button type="submit" class="btn btn-sm btn-outline-success flex-grow-1"><i class="bi bi-file-earmark-excel"></i> Excel</button>
+          <button type="submit" formaction="{% url 'office_inventory:requisitions_report_pdf' %}" class="btn btn-sm btn-outline-danger flex-grow-1"><i class="bi bi-file-earmark-pdf"></i> PDF</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card card-stat p-3 h-100">
+      <h6><i class="bi bi-cart-check me-1"></i> Purchases Report</h6>
+      <form class="row g-2 mt-1" method="get" action="{% url 'office_inventory:purchases_report_excel' %}">
+        <div class="col-6">
+          <select name="status" class="form-select form-select-sm">
+            <option value="">All Status</option>
+            {% for value, label in purchase_status_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-3"><input type="date" name="date_from" class="form-control form-control-sm" placeholder="From"></div>
+        <div class="col-3"><input type="date" name="date_to" class="form-control form-control-sm" placeholder="To"></div>
+        <div class="col-12 d-flex gap-2 mt-2">
+          <button type="submit" class="btn btn-sm btn-outline-success flex-grow-1"><i class="bi bi-file-earmark-excel"></i> Excel</button>
+          <button type="submit" formaction="{% url 'office_inventory:purchases_report_pdf' %}" class="btn btn-sm btn-outline-danger flex-grow-1"><i class="bi bi-file-earmark-pdf"></i> PDF</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card card-stat p-3 h-100">
+      <h6><i class="bi bi-person-badge me-1"></i> Assignments Report</h6>
+      <form class="row g-2 mt-1" method="get" action="{% url 'office_inventory:assignments_report_excel' %}">
+        <div class="col-6">
+          <select name="type" class="form-select form-select-sm">
+            <option value="">All Assign Types</option>
+            {% for t in assignment_types %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-6">
+          <select name="location" class="form-select form-select-sm">
+            <option value="">All Locations</option>
+            {% for l in locations %}<option value="{{ l.id }}">{{ l.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-12 d-flex gap-2 mt-2">
+          <button type="submit" class="btn btn-sm btn-outline-success flex-grow-1"><i class="bi bi-file-earmark-excel"></i> Excel</button>
+          <button type="submit" formaction="{% url 'office_inventory:assignments_report_pdf' %}" class="btn btn-sm btn-outline-danger flex-grow-1"><i class="bi bi-file-earmark-pdf"></i> PDF</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card card-stat p-3 h-100">
+      <h6><i class="bi bi-exclamation-triangle me-1"></i> Damage Report</h6>
+      <form class="row g-2 mt-1" method="get" action="{% url 'office_inventory:damage_report_excel' %}">
+        <div class="col-6">
+          <select name="status" class="form-select form-select-sm">
+            <option value="">All Status</option>
+            {% for value, label in damage_status_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-3"><input type="date" name="date_from" class="form-control form-control-sm" placeholder="From"></div>
+        <div class="col-3"><input type="date" name="date_to" class="form-control form-control-sm" placeholder="To"></div>
+        <div class="col-12 d-flex gap-2 mt-2">
+          <button type="submit" class="btn btn-sm btn-outline-success flex-grow-1"><i class="bi bi-file-earmark-excel"></i> Excel</button>
+          <button type="submit" formaction="{% url 'office_inventory:damage_report_pdf' %}" class="btn btn-sm btn-outline-danger flex-grow-1"><i class="bi bi-file-earmark-pdf"></i> PDF</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,104 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Project Location Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-lg font-medium">Add Project Location</h2>
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <form method="post">
+                            {% csrf_token %}
+                    
+                            <div class="mb-6">
+                                <label for="id_location_name" class="block text-gray-700 font-medium text-lg">Location Name</label>
+                                <input type="text" name="location_name" id="id_location_name"
+                                       class="w-full text-sm border-slate-200 shadow-sm rounded-md"
+                                       value="{{ form.location_name.value|default_if_none:'' }}">
+                                {% if form.location_name.errors %}
+                                    <ul class="text-red-600 mt-1 text-sm">
+                                        {% for error in form.location_name.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                    
+                            <div class="mb-6">
+                                <label for="id_area" class="block text-gray-700 font-medium text-lg">Area</label>
+                                <input type="text" name="area" id="id_area"
+                                       class="w-full text-sm border-slate-200 shadow-sm rounded-md"
+                                       value="{{ form.area.value|default_if_none:'' }}">
+                                {% if form.area.errors %}
+                                    <ul class="text-red-600 mt-1 text-sm">
+                                        {% for error in form.area.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                    
+                            <div class="flex justify-between">
+                                <button type="submit"  style="background-color:#1e3c98"
+                                        class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">Save</button>
+                                <a href="{% url 'project_location_list' %}"  style="margin-left:0.5%;background-color:#1e3c98;color: white"
+                                        class="inline-block bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400">Cancel</a>
+                                     
+                                </div>
+                        </form>
+                        
+                            
+                            <script>
+                                function calculateUnitCost() {
+                                    // Get the values of the input fields for construction, labor, material, and other costs
+                                    const constructionCost = parseFloat(document.getElementById("construction_cost").value) || 0;
+                                    const laborCost = parseFloat(document.getElementById("labor_cost").value) || 0;
+                                    const materialCost = parseFloat(document.getElementById("material_cost").value) || 0;
+                                    const otherCosts = parseFloat(document.getElementById("other_costs").value) || 0;
+                            
+                                    // Calculate unit cost by summing all costs
+                                    const unitCost = constructionCost + laborCost + materialCost + otherCosts;
+                            
+                                    // Update the unit cost field
+                                    document.getElementById("unit_cost").value = unitCost.toFixed(2);
+                                }
+                            
+                                function calculateSalesPrice() {
+                                    // Get the unit cost and profit margin
+                                    const unitCost = parseFloat(document.getElementById("unit_cost").value) || 0;
+                                    const profitMargin = parseFloat(document.getElementById("profit_margin").value) || 0;
+                            
+                                    // Calculate profit amount
+                                    const profitAmount = unitCost * (profitMargin / 100);
+                            
+                                    // Calculate sales price
+                                    const salesPrice = unitCost + profitAmount;
+                            
+                                    // Update the sales price and profit amount fields
+                                    document.getElementById("profit_amount").value = profitAmount.toFixed(2);
+                                    document.getElementById("sales_price").value = salesPrice.toFixed(2);
+                                }
+                            </script>
+                    </div>
+                </div>
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

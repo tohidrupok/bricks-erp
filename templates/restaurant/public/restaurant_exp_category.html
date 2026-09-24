@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Public Restaurant Expense Category</title>
+
+<style>
+
+body{
+    font-family:Arial,sans-serif;
+    background:#eef2f7;
+    margin:0;
+    padding:0;
+    color:#333;
+}
+
+/* ================= TOP NAVBAR ================= */
+
+.navbar{
+    background:linear-gradient(135deg,#198754,#157347);
+    padding:12px 20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    color:white;
+    box-shadow:0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* LEFT + RIGHT */
+.navbar-left,
+.navbar-right{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+}
+
+/* NAV LINKS */
+.navbar a{
+    color:white;
+    text-decoration:none;
+    padding:9px 14px;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:500;
+    transition:all 0.25s ease-in-out;
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.navbar a:hover{
+    background:rgba(255,255,255,0.15);
+    transform:translateY(-1px);
+}
+
+/* ================= BUTTONS ================= */
+
+.btn{
+    padding:9px 14px;
+    border-radius:8px;
+    text-decoration:none;
+    color:white;
+    font-size:14px;
+    font-weight:600;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:all 0.25s ease-in-out;
+    border:none;
+    cursor:pointer;
+}
+
+.btn:hover{
+    transform:translateY(-1px);
+    opacity:0.95;
+    box-shadow:0 3px 8px rgba(0,0,0,0.15);
+}
+
+.btn-blue{background:#0d6efd;}
+.btn-gray{background:#6c757d;}
+.btn-green{background:#28a745;}
+.btn-red{background:#dc3545;}
+
+/* ================= CONTAINER ================= */
+
+.container{
+    max-width:1100px;
+    margin:20px auto;
+    padding:0 15px;
+}
+
+/* ================= CARD ================= */
+
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:14px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.08);
+    transition:0.3s;
+}
+
+.card:hover{
+    box-shadow:0 10px 25px rgba(0,0,0,0.12);
+}
+
+/* ================= HEADER ================= */
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.header h1{
+    font-size:22px;
+    margin:0;
+    color:#198754;
+}
+
+/* ================= TABLE ================= */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+th{
+    background:linear-gradient(135deg,#0d6efd,#0b5ed7);
+    color:white;
+    padding:12px;
+    text-align:left;
+    font-size:14px;
+}
+
+td{
+    padding:12px;
+    border-bottom:1px solid #eee;
+    font-size:14px;
+}
+
+tr:hover{
+    background:#f1f5ff;
+}
+
+/* ================= FILTER ================= */
+
+.filter{
+    margin:12px 0;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+input{
+    padding:10px;
+    width:250px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    outline:none;
+    transition:0.2s;
+}
+
+input:focus{
+    border-color:#0d6efd;
+    box-shadow:0 0 0 3px rgba(13,110,253,0.15);
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:768px){
+
+    .navbar{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .navbar-left,
+    .navbar-right{
+        width:100%;
+    }
+
+    .navbar a,
+    .btn{
+        width:100%;
+        justify-content:center;
+    }
+
+    input{
+        width:100%;
+    }
+
+    .header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- NAV -->
+<div class="navbar">
+
+    <!-- LEFT MENU -->
+    <div class="navbar-left">
+
+        <a href="{% url 'restau_requisition_list_public' %}">
+            🏠 Dashboard
+        </a>
+        
+        <a href="{% url 'restau_requisition_list_public' %}">
+            📦 Back
+        </a>
+
+        <a href="{% url 'public_restaurant_supplier_list' %}">
+            🏢 Supplier
+        </a>
+
+        <a href="{% url 'public_restaurant_requisition_category' %}">
+            📂 Item Category
+        </a>
+        <a href="{% url 'public_restaurant_home' %}" class="nav-btn home-btn">
+                🏠 Home
+            </a>
+    </div>
+
+    <!-- RIGHT ACTION BUTTONS -->
+    <div class="navbar-right">
+
+        <a href="{% url 'public_restaurant_requisition_exp_category' %}" class="btn btn-gray">
+            🔄 Refresh
+        </a>
+
+        <a href="{% url 'public_add_restaurant_exp_category' %}" class="btn btn-blue">
+            ➕ Exp Category
+        </a>
+
+    </div>
+
+</div>
+
+<!-- CONTENT -->
+<div class="container">
+
+    <div class="card">
+
+        <!-- SEARCH -->
+        <form method="GET" class="filter">
+            <input type="text" name="search" placeholder="Search category...">
+            <button class="btn btn-blue" type="submit">Search</button>
+        </form>
+
+        <!-- TABLE -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Category Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for c in categories %}
+                <tr>
+                    <td>{{ c.restu_Exp_category_name }}</td>
+                    <td>
+                        <a href="{% url 'public_restaurant_exp_category_edit' c.id %}" class="btn btn-blue">Edit</a>
+                        <a href="{% url 'public_restaurant_exp_category_delete' c.id %}" class="btn btn-red">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" style="text-align:center;">No category found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

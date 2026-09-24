@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Project Balance Transfer - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            <!-- BEGIN: Top Bar -->  
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+            <div class="mt-10 max-w-lg mx-auto bg-white p-6 shadow-lg rounded-lg text-center">
+                <h2 class="text-xl font-bold mb-4 text-red-600">Confirm Deletion</h2>
+                <p class="mb-6 text-gray-700">Are you sure you want to delete the transfer of <strong class="text-black">{{ transfer.transfer_amount }}</strong> from <strong class="text-black">{{ transfer.source_project }}</strong> to <strong class="text-black">{{ transfer.destination_project }}</strong>? This will reverse the balance changes.</p>
+                
+                {% if messages %}
+                  {% for message in messages %}
+                    <div class="alert alert-dismissible fade show my-3 text-white text-center font-medium shadow-md rounded-md" role="alert" style="font-size:18px; height:50px; line-height: 50px; background-color: {% if message.tags == 'success' %}#16a34a{% else %}#dc2626{% endif %};">
+                      {{ message }}
+                    </div>
+                  {% endfor %}
+                {% endif %}
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit" style="background-color:#1e40ac" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md">Yes, Delete</button>
+                    <a href="{% url 'project_transfer_list' %}" style="background-color:#6b7280" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md ml-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+{% endblock %}

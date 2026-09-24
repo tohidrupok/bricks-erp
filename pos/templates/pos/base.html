@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant POS & ERP System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar-nav .nav-link.active { background-color: #0d6efd; color: #fff !important; font-weight: 600; }
+        .card-counter { border-radius: 8px; padding: 20px; color: #fff; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3 px-3">
+        <a class="navbar-brand fw-bold" href="{% url 'pos_terminal' %}"><i class="fa-solid fa-utensils me-2"></i>InComIT POS</a>
+        
+        <div class="ms-auto d-flex align-items-center gap-3">
+            {% if active_period %}
+            <span class="badge bg-success"><i class="fa-solid fa-circle-play me-1"></i> Period #{{ active_period.id }} Active</span>
+            <a href="{% url 'toggle_work_period' %}" class="btn btn-outline-danger btn-sm">Close Shift</a>
+            {% else %}
+            <span class="badge bg-secondary"><i class="fa-solid fa-circle-stop me-1"></i> No Active Shift</span>
+            <a href="{% url 'toggle_work_period' %}" class="btn btn-success btn-sm">Start Shift</a>
+            {% endif %}
+            <span class="text-light ms-2"><i class="fa-solid fa-user me-1"></i> {{ request.user.username }}</span>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Navigation Sidebar -->
+            <div class="col-md-2 mb-3">
+                <div class="list-group sidebar-nav shadow-sm">
+                    <a href="{% url 'pos_terminal' %}" class="list-group-item list-group-item-action nav-link {% if active_tab == 'pos' %}active{% endif %}">
+                        <i class="fa-solid fa-cash-register me-2"></i> POS Terminal
+                    </a>
+                    <a href="{% url 'dashboard' %}" class="list-group-item list-group-item-action nav-link {% if active_tab == 'dashboard' %}active{% endif %}">
+                        <i class="fa-solid fa-chart-line me-2"></i> Dashboard
+                    </a>
+                    <a href="{% url 'order_history' %}" class="list-group-item list-group-item-action nav-link {% if active_tab == 'orders' %}active{% endif %}">
+                        <i class="fa-solid fa-receipt me-2"></i> Order History
+                    </a>
+                    <a href="{% url 'stock_boq' %}" class="list-group-item list-group-item-action nav-link {% if active_tab == 'stock' %}active{% endif %}">
+                        <i class="fa-solid fa-boxes-stacked me-2"></i> Stock & BOQ
+                    </a>
+                </div>
+            </div>
+
+            <!-- Page Content -->
+            <div class="col-md-10">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

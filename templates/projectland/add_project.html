@@ -1,0 +1,263 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Project Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-lg font-medium">Add New Project</h2>
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                            <form method="POST" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                                {% csrf_token %}
+                            
+                                <!-- Project Name -->
+                                <div class="mb-6">
+                                    <label for="project_name" class="font-medium text-lg text-gray-700">Project Name</label>
+                                    <select id="project_name" name="project_name" class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                                        {% for project in form.project_name.field.queryset %}
+                                            <option value="{{ project.id }}" {% if project.id == form.project_name.value %}selected{% endif %}>
+                                                {{ project.project_first_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if form.project_name.errors %}
+                                        <ul class="text-red-600 mt-1">
+                                            {% for error in form.project_name.errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                                <!-- Project Description -->
+                                <div class="mb-4">
+                                    <label for="id_project_description" class="font-medium text-lg">Project Description</label>
+                                    <textarea id="project_description" name="project_description" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:placeholder:text-slate-500/80" placeholder="Enter Project Description">{{ form.project_description.value }}</textarea>
+                                    {% if form.project_description.errors %}
+                                        <ul class="text-red-600 mt-1">
+                                            {% for error in form.project_description.errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            
+                                <!-- Project Start Date -->
+                                <div class="mb-4 grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="id_project_start_date" class="font-medium text-lg">Start Date</label>
+                                        <input type="date" id="project_start_date" name="project_start_date" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:placeholder:text-slate-500/80" value="{{ form.project_start_date.value }}">
+                                        {% if form.project_start_date.errors %}
+                                            <ul class="text-red-600 mt-1">
+                                                {% for error in form.project_start_date.errors %}
+                                                    <li>{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <label for="id_project_end_date" class="font-medium text-lg">End Date</label>
+                                        <input type="date" id="project_end_date" name="project_end_date" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:placeholder:text-slate-500/80" value="{{ form.project_end_date.value }}">
+                                        {% if form.project_end_date.errors %}
+                                            <ul class="text-red-600 mt-1">
+                                                {% for error in form.project_end_date.errors %}
+                                                    <li>{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>                                    
+                                </div>                             
+                            
+                                <!-- Project Status -->
+                                <div class="mb-4">
+                                    <label for="id_project_status" class="font-medium text-lg">Project Status</label>
+                                    <select id="project_status" name="project_status" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:placeholder:text-slate-500/80">
+                                        <option value="Active" {% if form.project_status.value == 'Active' %} selected {% endif %}>Active</option>
+                                        <option value="Unactive" {% if form.project_status.value == 'Unactive' %} selected {% endif %}>Unactive</option>
+                                    </select>
+                                    {% if form.project_status.errors %}
+                                        <ul class="text-red-600 mt-1">
+                                            {% for error in form.project_status.errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            
+                                <!-- Land Details -->
+                                <div class="mb-4">
+                                    <label for="id_land_details_area" class="font-medium text-lg">Land Area (m²)</label>
+                                    <input type="number" id="land_details_area" name="land_details_area" step="0.01" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:placeholder:text-slate-500/80" value="{{ form.land_details_area.value }}">
+                                    {% if form.land_details_area.errors %}
+                                        <ul class="text-red-600 mt-1">
+                                            {% for error in form.land_details_area.errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            
+                                <!-- Land Purchase Price -->
+                                <div class="mb-4">
+                                    <label for="id_land_purchase_price" class="font-medium text-lg">Land Purchase Price</label>
+                                    <input type="number" id="land_purchase_price" name="land_purchase_price" step="0.01" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:placeholder:text-slate-500/80" value="{{ form.land_purchase_price.value }}">
+                                    {% if form.land_purchase_price.errors %}
+                                        <ul class="text-red-600 mt-1">
+                                            {% for error in form.land_purchase_price.errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            
+                                <!-- Land Current Market Price -->
+                                <div class="mb-4">
+                                    <label for="id_land_current_market_price" class="font-medium text-lg">Land Current Market Price</label>
+                                    <input type="number" id="land_current_market_price" name="land_current_market_price" step="0.01" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:placeholder:text-slate-500/80" value="{{ form.land_current_market_price.value }}">
+                                    {% if form.land_current_market_price.errors %}
+                                        <ul class="text-red-600 mt-1">
+                                            {% for error in form.land_current_market_price.errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            
+                                <!-- Building Details (Number of Stories, Flat Types, Parking Details) -->
+                                <div class="mb-4">
+                                    <label for="id_number_of_stories" class="font-medium text-lg">Number of Stories</label>
+                                    <input type="number" id="number_of_stories" name="number_of_stories" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:placeholder:text-slate-500/80" value="{{ form.number_of_stories.value }}">
+                                </div>
+                            
+                                <!-- Flat Types (A, B, C, D) -->
+                                <div class="mb-4 grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="id_flat_type_a" class="font-medium text-lg">Flat Type A</label>
+                                        <input type="number" id="flat_type_a" name="flat_type_a" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.flat_type_a.value }}">
+                                    </div>
+                                    <div>
+                                        <label for="id_flat_type_b" class="font-medium text-lg">Flat Type B</label>
+                                        <input type="number" id="flat_type_b" name="flat_type_b" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.flat_type_b.value }}">
+                                    </div>
+                                    <div>
+                                        <label for="id_flat_type_c" class="font-medium text-lg">Flat Type C</label>
+                                        <input type="number" id="flat_type_c" name="flat_type_c" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.flat_type_c.value }}">
+                                    </div>
+                                    <div>
+                                        <label for="id_flat_type_d" class="font-medium text-lg">Flat Type D</label>
+                                        <input type="number" id="flat_type_d" name="flat_type_d" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.flat_type_d.value }}">
+                                    </div>
+                                </div>
+                            
+                                <!-- Parking Details -->
+                                <div class="mb-4">
+                                    <label for="id_parking_details" class="font-medium text-lg">Parking Details</label>
+                                    <textarea id="parking_details" name="parking_details" class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:placeholder:text-slate-500/80">{{ form.parking_details.value }}</textarea>
+                                </div>  
+                                <!-- Construction, Labor, Material, and Other Costs -->
+                                <div class="mb-4 grid grid-cols-2 gap-4"> 
+                                    <div>
+                                        <label for="id_construction_cost" class="font-medium text-lg">Land Cost </label>
+                                        <input type="number" id="construction_cost" name="construction_cost" step="0.01" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.construction_cost.value }}" oninput="calculateUnitCost()">
+                                    </div>                                   
+                                    <div>
+                                        <label for="id_material_cost" class="font-medium text-lg">Material Cost</label>
+                                        <input type="number" id="material_cost" name="material_cost" step="0.01" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.material_cost.value }}" oninput="calculateUnitCost()">
+                                    </div>
+                                    <div>
+                                        <label for="id_labor_cost" class="font-medium text-lg">Labor Cost</label>
+                                        <input type="number" id="labor_cost" name="labor_cost" step="0.01" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.labor_cost.value }}" oninput="calculateUnitCost()">
+                                    </div>                                   
+                                    <div>
+                                        <label for="id_other_costs" class="font-medium text-lg">Other Costs</label>
+                                        <input type="number" id="other_costs" name="other_costs" step="0.01" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.other_costs.value }}" oninput="calculateUnitCost()">
+                                    </div>
+                                </div>                            
+                                <!-- Unit Cost Calculation -->
+                                <div class="mb-4">
+                                    <label for="unit_cost" class="font-medium text-lg">Unit Cost</label>
+                                    <input type="text" id="unit_cost" class="w-full text-sm border-slate-200 shadow-sm rounded-md" disabled>
+                                </div>
+                            
+                                <!-- Profit Margin -->
+                                <div class="mb-4 grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="id_profit_margin" class="font-medium text-lg">Profit Margin (%)</label>
+                                        <input type="number" id="profit_margin" name="profit_margin" step="0.01" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.profit_margin.value }}" oninput="calculateSalesPrice()">
+                                    </div>
+                                    <div>
+                                        <label for="profit_amount" class="font-medium text-lg">Profit Amount</label>
+                                        <input type="text" id="profit_amount" class="w-full text-sm border-slate-200 shadow-sm rounded-md" disabled>
+                                    </div>
+                                </div>                               
+                            
+                                <!-- Sales Price -->
+                                <div class="mb-4">
+                                    <label for="id_sales_price" class="font-medium text-lg">Sales Price</label>
+                                    <input type="text" id="sales_price" name="sales_price" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.sales_price.value }}" disabled>
+                                </div>
+                            
+                                <!-- Buttons -->
+                                <div class="text-right">
+                                    <button type="submit" style="background-color:#1e3c98" class="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md">
+                                        Save Project
+                                    </button>
+                                    <a href="{% url 'project_list' %}" style="background-color:#1e3c98" class="btn btn-secondary bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md ml-2">
+                                        Back to Projects List
+                                    </a>
+                                </div>
+                            </form>
+                            
+                            <script>
+                                function calculateUnitCost() {
+                                    // Get the values of the input fields for construction, labor, material, and other costs
+                                    const constructionCost = parseFloat(document.getElementById("construction_cost").value) || 0;
+                                    const laborCost = parseFloat(document.getElementById("labor_cost").value) || 0;
+                                    const materialCost = parseFloat(document.getElementById("material_cost").value) || 0;
+                                    const otherCosts = parseFloat(document.getElementById("other_costs").value) || 0;
+                            
+                                    // Calculate unit cost by summing all costs
+                                    const unitCost = constructionCost + laborCost + materialCost + otherCosts;
+                            
+                                    // Update the unit cost field
+                                    document.getElementById("unit_cost").value = unitCost.toFixed(2);
+                                }
+                            
+                                function calculateSalesPrice() {
+                                    // Get the unit cost and profit margin
+                                    const unitCost = parseFloat(document.getElementById("unit_cost").value) || 0;
+                                    const profitMargin = parseFloat(document.getElementById("profit_margin").value) || 0;
+                            
+                                    // Calculate profit amount
+                                    const profitAmount = unitCost * (profitMargin / 100);
+                            
+                                    // Calculate sales price
+                                    const salesPrice = unitCost + profitAmount;
+                            
+                                    // Update the sales price and profit amount fields
+                                    document.getElementById("profit_amount").value = profitAmount.toFixed(2);
+                                    document.getElementById("sales_price").value = salesPrice.toFixed(2);
+                                }
+                            </script>
+                    </div>
+                </div>
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

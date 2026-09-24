@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f9fafb;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 1000px;
+        margin: 20px auto; /* Top & bottom 20px, left-right auto */
+        padding: 20px;      /* Padding inside the box */
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .company-name {
+        font-weight: bold;
+        font-size: 20px;
+        color: #111827;
+        margin: 0;
+    }
+
+    .header p {
+        font-size: 13px;
+        margin: 2px 0;
+        color: #555;
+    }
+
+    .ledger-title {
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 15px;
+        color: #111;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    th, td {
+        padding: 8px 10px;
+        text-align: center;
+        border: 1px solid #ddd;
+        font-size: 14px;
+    }
+
+    th {
+        background-color: #f0f0f0;
+        font-weight: 600;
+    }
+
+    .footer {
+        text-align: right;
+        font-size: 13px;
+        margin-top: 20px;
+        color: #444;
+    }
+
+    .signature {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 40px;
+        font-size: 13px;
+        color: #444;
+        text-align: center;
+    }
+
+    .signature div {
+        width: 24%;
+        border-top: 1px solid #000;
+        padding-top: 5px;
+    }
+
+    .no-print {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .no-print button {
+        background-color: #2563eb;
+        color: white;
+        padding: 8px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .no-print button:hover {
+        background-color: #1e40af;
+    }
+
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+
+        .container {
+            box-shadow: none;
+            border-radius: 0;
+            margin: 0;
+        }
+    }
+</style>
+
+<div class="container">
+    <!-- Header -->
+    
+    <div class="sub-head">
+      House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br>
+      01993005558, 09639246230, 09639246231 <br>
+      md2bayid@gmail.com, thebtplimited@gmail.com, www.btplimited.com
+    </div>
+
+    <!-- Ledger Info -->
+    <div class="ledger-title">
+        Transaction Book of <strong>{{ head.head_name }}</strong>
+        {% if cash_types %}
+            <p style="font-weight: normal; font-size: 14px; margin-top: 5px;">
+                Cash Types: {% for cash in cash_types %}{{ cash.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Reference</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trx in transactions %}
+                <tr>
+                    <td>{{ trx.date|date:"d-M-Y" }}</td>
+                    <td style="text-align:left">{{ trx.cash_type }}</td>
+                    <td>৳{{ trx.amount|floatformat:2 }}</td>
+                    <td>{{ trx.reference|default:"—" }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4">No transactions found for this head.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p><strong>Total Amount:</strong> ৳{{ total_amount|floatformat:2 }}</p>
+        <p>Print Date: {{ print_time|date:"d-F-Y" }}</p>
+    </div>
+
+    <!-- Signatures -->
+    <div class="signature">
+        <div>Prepared by</div>
+        <div>Checked by</div>
+        <div>Approved by</div>
+        <div>Authorized by</div>
+    </div>
+
+    <!-- Print Button -->
+    <div class="no-print">
+        <button onclick="window.print()">Print</button>
+    </div>
+</div>
+{% endblock %}

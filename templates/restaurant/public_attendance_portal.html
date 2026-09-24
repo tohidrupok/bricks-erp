@@ -1,0 +1,815 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --ink:         #0E1520;
+        --panel:       #172231;
+        --panel-line:  #263143;
+        --paper:       #ECEFF3;
+        --paper-dim:   #8D99AC;
+        --primary:     #3FA9F5;
+        --primary-dim: #1C4A6E;
+        --accent:      #FF8A5B;
+        --accent-dim:  #7A3B22;
+        --radius:      10px;
+    }
+
+    .rap-wrap {
+        background: var(--ink);
+        border-radius: 18px;
+        padding: 0;
+        overflow: hidden;
+        box-shadow: 0 2rem 4rem rgba(0,0,0,0.35);
+        border: 1px solid #000;
+        font-family: 'Inter', sans-serif;
+        color: var(--paper);
+    }
+
+    /* ---- Rail header, styled like a KDS status bar ---- */
+    .rap-rail {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.1rem 1.75rem;
+        background: repeating-linear-gradient(
+            135deg,
+            #0A0F17,
+            #0A0F17 10px,
+            #0D131C 10px,
+            #0D131C 20px
+        );
+        border-bottom: 1px solid var(--panel-line);
+    }
+
+    .rap-rail-tag {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.72rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--paper-dim);
+    }
+
+    .rap-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-dim);
+        animation: rap-pulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes rap-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.35; }
+    }
+
+    .rap-rail-id {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        color: var(--paper-dim);
+    }
+
+    /* ---- Header / masthead ---- */
+    .rap-head {
+        padding: 2.75rem 2.5rem 2.25rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .rap-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.7rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--primary);
+        background: rgba(63, 169, 245, 0.1);
+        border: 1px solid var(--primary-dim);
+        padding: 0.4rem 0.9rem;
+        border-radius: 999px;
+        margin-bottom: 1.4rem;
+    }
+
+    .rap-title {
+        font-family: 'Oswald', sans-serif;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+        color: var(--paper);
+        margin-bottom: 0.6rem;
+    }
+
+    .rap-sub {
+        font-size: 1rem;
+        color: var(--paper-dim);
+        max-width: 30rem;
+        margin: 0 auto;
+        font-weight: 400;
+    }
+
+    .rap-divider {
+        width: 100%;
+        max-width: 420px;
+        margin: 1.75rem auto 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--panel-line) 20%, var(--panel-line) 80%, transparent);
+        position: relative;
+    }
+
+    .rap-divider::before, .rap-divider::after {
+        content: '';
+        position: absolute;
+        top: -3px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--panel-line);
+    }
+    .rap-divider::before { left: 0; }
+    .rap-divider::after { right: 0; }
+
+    /* ---- Body ---- */
+    .rap-body {
+        padding: 0.5rem 2.5rem 3rem;
+    }
+
+    /* ---- Action tickets (superuser view) ---- */
+    .rap-ticket {
+        background: var(--panel);
+        border: 1px solid var(--panel-line);
+        border-radius: var(--radius);
+        padding: 2.1rem 1.75rem 1.75rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        text-align: center;
+        position: relative;
+        transition: transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.25s ease;
+    }
+
+    .rap-ticket::before {
+        content: attr(data-code);
+        position: absolute;
+        top: 0.9rem;
+        right: 1.1rem;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+        color: var(--paper-dim);
+        opacity: 0.7;
+    }
+
+    .rap-ticket:hover {
+        transform: translateY(-4px);
+        border-color: var(--primary-dim);
+    }
+
+    .rap-ticket-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1.25rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        border: 1px solid;
+    }
+
+    .rap-ticket-icon.is-primary {
+        color: var(--primary);
+        background: rgba(63, 169, 245, 0.08);
+        border-color: var(--primary-dim);
+    }
+
+    .rap-ticket-icon.is-accent {
+        color: var(--accent);
+        background: rgba(255, 138, 91, 0.08);
+        border-color: var(--accent-dim);
+    }
+
+    .rap-ticket h4 {
+        font-family: 'Oswald', sans-serif;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        font-size: 1.15rem;
+        color: var(--paper);
+        margin-bottom: 0.65rem;
+    }
+
+    .rap-ticket p {
+        color: var(--paper-dim);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 1.75rem;
+    }
+
+    .rap-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border-radius: 7px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        font-size: 0.92rem;
+        text-decoration: none;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: filter 0.2s ease, transform 0.2s ease;
+        touch-action: manipulation; /* Improves mobile response responsiveness */
+    }
+
+    .rap-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    .rap-btn.is-primary {
+        background: var(--primary);
+        color: #071626;
+    }
+
+    .rap-btn.is-accent {
+        background: var(--accent);
+        color: #2A1206;
+    }
+
+    /* ---- Staff quick-actions row ---- */
+    .rap-staff-row {
+        display: flex;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    .rap-ticket--sm {
+        flex: 1 1 260px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        text-decoration: none;
+        color: inherit;
+        padding: 1.75rem 1.5rem 1.5rem;
+    }
+
+    .rap-ticket--sm .rap-ticket-icon {
+        width: 54px;
+        height: 54px;
+        font-size: 1.35rem;
+        margin-bottom: 1rem;
+    }
+
+    .rap-ticket--sm .rap-ticket-copy {
+        margin-bottom: 1.4rem;
+    }
+
+    .rap-ticket--sm h4 {
+        font-size: 1.05rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .rap-ticket--sm p {
+        font-size: 0.85rem;
+        margin-bottom: 0;
+    }
+
+    .rap-ticket--sm .rap-btn {
+        width: 100%;
+        margin-top: auto;
+    }
+
+    @media (max-width: 480px) {
+        .rap-staff-row { flex-direction: column; }
+    }
+
+    /* ---- Location select ---- */
+    .rap-kiosk {
+        max-width: 30rem;
+        margin: 0 auto;
+        background: var(--panel);
+        border: 1px solid var(--panel-line);
+        border-radius: var(--radius);
+        padding: 2rem;
+    }
+
+    .rap-kiosk-head {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        margin-bottom: 1.75rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px dashed var(--panel-line);
+    }
+
+    .rap-kiosk-icon {
+        flex-shrink: 0;
+        width: 46px;
+        height: 46px;
+        border-radius: 8px;
+        background: rgba(63, 169, 245, 0.1);
+        border: 1px solid var(--primary-dim);
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .rap-kiosk-head h5 {
+        font-family: 'Oswald', sans-serif;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        color: var(--paper);
+        margin: 0 0 0.15rem;
+        font-size: 1.02rem;
+    }
+
+    .rap-kiosk-head small {
+        color: var(--paper-dim);
+        font-size: 0.82rem;
+    }
+
+    .rap-label {
+        display: block;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--paper-dim);
+        margin-bottom: 0.6rem;
+    }
+
+    .rap-select-wrap {
+        position: relative;
+        margin-bottom: 1.6rem;
+    }
+
+    .rap-select-wrap i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--paper-dim);
+        pointer-events: none;
+    }
+
+    .rap-select {
+        width: 100%;
+        appearance: none;
+        background: #0B111A;
+        border: 1px solid var(--panel-line);
+        border-radius: 7px;
+        padding: 0.85rem 1rem 0.85rem 2.7rem;
+        color: var(--paper);
+        font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
+    }
+
+    .rap-select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(63, 169, 245, 0.18);
+    }
+
+    .rap-select-wrap::after {
+        content: '\F282';
+        font-family: 'bootstrap-icons';
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--paper-dim);
+        pointer-events: none;
+        font-size: 0.9rem;
+    }
+
+    /* ---- Location picker modal ---- */
+    .rap-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(6, 9, 14, 0.72);
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px); /* iOS Compatibility */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+        z-index: 2000; /* Raised higher for modern frameworks/mobile layers */
+    }
+
+    .rap-modal-overlay.is-open {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .rap-modal {
+        width: 100%;
+        max-width: 26rem;
+        background: var(--panel);
+        border: 1px solid var(--panel-line);
+        border-radius: var(--radius);
+        padding: 1.75rem;
+        transform: translateY(12px);
+        transition: transform 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        color: var(--paper);
+    }
+
+    .rap-modal-overlay.is-open .rap-modal {
+        transform: translateY(0);
+    }
+
+    .rap-modal-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px dashed var(--panel-line);
+    }
+
+    .rap-modal-eyebrow {
+        display: block;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.68rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--paper-dim);
+        margin-bottom: 0.35rem;
+    }
+
+    .rap-modal-head h3 {
+        font-family: 'Oswald', sans-serif;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        font-size: 1.15rem;
+        color: var(--paper);
+        margin: 0;
+    }
+
+    .rap-modal-close {
+        flex-shrink: 0;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1px solid var(--panel-line);
+        background: transparent;
+        color: var(--paper-dim);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .rap-modal-close:hover {
+        border-color: var(--accent-dim);
+        color: var(--accent);
+    }
+
+    @media (max-width: 576px) {
+        .rap-head { padding: 2.25rem 1.5rem 1.75rem; }
+        .rap-body { padding: 0.5rem 1.25rem 2.25rem; }
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-9">
+            <div class="rap-wrap">
+
+                <!--<div class="rap-rail">-->
+                <!--    <div class="rap-rail-tag">-->
+                <!--        <span class="rap-dot"></span>-->
+                <!--        System Online-->
+                <!--    </div>-->
+                <!--    <div class="rap-rail-id">BM ERP / RESTAURANT OPS</div>-->
+                <!--</div>-->
+                <div class="rap-rail">
+                    <div class="rap-rail-tag">
+                        <span class="rap-dot"></span>
+                        System Online
+                    </div>
+                    <div class="rap-rail-id">BM ERP / RESTAURANT OPS</div>
+                
+                    <!-- Quick Action Copy Buttons -->
+                    <div class="rap-rail-actions">
+                        <button type="button" class="btn-copy btn-btp" onclick="copyUrl('https://erp.btplimited.com/attendance/public/btp-office/', 'BTP Office')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                            BTP Office
+                        </button>
+                        <button type="button" class="btn-copy btn-restaurant" onclick="copyUrl('https://erp.btplimited.com/attendance/public/restaurant/', 'Restaurant')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                            Restaurant
+                        </button>
+                    </div>
+                </div>
+                
+                <style>
+                  /* Container layout adjustment */
+                 
+                
+                  /* Base Smart Button Styling */
+                  .btn-copy {
+                      display: inline-flex;
+                      align-items: center;
+                      gap: 6px;
+                      padding: 6px 12px;
+                      font-size: 12px;
+                      font-weight: 600;
+                      letter-spacing: 0.3px;
+                      border-radius: 6px;
+                      border: 1px solid transparent;
+                      cursor: pointer;
+                      transition: all 0.2s ease-in-out;
+                      outline: none;
+                  }
+                
+                  /* Smart Color 1: BTP Office (Tech Blue accent) */
+                  .btn-btp {
+                      background-color: #f0f7ff;
+                      color: #0284c7;
+                      border-color: #bae6fd;
+                  }
+                  .btn-btp:hover {
+                      background-color: #0284c7;
+                      color: #ffffff;
+                      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+                  }
+                
+                  /* Smart Color 2: Restaurant (Amber/Warm accent) */
+                  .btn-restaurant {
+                      background-color: #fffbeb;
+                      color: #d97706;
+                      border-color: #fde68a;
+                  }
+                  .btn-restaurant:hover {
+                      background-color: #d97706;
+                      color: #ffffff;
+                      box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);
+                  }
+                
+                  .btn-copy:active {
+                      transform: scale(0.97);
+                  }
+                </style>
+                
+                <script>
+                  function copyUrl(url, name) {
+                      navigator.clipboard.writeText(url).then(function() {
+                          alert(name + " URL copied successfully!");
+                      }).catch(function(err) {
+                          console.error("Could not copy URL: ", err);
+                      });
+                  }
+                </script>
+
+                <div class="rap-head">
+                    <span class="rap-eyebrow"><i class="bi bi-clipboard-check"></i> Dashboard Portal</span>
+                    <h1 class="rap-title">Attendance &amp; Permission Board</h1>
+                    <p class="rap-sub">Track sign-ins, approve outside-location requests, and keep every venue accountable in real time.</p>
+                    <div class="rap-divider"></div>
+                </div>
+
+                <div class="rap-body">
+
+                    {% if request.user.is_authenticated and request.user.is_superuser %}
+                    <div class="row g-4">
+
+                        <div class="col-md-6">
+                            <div class="rap-ticket" data-code="MOD.01">
+                                <div>
+                                    <div class="rap-ticket-icon is-primary">
+                                        <i class="bi bi-shield-check"></i>
+                                    </div>
+                                    <h4>Permission Allow</h4>
+                                    <p>Approve outside-attendance requests and coordinate location overrides for on-duty staff.</p>
+                                </div>
+                                <button type="button" class="rap-btn is-primary" data-modal-trigger="permission" data-modal-label="Permission Allow">
+                                    Grant Permissions <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="rap-ticket" data-code="MOD.02">
+                                <div>
+                                    <div class="rap-ticket-icon is-accent">
+                                        <i class="bi bi-calendar-check"></i>
+                                    </div>
+                                    <h4>Attendance Check</h4>
+                                    <p>Review daily sign-in logs, audit trails, and live reports across every restaurant site.</p>
+                                </div>
+                                <button type="button" class="rap-btn is-accent" data-modal-trigger="attendance_check" data-modal-label="Attendance Check">
+                                    Review Records <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="rap-modal-overlay" id="rapModalOverlay">
+                        <div class="rap-modal" role="dialog" aria-modal="true" aria-labelledby="rapModalTitle">
+                            <div class="rap-modal-head">
+                                <div>
+                                    <span class="rap-modal-eyebrow" id="rapModalEyebrow">Select Location</span>
+                                    <h3 id="rapModalTitle">Permission Allow</h3>
+                                </div>
+                                <button type="button" class="rap-modal-close" id="rapModalClose" aria-label="Close">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+
+                            <label for="rapModalSelect" class="rap-label">Location</label>
+                            <div class="rap-select-wrap">
+                                <i class="bi bi-geo-alt"></i>
+                                <select id="rapModalSelect" class="rap-select">
+                                    <option value="" disabled selected>Choose a location&hellip;</option>
+                                    {% for project in projects %}
+                                    <option value="{{ project.id }}" data-name="{{ project.project_first_name }}">{{ project.project_first_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <button type="button" class="rap-btn is-primary" id="rapModalGo">
+                                Continue <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                   <script>
+                        (function () {
+                            // 1. Map routes by the Project ID string instead of the descriptive text name
+                            // Replace the keys below with the exact string ID values of your projects
+                            var ROUTES = {
+                                permission: {
+                                    "1": "{% url 'manage_attendance_access_hrm' %}",       // Replace "1" with BTP Office ID
+                                    "2": "{% url 'manage_attendance_access_restaurant' %}",// Replace "2" with Galleria Cafe ID
+                                    "3": "{% url 'manage_attendance_access_restaurant' %}" // Replace "3" with Galleria Kitchen ID
+                                },
+                                attendance_check: {
+                                    "1": "{% url 'public_attendance_hrm_check' %}"        // Replace "1" with BTP Office ID
+                                }
+                            };
+                        
+                            var overlay = document.getElementById('rapModalOverlay');
+                            var title = document.getElementById('rapModalTitle');
+                            var select = document.getElementById('rapModalSelect');
+                            var goBtn = document.getElementById('rapModalGo');
+                            var closeBtn = document.getElementById('rapModalClose');
+                            var currentAction = null;
+                        
+                            function openModal(action, label) {
+                                currentAction = action;
+                                title.textContent = label;
+                                select.value = '';
+                                overlay.classList.add('is-open');
+                                document.documentElement.style.overflow = 'hidden'; 
+                            }
+                        
+                            function closeModal() {
+                                overlay.classList.remove('is-open');
+                                document.documentElement.style.overflow = '';
+                            }
+                        
+                            document.querySelectorAll('[data-modal-trigger]').forEach(function (btn) {
+                                // Mobile tap touch event handling fallback
+                                btn.addEventListener('click', function (e) {
+                                    e.preventDefault();
+                                    openModal(btn.getAttribute('data-modal-trigger'), btn.getAttribute('data-modal-label'));
+                                });
+                            });
+                        
+                            closeBtn.addEventListener('click', closeModal);
+                            overlay.addEventListener('click', function (e) {
+                                if (e.target === overlay) closeModal();
+                            });
+                        
+                            // Mobile redirect action button fix
+                            goBtn.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                
+                                var selectedValue = select.value;
+                                if (!selectedValue) {
+                                    select.focus();
+                                    return;
+                                }
+                        
+                                // Target routes directly by value ID (works 100% on both Mobile and Desktop)
+                                var base = ROUTES[currentAction] && ROUTES[currentAction][selectedValue];
+                                
+                                // Mobile fallback if mapping by ID fails: search options loop
+                                if (!base) {
+                                    var opt = select.options[select.selectedIndex];
+                                    var nameAttr = opt.getAttribute('data-name') || opt.text.trim();
+                                    
+                                    // Re-check original naming fallback array mapping
+                                    var OLD_ROUTES = {
+                                        permission: {
+                                            "BTP Office": "{% url 'manage_attendance_access_hrm' %}",
+                                            "The Galleria Restauent Cafe": "{% url 'manage_attendance_access_restaurant' %}",
+                                            "The Galleria Live Kitchen": "{% url 'manage_attendance_access_restaurant' %}"
+                                        },
+                                        attendance_check: {
+                                            "BTP Office": "{% url 'public_attendance_hrm_check' %}",
+                                            "The Galleria Restauent Cafe": "{% url 'public_attendance_resthrmcafe_check' %}",
+                                            "The Galleria Live Kitchen": "{% url 'public_attendance_resthrmlive_check' %}"
+                                        }
+                                    };
+                                    base = OLD_ROUTES[currentAction] && OLD_ROUTES[currentAction][nameAttr];
+                                }
+                        
+                                if (!base) {
+                                    alert("Route routing fallback mismatch error."); 
+                                    return;
+                                }
+                        
+                                // Force mobile window migration redirect context
+                                setTimeout(function() {
+                                    window.location.href = base + '?project=' + selectedValue;
+                                }, 50);
+                            });
+                        })();
+                        </script>
+
+                    {% elif request.user.is_authenticated %}
+                    <div class="rap-staff-row">
+                        <a href="#" class="rap-ticket rap-ticket--sm" data-code="MOD.01">
+                            <div class="rap-ticket-icon is-primary">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <div class="rap-ticket-copy">
+                                <h4>Attendance</h4>
+                                <p>Sign in or out for your shift at your assigned location.</p>
+                            </div>
+                            <span class="rap-btn is-primary">Open <i class="bi bi-arrow-right"></i></span>
+                        </a>
+
+                        <a href="#" class="rap-ticket rap-ticket--sm" data-code="MOD.02">
+                            <div class="rap-ticket-icon is-accent">
+                                <i class="bi bi-calendar-check"></i>
+                            </div>
+                            <div class="rap-ticket-copy">
+                                <h4>Attendance Check</h4>
+                                <p>Review your own sign-in history and attendance record.</p>
+                            </div>
+                            <span class="rap-btn is-accent">Open <i class="bi bi-arrow-right"></i></span>
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="rap-kiosk">
+                        <div class="rap-kiosk-head">
+                            <div class="rap-kiosk-icon"><i class="bi bi-shop"></i></div>
+                            <div>
+                                <h5>Select Restaurant</h5>
+                                <small>Confirm your active venue before continuing</small>
+                            </div>
+                        </div>
+
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            <label for="project-select" class="rap-label">Assigned Work Location</label>
+                            <div class="rap-select-wrap">
+                                <i class="bi bi-geo-alt"></i>
+                                <select name="project" id="project-select" class="rap-select" required>
+                                    <option value="" disabled selected>Choose your location&hellip;</option>
+                                    {% for project in projects %}
+                                    <option value="{{ project.id }}">{{ project.project_first_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <button type="submit" class="rap-btn is-primary">
+                                Continue to Dashboard <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

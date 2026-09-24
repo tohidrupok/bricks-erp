@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Requisition - Public Access</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; padding: 0; }
+        .navbar { background: #198754; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .navbar a { color: white; text-decoration: none; }
+        .container { max-width: 650px; margin: 40px auto; padding: 0 15px; }
+        .card { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h2 { margin-top: 0; color: #333; }
+        
+        /* Matching the classes applied in your form widgets */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
+        .form-input { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: 14px;
+        }
+        select.form-input { height: 40px; }
+        .form-input[readonly] { background-color: #e9ecef; color: #495057; cursor: not-allowed; }
+        
+        .btn { padding: 10px 15px; border-radius: 6px; text-decoration: none; color: white; font-size: 14px; display: inline-block; border: none; cursor: pointer; }
+        .btn-blue { background: #0d6efd; }
+        .btn-gray { background: #6c757d; margin-left: 10px; }
+        .messages { background: #d1e7dd; color: #0f5132; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
+        .errorlist { color: #dc3545; list-style: none; padding: 0; margin: 5px 0 0 0; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="{% url 'restu_requisition_by_fallback_public' requisition.project_name.id %}">← Back to Fallback View</a>
+    <strong>Public Access Session</strong>
+</div>
+
+<div class="container">
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <h2>Edit Requisition Details</h2>
+        <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 20px;">
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div style="background: #f8d7da; color: #842029; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        {{ field.errors }}
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div style="margin-top: 25px;">
+                <button type="submit" class="btn btn-blue">Save Changes</button>
+                <a href="{% url 'restu_requisition_by_fallback_public' requisition.project_name.id %}" class="btn btn-gray">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const qtyInput = document.querySelector('input[name="qty"]');
+        const rateInput = document.querySelector('input[name="rate"]');
+        const discountInput = document.querySelector('input[name="discount"]');
+        const amountInput = document.querySelector('input[name="amount"]');
+
+        function calculateAmount() {
+            const qty = parseFloat(qtyInput.value) || 0;
+            const rate = parseFloat(rateInput.value) || 0;
+            const discount = parseFloat(discountInput.value) || 0;
+
+            if (qty > 0 && rate > 0) {
+                const total = (qty * rate) - discount;
+                amountInput.value = Math.max(0, total).toFixed(2);
+            } else {
+                amountInput.value = "0.00";
+            }
+        }
+
+        if (qtyInput && rateInput && discountInput && amountInput) {
+            qtyInput.addEventListener('input', calculateAmount);
+            rateInput.addEventListener('input', calculateAmount);
+            discountInput.addEventListener('input', calculateAmount);
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,491 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Contractor Activity List - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    background-color: silver;
+    padding: 20px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 10px 0;
+    text-align: left;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-top: 10px;
+  }
+
+  .table th,
+  .table td {
+    border: 1px solid #ccc;
+    padding: 6px 8px;
+    text-align: left;
+  }
+
+  .btn-print {
+    background-color: #1e3a8a;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 11px;
+  }
+
+  .btn-refresh {
+    background-color: #1e3a8a;
+    color: white;
+    padding: 6px 12px;
+    font-size: 11px;
+    border-radius: 4px;
+    border: none;
+  }
+
+  .btn-confirm {
+    background-color: #84cc16;
+    color: white;
+    padding: 6px 12px;
+    font-size: 11px;
+    border-radius: 4px;
+    border: none;
+  }
+
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    body {
+      background: white;
+      padding: 0;
+    }
+    .card {
+      box-shadow: none;
+      border: none;
+      margin: 0;
+      padding: 0;
+    }
+  }
+</style>
+
+		<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+		  {% include 'partials/mobile.html' %}
+		  <div class="mt-[4.7rem] flex md:mt-0">
+			{% include 'partials/sidebar_list.html' %}
+			<div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+			  {% include 'partials/header.html' %}
+			  
+			  <div class="card mt-10">
+				<!-- Top Buttons -->
+				<div class="top-buttons flex flex-wrap items-center space-x-2 no-print mb-3">
+				  <a href="{{ request.get_full_path }}">
+					<button type="button" class="btn-refresh">🔄 Refresh</button>
+				  </a>
+				  &nbsp;
+				  <button class="btn-confirm" onclick="openPopupDel()">Add Activity</button>
+				  &nbsp;
+				  <button class="btn-refresh" onclick="openPopupSum()">Activity Summary</button>
+				  &nbsp;
+				   <div class="mx-auto hidden text-slate-500 md:block">                             </div>
+            
+                        <div class="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">                           
+                            <div class="relative w-56 text-slate-500 mb-4">
+                                <input id="searchInput" type="text" placeholder="Search..." class="w-full p-2 text-sm border rounded-md shadow-sm focus:ring-4 focus:ring-primary" oninput="handleSearch()">
+                                <i class="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4">🔍</i>
+                            </div>
+                        </div>
+				</div>
+
+				 <table class="table">
+				  <thead>
+					<tr>
+					  <th>Contractor</th>
+					  <th>Project</th>
+					  <th>Working Head</th>
+					  <th>Start Date</th>
+					  <th>End Date</th>
+					  <th>Status</th>
+					  <th>Actions</th>
+					</tr>
+				  </thead>
+				  <tbody id="tableBody">
+					{% for activity in activities %}
+					  <tr>
+						<td>{{ activity.contractor }}</td>
+						<td>{{ activity.project_name }}</td>
+						<td>{{ activity.working_head }}</td>
+						<td>{{ activity.work_start_date }}</td>
+						<td>{{ activity.work_end_date }}</td>
+						<td>{{ activity.get_status_display }}</td>
+						 <td class="space-x-1">
+							  <a href="{% url 'activity_detail' activity.pk %}">
+								<button type="button" style="background-color:#84cc16" class="btn-refresh bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs">
+								  📋 View
+								</button>
+							  </a>
+							  <a href="{% url 'activity_edit' activity.pk %}">
+								<button type="button" style="background-color:#00008b" class="btn-refresh bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs">
+								  ✏️ Edit
+								</button>
+							  </a>
+							  <a href="{% url 'activity_delete' activity.pk %}">
+								<button type="button" style="background-color:#ff0000" class="btn-refresh bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs">
+								  🗑️ Delete
+								</button>
+							  </a>
+						</td>
+					  </tr>
+					{% empty %}
+					  <tr>
+						<td colspan="7" class="text-center text-gray-500">No activities found.</td>
+					  </tr>
+					{% endfor %}
+				  </tbody>
+				</table>
+				<script>
+                            function handleSearch() {
+                                let searchValue = document.getElementById('searchInput').value.toLowerCase();
+                                let rows = document.querySelectorAll("#tableBody tr");
+                    
+                                rows.forEach(row => {
+                                    let columns = row.getElementsByTagName("td");
+                                    let rowText = "";
+                                    
+                                    // Combine text content of all columns in the row for searching
+                                    for (let i = 0; i < columns.length; i++) {
+                                        rowText += columns[i].textContent.toLowerCase(); // Get all text in row
+                                    }
+                    
+                                    // If search term is found in the row's combined text, show the row, else hide it
+                                    if (rowText.includes(searchValue)) {
+                                        row.style.display = ""; // Show row
+                                    } else {
+                                        row.style.display = "none"; // Hide row
+                                    }
+                                });
+                            }
+                        </script>
+				</div>
+			  </div>
+			</div>
+
+			<script>
+			  document.addEventListener("DOMContentLoaded", function () {
+				const selectAll = document.getElementById("select-all");
+				const checkboxes = document.querySelectorAll('input[name="selected_items"]');
+				if (selectAll) {
+				  selectAll.addEventListener("change", function () {
+					checkboxes.forEach(cb => cb.checked = this.checked);
+				  });
+				}
+			  });
+			</script>
+                
+            </div>
+            <!-- Start of Popup for selecting Project for Confirm Requisiton -->
+                    <div id="popupdel" style="display: none;">
+                        <div class="popup-content">
+                            <h3>  Select Project Name</h3>
+                            <form id="popup-form">
+                                <!-- Project Name Input -->
+                                <label for="project-select-del" class="form-label">Project Name:</label>
+                                <select id="project-select-del" class="form-select" required>
+                                    <option value="">Select a Project</option>
+                                    {% for projectFirst in projects_firts %}
+                                    <option value="{{ projectFirst.id }}">{{ projectFirst.project_first_name }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <div class="popup-actions">
+                                    <!-- Cancel Button -->
+                                    <button type="button" class="cancel-btn" onclick="closePopupDel()">Cancel</button>
+
+                                    <!-- Submit Button -->
+                                    <button type="button" class="submit-btn" onclick="submitPopupDel()">Submit</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <style>
+                        #popupdel {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background: rgba(0, 0, 0, 0.5);
+                            display: none;
+                            justify-content: center;
+                            align-items: center;
+                            z-index: 1000;
+                        }
+                    
+                        .popup-content {
+                            background: white;
+                            padding: 30px;
+                            border-radius: 10px;
+                            width: 400px;
+                            text-align: center;
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        }
+                    
+                        .popup-content h3 {
+                            margin-bottom: 20px;
+                            font-size: 20px;
+                            font-weight: bold;
+                            color: #333;
+                        }
+                    
+                        .form-label {
+                            display: block;
+                            margin-bottom: 8px;
+                            text-align: left;
+                            font-size: 14px;
+                            color: #555;
+                        }
+                    
+                        .form-select {
+                            width: 100%;
+                            padding: 10px;
+                            margin-bottom: 15px;
+                            border: 1px solid #ddd;
+                            border-radius: 5px;
+                            font-size: 14px;
+                            transition: border 0.3s;
+                        }
+                    
+                        .form-select:focus {
+                            border-color: #4caf50;
+                            outline: none;
+                        }
+                    
+                        .popup-actions {
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                    
+                        .popup-actions button {
+                            padding: 10px 20px;
+                            border: none;
+                            border-radius: 5px;
+                            font-size: 14px;
+                            cursor: pointer;
+                            transition: background 0.3s;
+                            width: 45%;
+                        }
+                    
+                        .cancel-btn {
+                            background-color: #f44336;
+                            color: white;
+                        }
+                    
+                        .submit-btn {
+                            background-color: #4caf50;
+                            color: white;
+                        }
+                    
+                        .cancel-btn:hover {
+                            background-color: #d32f2f;
+                        }
+                    
+                        .submit-btn:hover {
+                            background-color: #45a049;
+                        }
+                    
+                        @media (max-width: 600px) {
+                            .popup-content {
+                                width: 90%;
+                            }
+                        }
+                    </style>
+                    <script>
+                        // Function to open the popup
+                        function openPopupDel() {
+                            document.getElementById('popupdel').style.display = 'flex';
+                        }
+                    
+                        // Function to close the popup
+                        function closePopupDel() {
+                            document.getElementById('popupdel').style.display = 'none';
+                        }
+                    
+                        // Function to handle the form submission
+                        function submitPopupDel() {
+                            const project_id = document.getElementById('project-select-del').value;
+                    
+                            // Validate if a project is selected
+                            if (!project_id) {
+                                alert('Please select a project!');
+                                return;
+                            }
+                    
+                            // Redirect to project BOQ details page with selected project ID
+                            window.location.href = "{% url 'activity_add' %}?project_id=" + encodeURIComponent(project_id);
+                        }
+                    </script>
+                    <!-- End of Popup for selecting Project for Admin Requisition Confirmation --> 
+					
+					<!-- Start of Popup for selecting Project for Activity Summary -->
+                    <div id="popupsum" style="display: none;">
+                        <div class="popup-content">
+                            <h3>  Select Project Name</h3>
+                            <form id="popup-form">
+                                <!-- Project Name Input -->
+                                <label for="project-select-sum" class="form-label">Project Name:</label>
+                                <select id="project-select-sum" class="form-select" required>
+                                    <option value="">Select a Project</option>
+                                    {% for projectFirst in projects_firts %}
+                                    <option value="{{ projectFirst.id }}">{{ projectFirst.project_first_name }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <div class="popup-actions">
+                                    <!-- Cancel Button -->
+                                    <button type="button" class="cancel-btn" onclick="closePopupSum()">Cancel</button>
+
+                                    <!-- Submit Button -->
+                                    <button type="button" class="submit-btn" onclick="submitPopupSum()">Submit</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <style>
+                        #popupsum {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background: rgba(0, 0, 0, 0.5);
+                            display: none;
+                            justify-content: center;
+                            align-items: center;
+                            z-index: 1000;
+                        }
+                    
+                        .popup-content {
+                            background: white;
+                            padding: 30px;
+                            border-radius: 10px;
+                            width: 400px;
+                            text-align: center;
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        }
+                    
+                        .popup-content h3 {
+                            margin-bottom: 20px;
+                            font-size: 20px;
+                            font-weight: bold;
+                            color: #333;
+                        }
+                    
+                        .form-label {
+                            display: block;
+                            margin-bottom: 8px;
+                            text-align: left;
+                            font-size: 14px;
+                            color: #555;
+                        }
+                    
+                        .form-select {
+                            width: 100%;
+                            padding: 10px;
+                            margin-bottom: 15px;
+                            border: 1px solid #ddd;
+                            border-radius: 5px;
+                            font-size: 14px;
+                            transition: border 0.3s;
+                        }
+                    
+                        .form-select:focus {
+                            border-color: #4caf50;
+                            outline: none;
+                        }
+                    
+                        .popup-actions {
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                    
+                        .popup-actions button {
+                            padding: 10px 20px;
+                            border: none;
+                            border-radius: 5px;
+                            font-size: 14px;
+                            cursor: pointer;
+                            transition: background 0.3s;
+                            width: 45%;
+                        }
+                    
+                        .cancel-btn {
+                            background-color: #f44336;
+                            color: white;
+                        }
+                    
+                        .submit-btn {
+                            background-color: #4caf50;
+                            color: white;
+                        }
+                    
+                        .cancel-btn:hover {
+                            background-color: #d32f2f;
+                        }
+                    
+                        .submit-btn:hover {
+                            background-color: #45a049;
+                        }
+                    
+                        @media (max-width: 600px) {
+                            .popup-content {
+                                width: 90%;
+                            }
+                        }
+                    </style>
+                    <script>
+                        // Function to open the popup
+                        function openPopupSum() {
+                            document.getElementById('popupsum').style.display = 'flex';
+                        }
+                    
+                        // Function to close the popup
+                        function closePopupSum() {
+                            document.getElementById('popupsum').style.display = 'none';
+                        }
+                    
+                        // Function to handle the form submission
+                        function submitPopupSum() {
+                            const project_id = document.getElementById('project-select-sum').value;
+                    
+                            // Validate if a project is selected
+                            if (!project_id) {
+                                alert('Please select a project!');
+                                return;
+                            }
+                    
+                            // Redirect to project BOQ details page with selected project ID
+                            window.location.href = "{% url 'activity_summary' %}?project_id=" + encodeURIComponent(project_id);
+                        }
+                    </script>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

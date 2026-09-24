@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Record Details - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+
+        {% include 'partials/sidebar_list.html' %}
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+
+            {% include 'partials/header.html' %}
+            <div class="container mx-auto mt-10">
+                <div class="max-w-4xl mx-auto">
+                    
+                    <div class="overflow-hidden rounded-xl shadow-md bg-white dark:bg-darkmode-600 border border-slate-200/60 dark:border-darkmode-400">
+
+                        <div class="px-6 py-4 border-b border-slate-200/60 dark:border-darkmode-400 bg-slate-50/50 dark:bg-darkmode-700 flex items-center justify-between">
+                            <h2 class="text-base font-semibold text-slate-800 dark:text-slate-200 tracking-wide">
+                                Record Details
+                            </h2>
+                        </div>
+            
+                        <div  class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            
+                                <div>
+                                    <label class="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wider uppercase">
+                                        File Number
+                                    </label>
+                                    <div class="mt-1.5 p-3 bg-slate-50 dark:bg-darkmode-400 border border-slate-200/50 dark:border-darkmode-400 rounded-lg text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        {{ record.file_no|default:"N/A" }}
+                                    </div>
+                                </div>
+                
+                                <div>
+                                    <label class="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wider uppercase">
+                                        Date
+                                    </label>
+                                    <div class="mt-1.5 p-3 bg-slate-50 dark:bg-darkmode-400 border border-slate-200/50 dark:border-darkmode-400 rounded-lg text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        {{ record.date }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wider uppercase">
+                                       File NO
+                                    </label>
+                                    <div class="mt-1.5 p-3 bg-slate-50 dark:bg-darkmode-400 border border-slate-200/50 dark:border-darkmode-400 rounded-lg text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        {{ record.file_no }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wider uppercase">
+                                        Mouza Name
+                                    </label>
+                                    <div class="mt-1.5 p-3 bg-slate-50 dark:bg-darkmode-400 border border-slate-200/50 dark:border-darkmode-400 rounded-lg text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        {{ record.mouza }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wider uppercase">
+                                        CS Dag No
+                                    </label>
+                                    <div class="mt-1.5 p-3 bg-slate-50 dark:bg-darkmode-400 border border-slate-200/50 dark:border-darkmode-400 rounded-lg text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        {{ record.cs_dag_no }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wider uppercase">
+                                        SA Dag No
+                                    </label>
+                                    <div class="mt-1.5 p-3 bg-slate-50 dark:bg-darkmode-400 border border-slate-200/50 dark:border-darkmode-400 rounded-lg text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        {{ record.sa_dag_no }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wider uppercase">
+                                        RS Dag No
+                                    </label>
+                                    <div class="mt-1.5 p-3 bg-slate-50 dark:bg-darkmode-400 border border-slate-200/50 dark:border-darkmode-400 rounded-lg text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        {{ record.rs_dag_no }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wider uppercase">
+                                        CT Dag No
+                                    </label>
+                                    <div class="mt-1.5 p-3 bg-slate-50 dark:bg-darkmode-400 border border-slate-200/50 dark:border-darkmode-400 rounded-lg text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        {{ record.ct_dag_no }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wider uppercase">
+                                        Owner / Client
+                                    </label>
+                                    <div class="mt-1.5 p-3 bg-slate-50 dark:bg-darkmode-400 border border-slate-200/50 dark:border-darkmode-400 rounded-lg text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        {{ record.owner_client }}
+                                    </div>
+                                </div>
+                
+                                <div>
+                                    <label class="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wider uppercase">
+                                        Work Type
+                                    </label>
+                                    <div class="mt-1.5 p-3 bg-slate-50 dark:bg-darkmode-400 border border-slate-200/50 dark:border-darkmode-400 rounded-lg text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        {{ record.work_type }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wider uppercase">
+                                        Area
+                                    </label>
+                                    <div class="mt-1.5 p-3 bg-slate-50 dark:bg-darkmode-400 border border-slate-200/50 dark:border-darkmode-400 rounded-lg text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        {{ record.area }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wider uppercase">
+                                        Area Value
+                                    </label>
+                                    <div class="mt-1.5 p-3 bg-slate-50 dark:bg-darkmode-400 border border-slate-200/50 dark:border-darkmode-400 rounded-lg text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        {{ record.area_value }}
+                                    </div>
+                                </div>
+                
+                                <div>
+                                    <label class="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wider uppercase">
+                                        Status
+                                    </label>
+                                    <div class="mt-1.5 p-3 bg-slate-50 dark:bg-darkmode-400 border border-slate-200/50 dark:border-darkmode-400 rounded-lg text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        {{ record.status }}
+                                    </div>
+                                </div>
+                
+                                <div>
+                                    <label class="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wider uppercase">
+                                        Responsible
+                                    </label>
+                                    <div class="mt-1.5 p-3 bg-slate-50 dark:bg-darkmode-400 border border-slate-200/50 dark:border-darkmode-400 rounded-lg text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        {{ record.responsible }}
+                                    </div>
+                                </div>
+                
+                            </div>
+                
+                            <div class="mt-5">
+                                <label class="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wider uppercase">
+                                    Remarks
+                                </label>
+                                <div class="mt-1.5 p-3 bg-slate-50 dark:bg-darkmode-400 border border-slate-200/50 dark:border-darkmode-400 rounded-lg min-h-[100px] text-slate-700 dark:text-slate-200 text-sm whitespace-pre-wrap">
+                                    {{ record.remarks|default:"No Remarks Available" }}
+                                </div>
+                            </div>
+                
+                            <div class="mt-6 pt-4 border-t border-slate-200/60 dark:border-darkmode-400 flex justify-end">
+                                <a href="{% url 'file_record_list' %}" style="background-color:#1e40ac;color:white"
+                                   class="inline-flex items-center justify-center px-5 py-2 rounded-lg bg-slate-100 text-slate-600 dark:bg-darkmode-400 dark:text-slate-300 font-medium shadow-sm hover:bg-slate-200 dark:hover:bg-darkmode-300 transition duration-200 text-sm">
+                                    Back to List
+                                </a>
+                            </div>
+                
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        </div>
+
+</div>
+{% endblock %}

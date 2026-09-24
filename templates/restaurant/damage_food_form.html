@@ -1,0 +1,126 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Record Damage Food - The Galleria</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .win-button {
+      background: linear-gradient(to bottom, #f6f6f6 0%, #e0e0e0 100%);
+      border: 1px solid #777;
+      border-radius: 2px;
+      padding: 4px 10px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .win-button:hover { background: linear-gradient(to bottom, #e0e0e0 0%, #cccccc 100%); }
+  </style>
+</head>
+<body class="bg-[#dcdcdc] p-2 font-sans text-xs">
+<div class="max-w-[700px] mx-auto bg-[#e8e8e8] border-2 border-red-600 p-2 shadow-2xl">
+
+  <div class="bg-red-700 text-white font-bold px-3 py-1.5 flex justify-between items-center text-sm mb-2">
+    <span>⚠️ Record Damaged / Wasted Food</span>
+    <a href="{% url 'restaurant_sales_list' %}" class="text-white hover:underline text-xs">← Back to POS Sales</a>
+  </div>
+
+  {% if messages %}
+    <div class="mb-2 space-y-1">
+      {% for message in messages %}
+        <div class="px-2 py-1 text-xs rounded border
+                    {% if message.tags == 'success' %}bg-green-100 border-green-400 text-green-800
+                    {% elif message.tags == 'error' %}bg-red-100 border-red-400 text-red-800
+                    {% else %}bg-yellow-100 border-yellow-400 text-yellow-800{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="POST" class="bg-white p-3 border border-gray-300 space-y-3">
+    {% csrf_token %}
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div>
+        <label class="block font-semibold mb-1 text-gray-700">Select Item</label>
+        {{ form.item }}
+        {% if form.item.errors %}
+          <p class="text-red-600 text-[11px] mt-0.5">{{ form.item.errors|first }}</p>
+        {% endif %}
+        <div class="mt-1 text-[11px] text-gray-600">
+          Current stock: <span id="currentStockDisplay" class="font-bold text-red-700">-</span>
+        </div>
+      </div>
+      <div>
+        <label class="block font-semibold mb-1 text-gray-700">Damaged Quantity</label>
+        {{ form.quantity }}
+        <p id="stockWarning" class="text-[11px] text-red-600 mt-0.5 hidden">Quantity exceeds available stock.</p>
+        {% if form.quantity.errors %}
+          <p class="text-red-600 text-[11px] mt-0.5">{{ form.quantity.errors|first }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div>
+      <label class="block font-semibold mb-1 text-gray-700">Damage Date</label>
+      {{ form.damage_date }}
+    </div>
+
+    <div>
+      <label class="block font-semibold mb-1 text-gray-700">Reason / Remark</label>
+      {{ form.reason }}
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2 border-t">
+      <a href="{% url 'restaurant_sales_list' %}" class="win-button text-black no-underline">Cancel</a>
+      <button type="submit" class="bg-red-700 hover:bg-red-800 text-white font-bold px-4 py-1 rounded">Save Damage Record</button>
+    </div>
+  </form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const select = document.querySelector('select[name="item"]');
+  const stockDisplay = document.getElementById("currentStockDisplay");
+  const qtyInput = document.querySelector('input[name="quantity"]');
+  const warning = document.getElementById("stockWarning");
+
+  // Django renders {{ form.item }} without a data-stock attribute by default,
+  // so we build a lookup once from the option text Django already generated
+  // via label_from_instance ("... — Stock: N") rather than requiring extra
+  // context plumbing from the view.
+  function parseStockFromLabel(text) {
+    const match = text.match(/Stock:\s*(\d+)/);
+    return match ? parseInt(match[1], 10) : null;
+  }
+
+  function updateStockView() {
+    const opt = select.options[select.selectedIndex];
+    const stock = opt && opt.value ? parseStockFromLabel(opt.text) : null;
+
+    if (stock === null) {
+      stockDisplay.textContent = "-";
+      qtyInput.removeAttribute("max");
+      warning.classList.add("hidden");
+      return;
+    }
+    stockDisplay.textContent = stock;
+    qtyInput.setAttribute("max", stock);
+    checkQty();
+  }
+
+  function checkQty() {
+    const max = parseInt(qtyInput.getAttribute("max") || "0", 10);
+    const val = parseInt(qtyInput.value || "0", 10);
+    warning.classList.toggle("hidden", !(max && val > max));
+  }
+
+  select.addEventListener("change", updateStockView);
+  qtyInput.addEventListener("input", checkQty);
+  updateStockView();
+});
+</script>
+</body>
+</html>

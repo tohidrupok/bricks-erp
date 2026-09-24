@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Day Opening Stock Report - {{ shift.user.username }}{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    :root{
+        --kds-bg: #f4f5f7;
+        --kds-surface: #ffffff;
+        --kds-surface-raised: #f8f9fb;
+        --kds-border: #e2e5ea;
+        --kds-text: #1b2129;
+        --kds-text-muted: #6b7480;
+        --kds-accent: #e0611f;
+        --kds-good: #1a9d6d;
+        --kds-warn: #b8790a;
+        --kds-bad: #d63c3c;
+        --font-display: 'Oswald', sans-serif;
+        --font-body: 'Inter', sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+        --shadow-sm: 0 1px 2px rgba(20,24,29,0.06), 0 1px 1px rgba(20,24,29,0.04);
+    }
+
+    .kds-wrap{
+        background: var(--kds-bg);
+        color: var(--kds-text);
+        font-family: var(--font-body);
+        border-radius: 16px;
+        padding: 28px;
+        margin: -1rem;
+    }
+    .kds-wrap h1, .kds-wrap h2, .kds-wrap h5{ font-family: var(--font-display); letter-spacing:0.02em; text-transform:uppercase; }
+
+    .kds-header{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:22px; }
+    .kds-eyebrow{ font-family: var(--font-mono); font-size:0.72rem; color:var(--kds-text-muted); letter-spacing:0.08em; }
+    .kds-header h1{ font-size:1.5rem; margin:6px 0 4px; color: var(--kds-text); }
+    .kds-header-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .kds-back{
+        font-family:var(--font-mono); font-size:0.75rem; color:var(--kds-text-muted); text-decoration:none;
+        border:1px solid var(--kds-border); border-radius:8px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;
+        background: var(--kds-surface);
+    }
+    .kds-back:hover{ color:var(--kds-text); background:var(--kds-surface-raised); border-color:#c9ced6; }
+
+    /* FIX: this class was referenced on the POS button but never defined,
+       so it rendered with no button styling at all. */
+    .btn-kds-outline{
+        font-family:var(--font-display); text-transform:uppercase; letter-spacing:0.03em; font-size:0.8rem;
+        border-radius:8px; padding:10px 18px; border:1px solid var(--kds-border) !important;
+        background: var(--kds-surface); color: var(--kds-text); text-decoration:none; display:inline-flex; align-items:center;
+    }
+    .btn-kds-outline:hover{ background: var(--kds-surface-raised); border-color:#c9ced6 !important; color: var(--kds-text); }
+
+    .btn-kds-print{
+        font-family:var(--font-display); text-transform:uppercase; letter-spacing:0.03em; font-size:0.8rem;
+        border-radius:8px; padding:10px 18px; border:none; background:var(--kds-good); color:#fff; box-shadow: var(--shadow-sm);
+    }
+    .btn-kds-print:hover{ background:#158058; color:#fff; }
+
+    .kds-banner{
+        background:#1a9d6d14; border:1px solid #1a9d6d40; border-radius:10px; padding:14px 18px;
+        margin-bottom:22px; font-size:0.88rem; color: var(--kds-text);
+    }
+    .kds-banner strong{ color: var(--kds-good); }
+
+    /* Shift meta strip */
+    .meta-strip{
+        display:grid; grid-template-columns:repeat(4,1fr); gap:0; background:var(--kds-surface);
+        border:1px solid var(--kds-border); border-radius:12px; margin-bottom:22px; overflow:hidden; box-shadow: var(--shadow-sm);
+    }
+    @media (max-width:800px){ .meta-strip{ grid-template-columns:repeat(2,1fr);} }
+    .meta-cell{ padding:18px 20px; border-right:1px solid var(--kds-border); }
+    .meta-cell:last-child{ border-right:none; }
+    .meta-label{ font-family:var(--font-mono); font-size:0.68rem; color:var(--kds-text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px; }
+    .meta-value{ font-family:var(--font-display); font-size:1.1rem; color: var(--kds-text); }
+    .meta-value.accent{ color: var(--kds-good); }
+
+    .kds-panel{ background: var(--kds-surface); border:1px solid var(--kds-border); border-radius:12px; padding:20px; height:100%; box-shadow: var(--shadow-sm); }
+    .kds-panel-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+    .kds-panel-head h5{ font-size:0.85rem; color:var(--kds-text-muted); margin:0; font-weight:600; }
+    .kds-tag{ font-family:var(--font-mono); font-size:0.68rem; padding:3px 9px; border-radius:20px; background:var(--kds-surface-raised); color:var(--kds-good); border:1px solid var(--kds-border); }
+
+    .kds-table-wrap{ background: var(--kds-surface); border:1px solid var(--kds-border); border-radius:12px; overflow:hidden; margin-top:20px; box-shadow: var(--shadow-sm); }
+    .kds-table-head{ display:flex; justify-content:space-between; align-items:center; padding:18px 20px; border-bottom:1px solid var(--kds-border); flex-wrap:wrap; gap:10px; background: var(--kds-surface-raised); }
+    .kds-table-head h5{ margin:0; font-size:1rem; color: var(--kds-text); }
+    #searchInput{
+        background: var(--kds-surface); border:1px solid var(--kds-border); color:var(--kds-text);
+        font-family:var(--font-mono); font-size:0.82rem;
+    }
+    #searchInput::placeholder{ color:var(--kds-text-muted); }
+    #searchInput:focus{ border-color:var(--kds-accent); box-shadow:0 0 0 3px #e0611f14; outline:none; }
+
+    table.kds-table{ width:100%; margin:0; color:var(--kds-text); }
+    table.kds-table thead th{
+        font-family:var(--font-mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em;
+        color:var(--kds-text-muted); border-bottom:1px solid var(--kds-border); padding:10px 20px; font-weight:600;
+        background: var(--kds-surface-raised);
+    }
+    table.kds-table tbody tr{ border-bottom:1px solid var(--kds-border); }
+    table.kds-table tbody tr:last-child{ border-bottom:none; }
+    table.kds-table tbody tr:hover{ background: var(--kds-surface-raised); }
+    table.kds-table td{ padding:12px 20px; vertical-align:middle; font-size:0.88rem; }
+    .name-cell{ font-weight:600; color: var(--kds-text); }
+    .qty-cell{ font-family:var(--font-mono); font-weight:600; color:var(--kds-good); text-align:center; }
+    .status-chip{ font-family:var(--font-mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.04em; padding:4px 10px; border-radius:20px; }
+    .chip-good{ background:#1a9d6d18; color:var(--kds-good); }
+    .chip-warn{ background:#b8790a18; color:var(--kds-warn); }
+    .chip-bad{ background:#d63c3c18; color:var(--kds-bad); }
+    .empty-row{ text-align:center; padding:40px 20px; color:var(--kds-text-muted); font-family:var(--font-mono); font-size:0.85rem; }
+
+    .print-only-header{ display:none; }
+
+    /* ---------- Print: clean paper output, theme dropped intentionally ---------- */
+    @media print {
+        body{ background:#fff !important; color:#000 !important; }
+        .no-print{ display:none !important; }
+        .kds-wrap{ background:#fff !important; color:#000 !important; padding:0 !important; margin:0 !important; border-radius:0 !important; }
+        .kds-panel, .kds-table-wrap, .meta-strip{ background:#fff !important; border:1px solid #ccc !important; box-shadow:none !important; }
+        .meta-label, .kds-eyebrow{ color:#555 !important; }
+        .print-only-header{ display:block !important; }
+        table.kds-table th, table.kds-table td{ border:1px solid #ddd !important; color:#000 !important; padding:8px !important; }
+        .status-chip{ border:1px solid #999 !important; background:#fff !important; color:#000 !important; }
+    }
+</style>
+
+<div class="kds-wrap">
+    <div class="kds-header">
+        <div>
+            <a href="{% url 'shift_dashboard' %}" class="kds-back no-print">&larr; Back to Dashboard</a>
+            <div class="kds-eyebrow mt-2">SHIFT HANDOVER &bull; STOCK AUDIT</div>
+            <h1>Day Opening Stock Report</h1>
+            <div class="kds-eyebrow">Initial inventory snapshot for shift handover</div>
+        </div>
+
+        <div class="kds-header-actions no-print">
+            <a href="{% url 'restaurant_sales_list' %}" class="btn-kds-outline">POS</a>
+            <button onclick="window.print()" class="btn-kds-print" style="cursor:pointer;">🖨 Print / Export PDF</button>
+        </div>
+    </div>
+
+    <!-- Printable-only header -->
+    <div class="print-only-header mb-4">
+        <h2 style="text-transform:none; font-family: 'Oswald', sans-serif;">Day Opening Stock Report</h2>
+        <p>
+            <strong>Shift User:</strong> {{ shift.user.username }} |
+            <strong>Employee:</strong> {{ shift.employee.rda_emp_name|default:"N/A" }} |
+            <strong>Shift Start:</strong> {{ shift.start_time|date:"Y-m-d H:i" }}
+        </p>
+        <hr>
+    </div>
+
+    <div class="kds-banner no-print">
+        <strong>Carried-over stock —</strong> this snapshot reflects opening inventory for this shift, carried over from the previous closing stock (or active inventory if this is the first shift of the day).
+    </div>
+
+    <!-- Shift meta strip -->
+    <div class="meta-strip">
+        <div class="meta-cell">
+            <div class="meta-label">Shift User</div>
+            <div class="meta-value">{{ shift.user.username }}</div>
+        </div>
+        <div class="meta-cell">
+            <div class="meta-label">Assigned Employee</div>
+            <div class="meta-value">{{ shift.employee.rda_emp_name|default:"N/A" }}</div>
+        </div>
+        <div class="meta-cell">
+            <div class="meta-label">Shift Started</div>
+            <div class="meta-value">{{ shift.start_time|date:"Y-m-d H:i" }}</div>
+        </div>
+        <div class="meta-cell">
+            <div class="meta-label">Total Unique Items</div>
+            <div class="meta-value accent">{{ snapshots|length }} Item{% if snapshots|length != 1 %}s{% endif %}</div>
+        </div>
+    </div>
+
+    {% if snapshots %}
+    <div class="row g-3 no-print">
+        <div class="col-lg-8">
+            <div class="kds-panel">
+                <div class="kds-panel-head">
+                    <h5>Opening Stock Volume Distribution</h5>
+                    <span class="kds-tag">Initial Audit</span>
+                </div>
+                <canvas id="openingStockChart" style="max-height:260px;"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="kds-panel">
+                <div class="kds-panel-head">
+                    <h5>Status Split</h5>
+                    <span class="kds-tag">%</span>
+                </div>
+                <canvas id="openingStatusChart" style="max-height:260px;"></canvas>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Snapshot table -->
+    <div class="kds-table-wrap">
+        <div class="kds-table-head">
+            <h5>Opening Snapshot Items</h5>
+            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search item…" class="form-control form-control-sm no-print" style="width:200px;">
+        </div>
+        <div class="table-responsive">
+            <table class="kds-table" id="stockTable">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th class="text-center">Opening Stock</th>
+                        <th class="text-center">Stock Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for snap in snapshots %}
+                    <tr>
+                        <td class="name-cell">{{ snap.item_amount.item_name.rest_item_name|default:"N/A" }}</td>
+                        <td class="qty-cell">{{ snap.opening_stock }}</td>
+                        <td class="text-center">
+                            {% if snap.opening_stock <= 0 %}
+                                <span class="status-chip chip-bad">Out of Stock</span>
+                            {% elif snap.opening_stock < 10 %}
+                                <span class="status-chip chip-warn">Low Stock</span>
+                            {% else %}
+                                <span class="status-chip chip-good">Adequate</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="empty-row">No opening stock items found for this shift.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterTable() {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        document.querySelectorAll("#stockTable tbody tr").forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
+        });
+    }
+
+    {% if snapshots %}
+    document.addEventListener("DOMContentLoaded", function () {
+        const itemNames = [
+            {% for snap in snapshots %}"{{ snap.item_amount.item_name.rest_item_name|default:'N/A'|escapejs }}",{% endfor %}
+        ];
+        const openingStock = [
+            {% for snap in snapshots %}{{ snap.opening_stock|default:0 }},{% endfor %}
+        ];
+
+        let healthy = 0, low = 0, critical = 0;
+        openingStock.forEach(q => { if (q <= 0) critical++; else if (q < 10) low++; else healthy++; });
+
+        const textColor = '#6b7480';
+        const gridColor = '#e2e5ea';
+        const barColors = openingStock.map(q => q <= 0 ? '#d63c3c' : (q < 10 ? '#b8790a' : '#1a9d6d'));
+
+        new Chart(document.getElementById('openingStockChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: itemNames,
+                datasets: [{ label: 'Opening Stock Volume', data: openingStock, backgroundColor: barColors, borderRadius: 5, borderSkipped: false }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: gridColor } },
+                    y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('openingStatusChart').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Adequate', 'Low', 'Out of Stock'],
+                datasets: [{ data: [healthy, low, critical], backgroundColor: ['#1a9d6d', '#b8790a', '#d63c3c'], borderWidth: 0 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '65%',
+                plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 12 } } }
+            }
+        });
+    });
+    {% endif %}
+</script>
+{% endblock %}

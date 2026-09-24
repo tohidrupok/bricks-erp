@@ -1,0 +1,268 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Restaurant Item - POS System</title>
+    <style>
+        :root {
+            --primary-gold: #b89230;
+            --primary-gold-dark: #967423;
+            --primary-blue: #0d6efd;
+            --primary-green: #198754;
+            --primary-red: #dc3545;
+            --bg-canvas: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-dark: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg-canvas); 
+            color: var(--text-dark); 
+            line-height: 1.5; 
+            padding-bottom: 50px; 
+        }
+
+        /* TOP HEADER NAVIGATION */
+        .top-header { 
+            max-width: 900px; 
+            margin: 15px auto 0; 
+            background: var(--card-bg); 
+            padding: 15px 20px; 
+            border-radius: 12px; 
+            box-shadow: var(--shadow-sm); 
+            border: 1px solid var(--border-color);
+        }
+        .header-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            gap: 15px; 
+            flex-wrap: wrap; 
+        }
+        .page-title { 
+            margin: 0; 
+            color: var(--primary-gold); 
+            font-size: 22px; 
+            font-weight: 700; 
+            letter-spacing: -0.5px; 
+        }
+        .page-subtitle { 
+            margin-top: 2px; 
+            color: var(--text-muted); 
+            font-size: 13px; 
+        }
+
+        .nav-links { 
+            display: flex; 
+            gap: 8px; 
+            flex-wrap: wrap; 
+            align-items: center;
+        }
+        .nav-btn { 
+            text-decoration: none; 
+            color: #fff; 
+            padding: 8px 14px; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            font-weight: 600; 
+            transition: all 0.2s ease; 
+            border: none; 
+            cursor: pointer; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px; 
+        }
+        .nav-btn:hover { 
+            opacity: 0.9; 
+            transform: translateY(-1px); 
+        }
+        .home-btn { background: #0d6efd; }
+        .supplier-btn { background: #198754; }
+        .category-btn { background: #fd7e14; }
+        .req-btn { background: #6f42c1; }
+        .back-btn { background: #4b5563; }
+
+        /* CONTAINER & FORM CARD */
+        .pos-container { 
+            max-width: 900px; 
+            margin: 15px auto; 
+        }
+        .card-panel { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            padding: 24px; 
+            border-radius: 12px; 
+            box-shadow: var(--shadow-sm); 
+        }
+
+        /* FORM STYLING */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        /* Django form field overrides */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13.5px;
+            color: var(--text-dark);
+            background-color: #fff;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(184, 146, 48, 0.15);
+        }
+
+        /* Django {{ form.as_p }} paragraph cleanup */
+        form p {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        form p label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+        }
+        .helptext {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .errorlist {
+            list-style: none;
+            color: var(--primary-red);
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        /* FORM ACTION BUTTONS */
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .btn-save {
+            background: var(--primary-gold);
+            color: #ffffff;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-save:hover {
+            background: var(--primary-gold-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-cancel {
+            background: #ffffff;
+            color: #374151;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-cancel:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        @media (max-width: 768px) {
+            .header-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP HEADER MENU -->
+<div class="top-header">
+    <div class="header-row">
+        <div>
+            <h2 class="page-title">➕ Add Restaurant Item</h2>
+            <div class="page-subtitle">The Galleria Restaurant & Cafe</div>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'public_restaurant_item_name' %}" class="nav-btn req-btn">📦 Item List</a>
+            <a href="{% url 'public_restaurant_requisition_category' %}" class="nav-btn category-btn">📂 Category</a>
+            <a href="{% url 'public_restaurant_item_name' %}" class="nav-btn back-btn">⬅ Back</a>
+        </div>
+    </div>
+</div>
+
+<!-- FORM CONTAINER -->
+<div class="pos-container">
+    <div class="card-panel">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-grid">
+                {{ form.as_p }}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-save">💾 Save Item</button>
+                <a href="{% url 'public_restaurant_item_name' %}" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>

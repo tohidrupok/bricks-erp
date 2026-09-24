@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Purchase Item Check Details - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+  .message.success {
+    color: green;
+    background-color: #d4edda;
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  .message.error {
+    color: red;
+    background-color: #f8d7da;
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  .table th, .table td {
+    font-size: 11px;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+  }
+
+  .btn-print, .btn-refresh, .btn-back {
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: white;
+    display: inline-block;
+  }
+
+  .btn-refresh { background-color: #1e3a8a; }
+  .btn-back { background-color: #10b981; }
+  .btn-approve { background-color: #16a34a; }
+
+  .status-approved {
+    background-color: #16a34a;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+
+  .status-waiting {
+    background-color: #dc2626;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+
+  .status-no-purchase {
+    background-color: #2563eb;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+  }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+  {% include 'partials/mobile.html' %}
+  <div class="mt-[4.7rem] flex md:mt-0">
+    {% include 'partials/sidebar_list.html' %}
+
+    <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+      {% include 'partials/header.html' %}
+
+      <div class="card mt-10">
+
+        <div class="top-buttons flex flex-wrap items-center space-x-2 no-print mb-3">
+          <a href="{% url 'purchase_list' %}">
+            <button class="btn-back">🔙 Back</button>
+          </a>
+          &nbsp;
+          <button onclick="location.reload()" class="btn-refresh">🔄 Refresh</button>
+        &nbsp;
+          <div class="flex-grow"></div>
+
+          <div class="relative w-48">
+            <input id="searchInput" type="text" placeholder="🔍 Search..." class="w-full text-xs py-1.5 pl-3 pr-8 border rounded-md shadow-sm focus:ring focus:ring-blue-300 focus:outline-none" oninput="handleSearch()">
+          </div>
+        </div>
+
+        {% if messages %}
+        <ul>
+          {% for message in messages %}
+          <li class="message {{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        <h2 class="section-title"><span style="font-size:18px;font-weight:bold">Requisition - ID: {{ requisition.requi_uniq_id }}</span></h2>
+        <table class="table w-full mb-6">
+          <thead class="bg-blue-100">
+            <tr>
+              <th>Item</th>
+              <th style="text-align:left">Qty</th>
+              <th style="text-align:left">Rate</th>
+              <th >Amount</th>
+              <th style="text-align:left">Supplier</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            {% for req in requisitions %}
+            <tr>
+              <td>{{ req.item_name }}</td>
+              <td>{{ req.qty }}</td>
+              <td>{{ req.rate }}</td>
+              <td>{{ req.amount }}</td>
+              <td>{{ req.vendor_name }}</td>
+              <td>
+                {% if req.purch_appov|default:''|lower == 'yes' %}
+                  <span class="status-approved">Approved</span>
+                {% elif req.purch_appov|default:''|lower == 'wait' %}
+                  <span class="status-waiting">Waiting</span>
+                {% elif req.purch_appov|default:''|lower == 'no purchase' or not req.purch_appov %}
+                  <a href="{% url 'purchase_repurchase' requi_id=req.requi_uniq_id purch_id=req.purch_id|default:'0' %}" class="status-no-purchase">No Purchase</a>
+                {% else %}
+                  <span>{{ req.purch_appov }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <h2 class="section-title"><span style="font-size:18px;font-weight:bold">Purchase - ID: {{ purch_id }}</span></h2>
+        <table class="table w-full">
+          <thead class="bg-green-100">
+            <tr>
+              <th>Item</th>
+              <th style="text-align:left">Qty</th>
+              <th style="text-align:left">Rate</th>
+              <th style="text-align:left">Amount</th>
+              <th style="text-align:left">Supplier</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            {% for inv in inventories %}
+            <tr>
+              <td>{{ inv.item_name }}</td>
+              <td>{{ inv.qty }}</td>
+              <td>{{ inv.rate }}</td>
+              <td>{{ inv.amount }}</td>
+              <td>{{ inv.vendor_name }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        
+        <!-- Summary Table -->
+        <table class="table w-full mt-6 mb-3 bg-yellow-50 border border-gray-300">
+          <thead>
+            <tr>
+              <th colspan="2" class="text-left bg-yellow-100 px-3 py-2"><span style="font-size:18px;font-weight:bold">Summary of Amounts</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-semibold px-3 py-2">Total Requisition Amount</td>
+              <td class="px-3 py-2">{{ req_total|floatformat:2|intcomma }}</td>
+            </tr>
+            <tr>
+              <td class="font-semibold px-3 py-2">Total Purchase Amount</td>
+              <td class="px-3 py-2">{{ inv_total|floatformat:2|intcomma }}</td>
+            </tr>
+            <tr>
+              <td class="font-semibold px-3 py-2">Difference (Requisition - Purchase)</td>
+              <td class="px-3 py-2">{{ difference|floatformat:2|intcomma }}</td>
+            </tr>
+          </tbody>
+        </table>
+        
+       
+        <div class="btn-container text-center mt-6">
+          <form method="post" action="{% url 'purchase_approval_action' requi_id=requi_uniq_id purch_id=purch_id %}">
+            {% csrf_token %}
+            <button type="submit" style="color: #FFFFFF; height: 30px; border-radius: 5px;"
+              class="btn-approve {% if requisitions.0.purch_appov|default:''|lower|cut:' ' == 'yes' %}green{% else %}red{% endif %}">
+              ✅ Approve Purchase &nbsp;
+            </button>
+          </form>
+          <script>
+                            function handleSearch() {
+                                let searchValue = document.getElementById('searchInput').value.toLowerCase();
+                                let rows = document.querySelectorAll("#tableBody tr");
+                    
+                                rows.forEach(row => {
+                                    let columns = row.getElementsByTagName("td");
+                                    let rowText = "";
+                                    
+                                    // Combine text content of all columns in the row for searching
+                                    for (let i = 0; i < columns.length; i++) {
+                                        rowText += columns[i].textContent.toLowerCase(); // Get all text in row
+                                    }
+                    
+                                    // If search term is found in the row's combined text, show the row, else hide it
+                                    if (rowText.includes(searchValue)) {
+                                        row.style.display = ""; // Show row
+                                    } else {
+                                        row.style.display = "none"; // Hide row
+                                    }
+                                });
+                            }
+                        </script>
+        </div>
+      </div>
+
+      <script>
+        function handleSearch() {
+          const input = document.getElementById('searchInput').value.toLowerCase();
+          const rows = document.querySelectorAll('.card table tbody tr');
+          rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(input) ? '' : 'none';
+          });
+        }
+      </script>
+    </div>
+  </div>
+</div>
+{% endblock %}

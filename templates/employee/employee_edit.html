@@ -1,0 +1,195 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Employee Edit - BM ERP{% endblock %}
+
+{% block content %}
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12">
+
+                        <!-- Page heading -->
+                        <div class="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                            <div>
+                                <div class="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                                    Employee
+                                </div>
+                                <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">
+                                    {{ employee.employee_name }}
+                                </h2>
+                                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+                                    Update salary, allowances and account access below.
+                                </p>
+                            </div>
+                            <a href="{% url 'employee_list' %}"
+                               class="inline-flex w-fit items-center gap-1.5 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-darkmode-400 dark:text-slate-300 dark:hover:bg-darkmode-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                                Back to employees
+                            </a>
+                        </div>
+
+                        <form method="post" enctype="multipart/form-data" class="mx-auto max-w-3xl">
+                            {% csrf_token %}
+
+                            {% if form.non_field_errors %}
+                                <div class="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">
+                                    {{ form.non_field_errors }}
+                                </div>
+                            {% endif %}
+
+                            <!-- Section: Salary & Allowances -->
+                            <div class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-darkmode-400 dark:bg-darkmode-600">
+                                <div class="flex items-center gap-2.5 border-b border-slate-100 px-5 py-4 dark:border-darkmode-400">
+                                    <span class="flex h-8 w-8 items-center justify-center rounded-lg" style="background-color:#1e3c98">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                    </span>
+                                    <div>
+                                        <h3 class="font-semibold text-slate-800 dark:text-slate-100">Salary &amp; Allowances</h3>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">Base pay and recurring allowance amounts</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 gap-x-5 gap-y-4 px-5 py-5 sm:grid-cols-2">
+                                    {% for field in form %}
+                                        {% if field.name != 'current_password' and field.name != 'password1' and field.name != 'password2' %}
+                                            <div class="{% if field.field.widget.input_type == 'textarea' %}sm:col-span-2{% endif %}">
+                                                <label for="{{ field.id_for_label }}"
+                                                       class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                    {{ field.label }}
+                                                </label>
+
+                                                {{ field }}
+
+                                                {% if field.help_text %}
+                                                    <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">{{ field.help_text }}</p>
+                                                {% endif %}
+
+                                                {% if field.errors %}
+                                                    <p class="mt-1 text-xs font-medium text-red-600 dark:text-red-400">{{ field.errors }}</p>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Section: Account Access -->
+                            <div class="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-darkmode-400 dark:bg-darkmode-600">
+                                <div class="flex items-center gap-2.5 border-b border-slate-100 px-5 py-4 dark:border-darkmode-400">
+                                    <span class="flex h-8 w-8 items-center justify-center rounded-lg" style="background-color:#1e3c98">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    </span>
+                                    <div>
+                                        <h3 class="font-semibold text-slate-800 dark:text-slate-100">Account Access</h3>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">Only fill these in if you want to change the login password</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 gap-x-5 gap-y-4 px-5 py-5 sm:grid-cols-2">
+                                    <div class="sm:col-span-2">
+                                        <label for="id_current_password" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                            Current Password
+                                        </label>
+                                        {{ form.current_password }}
+                                        {% if form.current_password.errors %}
+                                            <p class="mt-1 text-xs font-medium text-red-600 dark:text-red-400">{{ form.current_password.errors }}</p>
+                                        {% endif %}
+                                    </div>
+
+                                    <div>
+                                        <label for="id_password1" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                            New Password
+                                        </label>
+                                        {{ form.password1 }}
+                                        {% if form.password1.errors %}
+                                            <p class="mt-1 text-xs font-medium text-red-600 dark:text-red-400">{{ form.password1.errors }}</p>
+                                        {% endif %}
+                                    </div>
+
+                                    <div>
+                                        <label for="id_password2" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                            Confirm Password
+                                        </label>
+                                        {{ form.password2 }}
+                                        {% if form.password2.errors %}
+                                            <p class="mt-1 text-xs font-medium text-red-600 dark:text-red-400">{{ form.password2.errors }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="mt-6 flex items-center justify-between">
+                                <a href="{% url 'employee_list' %}"
+                                   class="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-darkmode-400 dark:text-slate-300 dark:hover:bg-darkmode-400">
+                                    Cancel
+                                </a>
+
+                                <button type="submit"
+                                        class="rounded-lg px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
+                                        style="background-color:#1e3c98">
+                                    Save Changes
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+
+    <style>
+        /* Consistent input styling for all form fields rendered by {{ field }} */
+        .rubick input[type="text"],
+        .rubick input[type="number"],
+        .rubick input[type="email"],
+        .rubick input[type="password"],
+        .rubick input[type="date"],
+        .rubick input[type="file"],
+        .rubick select,
+        .rubick textarea {
+            width: 100%;
+            border-radius: 0.5rem;
+            border: 1px solid rgb(226 232 240);
+            padding: 0.55rem 0.75rem;
+            font-size: 0.875rem;
+            background-color: #fff;
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+        .rubick input:focus,
+        .rubick select:focus,
+        .rubick textarea:focus {
+            outline: none;
+            border-color: #1e3c98;
+            box-shadow: 0 0 0 3px rgba(30, 60, 152, 0.15);
+        }
+        .dark .rubick input[type="text"],
+        .dark .rubick input[type="number"],
+        .dark .rubick input[type="email"],
+        .dark .rubick input[type="password"],
+        .dark .rubick input[type="date"],
+        .dark .rubick input[type="file"],
+        .dark .rubick select,
+        .dark .rubick textarea {
+            background-color: rgb(43 55 82);
+            border-color: rgb(63 79 115);
+            color: rgb(226 232 240);
+        }
+    </style>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Project Financial Ledger System</h4>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="" class="row g-3 align-items-center">
+                <div class="col-md-6">
+                    <label for="project_id" class="form-label fw-bold">Select Active Project</label>
+                    <select name="project_id" id="project_id" class="form-select" onchange="this.form.submit()">
+                        <option value="">--- Choose Project Workspace ---</option>
+                        {% for proj in projects %}
+                            <option value="{{ proj.id }}" {% if selected_project.id == proj.id %}selected{% endif %}>
+                                {{ proj.project_first_name|default:proj }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 align-self-end">
+                    <button type="submit" class="btn btn-secondary w-100">Load Matrix Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if selected_project %}
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Statement Record: <strong>{{ selected_project.project_first_name|default:selected_project }}</strong></h5>
+            <span class="badge bg-secondary font-monospace fs-6">Run Date: {% now "Y-m-d" %}</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover mb-0">
+                <thead class="table-light text-center">
+                    <tr>
+                        <th scope="col" style="width: 12%;">Date</th>
+                        <th scope="col" style="width: 15%;">Type</th>
+                        <th scope="col">Transaction Details / References</th>
+                        <th scope="col" class="text-end" style="width: 15%;">Debit (Payment)</th>
+                        <th scope="col" class="text-end" style="width: 15%;">Credit (Requisition)</th>
+                        <th scope="col" class="text-end" style="width: 18%;">Cumulative Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if ledger_rows %}
+                        {% for row in ledger_rows %}
+                        <tr class="align-middle">
+                            <td class="text-center font-monospace">{{ row.date|date:"Y-m-d"|default:"-" }}</td>
+                            <td class="text-center">
+                                {% if row.type == 'Requisition' %}
+                                    <span class="badge bg-success-subtle text-success px-3 py-2 border border-success w-100">Requisition</span>
+                                {% else %}
+                                    <span class="badge bg-warning-subtle text-warning-emphasis px-3 py-2 border border-warning w-100">{{ row.type }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-wrap text-muted small">{{ row.description }}</td>
+                            <td class="text-end font-monospace text-danger fw-bold">
+                                {% if row.debit > 0 %}{{ row.debit }}{% else %}-{% endif %}
+                            </td>
+                            <td class="text-end font-monospace text-success fw-bold">
+                                {% if row.credit > 0 %}{{ row.credit }}{% else %}-{% endif %}
+                            </td>
+                            <td class="text-end font-monospace fw-bold {% if row.balance < 0 %}text-danger{% else %}text-dark{% endif %}">
+                                {{ row.balance }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted bg-light">No ledger data entries or matching allocations reported for this workspace.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning text-center border-dashed py-4 shadow-sm">
+        Please select a valid Project Workspace context value from the menu configuration controls interface above to review the calculated performance output sheet matrix.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

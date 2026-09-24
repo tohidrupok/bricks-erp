@@ -1,0 +1,131 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Customer Ledger Report - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+                
+                {% for data in entry_data %}
+                    {% if forloop.first %}
+                        <h2 class="intro-y mt-10 text-lg font-medium">{{ data.entry.project_name.project_first_name }} Reports</h2>
+                    {% endif %}
+                {% endfor %}
+
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                         <a href="{% url 'rest_customer_summary_report' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Refresh</button>
+                        </a> 
+                        <a href="{% url 'rest_customer_ledger_manage' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Customer Reports</button>
+                        </a> 
+                         
+                    </div>
+            
+                   <div class="intro-y col-span-12 overflow-auto lg:overflow-visible mt-5">
+				    <table class="w-full border border-collapse border-gray-300 text-sm">
+                        <thead>
+                            <tr class="bg-gray-100 font-semibold text-gray-700">
+                                <th class="border px-4 py-2 text-left">Date</th>
+                                <th class="border px-4 py-2 text-left">Customer</th>
+                                <th class="border px-4 py-2 text-left">Project</th>
+                                <th class="border px-4 py-2 text-right">Amount (Debit)</th>
+                                <th class="border px-4 py-2 text-right">Amount (Credit)</th>
+                                <th class="border px-4 py-2 text-right">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            {% for data in report_data %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="border px-4 py-2">{{ data.first_date }}</td>
+                                <td class="border px-4 py-2">{{ data.customer.customer_name }}</td>
+                                <td class="border px-4 py-2">{{ data.project_name }}</td>
+                                <td class="border px-4 py-2 text-right">{{ data.total_debit|floatformat:2 }}</td>
+                                <td class="border px-4 py-2 text-right">{{ data.total_credit|floatformat:2 }}</td>
+                                <td class="border px-4 py-2 text-right">{{ data.balance|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-gray-500 py-4">No records found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <script>
+                            function handleSearch() {
+                                let searchValue = document.getElementById('searchInput').value.toLowerCase();
+                                let rows = document.querySelectorAll("#tableBody tr");
+                                let balance = 0;
+
+                                rows.forEach(row => {
+                                    let columns = row.getElementsByTagName("td");
+                                    let rowText = "";
+                                    for (let i = 0; i < columns.length; i++) {
+                                        rowText += columns[i].textContent.toLowerCase();
+                                    }
+
+                                    if (rowText.includes(searchValue)) {
+                                        row.style.display = "";
+
+                                        let debit = parseFloat(columns[4].textContent) || 0;
+                                        let credit = parseFloat(columns[5].textContent) || 0;
+
+                                        balance += (credit - debit);  // balance += credit - debit
+
+                                        columns[6].textContent = balance.toFixed(2);  // Update balance cell
+                                    } else {
+                                        row.style.display = "none";
+                                        columns[6].textContent = "";
+                                    }
+                                });
+
+                                // Update the balance beside the search input
+                                document.getElementById("lastBalance").textContent = "Balance: " + balance.toFixed(2);
+                            }
+                        </script>
+
+				</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

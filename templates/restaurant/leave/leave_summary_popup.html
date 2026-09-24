@@ -1,0 +1,352 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Leave Summary - {{ employee.rda_emp_name }}</title>
+  
+  <!-- Font support for Bengali & English -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Serif Bengali', Arial, sans-serif;
+      font-size: 11px;
+      background-color: #c0c0c0;
+      padding: 20px;
+      margin: 0;
+      color: #333;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 6px;
+      padding: 24px;
+      max-width: 960px;
+      margin: auto;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .logo img {
+      height: 50px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .label-box {
+      background-color: #e2f0d9;
+      color: #000;
+      padding: 4px 12px;
+      font-weight: bold;
+      font-size: 13px;
+      border-radius: 4px;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .sub-head {
+      font-size: 11px;
+      color: #555;
+      margin-top: -10px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .voucher-header {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .project-name {
+      margin: 4px 0;
+      font-size: 12px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 8px;
+    }
+
+    .table th,
+    .table td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .table th {
+      background-color: #f8f9fa;
+      font-weight: bold;
+    }
+
+    .section {
+      margin-top: 15px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .signature-section {
+      margin-top: 50px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      text-align: center;
+    }
+
+    .signature-box {
+      flex: 1;
+      padding: 8px;
+    }
+
+    .signature-box:not(:last-child) {
+      margin-right: 10px;
+    }
+
+    .signature-line {
+      display: block;
+      margin-top: 10px;
+      border-top: 1px solid #000;
+      width: 100%;
+    }
+
+    .bm-property {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      font-size: 12px;
+      color: #333;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+    }
+
+    .back-btn {
+      background-color: #28a745;
+      color: white;
+      padding: 6px 16px;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .print-btn {
+      background-color: #1e3c98;
+      color: white;
+      padding: 6px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+        padding: 0;
+        margin: 0;
+      }
+
+      .card {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+        max-width: 100%;
+      }
+
+      .table th {
+        background-color: #f8f9fa !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .label-box {
+        background-color: #e2f0d9 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+
+    <!-- Header Section -->
+    <div class="card-header">
+      <div class="logo">
+        <img src="{% static 'images/resturant-logo.png' %}" alt="Company Logo" onerror="this.style.display='none'">
+      </div>
+      <div style="text-align: right;">
+        <div class="label-box">Employee Leave Summary</div>
+        <p style="font-size: 11px; margin-top: 4px;">Printing Date: {% now "F j, Y, g:i a" %}</p>
+      </div>
+    </div>
+
+    <!-- Company Address -->
+    <div class="sub-head">
+      House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br>
+      01993005558, 09639246230, 09639246231 <br>
+      md2bayid@gmail.com, thebtplimited@gmail.com, www.btplimited.com
+    </div>
+
+    <hr style="margin: 8px 0; border: 0; border-top: 1px solid #ddd;">
+
+    <!-- Summary Year & Project Info -->
+    <div class="voucher-header">
+      <div class="project-name">
+        <div>
+          <strong>Report Year:</strong> {{ year }}
+        </div>
+        <div>
+          <strong>Project:</strong> {{ employee.project_name|default:"N/A" }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Employee Details Table -->
+    <div class="section">Employee Details (কর্মচারী তথ্য)</div>
+    <table class="table">
+      <tr>
+        <td style="width: 50%;"><strong>Name (নাম):</strong> {{ employee.rda_emp_name|default:"N/A" }}</td>
+        <td style="width: 50%;"><strong>Position (পদবী):</strong> {{ employee.rda_position|default:"N/A" }}</td>
+      </tr>
+      <tr>
+        <td><strong>Phone (ফোন):</strong> {{ employee.rda_phone|default:"N/A" }}</td>
+        <td><strong>Department (বিভাগ):</strong> {{ employee.department|default:"Restaurant" }}</td>
+      </tr>
+    </table>
+
+    <!-- Leave Balance Status Table -->
+    <div class="section">Leave Balance Status (ছুটি ব্যালেন্স বিবরণী)</div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Leave Type (ছুটির ধরন)</th>
+          <th style="text-align: center;">Allocated (বরাদ্দ)</th>
+          <th style="text-align: center;">Used (ব্যবহৃত)</th>
+          <th style="text-align: center;">Remaining (অবশিষ্ট)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Casual Leave (CL)</strong></td>
+          <td style="text-align: center;">{{ alloc.casual_leave_allocated|default:0 }}</td>
+          <td style="text-align: center; color: #dc3545; font-weight: bold;">{{ alloc.casual_leave_used|default:0 }}</td>
+          <td style="text-align: center; color: #28a745; font-weight: bold;">{{ alloc.remaining_casual_leave|default:0 }}</td>
+        </tr>
+        <tr>
+          <td><strong>Sick Leave (SL)</strong></td>
+          <td style="text-align: center;">{{ alloc.sick_leave_allocated|default:0 }}</td>
+          <td style="text-align: center; color: #dc3545; font-weight: bold;">{{ alloc.sick_leave_used|default:0 }}</td>
+          <td style="text-align: center; color: #28a745; font-weight: bold;">{{ alloc.remaining_sick_leave|default:0 }}</td>
+        </tr>
+        <tr>
+          <td><strong>Earned Leave (EL)</strong></td>
+          <td style="text-align: center;">{{ alloc.total_earned_leave|default:0 }}</td>
+          <td style="text-align: center; color: #dc3545; font-weight: bold;">{{ alloc.earned_leave_used|default:0 }}</td>
+          <td style="text-align: center; color: #28a745; font-weight: bold;">{{ alloc.remaining_earned_leave|default:0 }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Leave History Table -->
+    <div class="section">Approved Leave History (অনুমোদিত ছুটির ইতিহাস)</div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th style="width: 20%;">Type</th>
+          <th style="width: 15%;">Start Date</th>
+          <th style="width: 15%;">End Date</th>
+          <th style="width: 10%; text-align: center;">Days</th>
+          <th style="width: 40%;">Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in leave_history %}
+        <tr>
+          <td>{{ l.get_leave_type_display|default:l.leave_type }}</td>
+          <td>{{ l.start_date|date:"Y-m-d" }}</td>
+          <td>{{ l.end_date|date:"Y-m-d" }}</td>
+          <td style="text-align: center; font-weight: bold;">{{ l.total_days }}</td>
+          <td>{{ l.reason|default:"-" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" style="text-align: center; color: #777; padding: 12px;">
+            No approved leaves found for {{ year }}.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Signatures Section -->
+    <div class="signature-section">
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Employee Signature
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        HR / Admin
+      </div>
+      <div class="signature-box">
+        <span class="bm-property">{{ request.user.get_full_name|default:request.user.username }}</span>
+        <span class="signature-line"></span>
+        Prepared By
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Approved By
+      </div>
+    </div>
+
+    <!-- Action Buttons (Print & Close) -->
+    <div class="footer no-print">
+      <button onclick="if(window.opener){ window.close(); } else { window.history.back(); }" class="back-btn">
+        ← Close Window
+      </button>
+      &nbsp;&nbsp;
+      <button onclick="window.print()" class="print-btn">🖨️ Print Report</button>
+    </div>
+
+  </div>
+
+</body>
+</html>

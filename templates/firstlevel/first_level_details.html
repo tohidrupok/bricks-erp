@@ -1,0 +1,404 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Project Details - BM ERP{% endblock %}
+
+{% block content %}
+
+<!-- ===================== ICON SPRITE (inline SVG, no library needed) ===================== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-building" viewBox="0 0 24 24"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-ruler" viewBox="0 0 24 24"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2M11.5 9.5l2-2M8.5 6.5l2-2M17.5 15.5l2-2"/></symbol>
+    <symbol id="i-rows" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 9H3M21 15H3"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-hash" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8M16 13H8M16 17H8"/></symbol>
+    <symbol id="i-calc" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></symbol>
+    <symbol id="i-cash" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+    <symbol id="i-flask" viewBox="0 0 24 24"><path d="M10 2v7.53a2 2 0 0 1-.21.9L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.07-10.13a2 2 0 0 1-.21-.9V2"/><path d="M8.5 2h7M7 16h10"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="m3 21 8.02-14.26"/><path d="m12.99 6.74 1.93 3.44"/><path d="M19 12c-3.36 3.36-8.64 3.36-12 0"/><path d="m21 21-2.16-3.84"/></symbol>
+    <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+</svg>
+
+<style>
+    /* ---------- Original helper styles (kept) ---------- */
+    .detail-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .dark .detail-card {
+        background: #232a3b;
+    }
+
+    .detail-label {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 5px;
+    }
+
+    .detail-value {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    .dark .detail-value {
+        color: #f8fafc;
+    }
+
+    .status-completed {
+        color: #16a34a;
+        background: #dcfce7;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .status-pending {
+        color: #dc2626;
+        background: #fee2e2;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    /* ---------- Dashboard ---------- */
+    .pd {
+        --pd-brand: #1e3c98;
+        --pd-brand-2: #3557d1;
+        --pd-ink: #0f172a;
+        --pd-muted: #64748b;
+        --pd-line: #e2e8f0;
+        --pd-card: #ffffff;
+        --pd-soft: #f8fafc;
+        width: 100%;
+        color: var(--pd-ink);
+    }
+    .dark .pd {
+        --pd-ink: #e2e8f0;
+        --pd-muted: #94a3b8;
+        --pd-line: #334155;
+        --pd-card: #1e293b;
+        --pd-soft: #0f172a;
+    }
+
+    .pd-i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+    /* ---------- Summary card ---------- */
+    .pd-summary { background: var(--pd-card); border: 1px solid var(--pd-line); border-radius: 18px; box-shadow: 0 10px 30px -14px rgba(15, 23, 42, .22); overflow: hidden; }
+
+    .pd-hero { position: relative; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 22px 28px; color: #fff; background: linear-gradient(120deg, var(--pd-brand) 0%, var(--pd-brand-2) 100%); overflow: hidden; }
+    .pd-hero::after { content: ""; position: absolute; right: -40px; top: -70px; width: 220px; height: 220px; border-radius: 50%; background: rgba(255, 255, 255, .09); }
+    .pd-hero::before { content: ""; position: absolute; right: 110px; bottom: -90px; width: 150px; height: 150px; border-radius: 50%; background: rgba(255, 255, 255, .06); }
+    .pd-hero > * { position: relative; z-index: 1; }
+    .pd-hero-ico { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 14px; background: rgba(255, 255, 255, .18); border: 1px solid rgba(255, 255, 255, .25); }
+    .pd-hero-ico .pd-i { width: 26px; height: 26px; }
+    .pd-hero-text { min-width: 0; }
+    .pd-eyebrow { font-size: 12.5px; opacity: .8; margin: 0; }
+    .pd-title { font-size: 21px; font-weight: 700; line-height: 1.25; margin: 2px 0 0; letter-spacing: -.01em; overflow-wrap: anywhere; }
+    .pd-pill { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 4px 11px; font-size: 12px; font-weight: 600; border-radius: 999px; background: rgba(255, 255, 255, .18); border: 1px solid rgba(255, 255, 255, .25); }
+    .pd-pill .pd-i { width: 13px; height: 13px; }
+    .pd-hero-side { margin-left: auto; }
+    .pd-back { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 13px; font-size: 13px; font-weight: 600; color: #fff; text-decoration: none; border-radius: 9px; background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .28); transition: background-color .15s; }
+    .pd-back:hover { background: rgba(255, 255, 255, .28); color: #fff; }
+    .pd-back .pd-i { width: 15px; height: 15px; }
+
+    /* ---------- Stat strip ---------- */
+    .pd-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+    .pd-stat { display: flex; align-items: center; gap: 12px; padding: 16px 22px; border-right: 1px solid var(--pd-line); border-bottom: 1px solid var(--pd-line); margin: 0 -1px -1px 0; }
+    .pd-stat-ico { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; color: var(--pd-brand-2); background: color-mix(in srgb, var(--pd-brand-2) 12%, transparent); }
+    .dark .pd-stat-ico { color: #93a8ff; }
+    .pd-stat-ico .pd-i { width: 18px; height: 18px; }
+    .pd-stat .detail-label { margin: 0; line-height: 1.2; }
+    .pd-stat .detail-value { line-height: 1.3; overflow-wrap: anywhere; }
+    .pd-stat .detail-label { color: var(--pd-muted); }
+    .pd .detail-value { color: var(--pd-ink); }
+
+    /* ---------- Section heading ---------- */
+    .pd-sec { display: flex; align-items: center; gap: 10px; margin: 26px 2px 14px; }
+    .pd-sec-ico { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; color: var(--pd-brand-2); background: color-mix(in srgb, var(--pd-brand-2) 12%, transparent); }
+    .dark .pd-sec-ico { color: #93a8ff; }
+    .pd-sec-ico .pd-i { width: 17px; height: 17px; }
+    .pd-sec h4 { font-size: 16px; font-weight: 650; margin: 0; }
+    .pd-sec p { font-size: 12.5px; color: var(--pd-muted); margin: 1px 0 0; }
+
+    /* ---------- Module cards ---------- */
+    .pd-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    @media (max-width: 1023px) { .pd-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 640px) { .pd-grid { grid-template-columns: 1fr; } .pd-hero { padding: 18px 16px; } .pd-stat { padding: 14px 16px; } }
+
+    .pd-card { --a: #3557d1; position: relative; display: flex; align-items: center; gap: 14px; padding: 16px 18px; text-decoration: none; color: var(--pd-ink); background: var(--pd-card); border: 1px solid var(--pd-line); border-radius: 15px; box-shadow: 0 1px 2px rgba(15, 23, 42, .04); transition: transform .15s, box-shadow .15s, border-color .15s; }
+    .pd-card::before { content: ""; position: absolute; left: 0; top: 16px; bottom: 16px; width: 3px; border-radius: 0 3px 3px 0; background: var(--a); opacity: 0; transition: opacity .15s; }
+    .pd-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--a) 45%, var(--pd-line)); box-shadow: 0 14px 26px -16px color-mix(in srgb, var(--a) 60%, transparent); color: var(--pd-ink); }
+    .pd-card:hover::before { opacity: 1; }
+    .pd-card:focus-visible { outline: 3px solid rgba(53, 87, 209, .45); outline-offset: 2px; }
+    .pd-ico { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 13px; color: var(--a); background: color-mix(in srgb, var(--a) 13%, transparent); flex-shrink: 0; }
+    .pd-ico .pd-i { width: 22px; height: 22px; }
+    .pd-card-text { min-width: 0; flex: 1; }
+    .pd-card h3 { font-size: 14.5px; font-weight: 650; line-height: 1.3; margin: 0; }
+    .pd-card p { font-size: 12.5px; color: var(--pd-muted); margin: 3px 0 0; line-height: 1.4; }
+    .pd-go { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: var(--pd-muted); background: var(--pd-soft); flex-shrink: 0; transition: background-color .15s, color .15s, transform .15s; }
+    .pd-go .pd-i { width: 14px; height: 14px; }
+    .pd-card:hover .pd-go { color: #fff; background: var(--a); transform: translateX(2px); }
+    @media (prefers-reduced-motion: reduce) { .pd-card, .pd-go { transition: none; } .pd-card:hover { transform: none; } }
+
+    /* accent colors */
+    .a-blue { --a: #2563eb; }
+    .a-indigo { --a: #4f46e5; }
+    .a-emerald { --a: #059669; }
+    .a-amber { --a: #d97706; }
+    .a-rose { --a: #e11d48; }
+    .a-violet { --a: #7c3aed; }
+    .a-cyan { --a: #0891b2; }
+    .a-teal { --a: #0d9488; }
+    .a-orange { --a: #ea580c; }
+    .a-sky { --a: #0284c7; }
+    .a-fuchsia { --a: #c026d3; }
+    .a-slate { --a: #475569; }
+    .dark .a-slate { --a: #94a3b8; }
+</style>
+
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+
+
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+            <div class="mt-5 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12">
+                    <div class="pd">
+
+                        <!-- ============ PROJECT SUMMARY (top) ============ -->
+                        <div class="pd-summary">
+
+                            <div class="pd-hero">
+                                <span class="pd-hero-ico"><svg class="pd-i"><use href="#i-building"/></svg></span>
+                                <div class="pd-hero-text">
+                                    <p class="pd-eyebrow">Project Details</p>
+                                    <h2 class="pd-title">{{ project.project_first_name|default:"Project" }}</h2>
+                                    {% if project.project_type %}
+                                    <span class="pd-pill"><svg class="pd-i"><use href="#i-layers"/></svg>{{ project.project_type }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="pd-hero-side">
+                                    <a href="{% url 'first_level_list' %}" class="pd-back">
+                                        <svg class="pd-i"><use href="#i-back"/></svg>
+                                        Back to List
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="pd-stats">
+
+                                <div class="pd-stat">
+                                    <span class="pd-stat-ico"><svg class="pd-i"><use href="#i-pin"/></svg></span>
+                                    <div>
+                                        <div class="detail-label">Location</div>
+                                        <div class="detail-value">{{ project.location.location_name|default:"—" }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="pd-stat">
+                                    <span class="pd-stat-ico"><svg class="pd-i"><use href="#i-user"/></svg></span>
+                                    <div>
+                                        <div class="detail-label">Owner</div>
+                                        <div class="detail-value">{{ project.project_owner.owner_name|default:"—" }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="pd-stat">
+                                    <span class="pd-stat-ico"><svg class="pd-i"><use href="#i-ruler"/></svg></span>
+                                    <div>
+                                        <div class="detail-label">Size</div>
+                                        <div class="detail-value">{% if project.project_size_sq_ft %}{{ project.project_size_sq_ft }} sq ft{% else %}—{% endif %}</div>
+                                    </div>
+                                </div>
+
+                                <div class="pd-stat">
+                                    <span class="pd-stat-ico"><svg class="pd-i"><use href="#i-rows"/></svg></span>
+                                    <div>
+                                        <div class="detail-label">Floors</div>
+                                        <div class="detail-value">{{ project.number_of_floors|default:"—" }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="pd-stat">
+                                    <span class="pd-stat-ico"><svg class="pd-i"><use href="#i-hash"/></svg></span>
+                                    <div>
+                                        <div class="detail-label">Total Units</div>
+                                        <div class="detail-value">{{ project.number_of_units|default:"—" }}</div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <!-- ============ MODULES ============ -->
+                        <div class="pd-sec">
+                            <span class="pd-sec-ico"><svg class="pd-i"><use href="#i-grid"/></svg></span>
+                            <div>
+                                <h4>Project Modules</h4>
+                                <p>Open a section to view or manage it</p>
+                            </div>
+                        </div>
+
+                        <div class="pd-grid">
+
+                            <!-- Project Intro -->
+                            <a href="{% url 'project_intro' project.id %}" class="pd-card a-blue">
+                                <span class="pd-ico"><svg class="pd-i"><use href="#i-building"/></svg></span>
+                                <div class="pd-card-text">
+                                    <h3>Project Intro</h3>
+                                    <p>Project basic information</p>
+                                </div>
+                                <span class="pd-go"><svg class="pd-i"><use href="#i-arrow"/></svg></span>
+                            </a>
+
+                            <!-- Agreement / Land -->
+                            <a href="{% url 'agreement_land' project.id %}" class="pd-card a-indigo">
+                                <span class="pd-ico"><svg class="pd-i"><use href="#i-file"/></svg></span>
+                                <div class="pd-card-text">
+                                    <h3>Agreement / Land</h3>
+                                    <p>Land and agreement information</p>
+                                </div>
+                                <span class="pd-go"><svg class="pd-i"><use href="#i-arrow"/></svg></span>
+                            </a>
+
+                            <!-- Budget / Expense / BOQ -->
+                            <a href="#" class="pd-card a-emerald">
+                                <span class="pd-ico"><svg class="pd-i"><use href="#i-calc"/></svg></span>
+                                <div class="pd-card-text">
+                                    <h3>Budget / Expense / BOQ</h3>
+                                    <p>Project costing and BOQ</p>
+                                </div>
+                                <span class="pd-go"><svg class="pd-i"><use href="#i-arrow"/></svg></span>
+                            </a>
+
+                            <!-- Fund Receive -->
+                            <a href="#" class="pd-card a-teal">
+                                <span class="pd-ico"><svg class="pd-i"><use href="#i-cash"/></svg></span>
+                                <div class="pd-card-text">
+                                    <h3>Fund Receive</h3>
+                                    <p>Project fund receiving records</p>
+                                </div>
+                                <span class="pd-go"><svg class="pd-i"><use href="#i-arrow"/></svg></span>
+                            </a>
+
+                            <!-- Schedule -->
+                            <a href="{% url 'project_schedule' project.id %}" class="pd-card a-amber">
+                                <span class="pd-ico"><svg class="pd-i"><use href="#i-calendar"/></svg></span>
+                                <div class="pd-card-text">
+                                    <h3>Schedule</h3>
+                                    <p>Project schedule and tasks</p>
+                                </div>
+                                <span class="pd-go"><svg class="pd-i"><use href="#i-arrow"/></svg></span>
+                            </a>
+
+                            <!-- Vendor -->
+                            <a href="#" class="pd-card a-orange">
+                                <span class="pd-ico"><svg class="pd-i"><use href="#i-users"/></svg></span>
+                                <div class="pd-card-text">
+                                    <h3>Vendor</h3>
+                                    <p>Project vendors</p>
+                                </div>
+                                <span class="pd-go"><svg class="pd-i"><use href="#i-arrow"/></svg></span>
+                            </a>
+
+                            <!-- Test -->
+                            <a href="{% url 'project_test' project.id %}" class="pd-card a-violet">
+                                <span class="pd-ico"><svg class="pd-i"><use href="#i-flask"/></svg></span>
+                                <div class="pd-card-text">
+                                    <h3>Test</h3>
+                                    <p>Project testing information</p>
+                                </div>
+                                <span class="pd-go"><svg class="pd-i"><use href="#i-arrow"/></svg></span>
+                            </a>
+
+                            <!-- Drawing -->
+                            <a href="{% url 'project_drawing' project.id %}" class="pd-card a-cyan">
+                                <span class="pd-ico"><svg class="pd-i"><use href="#i-compass"/></svg></span>
+                                <div class="pd-card-text">
+                                    <h3>Drawing</h3>
+                                    <p>Project drawings</p>
+                                </div>
+                                <span class="pd-go"><svg class="pd-i"><use href="#i-arrow"/></svg></span>
+                            </a>
+
+                            <!-- Certificate -->
+                            <a href="{% url 'project_certificate' project.id %}" class="pd-card a-rose">
+                                <span class="pd-ico"><svg class="pd-i"><use href="#i-award"/></svg></span>
+                                <div class="pd-card-text">
+                                    <h3>Certificate</h3>
+                                    <p>Project certificates</p>
+                                </div>
+                                <span class="pd-go"><svg class="pd-i"><use href="#i-arrow"/></svg></span>
+                            </a>
+
+                            <!-- Approval -->
+                            <a href="{% url 'project_approval' project.id %}" class="pd-card a-sky">
+                                <span class="pd-ico"><svg class="pd-i"><use href="#i-check"/></svg></span>
+                                <div class="pd-card-text">
+                                    <h3>Approval</h3>
+                                    <p>Project approvals</p>
+                                </div>
+                                <span class="pd-go"><svg class="pd-i"><use href="#i-arrow"/></svg></span>
+                            </a>
+
+                            <!-- Comparison -->
+                            <a href="#" class="pd-card a-fuchsia">
+                                <span class="pd-ico"><svg class="pd-i"><use href="#i-scale"/></svg></span>
+                                <div class="pd-card-text">
+                                    <h3>Comparison</h3>
+                                    <p>Project comparison</p>
+                                </div>
+                                <span class="pd-go"><svg class="pd-i"><use href="#i-arrow"/></svg></span>
+                            </a>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <!-- END: Content -->
+
+    </div>
+
+</div>
+
+{% endblock %}

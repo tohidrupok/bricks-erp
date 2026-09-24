@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirm Allocation Delete - BM ERP{% endblock %}
+
+{% block content %}
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+
+                <div class="intro-y flex justify-center items-center mt-12">
+                    <div class="w-full max-w-md bg-white p-6 rounded-lg shadow-lg text-center dark:bg-darkmode-600">
+                        <div class="text-red-500 text-5xl mb-3">⚠️</div>
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-slate-200 mb-2">Confirm Deletion</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm mb-6">
+                            Are you sure you want to delete the leave allocation record for 
+                            <strong class="text-slate-800 dark:text-slate-200">{{ alloc.employee.rda_emp_name }}</strong> (Year: {{ alloc.year }})?
+                        </p>
+
+                        <form method="post" class="flex justify-center gap-4">
+                            {% csrf_token %}
+                            <a href="{% url 'restu_allocation_list' %}" 
+                               style="background-color: #1e3c98;" 
+                               class="text-white px-5 py-2 rounded-md shadow hover:opacity-90 transition">
+                                Cancel
+                            </a>
+                            <button type="submit" style="margin-left:0.5%;background-color: #1e3c98;"
+                                    class="bg-red-600 text-white px-5 py-2 rounded-md hover:bg-red-700 shadow transition">
+                                Yes, Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

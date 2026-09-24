@@ -1,0 +1,171 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Invoice {{ sale.invoice_no }}</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f3f4f6;
+    padding: 20px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 24px;
+    max-width: 900px;
+    margin: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .card-header .label-box {
+    background-color: #e2f0d9;
+    padding: 4px 10px;
+    font-weight: bold;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .card-header img {
+    height: 50px;
+  }
+
+  .sub-head {
+    font-size: 11px;
+    color: #555;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .header-section h1 {
+    font-size: 1.75rem;
+    font-weight: bold;
+  }
+
+  .customer-info p {
+    margin-bottom: 4px;
+    font-size: 0.875rem;
+  }
+
+  .table th, .table td {
+    border: 1px solid #d1d5db;
+    padding: 8px;
+  }
+
+  .table th {
+    background-color: #e5e7eb;
+    text-align: left;
+  }
+
+  .table tfoot tr {
+    background-color: #f9fafb;
+    font-weight: bold;
+  }
+
+  .footer-buttons button, .footer-buttons a {
+    font-size: 0.875rem;
+  }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .card { box-shadow: none; border: none; padding: 0; }
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <!-- Company Logo & Voucher Info -->
+  <div class="card-header">
+    <div class="logo">
+      <img src="{% static '/images/BTP_logo_webp.webp' %}" alt="Company Logo">
+    </div>
+    <div style="text-align: right;">
+      <div class="label-box">Invoice</div>
+      <p style="font-size: 11px; margin-top: 4px;">Printing Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+    </div>
+  </div>
+
+  <!-- Company Address -->
+  <div class="sub-head">
+    House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br>
+    +880191322203<br>
+    md2bayid@gmail.com
+  </div>
+
+  <hr style="margin: 8px 0;">
+
+  <!-- Invoice Header -->
+  <div class="header-section">
+    <h1>Invoice: {{ sale.invoice_no }}</h1>
+    <p class="text-gray-600 text-sm">{{ sale.sale_date|date:"F j, Y" }}</p>
+  </div>
+
+  <!-- Customer Info -->
+  <div class="customer-info mb-4">
+    <p><strong>Customer:</strong> {{ sale.customer.rest_customer_name }}</p>
+    <p><strong>Total Amount:</strong> {{ sale.total_amount|floatformat:2 }}</p>
+  </div>
+
+  <!-- Items Table -->
+  <div class="mt-6">
+    <table class="table w-full text-sm border-collapse">
+      <thead>
+        <tr>
+          <th class="w-8 text-center">#</th>
+          <th>Item</th>
+          <th class="w-20 text-center">Qty</th>
+          <th class="w-24 text-right">Price</th>
+          <th class="w-24 text-right">Discount</th>
+          <th class="w-28 text-right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in sale_items %}
+        <tr>
+          <td class="text-center">{{ forloop.counter }}</td>
+          <td>{{ item.item.item_name }}</td>
+          <td class="text-center">{{ item.quantity }}</td>
+          <td class="text-right">{{ item.price|floatformat:2 }}</td>
+          <td class="text-right">{{ item.discount|floatformat:2 }}</td>
+          <td class="text-right">{{ item.final_amount|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="5" class="text-center">Total</td>
+          <td class="text-right">{{ sale.final_amount|floatformat:2 }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- Footer Buttons -->
+  <div class="mt-6 flex justify-end gap-3 no-print">
+    <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Print</button>
+    <a href="{% url 'restaurant_sales_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Back to List</a>
+  </div>
+</div>
+
+</body>
+</html>

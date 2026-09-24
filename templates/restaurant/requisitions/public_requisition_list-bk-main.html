@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Public Requisition List</title>
+
+<style>
+
+body{
+    background:#eef2f7;
+    font-family:Arial;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+h1{
+    margin:0;
+    font-size:22px;
+}
+
+.filter-box{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+    margin-top:15px;
+    background:#f8f9fa;
+    padding:15px;
+    border-radius:10px;
+}
+
+input,select{
+    padding:10px;
+    border:1px solid #ddd;
+    border-radius:6px;
+}
+
+button{
+    background:#0d6efd;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0b5ed7;
+}
+
+.table-box{
+    margin-top:20px;
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#0d6efd;
+    color:white;
+    padding:10px;
+}
+
+td{
+    padding:10px;
+    border-bottom:1px solid #eee;
+}
+
+tr:hover{
+    background:#f1f5ff;
+}
+
+/* mobile */
+@media(max-width:768px){
+    .filter-box{
+        grid-template-columns:1fr;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <!-- HEADER -->
+        <div class="header">
+            <h1>Restaurant Requisition Report</h1>
+            <a href="{% url 'public_rest_requisition_create' %}" 
+               style="padding:8px 5px; background:#28a745; color:#fff; text-decoration:none; border-radius:5px;">
+                Back
+            </a>
+            <a href="{% url 'public_rest_requisition_list' %}"
+               style="padding:8px 12px;background:#198754;color:#fff;text-decoration:none;border-radius:6px;">
+                ðŸ”„ Today Reset
+            </a>
+        </div>
+
+        <!-- FILTER -->
+        <form method="GET" class="filter-box">
+
+            <select name="project">
+                <option value="">Project</option>
+                {% for p in projects %}
+                    <option value="{{ p.id }}" {% if p.id|stringformat:"s" == project_id %}selected{% endif %}>
+                        {{ p }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <select name="employee">
+                <option value="">Employee</option>
+                {% for e in employees %}
+                    <option value="{{ e.id }}" {% if e.id|stringformat:"s" == employee_id %}selected{% endif %}>
+                        {{ e }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <!--<input type="date" name="date" value="{{ date }}">-->
+
+            <input type="date" name="from_date" value="{{ from_date }}">
+            <input type="date" name="to_date" value="{{ to_date }}">
+
+            <button type="submit">Filter</button>
+
+        </form>
+
+        <!-- TABLE -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 15px;">
+            <h3 style="margin: 0;">Today's Last 10 Requisitions</h3>
+            
+            <div>
+                <a href="{% url 'print_day_wise_requisitions' %}" target="_blank"
+                   style="padding: 8px 15px; background: green; color: #fff; text-decoration: none; border-radius: 5px; font-size: 14px; font-weight: bold; display: inline-flex; align-items: center; gap: 5px;">
+                   🖨️ Print Today's Requisitions
+                </a>
+            </div>
+        </div>
+        <div class="table-box">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Project</th>
+                        <th>Employee</th>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                        <th>Vendor</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for r in requisitions %}
+                    <tr>
+                        <td>{{ r.requisition_date }}</td>
+                        <td>{{ r.project_name }}</td>
+                        <td>{{ r.employee_name }}</td>
+                        <td>{{ r.item_name }}</td>
+                        <td>{{ r.qty }}</td>
+                        <td>{{ r.rate }}</td>
+                        <td>{{ r.amount }}</td>
+                        <td>{{ r.vendor_name }}</td>
+                        <td>{{ r.approv_status }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9">No data found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

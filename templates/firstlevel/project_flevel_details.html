@@ -1,0 +1,134 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Project Firts Level Details- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-2xl font-semibold text-gray-900">Project First Level Details</h2>
+
+                <div class="mt-6 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <div class="project-detail">
+                            <!-- Project Header -->
+                            <h1 class="text-3xl font-semibold text-gray-900 mb-4">
+                                {{ project.project_first_name }}
+                            </h1>
+                
+                            <!-- Project Flevel Details -->
+                            <div class="mb-6">
+                                <h4 class="text-lg font-medium text-gray-700 mb-2">Project Details</h4>
+                
+                                <table class="min-w-full table-auto border-collapse border border-gray-300">
+                                    <thead>
+                                        <tr class="bg-gray-200">
+                                            <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Field</th>
+                                            <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td class="border-b px-6 py-3">Project Name</td><td class="border-b px-6 py-3">{{ project.project_first_name }}</td></tr>
+                                        <tr><td class="border-b px-6 py-3">Location</td><td class="border-b px-6 py-3">{{ project.location }}</td></tr>
+                                        <tr><td class="border-b px-6 py-3">Start Month</td><td class="border-b px-6 py-3">{{ project.project_start_month }}</td></tr>
+                                        <tr><td class="border-b px-6 py-3">Project Duration</td><td class="border-b px-6 py-3">{{ project.project_duration }} months ( {{ project.project_start_date }} - {{ project.project_end_date }} )</td></tr>
+                                        <tr><td class="border-b px-6 py-3">Project Type</td><td class="border-b px-6 py-3">{{ project.project_type }}</td></tr>
+                                        <tr><td class="border-b px-6 py-3">Project Owner Name</td><td class="border-b px-6 py-3">{{ project.project_owner }}</td></tr>
+                                        <tr><td class="border-b px-6 py-3">Size (sq ft)</td><td class="border-b px-6 py-3">{{ project.project_size_sq_ft }}</td></tr>
+                                        <tr><td class="border-b px-6 py-3">Number of Units</td><td class="border-b px-6 py-3">{{ project.number_of_units }}</td></tr>
+                                        <tr><td class="border-b px-6 py-3">Floors</td><td class="border-b px-6 py-3">{{ project.number_of_floors }}</td></tr>
+                                        <tr><td class="border-b px-6 py-3">Units per Floor</td><td class="border-b px-6 py-3">{{ project.units_per_floor }}</td></tr>
+                                        <!--  Soil Test Completed -->
+                                        <tr>
+                                            <td class="border-b px-6 py-3">Soil Test Completed</td>
+                                            <td class="border-b px-6 py-3">
+                                                {{ project.soil_test_completed|yesno:"Yes,No" }}
+                                                {% if project.soil_test %}
+                                                    <div class="flex items-center space-x-4">
+                                                        {% if ".pdf" in project.soil_test.url|lower %}
+                                                            <a href="{{ project.soil_test.url }}" target="_blank" class="text-blue-600 hover:underline" style="margin-left: 100px;">View PDF</a>
+                                                        {% else %}
+                                                            <img src="{{ project.soil_test.url }}" alt="Soil Test Image" class="mt-2 w-40 border rounded shadow">
+                                                        {% endif %}
+                                                    </div>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+
+                                        <!--  Drawing Test Completed -->
+                                        <tr>
+                                            <td class="border-b px-6 py-3">Drawing Test Completed</td>
+                                            <td class="border-b px-6 py-3">
+                                                {{ project.drawing_test_completed|yesno:"Yes,No" }}
+                                                {% if project.drawing_test %}
+                                                    <div class="flex items-center space-x-4">
+                                                        {% if ".pdf" in project.drawing_test.url|lower %}
+                                                            <a href="{{ project.drawing_test.url }}" target="_blank" class="text-blue-600 hover:underline" style="margin-left: 100px;">View PDF</a>
+                                                        {% else %}
+                                                            <img src="{{ project.drawing_test.url }}" alt="Drawing Test Image" class="mt-2 w-40 border rounded shadow">
+                                                        {% endif %}
+                                                    </div>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+
+                                        <!--  Agreement Completed -->
+                                        <tr>
+                                            <td class="border-b px-6 py-3">Agreement Completed</td>
+                                            <td class="border-b px-6 py-3">
+                                                {{ project.agreement_completed|yesno:"Yes,No" }}
+                                                {% if project.agreement_document %}
+                                                    <div class="flex items-center space-x-4">
+                                                        {% if ".pdf" in project.agreement_document.url|lower %}
+                                                            <a href="{{ project.agreement_document.url }}" target="_blank" class="text-blue-600 hover:underline" style="margin-left: 100px;">View PDF</a>
+                                                        {% else %}
+                                                            <img src="{{ project.agreement_document.url }}" alt="Agreement Image" class="mt-2 w-40 border rounded shadow">
+                                                        {% endif %}
+                                                    </div>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+
+                                        <tr><td class="border-b px-6 py-3">Current Date</td><td class="border-b px-6 py-3">{{ project.current_date }}</td></tr>
+                                        <tr><td class="border-b px-6 py-3">Grand Total</td><td class="border-b px-6 py-3">৳ {{ project.grand_total|floatformat:2 }}</td></tr>
+                                        <tr><td class="border-b px-6 py-3">Percentage (%)</td><td class="border-b px-6 py-3">{{ project.percentage|floatformat:2 }}</td></tr>
+                                        <tr><td class="border-b px-6 py-3">Percentage Value</td><td class="border-b px-6 py-3">৳ {{ project.percentage_value|floatformat:2 }}</td></tr>
+                                        <tr><td class="border-b px-6 py-3">Final Total With Extra</td><td class="border-b px-6 py-3">৳ {{ project.final_total_with_extra|floatformat:2 }}</td></tr>
+                                        <tr><td class="border-b px-6 py-3">Per Floor Sales Price</td><td class="border-b px-6 py-3">৳ {{ per_floor_price |floatformat:2 }}</td></tr>
+                                        <tr><td class="border-b px-6 py-3">Per Unit Sales Price</td><td class="border-b px-6 py-3">৳ {{ per_unit_price |floatformat:2 }}</td></tr>
+                                    </tbody>
+                                </table>                               
+                                
+                
+                                <!-- Back to Project List Button -->
+                                <div class="mt-8 text-center">
+                                    <a href="{% url 'first_level_list' %}" style="background-color:#1e3c98" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                        Back to List
+                                    </a>
+                                    <a href="{% url 'pfld_pdf' project.id %}" style="margin-left:0.5%;background-color:#1e3c98" target="_blank" class="px-8 py-3 bg-blue-600 text-white rounded-lg ml-2">
+                                        PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,299 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Purchase Memo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: #ccc;
+      padding: 20px;
+    }
+
+    .invoice-box {
+      background: #fff;
+      max-width: 960px;
+      margin: auto;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .company-name {
+      color: #0645ad;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .company-info {
+      font-size: 11px;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .label-box {
+      border: 1px solid #ccc;
+      padding: 8px 16px;
+      margin-bottom: 5px;
+      font-weight: bold;
+      display: inline-block;
+    }
+
+    .label-box.green {
+      background-color: #d1f0d1;
+      color: #006400;
+    }
+
+    .label-box.red {
+      background-color: #ffe5e5;
+      color: #c00;
+    }
+
+    .invoice-meta {
+      margin-top: 15px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .invoice-meta div {
+      margin-bottom: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 11px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      font-weight: bold;
+    }
+
+    .description {
+      text-align: left;
+    }
+
+    .amount-words {
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .notes {
+      margin-top: 10px;
+      font-size: 11px;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    .logo img {
+      height: 50px;
+    }
+
+    .no-print a,
+    .no-print button {
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+<div class="invoice-box">
+
+  <!-- Header Section -->
+  <div class="header-row">
+    <div class="logo">
+      <img src="{% static '/images/BTP_logo_webp.webp' %}" alt="Company Logo" />
+    </div>
+    <div style="float: right; text-align: right; margin-top: -50px;">
+      <div class="label-box">Purchase Memo</div>
+      <p style="font-size: 11px; margin-top: 4px;">
+        Print Date: {{ print_time|date:"F j, Y, g:i a" }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Company Info -->
+  <div class="sub-head">
+    House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br />
+    01993005558, 09639246230, 09639246231 <br>
+     md2bayid@gmail.com, thebtplimited@gmail.com, www.btplimited.com
+  </div>
+
+  <hr style="margin: 8px 0; border-color: #ccc;" />
+  <div style="clear: both;"></div>
+
+  <!-- Invoice Info -->
+  <div>
+    <p><strong>Invoice No:</strong> {{ voucher.pk }}</p>
+    <p><strong>Purchase No.:</strong> {{ purch_id }}</p>
+    <!--<p><strong>Supplier:</strong> {{ vendor_name }}</p>-->
+    {% if start_date and end_date %}
+      <p><strong>Purchase Date:</strong> 
+         {{ start_date|date:"d M Y" }} — {{ end_date|date:"d M Y" }}
+      </p>
+    {% endif %}
+  </div>
+
+  <!-- Table Section -->
+  <table>
+    <thead>
+      <tr>
+        <th>S.N.</th>
+        <th>Supplier</th>
+        <th>Item Code</th>
+        <th>Item Name & Description</th>
+        <th>Quantity</th>
+        <th>Unit</th>
+        <th>Rate</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in requisitions %}
+      <tr>
+        <td rowspan="{{ entry.item.rows }}">{{ forloop.counter }}</td>
+        <td rowspan="{{ entry.item.rows }}">{{ entry.vendor_name }}</td>
+        <td rowspan="{{ entry.item.rows }}">{{ entry.item_code }}</td>
+        <td style="text-align:left;font-weight:bold" rowspan="{{ entry.item.rows }}">{{ entry.item_title }}</td>
+        <td style="text-align: right;">{{ entry.item.qty|floatformat:2 }}</td>
+        <td>{{ entry.item.unit }}</td>
+        <td style="text-align: right;">{{ entry.item.rate|floatformat:2 }}</td>
+        <!--<td style="text-align: right;">{{ entry.item.amount|floatformat:2 }}</td>-->
+        {% if request.session.department == "admin" %}
+        <td style="text-align: right;">
+            <input type="number" step="0.01" 
+                   value="{{ entry.item.amount|floatformat:2 }}" 
+                   class="amount-input" 
+                   data-id="{{ entry.item.id }}"
+                   style="width: 100px; text-align: right;"
+                   min="0">
+        </td>
+        {% else %}
+           <td style="text-align: right;">{{ entry.item.amount|floatformat:2 }}</td>
+        {% endif %}
+      </tr>
+
+      {% if entry.item.sub_items %}
+        {% for desc in entry.item.sub_items %}
+        <tr>
+          <td class="description"><b>{{ desc.name }}</b>
+            {% if desc.note %}
+              <br><small>{{ desc.note }}</small>
+            {% endif %}
+          </td>
+          <td style="text-align: right;">{{ desc.quantity|floatformat:2 }}</td>
+          <td>{{ desc.unit }}</td>
+          <td style="text-align: right;">{{ desc.rate|floatformat:2 }}</td>
+          <td style="text-align: right;">{{ desc.amount|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+      {% endif %}
+      {% endfor %}
+
+      <!-- Total Amount -->
+      <tr>
+        <td colspan="7" style="text-align: right;"><strong>Total Amount</strong></td>
+        <td style="text-align: right;"><strong>{{ total_amount_int|intcomma }}</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Amount in Words -->
+  <div class="amount-words">
+    BILL AMOUNT IN WORD : "{{ amount_in_words|upper }}" TAKA ONLY
+  </div>
+
+  <!-- Notes (optional) -->
+  {% if note_text %}
+  <div class="notes">
+    <strong>Note:</strong> {{ note_text }}
+  </div>
+  {% endif %}
+  <!-- Footer Buttons -->
+  <div class="no-print" style="margin-top: 20px; text-align: center;">
+    <a href="{% url 'purchase_invoice_list' %}" 
+       style="display: inline-block; margin-right: 20px; padding: 8px 16px; background-color: #3490dc; color: white; text-decoration: none; border-radius: 4px;">
+      ← Back
+    </a>
+
+    <button onclick="window.print()" 
+            style="display: inline-block; padding: 8px 16px; background-color: #38c172; color: white; border: none; border-radius: 4px; cursor: pointer;">
+      🖨️ Print
+    </button>
+  </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function(){
+
+    function showMessage(message, type='success') {
+        // Simple message popup
+        let msgBox = $('<div>')
+            .text(message)
+            .css({
+                'position': 'fixed',
+                'top': '20px',
+                'right': '20px',
+                'padding': '10px 20px',
+                'background-color': type === 'success' ? '#28a745' : '#dc3545',
+                'color': 'white',
+                'border-radius': '5px',
+                'z-index': 9999,
+                'box-shadow': '0 0 10px rgba(0,0,0,0.2)'
+            });
+        $('body').append(msgBox);
+        setTimeout(function(){ msgBox.fadeOut(500, function(){ $(this).remove(); }); }, 2000);
+    }
+
+    $('.amount-input').on('change', function(){
+        const newAmount = $(this).val();
+        const itemId = $(this).data('id');
+        const inputField = $(this);
+
+        if(!itemId){
+            showMessage('Item ID missing!', 'error');
+            return;
+        }
+
+        $.ajax({
+            url: "{% url 'update_amount' %}",  // Django URL
+            type: 'POST',
+            data: {
+                'id': itemId,
+                'amount': newAmount,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response){
+                if(response.status === 'success'){
+                    showMessage('Amount updated successfully!');
+                } else {
+                    showMessage('Update failed: ' + response.message, 'error');
+                }
+            },
+            error: function(xhr, status, error){
+                showMessage('Error updating amount!', 'error');
+                console.log(xhr.responseText);
+            }
+        });
+    });
+});
+</script>
+
+
+</div>
+</body>
+</html>

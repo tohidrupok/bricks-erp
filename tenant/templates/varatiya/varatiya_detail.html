@@ -1,0 +1,1002 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ varatiya.name }} — Tenant Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --c-ink:        #111827;
+      --c-ink-soft:   #374151;
+      --c-muted:      #6B7280;
+      --c-rule:       #E5E7EB;
+      --c-rule-soft:  #F3F4F6;
+      --c-bg:         #F8FAFC;
+      --c-surface:    #FFFFFF;
+      --c-primary:    #1D4ED8;
+      --c-primary-lt: #3B82F6;
+      --c-primary-bg: #EFF6FF;
+      --c-teal:       #0D9488;
+      --c-teal-bg:    #F0FDF9;
+      --c-amber:      #D97706;
+      --c-amber-bg:   #FFFBEB;
+      --c-rose:       #E11D48;
+      --c-rose-bg:    #FFF1F2;
+      --c-green:      #059669;
+      --c-green-bg:   #ECFDF5;
+      --font:         'Outfit', sans-serif;
+      --mono:         'JetBrains Mono', monospace;
+      --r-sm:         8px;
+      --r-md:         12px;
+      --r-lg:         18px;
+      --r-xl:         24px;
+      --shadow-sm:    0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md:    0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+      --shadow-lg:    0 12px 40px rgba(0,0,0,0.10);
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--c-bg);
+      color: var(--c-ink);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ═══════════════════════════════════
+       STICKY TOPBAR
+    ═══════════════════════════════════ */
+    .tp-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--c-rule);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .tp-topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .tp-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--c-muted);
+    }
+    .tp-breadcrumb a {
+      color: var(--c-primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .tp-breadcrumb a:hover { text-decoration: underline; }
+    .tp-breadcrumb svg {
+      width: 12px; height: 12px;
+      stroke: var(--c-muted); fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .tp-badge {
+      background: var(--c-primary-bg);
+      color: var(--c-primary);
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--mono);
+      padding: 3px 9px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+    .tp-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tp-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      border-radius: var(--r-sm);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .tp-btn svg {
+      width: 14px; height: 14px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .tp-btn-ghost {
+      background: transparent;
+      color: var(--c-muted);
+      border: 1px solid var(--c-rule);
+    }
+    .tp-btn-ghost:hover { background: var(--c-rule-soft); color: var(--c-ink); }
+    .tp-btn-primary {
+      background: var(--c-primary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(29,78,216,0.25);
+    }
+    .tp-btn-primary:hover { background: var(--c-primary-lt); box-shadow: 0 4px 14px rgba(29,78,216,0.35); }
+
+    /* ═══════════════════════════════════
+       HERO STRIP
+    ═══════════════════════════════════ */
+    .tp-hero {
+      background: linear-gradient(135deg, #1e3a5f 0%, #1D4ED8 60%, #0ea5e9 100%);
+      padding: 40px 32px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .tp-hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 320px; height: 320px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 50%;
+    }
+    .tp-hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 30%;
+      width: 200px; height: 200px;
+      background: rgba(14,165,233,0.12);
+      border-radius: 50%;
+    }
+
+    .tp-hero-inner {
+      position: relative; z-index: 1;
+      display: flex;
+      align-items: flex-end;
+      gap: 28px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .tp-hero-photo {
+      flex-shrink: 0;
+      width: 110px; height: 110px;
+      border-radius: var(--r-lg);
+      border: 3px solid rgba(255,255,255,0.3);
+      object-fit: cover;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      margin-bottom: -1px;
+    }
+    .tp-hero-photo-placeholder {
+      flex-shrink: 0;
+      width: 110px; height: 110px;
+      border-radius: var(--r-lg);
+      border: 3px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: -1px;
+    }
+    .tp-hero-photo-placeholder svg {
+      width: 44px; height: 44px;
+      stroke: rgba(255,255,255,0.5); fill: none;
+      stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .tp-hero-meta {
+      flex: 1;
+      padding-bottom: 24px;
+    }
+    .tp-hero-name {
+      font-size: 30px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .tp-hero-chips {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tp-hero-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      color: rgba(255,255,255,0.85);
+      font-size: 12px;
+      font-weight: 500;
+      backdrop-filter: blur(4px);
+    }
+    .tp-hero-chip svg {
+      width: 12px; height: 12px;
+      stroke: rgba(255,255,255,0.7); fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    /* ═══════════════════════════════════
+       TAB NAV
+    ═══════════════════════════════════ */
+    .tp-tabs-wrap {
+      background: #fff;
+      border-bottom: 1px solid var(--c-rule);
+      position: sticky;
+      top: 60px;
+      z-index: 90;
+    }
+    .tp-tabs {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      gap: 0;
+    }
+    .tp-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 14px 20px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--c-muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 2.5px solid transparent;
+      transition: all 0.15s ease;
+      font-family: var(--font);
+      text-decoration: none;
+    }
+    .tp-tab svg {
+      width: 15px; height: 15px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .tp-tab:hover { color: var(--c-ink); }
+    .tp-tab.active {
+      color: var(--c-primary);
+      border-bottom-color: var(--c-primary);
+    }
+    .tp-tab-count {
+      background: var(--c-rule-soft);
+      color: var(--c-muted);
+      font-size: 10px;
+      font-weight: 700;
+      font-family: var(--mono);
+      padding: 2px 6px;
+      border-radius: 20px;
+    }
+    .tp-tab.active .tp-tab-count {
+      background: var(--c-primary-bg);
+      color: var(--c-primary);
+    }
+
+    /* ═══════════════════════════════════
+       MAIN LAYOUT
+    ═══════════════════════════════════ */
+    .tp-layout {
+      max-width: 1200px;
+      margin: 28px auto;
+      padding: 0 32px;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ═══════════════════════════════════
+       SECTION CARD
+    ═══════════════════════════════════ */
+    .tp-section {
+      background: var(--c-surface);
+      border-radius: var(--r-xl);
+      border: 1px solid var(--c-rule);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .tp-section-head {
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--c-rule-soft);
+    }
+    .tp-section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tp-section-icon {
+      width: 34px; height: 34px;
+      border-radius: var(--r-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tp-section-icon svg {
+      width: 16px; height: 16px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .tp-section-icon.blue  { background: var(--c-primary-bg); color: var(--c-primary); }
+    .tp-section-icon.teal  { background: var(--c-teal-bg);    color: var(--c-teal); }
+    .tp-section-icon.amber { background: var(--c-amber-bg);   color: var(--c-amber); }
+    .tp-section-h {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--c-ink);
+    }
+    .tp-section-sub {
+      font-size: 11.5px;
+      color: var(--c-muted);
+      margin-top: 1px;
+    }
+
+    /* ═══════════════════════════════════
+       KV ROWS
+    ═══════════════════════════════════ */
+    .tp-kv-list {
+      padding: 8px 0;
+    }
+    .tp-kv {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 12px 24px;
+      border-bottom: 1px solid var(--c-rule-soft);
+      transition: background 0.1s;
+    }
+    .tp-kv:last-child { border-bottom: none; }
+    .tp-kv:hover { background: #fafbff; }
+    .tp-kv-key {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--c-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-family: var(--mono);
+      padding-top: 1px;
+    }
+    .tp-kv-val {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--c-ink-soft);
+      line-height: 1.5;
+    }
+    .tp-kv-val.mono { font-family: var(--mono); font-size: 13px; }
+
+    /* ═══════════════════════════════════
+       RENT TABLE
+    ═══════════════════════════════════ */
+    .tp-table-scroll { overflow-x: auto; }
+    .tp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 860px;
+    }
+    .tp-table thead tr {
+      background: var(--c-rule-soft);
+      border-bottom: 1px solid var(--c-rule);
+    }
+    .tp-table thead th {
+      padding: 11px 16px;
+      text-align: left;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--c-muted);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      font-family: var(--mono);
+      white-space: nowrap;
+    }
+    .tp-table tbody tr {
+      border-bottom: 1px solid var(--c-rule-soft);
+      transition: background 0.12s;
+    }
+    .tp-table tbody tr:last-child { border-bottom: none; }
+    .tp-table tbody tr:hover { background: #fafbff; }
+    .tp-table td {
+      padding: 13px 16px;
+      font-size: 13.5px;
+      color: var(--c-ink-soft);
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    .tp-table td.tp-td-project { font-weight: 600; color: var(--c-ink); }
+    .tp-table td.tp-td-room {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      color: var(--c-primary);
+    }
+    .tp-table td.tp-td-total {
+      font-weight: 700;
+      color: var(--c-teal);
+      font-family: var(--mono);
+      font-size: 13.5px;
+    }
+    .tp-table td.tp-td-num {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      color: var(--c-ink-soft);
+    }
+
+    /* Status badge */
+    .tp-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 700;
+      font-family: var(--mono);
+      white-space: nowrap;
+    }
+    .tp-status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .tp-status.active  { background: var(--c-green-bg);  color: var(--c-green); }
+    .tp-status.warning { background: var(--c-amber-bg);  color: var(--c-amber); }
+    .tp-status.ended   { background: var(--c-rose-bg);   color: var(--c-rose);  }
+
+    .tp-ongoing {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--c-teal);
+      background: var(--c-teal-bg);
+      padding: 3px 9px;
+      border-radius: 20px;
+    }
+
+    /* Empty state */
+    .tp-empty {
+      padding: 60px 24px;
+      text-align: center;
+    }
+    .tp-empty svg {
+      width: 44px; height: 44px;
+      stroke: #D1D5DB; fill: none;
+      stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round;
+      margin: 0 auto 14px;
+      display: block;
+    }
+    .tp-empty p {
+      color: var(--c-muted);
+      font-size: 13.5px;
+    }
+
+    /* ═══════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════ */
+    .tp-sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+    /* Stat tiles */
+    .tp-stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 20px 20px 0;
+    }
+    .tp-stat {
+      background: var(--c-rule-soft);
+      border-radius: var(--r-md);
+      padding: 14px 16px;
+      border: 1px solid var(--c-rule);
+    }
+    .tp-stat-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--c-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      font-family: var(--mono);
+      margin-bottom: 5px;
+    }
+    .tp-stat-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--c-ink);
+      line-height: 1;
+    }
+    .tp-stat-val.teal { color: var(--c-teal); }
+
+    /* NID card */
+    .tp-nid-wrap { padding: 20px; }
+    .tp-nid-img {
+      width: 100%;
+      border-radius: var(--r-md);
+      border: 1px solid var(--c-rule);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Ref card */
+    .tp-ref-body { padding: 20px; }
+    .tp-ref-person {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--c-rule-soft);
+      border-radius: var(--r-md);
+      border: 1px solid var(--c-rule);
+    }
+    .tp-ref-icon {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--c-primary-bg);
+      color: var(--c-primary);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .tp-ref-icon svg {
+      width: 18px; height: 18px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .tp-ref-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--c-ink);
+    }
+    .tp-ref-phone {
+      font-size: 12px;
+      font-family: var(--mono);
+      color: var(--c-muted);
+      margin-top: 2px;
+    }
+
+    /* ═══════════════════════════════════
+       QR MODAL
+    ═══════════════════════════════════ */
+    .tp-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(17,24,39,0.6);
+      backdrop-filter: blur(6px);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+    .tp-overlay.open { display: flex; }
+    .tp-modal {
+      background: #fff;
+      border-radius: var(--r-xl);
+      padding: 32px;
+      width: 320px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      animation: tp-pop 0.22s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes tp-pop {
+      from { transform: scale(0.88) translateY(12px); opacity: 0; }
+      to   { transform: scale(1)    translateY(0);    opacity: 1; }
+    }
+    .tp-modal-icon {
+      width: 50px; height: 50px;
+      border-radius: var(--r-md);
+      background: var(--c-primary-bg);
+      color: var(--c-primary);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+    }
+    .tp-modal-icon svg {
+      width: 24px; height: 24px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .tp-modal h3 { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
+    .tp-modal p  { font-size: 12.5px; color: var(--c-muted); margin-bottom: 20px; }
+    #tp-qrcode   { display: flex; justify-content: center; margin-bottom: 22px; }
+    .tp-modal-btns { display: flex; gap: 10px; justify-content: center; }
+    .tp-modal-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 18px;
+      border-radius: var(--r-sm);
+      font-family: var(--font); font-size: 13px; font-weight: 700;
+      cursor: pointer; border: none; transition: all 0.15s;
+    }
+    .tp-modal-btn svg {
+      width: 13px; height: 13px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .tp-modal-btn.dl   { background: var(--c-primary); color: #fff; }
+    .tp-modal-btn.dl:hover { background: var(--c-primary-lt); }
+    .tp-modal-btn.cls  { background: var(--c-rule-soft); color: var(--c-muted); border: 1px solid var(--c-rule); }
+    .tp-modal-btn.cls:hover { background: var(--c-rule); color: var(--c-ink); }
+
+    /* ═══════════════════════════════════
+       ANIMATIONS
+    ═══════════════════════════════════ */
+    .tp-fade-in {
+      animation: tp-fade 0.4s ease both;
+    }
+    @keyframes tp-fade {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .tp-delay-1 { animation-delay: 0.05s; }
+    .tp-delay-2 { animation-delay: 0.10s; }
+    .tp-delay-3 { animation-delay: 0.15s; }
+
+    /* ═══════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════ */
+    @media (max-width: 1024px) {
+      .tp-layout { grid-template-columns: 1fr; }
+      .tp-sidebar { display: grid; grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 700px) {
+      .tp-topbar { padding: 0 16px; }
+      .tp-hero   { padding: 28px 16px 0; }
+      .tp-layout { padding: 0 16px; }
+      .tp-tabs   { padding: 0 16px; overflow-x: auto; }
+      .tp-hero-name { font-size: 22px; }
+      .tp-sidebar { grid-template-columns: 1fr; }
+      .tp-kv { grid-template-columns: 120px 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ TOPBAR ══ -->
+  <nav class="tp-topbar">
+    <div class="tp-topbar-left">
+      <div class="tp-breadcrumb">
+        <a href="{% url 'varatiya_list' %}">Tenants</a>
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>{{ varatiya.name }}</span>
+      </div>
+      <span class="tp-badge">PROFILE</span>
+    </div>
+    <div class="tp-actions">
+      <a href="{% url 'varatiya_list' %}" class="tp-btn tp-btn-ghost">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </a>
+      <button onclick="openQR()" class="tp-btn tp-btn-primary">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/></svg>
+        QR Code
+      </button>
+    </div>
+  </nav>
+
+  <!-- ══ HERO ══ -->
+  <div class="tp-hero">
+    <div class="tp-hero-inner">
+      {% if varatiya.image %}
+        <img src="{{ varatiya.image.url }}" alt="{{ varatiya.name }}" class="tp-hero-photo">
+      {% else %}
+        <div class="tp-hero-photo-placeholder">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+      {% endif %}
+      <div class="tp-hero-meta">
+        <div class="tp-hero-name">{{ varatiya.name }}</div>
+        <div class="tp-hero-chips">
+          <span class="tp-hero-chip">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.36 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            {{ varatiya.contact }}
+          </span>
+          {% if varatiya.occupation %}
+          <span class="tp-hero-chip">
+            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            {{ varatiya.occupation }}
+          </span>
+          {% endif %}
+          <span class="tp-hero-chip">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            {{ varatiya.number_of_members }} Members
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TABS ══ -->
+  <div class="tp-tabs-wrap">
+    <div class="tp-tabs">
+      <a href="#overview" class="tp-tab active" onclick="switchTab(event,'overview')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="#rents" class="tp-tab" onclick="switchTab(event,'rents')">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Rent & Room
+        <span class="tp-tab-count">{% if rents %}{{ rents|length }}{% else %}0{% endif %}</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ══ MAIN ══ -->
+  <div class="tp-layout">
+
+    <!-- LEFT COLUMN -->
+    <div class="tp-main-col">
+
+      <!-- OVERVIEW TAB -->
+      <div id="tab-overview">
+
+        <!-- Personal Details -->
+        <div class="tp-section tp-fade-in">
+          <div class="tp-section-head">
+            <div class="tp-section-title">
+              <div class="tp-section-icon blue">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div>
+                <div class="tp-section-h">Personal Details</div>
+                <div class="tp-section-sub">Basic identification information</div>
+              </div>
+            </div>
+          </div>
+          <div class="tp-kv-list">
+            <div class="tp-kv">
+              <span class="tp-kv-key">Full Name</span>
+              <span class="tp-kv-val">{{ varatiya.name }}</span>
+            </div>
+            <div class="tp-kv">
+              <span class="tp-kv-key">Phone</span>
+              <span class="tp-kv-val mono">{{ varatiya.contact }}</span>
+            </div>
+            <div class="tp-kv">
+              <span class="tp-kv-key">Occupation</span>
+              <span class="tp-kv-val">{{ varatiya.occupation|default:"—" }}</span>
+            </div>
+            <div class="tp-kv">
+              <span class="tp-kv-key">Family Size</span>
+              <span class="tp-kv-val">{{ varatiya.number_of_members }} members</span>
+            </div>
+            <div class="tp-kv">
+              <span class="tp-kv-key">Perm. Address</span>
+              <span class="tp-kv-val">{{ varatiya.permanent_address }}</span>
+            </div>
+            {% if varatiya.description %}
+            <div class="tp-kv">
+              <span class="tp-kv-key">Notes</span>
+              <span class="tp-kv-val">{{ varatiya.description }}</span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+      </div><!-- /tab-overview -->
+
+      <!-- RENTS TAB -->
+      <div id="tab-rents" style="display:none;">
+        <div class="tp-section tp-fade-in tp-delay-1">
+          <div class="tp-section-head">
+            <div class="tp-section-title">
+              <div class="tp-section-icon teal">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </div>
+              <div>
+                <div class="tp-section-h">Rent & Room Details</div>
+                <div class="tp-section-sub">Active and historical tenancy records</div>
+              </div>
+            </div>
+          </div>
+          {% if rents %}
+          <div class="tp-table-scroll">
+            <table class="tp-table">
+              <thead>
+                <tr>
+                  <th>Project</th>
+                  <th>Room</th>
+                  <th>Flat</th>
+                  <th>Status</th>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Core</th>
+                  <th>Parking</th>
+                  <th>Service</th>
+                  <th>Gas</th>
+                  <th>Water</th>
+                  <th>Elec.</th>
+                  <th>Other</th>
+                  <th>Total / Mo.</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for rent in rents %}
+                  {% if rent.room %}
+                  <tr>
+                    <td class="tp-td-project">{{ rent.projectref }}</td>
+                    <td class="tp-td-room">{{ rent.room.room_name }}</td>
+                    <td class="tp-td-num">{{ rent.room.flat }}</td>
+                    <td>
+                      <span class="tp-status {% if rent.status == 'Active' %}active{% elif rent.status == 'Warning' %}warning{% else %}ended{% endif %}">
+                        <span class="tp-status-dot"></span>
+                        {{ rent.status }}
+                      </span>
+                    </td>
+                    <td class="tp-td-num">{{ rent.startmonths|date:"M Y" }}</td>
+                    <td>
+                      {% if rent.endmonths %}
+                        <span class="tp-td-num">{{ rent.endmonths|date:"M Y" }}</span>
+                      {% else %}
+                        <span class="tp-ongoing">Ongoing</span>
+                      {% endif %}
+                    </td>
+                    <td class="tp-td-num">{{ rent.room.core_room_rent }}</td>
+                    <td class="tp-td-num">{{ rent.room.parking_cost }}</td>
+                    <td class="tp-td-num">{{ rent.room.service_rent }}</td>
+                    <td class="tp-td-num">{{ rent.room.gas_rent }}</td>
+                    <td class="tp-td-num">{{ rent.room.water_rent }}</td>
+                    <td class="tp-td-num">{{ rent.room.electricity_rent }}</td>
+                    <td class="tp-td-num">{{ rent.room.other_cost }}</td>
+                    <td class="tp-td-total">{{ rent.room.total_monthly_rent }}</td>
+                  </tr>
+                  {% endif %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="tp-empty">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <p>No rent records found for this tenant.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div><!-- /tab-rents -->
+
+    </div><!-- /main-col -->
+
+    <!-- SIDEBAR -->
+    <aside class="tp-sidebar">
+
+      <!-- Stats -->
+      <div class="tp-section tp-fade-in tp-delay-1">
+        <div class="tp-section-head">
+          <div class="tp-section-title">
+            <div class="tp-section-icon amber">
+              <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div>
+              <div class="tp-section-h">Quick Stats</div>
+            </div>
+          </div>
+        </div>
+        <div class="tp-stat-grid" style="padding-bottom:20px;">
+          <div class="tp-stat">
+            <div class="tp-stat-label">Members</div>
+            <div class="tp-stat-val">{{ varatiya.number_of_members }}</div>
+          </div>
+          <div class="tp-stat">
+            <div class="tp-stat-label">Rooms</div>
+            <div class="tp-stat-val teal">{% if rents %}{{ rents|length }}{% else %}0{% endif %}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reference -->
+      <div class="tp-section tp-fade-in tp-delay-2">
+        <div class="tp-section-head">
+          <div class="tp-section-title">
+            <div class="tp-section-icon blue">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </div>
+            <div>
+              <div class="tp-section-h">Reference Contact</div>
+            </div>
+          </div>
+        </div>
+        <div class="tp-ref-body">
+          <div class="tp-ref-person">
+            <div class="tp-ref-icon">
+              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div>
+              <div class="tp-ref-name">{{ varatiya.reference_name }}</div>
+              <div class="tp-ref-phone">{{ varatiya.reference_contact }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NID -->
+      {% if varatiya.nid %}
+      <div class="tp-section tp-fade-in tp-delay-3">
+        <div class="tp-section-head">
+          <div class="tp-section-title">
+            <div class="tp-section-icon teal">
+              <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <div>
+              <div class="tp-section-h">National ID (NID)</div>
+            </div>
+          </div>
+        </div>
+        <div class="tp-nid-wrap">
+          <img src="{{ varatiya.nid.url }}" alt="NID" class="tp-nid-img">
+        </div>
+      </div>
+      {% endif %}
+
+    </aside>
+  </div><!-- /tp-layout -->
+
+
+  <!-- ══ QR MODAL ══ -->
+  <div class="tp-overlay" id="tp-overlay">
+    <div class="tp-modal">
+      <div class="tp-modal-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/></svg>
+      </div>
+      <h3>Page QR Code</h3>
+      <p>Scan to open this tenant's profile</p>
+      <div id="tp-qrcode"></div>
+      <div class="tp-modal-btns">
+        <button onclick="downloadQR()" class="tp-modal-btn dl">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download
+        </button>
+        <button onclick="closeQR()" class="tp-modal-btn cls">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+  <script>
+    // Tab switching
+    function switchTab(e, name) {
+      e.preventDefault();
+      document.querySelectorAll('.tp-tab').forEach(t => t.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+      ['overview','rents'].forEach(id => {
+        const el = document.getElementById('tab-' + id);
+        if (el) el.style.display = (id === name) ? '' : 'none';
+      });
+    }
+
+    // QR
+    function openQR() {
+      const box = document.getElementById('tp-qrcode');
+      box.innerHTML = '';
+      new QRCode(box, { text: window.location.href, width: 190, height: 190 });
+      document.getElementById('tp-overlay').classList.add('open');
+    }
+    function closeQR() {
+      document.getElementById('tp-overlay').classList.remove('open');
+    }
+    function downloadQR() {
+      const c = document.querySelector('#tp-qrcode canvas');
+      if (!c) return;
+      const a = document.createElement('a');
+      a.href = c.toDataURL('image/png');
+      a.download = 'tenant_qr.png';
+      a.click();
+    }
+    document.getElementById('tp-overlay').addEventListener('click', function(e) {
+      if (e.target === this) closeQR();
+    });
+  </script>
+</body>
+</html>

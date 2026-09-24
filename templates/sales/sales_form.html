@@ -1,0 +1,160 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sales Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-lg font-medium">Sale Record Information</h2>
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <div class="p-8 bg-white rounded-lg shadow-lg border border-gray-200">
+                            <h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+								{% if form.instance.id %}Edit Sale{% else %}Add Sale{% endif %}
+							</h1>
+
+							<form method="POST" enctype="multipart/form-data">
+								{% csrf_token %}
+
+								<!-- Project Name -->
+								<div class="mb-4">
+									<label class="block text-sm font-medium text-gray-700">Project Name</label>
+									{{ form.project_name }}
+									{% for error in form.project_name.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div>
+
+								<!-- Floor No -->
+								<div class="mb-4">
+									<label class="block text-sm font-medium text-gray-700">Floor No</label>
+									{{ form.floor_no }}
+									{% for error in form.floor_no.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div>
+
+								<!-- Unit No -->
+								<div class="mb-4">
+									<label class="block text-sm font-medium text-gray-700">Unit No</label>
+									{{ form.unit_no }}
+									{% for error in form.unit_no.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div>
+
+								<!-- Unit Count -->
+								<div class="mb-4">
+									<label class="block text-sm font-medium text-gray-700">Unit Count</label>
+									{{ form.unit_count }}
+									{% for error in form.unit_count.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div>
+
+								<!-- Unit Price -->
+								<div class="mb-4">
+									<label class="block text-sm font-medium text-gray-700">Unit Price</label>
+									{{ form.unit_price }}
+									{% for error in form.unit_price.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div>
+
+								<!-- Total Amount -->
+								<div class="mb-4">
+									<label class="block text-sm font-medium text-gray-700">Total Amount</label>
+									{{ form.total_amount }}
+									{% for error in form.total_amount.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div>
+
+								<!-- Pay Amount -->
+								<div class="mb-4">
+									<label class="block text-sm font-medium text-gray-700">Pay Amount</label>
+									{{ form.pay_amount }}
+									{% for error in form.pay_amount.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div>
+
+								<!-- Cash Type -->
+								<div class="mb-4">
+									<label class="block text-sm font-medium text-gray-700">Cash Type</label>
+									{{ form.cash_type }}
+									{% for error in form.cash_type.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div>
+
+								<!-- Head -->
+								<div class="mb-4">
+									<label class="block text-sm font-medium text-gray-700">Head of Account</label>
+									{{ form.head }}
+									{% for error in form.head.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div>
+
+								<!-- Details -->
+								<div class="mb-4">
+									<label class="block text-sm font-medium text-gray-700">Details</label>
+									{{ form.details }}
+									{% for error in form.details.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div>
+
+								<!-- Status -->
+								<div class="mb-4">
+									<label class="block text-sm font-medium text-gray-700">Status</label>
+									{{ form.status }}
+									{% for error in form.status.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div>
+
+								<!-- Create Date -->
+								<div class="mb-6">
+									<label class="block text-sm font-medium text-gray-700">Create Date</label>
+									{{ form.create_date }}
+									{% for error in form.create_date.errors %}
+										<p class="text-red-600 text-sm">{{ error }}</p>
+									{% endfor %}
+								</div>
+
+								<!-- Buttons -->
+								<div class="flex justify-center space-x-4">
+									<button type="submit" style="background-color:#1e3c98" class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 rounded shadow">
+										{% if form.instance.id %}Update{% else %}Save{% endif %}
+									</button>
+									<a href="{% url 'sales_list' %}" style="margin-left:0.5%;background-color:#1e3c98" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded shadow">
+										Cancel
+									</a>
+								</div>
+							</form>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

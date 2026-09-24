@@ -1,0 +1,275 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payable Voucher</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: silver;
+      padding: 20px;
+      font-size: 11px;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 960px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .logo img {
+      height: 50px;
+    }
+
+    .voucher-info {
+      text-align: right;
+      font-size: 11px;
+    }
+
+    .label-box {
+      background-color: #e2f0d9;
+      color: #000;
+      padding: 4px 10px;
+      font-weight: bold;
+      font-size: 13px;
+      border-radius: 4px;
+    }
+
+    .project-name {
+      margin: 4px 0;
+      font-size: 12px;
+    }
+
+    .readonly-fields input {
+      width: 100%;
+      border: none;
+      background: transparent;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f9f9f9;
+      color: #000;
+      font-weight: bold;
+    }
+
+    .total-row td {
+      font-weight: bold;
+    }
+
+    .amount-in-words {
+      font-size: 12px;
+      font-weight: bold;
+      margin-top: 12px;
+    }
+
+    .amount-in-words span {
+      color: #000;
+    }
+
+    .signature-section {
+      margin-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      text-align: center;
+    }
+
+    .signature-box {
+      flex: 1;
+      padding: 8px;
+    }
+
+    .signature-box:not(:last-child) {
+      margin-right: 10px;
+    }
+
+    .signature-line {
+      display: block;
+      margin-top: 10px;
+      border-top: 1px solid #000;
+      width: 100%;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #333;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+      flex-wrap: wrap;
+    }
+
+    .print-btn {
+      background-color: #1e3a8a;
+      color: white;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .back-btn {
+      background-color: #888;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 11px;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .container {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="{% static 'images/resturant-logo.png' %}" alt="Company Logo">
+      </div>
+      <div class="voucher-info">
+        <div class="label-box">Payable Voucher</div>
+        <p>Voucher No.: {{ voucher.pk }}</p>
+        <p>Printing Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+      </div>
+    </div>
+
+    <!-- Project Info -->
+    <div class="project-name"><strong>Project:</strong> {{ voucher.project_name }}</div> <div class="project-name"><strong>Date:</strong> {{ voucher.date }}</div> 
+
+    <!-- Paid To Info -->
+    <table>
+      <tr>
+        <td colspan="2"><strong>Paid To - ({{ voucher.type }})</strong><hr style="margin: 3px 0;">
+          {% if voucher.customer_name %}
+            {{ voucher.customer_name }}
+          {% elif voucher.conductor_name %}
+            {{ voucher.conductor_name }}
+          {% elif voucher.expense_name %}
+            {{ voucher.expense_name }}
+          {% elif voucher.vendor_name %}
+            {{ voucher.vendor_name }}
+          {% else %}
+            N/A
+          {% endif %}
+        </td>
+        <td><strong>Status</strong><hr style="margin: 3px 0;">{{ voucher.loan_status }}</td>
+      </tr>
+    </table>
+
+    <!-- Entry Table -->
+    <table>
+      <thead>
+        <tr>
+          <th>SL. No.</th>
+          <th>Particulars</th>
+          <th>Bank Name</th>
+          <th>Head of Accounts</th>
+          <th>M.R./Bill No</th>
+          <th>Amount (TK)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>{{ voucher.particulars }}</td>
+          <td>{{ voucher.cash_type }}</td>
+          <td>{{ voucher.headAcct }}</td>
+          <td>{{ voucher.mr_or_bill_no }}</td>
+          <td>{{ voucher.amount|intcomma }}/-</td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="5" class="text-right">Total</td>
+          <td>{{ voucher.amount|intcomma }}/-</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Amount in Words -->
+    <p class="amount-in-words">Payment Amount in Words: <span>{{ amount_in_words }}</span> only.</p>
+
+    <!-- Signatures -->
+    <div class="signature-section">
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Received By
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Paid By
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Prepared By
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Approved By
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <!--<div>-->
+      <!--  {% if voucher.approval_cr_status %}-->
+      <!--    <span style="color: green; font-weight: bold;">✔ Approved</span>-->
+      <!--  {% elif voucher.approval_cr_status == False %}-->
+      <!--    <span style="background-color: #facc15; padding: 4px 8px; border-radius: 4px;">❌ Not Approved</span>-->
+      <!--  {% else %}-->
+      <!--    <a href="{% url 'approve_cr_voucher' voucher.pk %}" style="background-color: #e2e8f0; padding: 4px 8px; border-radius: 4px; text-decoration: none;">⏳ Pending</a>-->
+      <!--  {% endif %}-->
+      <!--</div>-->
+      <div class="no-print">
+        <a href="{% url 'rest_loanvoucher_pay_list' %}" class="back-btn">← Back to List</a>
+        &nbsp;
+        <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

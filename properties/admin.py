@@ -1,0 +1,23 @@
+from django.contrib import admin
+from .models import PropertyOwner,Property,JointVenture,JVPartner,Tenant,LeaseAgreement,LeasePayment,Buyer,SaleRecord,Customer,LandPurchase,CashMethod,LandHeadOfAccount,LandDebitVoucher,LandCreditVoucher,LandApprovalPayment,LandLedgerEntry,LandTransactionHistory,LandHeadOfExpense,RecordFile
+
+admin.site.register(PropertyOwner)
+admin.site.register(Property)
+admin.site.register(JointVenture)
+admin.site.register(JVPartner)
+admin.site.register(Tenant)
+admin.site.register(LeaseAgreement)
+admin.site.register(LeasePayment)
+admin.site.register(Buyer)
+admin.site.register(SaleRecord)
+admin.site.register(Customer)
+admin.site.register(LandPurchase)
+admin.site.register(CashMethod)
+admin.site.register(LandHeadOfAccount)
+admin.site.register(LandDebitVoucher)
+admin.site.register(LandCreditVoucher)
+admin.site.register(LandApprovalPayment)
+admin.site.register(LandLedgerEntry)
+admin.site.register(LandTransactionHistory)
+admin.site.register(LandHeadOfExpense)
+admin.site.register(RecordFile)

@@ -1,0 +1,188 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bank Ledger Manage - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Bank Ledger Manage</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{% url 'rest_bank_reports_list' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Back</button>
+                        </a>
+                        <a href="{% url 'rest_bank_ledger_manage' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Refresh</button>
+                        </a>
+                    </div>
+            
+                    <!-- BEGIN: Property Owners List -->
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                       <form method="get" action="{% url 'rest_bank_ledger_report' %}" class="w-full max-w-4xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                        <h2 class="text-2xl font-semibold text-gray-800 text-center mb-6">Bank Ledger Report </h2>
+
+                        <div class="space-y-6">
+                            
+                           <!-- Opening Balance Radio Buttons -->
+                           <div>
+								<label class="block font-medium text-gray-800 mb-2"><b>Opening Balance</b></label>
+								<div class="flex">
+									<!-- Include -->
+									<label class="inline-flex items-center mr-12 w-40">
+										<input type="radio" name="balance" value="include" class="form-radio text-blue-600"
+											{% if request.GET.balance == 'include' %}checked{% endif %}>
+										<span class="ml-2 text-gray-700">Include Single</span>
+									</label>
+
+									<!-- Exclude -->
+									<label class="inline-flex items-center mr-12 w-40">
+										<input type="radio" name="balance" value="exclude" class="form-radio text-blue-600"
+											{% if request.GET.balance == 'exclude' or not request.GET.balance %}checked{% endif %}>
+										<span class="ml-2 text-gray-700">Exclude Single</span>
+									</label>
+
+									<!-- All -->
+									<label class="inline-flex items-center w-40">
+										<input type="radio" name="balance" value="all" class="form-radio text-blue-600"
+											{% if request.GET.balance == 'all' %}checked{% endif %}>
+										<span class="ml-2 text-gray-700">All Method</span>
+									</label>
+								</div>
+							</div>
+
+                            <!-- Bank Type Dropdown -->
+                            <div>
+                                <label for="cash_type_name" class="block font-medium text-gray-800 mb-2"><b>Bank Type</b></label>
+                                <select name="cash_type_name" id="cash_type_name" class="w-full border border-slate-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    {% for cashType in cashTypes %}
+                                        <option value="{{ cashType.id }}" {% if request.GET.head == cashType.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ cashType.cash_type_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div>
+                                    <label for="project" class="block font-medium text-gray-800">Project Name</label>
+                                    <select name="project" id="project" class="w-full border border-slate-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        {% for projectName in projectNames %}
+                                            <option value="{{ projectName.id }}">{{ projectName.project_first_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                            <!-- Transaction Type Radio Buttons -->
+                            <div>
+                                <label class="block font-medium text-gray-800 mb-2"><b>Transaction Type</b></label>
+                                <div class="flex space-x-6">
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="transaction" value="all" class="form-radio text-blue-600"
+                                            {% if request.GET.transaction == 'all' %}checked{% endif %}>
+                                        <span class="ml-2 text-gray-700">All Transactions &nbsp;&nbsp;&nbsp;&nbsp; </span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="transaction" value="datewise" class="form-radio text-blue-600"
+                                            {% if request.GET.transaction == 'datewise' or not request.GET.transaction %}checked{% endif %}>
+                                        <span class="ml-2 text-gray-700">Date Wise</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- From Date -->
+                            <div>
+                                <label for="from_date" class="block font-medium text-gray-800 mb-2"><b>From Date</b></label>
+                                <input type="date" name="from_date" id="from_date"
+                                    value="{{ request.GET.from_date|default:today|date:'Y-m-d' }}"
+                                    class="w-full border border-slate-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <!-- To Date -->
+                            <div>
+                                <label for="to_date" class="block font-medium text-gray-800 mb-2"><b>To Date</b></label>
+                                <input type="date" name="to_date" id="to_date"
+                                    value="{{ request.GET.to_date|default:today|date:'Y-m-d' }}"
+                                    class="w-full border border-slate-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="text-center pt-4">
+                                <button type="submit" style="margin-left:0.5%;background-color:#1e3c98" class="bg-blue-700 text-white px-6 py-3 rounded-md hover:bg-blue-800 transition-colors duration-200">
+                                    Show Results
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+					
+					<!-- Date fields readonly option -->
+						<script>
+							document.addEventListener('DOMContentLoaded', function () {
+								const transactionRadios = document.querySelectorAll('input[name="transaction"]');
+								const fromDate = document.getElementById('from_date');
+								const toDate = document.getElementById('to_date');
+
+								function updateDateFields() {
+									const selectedValue = document.querySelector('input[name="transaction"]:checked').value;
+									const isAll = selectedValue === 'all';
+
+									fromDate.readOnly = isAll;
+									toDate.readOnly = isAll;
+
+									// Optional: Gray out the fields when readonly
+									fromDate.style.backgroundColor = isAll ? '#f1f1f1' : '';
+									toDate.style.backgroundColor = isAll ? '#f1f1f1' : '';
+								}
+
+								// Initial call on page load
+								updateDateFields();
+
+								// Update on change
+								transactionRadios.forEach(radio => {
+									radio.addEventListener('change', updateDateFields);
+								});
+							});
+						</script>
+                       
+                    </div>
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,423 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Employee File System{% endblock %}
+
+{% block content %}
+
+<style>
+
+.upload-card{
+    background:#ffffff;
+    border-radius:22px;
+    padding:35px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+    margin-top:30px;
+    margin-bottom:35px;
+}
+
+.folder-title{
+    font-size:30px;
+    font-weight:700;
+    color:#1e3a8a;
+    margin-bottom:8px;
+}
+
+.employee-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:#eff6ff;
+    color:#1d4ed8;
+    padding:8px 16px;
+    border-radius:999px;
+    font-weight:600;
+    margin-bottom:25px;
+}
+
+.form-group{
+    margin-bottom:20px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:8px;
+    font-size:16px;
+    font-weight:600;
+    color:#374151;
+}
+
+.form-group input{
+    width:100%;
+    padding:14px 16px;
+    border-radius:12px;
+    border:1px solid #d1d5db;
+    font-size:15px;
+    transition:0.3s;
+}
+
+.form-group input:focus{
+    border-color:#2563eb;
+    outline:none;
+    box-shadow:0 0 0 4px rgba(37,99,235,0.1);
+}
+
+.button-group{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-top:25px;
+}
+
+.upload-btn{
+    background:linear-gradient(135deg,#2563eb,#1d4ed8);
+    color:white;
+    border:none;
+    padding:14px 30px;
+    border-radius:12px;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.upload-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 20px rgba(37,99,235,0.3);
+}
+
+.back-btn{
+    background:#64748b;
+    color:white;
+    padding:14px 30px;
+    border-radius:12px;
+    text-decoration:none;
+    font-size:16px;
+    font-weight:600;
+    transition:0.3s;
+}
+
+.back-btn:hover{
+    background:#475569;
+}
+
+/* File Section */
+
+.file-section{
+    background:white;
+    border-radius:22px;
+    padding:35px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+.file-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.file-header h3{
+    font-size:28px;
+    font-weight:700;
+    color:#1e293b;
+}
+
+/* Search */
+
+.search-box{
+    width:320px;
+}
+
+.search-box input{
+    width:100%;
+    padding:13px 18px;
+    border-radius:12px;
+    border:1px solid #d1d5db;
+    font-size:15px;
+}
+
+.search-box input:focus{
+    outline:none;
+    border-color:#2563eb;
+}
+
+/* File List */
+
+.file-list{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+.file-item{
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    border-radius:18px;
+    padding:18px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:15px;
+    transition:0.3s;
+}
+
+.file-item:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 18px rgba(0,0,0,0.08);
+}
+
+.file-left{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.file-left img{
+    width:42px;
+}
+
+.file-info h4{
+    margin:0;
+    font-size:18px;
+    font-weight:700;
+    color:#1e293b;
+}
+
+.file-info p{
+    margin:4px 0 0;
+    color:#64748b;
+    font-size:14px;
+}
+
+.file-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.action-btn{
+    padding:10px 18px;
+    border-radius:10px;
+    color:white;
+    font-size:14px;
+    font-weight:600;
+    text-decoration:none;
+    border:none;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.view-btn{
+    background:#16a34a;
+}
+
+.edit-btn{
+    background:#2563eb;
+}
+
+.delete-btn{
+    background:#dc2626;
+}
+
+.action-btn:hover{
+    opacity:0.9;
+    transform:scale(1.03);
+}
+
+.empty-file{
+    text-align:center;
+    padding:40px;
+    color:#64748b;
+    font-size:18px;
+}
+
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 before:fixed before:inset-0 before:z-[-1]">
+
+    {% include 'partials/mobile.html' %}
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+
+        {% include 'partials/sidebar_list.html' %}
+
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-6 pb-10 md:px-[22px]">
+
+            {% include 'partials/header.html' %}
+
+            <!-- Upload Section -->
+
+            <div class="upload-card">
+
+                <h2 class="folder-title">
+                    {{ folder.name }}
+                </h2>
+
+                <div class="employee-badge">
+                    <i class="fa fa-user"></i>
+
+                    {% if folder.employee %}
+                        {{ folder.employee.employee_name }}
+                    {% else %}
+                        No Employee
+                    {% endif %}
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+
+                    {% csrf_token %}
+
+                    <div class="form-group">
+
+                        <label>File Name</label>
+
+                        {{ file_form.name }}
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>Select File</label>
+
+                        {{ file_form.file }}
+
+                    </div>
+
+                    <div class="button-group">
+
+                        <button type="submit"
+                                name="upload_file"
+                                class="upload-btn">
+                            Upload File
+                        </button>
+
+                        <a href="{% url 'emp_document' %}"
+                           class="back-btn">
+                            Back
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            <!-- File List -->
+
+            <div class="file-section">
+
+                <div class="file-header">
+
+                    <h3>Uploaded Files</h3>
+
+                    <div class="search-box">
+
+                        <input type="text"
+                               id="fileSearchInput"
+                               placeholder="Search files...">
+
+                    </div>
+
+                </div>
+
+                <div class="file-list">
+
+                    {% for file in files %}
+
+                    <div class="file-item file-search-item">
+
+                        <div class="file-left">
+
+                            <img src="{% static 'icons/file.png' %}" alt="File">
+
+                            <div class="file-info">
+
+                                <h4>{{ file.name }}</h4>
+
+                                <p>
+                                    Uploaded:
+                                    {{ file.created_at|date:"d M Y h:i A" }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="file-actions">
+
+                            <a href="{{ file.file.url }}"
+                               target="_blank"
+                               class="action-btn view-btn">
+                                View
+                            </a>
+                            {% if employee.employee_name|lower == "admin" %}
+                            <a href="{% url 'emp_edit_file_name' file.id %}"
+                               class="action-btn edit-btn">
+                                Edit
+                            </a>
+
+                            <form action="{% url 'emp_delete_file' file.id %}"
+                                  method="POST"
+                                  onsubmit="return confirm('Are you sure you want to delete this file?')">
+
+                                {% csrf_token %}
+
+                                <button type="submit"
+                                        class="action-btn delete-btn">
+                                    Delete
+                                </button>
+
+                            </form>
+                             {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    {% empty %}
+
+                    <div class="empty-file">
+                        No files uploaded yet.
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+document.getElementById('fileSearchInput').addEventListener('keyup', function () {
+
+    const searchValue = this.value.toLowerCase();
+
+    const files = document.querySelectorAll('.file-search-item');
+
+    files.forEach(function(file){
+
+        const fileName = file.textContent.toLowerCase();
+
+        if(fileName.includes(searchValue)){
+            file.style.display = '';
+        }else{
+            file.style.display = 'none';
+        }
+
+    });
+
+});
+
+</script>
+
+{% endblock %}

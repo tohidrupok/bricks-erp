@@ -1,0 +1,387 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ form.instance.pk|yesno:"Update,Create" }} Project - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    {% include 'partials/mobile.html' %}
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+
+            {% include 'partials/header.html' %}
+
+            <div class="mt-6 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 p-5">
+                    <div class="w-full max-w-5xl mx-auto bg-white dark:bg-darkmode-600 p-8 shadow-lg rounded-xl">
+
+                        <!-- Container for Form and Listing -->
+                        
+                        <style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500&display=swap');
+
+  .tnd-wrapper {
+    font-family: 'DM Sans', sans-serif;
+    padding: 2rem;
+    background: #f0f4ff;
+    min-height: 100%;
+    border-radius: 16px;
+  }
+
+  .tnd-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 2rem;
+  }
+
+  .tnd-header-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #3b5bdb, #7048e8);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(59,91,219,0.35);
+  }
+
+  .tnd-header-icon svg {
+    width: 26px;
+    height: 26px;
+    color: white;
+    fill: none;
+    stroke: white;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .tnd-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a1f36;
+    margin: 0;
+    letter-spacing: -0.5px;
+  }
+
+  .tnd-subtitle {
+    font-size: 0.82rem;
+    color: #6b7280;
+    margin: 2px 0 0 0;
+  }
+
+  .tnd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 16px;
+  }
+
+  .tnd-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.4rem 1rem 1.2rem;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    border: 1.5px solid transparent;
+    transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tnd-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--tnd-gradient);
+    opacity: 0;
+    transition: opacity 0.22s ease;
+    border-radius: 16px;
+    z-index: 0;
+  }
+
+  .tnd-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    border-color: var(--tnd-accent);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .tnd-card:hover::before {
+    opacity: 0.07;
+  }
+
+  .tnd-card:hover .tnd-icon-box {
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px var(--tnd-shadow);
+  }
+
+  .tnd-icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--tnd-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.22s ease;
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+  }
+
+  .tnd-icon-box svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: white;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .tnd-label {
+    font-family: 'Sora', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #1a1f36;
+    line-height: 1.3;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Color themes per card */
+  .tnd-blue   { --tnd-gradient: linear-gradient(135deg,#3b5bdb,#4dabf7); --tnd-accent:#3b5bdb; --tnd-shadow:rgba(59,91,219,0.3); }
+  .tnd-violet { --tnd-gradient: linear-gradient(135deg,#7048e8,#b197fc); --tnd-accent:#7048e8; --tnd-shadow:rgba(112,72,232,0.3); }
+  .tnd-teal   { --tnd-gradient: linear-gradient(135deg,#0ca678,#63e6be); --tnd-accent:#0ca678; --tnd-shadow:rgba(12,166,120,0.3); }
+  .tnd-orange { --tnd-gradient: linear-gradient(135deg,#e8590c,#ffa94d); --tnd-accent:#e8590c; --tnd-shadow:rgba(232,89,12,0.3); }
+  .tnd-red    { --tnd-gradient: linear-gradient(135deg,#c92a2a,#ff8787); --tnd-accent:#c92a2a; --tnd-shadow:rgba(201,42,42,0.3); }
+  .tnd-green  { --tnd-gradient: linear-gradient(135deg,#2f9e44,#8ce99a); --tnd-accent:#2f9e44; --tnd-shadow:rgba(47,158,68,0.3); }
+  .tnd-pink   { --tnd-gradient: linear-gradient(135deg,#a61e4d,#f783ac); --tnd-accent:#a61e4d; --tnd-shadow:rgba(166,30,77,0.3); }
+  .tnd-indigo { --tnd-gradient: linear-gradient(135deg,#364fc7,#748ffc); --tnd-accent:#364fc7; --tnd-shadow:rgba(54,79,199,0.3); }
+  .tnd-cyan   { --tnd-gradient: linear-gradient(135deg,#0b7285,#66d9e8); --tnd-accent:#0b7285; --tnd-shadow:rgba(11,114,133,0.3); }
+  .tnd-amber  { --tnd-gradient: linear-gradient(135deg,#e67700,#ffd43b); --tnd-accent:#e67700; --tnd-shadow:rgba(230,119,0,0.3); }
+  .tnd-slate  { --tnd-gradient: linear-gradient(135deg,#343a40,#868e96); --tnd-accent:#343a40; --tnd-shadow:rgba(52,58,64,0.3); }
+  .tnd-rose   { --tnd-gradient: linear-gradient(135deg,#c2255c,#ff6b6b); --tnd-accent:#c2255c; --tnd-shadow:rgba(194,37,92,0.3); }
+  .tnd-lime   { --tnd-gradient: linear-gradient(135deg,#5c940d,#c0eb75); --tnd-accent:#5c940d; --tnd-shadow:rgba(92,148,13,0.3); }
+  .tnd-grape  { --tnd-gradient: linear-gradient(135deg,#862e9c,#da77f2); --tnd-accent:#862e9c; --tnd-shadow:rgba(134,46,156,0.3); }
+  .tnd-sky    { --tnd-gradient: linear-gradient(135deg,#1971c2,#74c0fc); --tnd-accent:#1971c2; --tnd-shadow:rgba(25,113,194,0.3); }
+  .tnd-mint   { --tnd-gradient: linear-gradient(135deg,#087f5b,#63e6be); --tnd-accent:#087f5b; --tnd-shadow:rgba(8,127,91,0.3); }
+  .tnd-sand   { --tnd-gradient: linear-gradient(135deg,#7d4f00,#ffd8a8); --tnd-accent:#7d4f00; --tnd-shadow:rgba(125,79,0,0.3); }
+
+  /* Animate cards on load */
+  .tnd-card {
+    animation: tndFadeUp 0.4s ease both;
+  }
+  .tnd-card:nth-child(1)  { animation-delay: 0.03s; }
+  .tnd-card:nth-child(2)  { animation-delay: 0.06s; }
+  .tnd-card:nth-child(3)  { animation-delay: 0.09s; }
+  .tnd-card:nth-child(4)  { animation-delay: 0.12s; }
+  .tnd-card:nth-child(5)  { animation-delay: 0.15s; }
+  .tnd-card:nth-child(6)  { animation-delay: 0.18s; }
+  .tnd-card:nth-child(7)  { animation-delay: 0.21s; }
+  .tnd-card:nth-child(8)  { animation-delay: 0.24s; }
+  .tnd-card:nth-child(9)  { animation-delay: 0.27s; }
+  .tnd-card:nth-child(10) { animation-delay: 0.30s; }
+  .tnd-card:nth-child(11) { animation-delay: 0.33s; }
+  .tnd-card:nth-child(12) { animation-delay: 0.36s; }
+  .tnd-card:nth-child(13) { animation-delay: 0.39s; }
+  .tnd-card:nth-child(14) { animation-delay: 0.42s; }
+  .tnd-card:nth-child(15) { animation-delay: 0.45s; }
+  .tnd-card:nth-child(16) { animation-delay: 0.48s; }
+  .tnd-card:nth-child(17) { animation-delay: 0.51s; }
+
+  @keyframes tndFadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 640px) {
+    .tnd-grid { grid-template-columns: repeat(2, 1fr); }
+    .tnd-wrapper { padding: 1rem; }
+  }
+</style>
+
+                        <div class="container tnd-wrapper">
+                        
+                          <!-- Header -->
+                          <div class="tnd-header">
+                            <div class="tnd-header-icon">
+                              <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            </div>
+                            <div>
+                              <h2 class="tnd-title">Tenant Dashboard</h2>
+                              <p class="tnd-subtitle">Manage all your property modules from one place</p>
+                            </div>
+                          </div>
+                        
+                          <!-- Cards Grid -->
+                          <div class="tnd-grid">
+                        
+                            <!-- Project List -->
+                            <a href="{% url 'project_page' %}" class="tnd-card tnd-blue">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                              </div>
+                              <span class="tnd-label">Project List</span>
+                            </a>
+                        
+                            <!-- Room List -->
+                            <a href="{% url 'room_list' %}" class="tnd-card tnd-violet">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                              </div>
+                              <span class="tnd-label">Room List</span>
+                            </a>
+                        
+                            <!-- Tenant List -->
+                            <a href="{% url 'varatiya_list' %}" class="tnd-card tnd-teal">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                              </div>
+                              <span class="tnd-label">Tenant List</span>
+                            </a>
+                        
+                            <!-- Rent List -->
+                            <a href="{% url 'rent_form_and_list' %}" class="tnd-card tnd-orange">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                              </div>
+                              <span class="tnd-label">Rent List</span>
+                            </a>
+                        
+                            <!-- Deactive Room -->
+                            <a href="{% url 'rent_search' %}" class="tnd-card tnd-red">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                              </div>
+                              <span class="tnd-label">Deactive Room</span>
+                            </a>
+                        
+                            <!-- Bills Generate -->
+                            <a href="{% url 'bill_generator_home' %}" class="tnd-card tnd-green">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                              </div>
+                              <span class="tnd-label">Bills Generate</span>
+                            </a>
+                        
+                            <!-- Advance Payment -->
+                            <a href="{% url 'tenant_advance_list' %}" class="tnd-card tnd-pink">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                              </div>
+                              <span class="tnd-label">Advance Payment</span>
+                            </a>
+                        
+                            <!-- Adjust Payment -->
+                            <a href="{% url 'payment_tenant_advance' %}" class="tnd-card tnd-indigo">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+                              </div>
+                              <span class="tnd-label">Adjust Payment</span>
+                            </a>
+                        
+                            <!-- Cheque Book -->
+                            <a href="{% url 'cheque_book_list' %}" class="tnd-card tnd-cyan">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                              </div>
+                              <span class="tnd-label">Cheque Book Manage</span>
+                            </a>
+                        
+                            <!-- Accounting -->
+                            <a href="{% url 'account_list' %}" class="tnd-card tnd-amber">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                              </div>
+                              <span class="tnd-label">Accounting</span>
+                            </a>
+                        
+                            <!-- Discount Bills -->
+                            <a href="{% url 'mainbill_list' %}" class="tnd-card tnd-slate">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                              </div>
+                              <span class="tnd-label">Discount Bills</span>
+                            </a>
+                        
+                            <!-- Top Sheet -->
+                            <a href="{% url 'main_bill_list' %}" class="tnd-card tnd-rose">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                              </div>
+                              <span class="tnd-label">Top Sheet</span>
+                            </a>
+                        
+                            <!-- Ledger Report -->
+                            <a href="{% url 'tenant_ledger_input_page' %}" class="tnd-card tnd-lime">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+                              </div>
+                              <span class="tnd-label">Ledger Report</span>
+                            </a>
+                        
+                            <!-- Receivable Voucher -->
+                            <a href="{% url 'bill_summary_page' %}" class="tnd-card tnd-grape">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>
+                              </div>
+                              <span class="tnd-label">Receivable Voucher</span>
+                            </a>
+                        
+                            <!-- Received Voucher List -->
+                            <a href="{% url 'receive_voucher_list' %}" class="tnd-card tnd-sky">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                              </div>
+                              <span class="tnd-label">Received Voucher List</span>
+                            </a>
+                        
+                            <!-- Payment Voucher List -->
+                                <a href="{% url 'supplier_payment_page' %}" class="tnd-card tnd-mint">
+                                  <div class="tnd-icon-box">
+                                    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                                  </div>
+                                  <span class="tnd-label">Expanse Voucher</span>
+                                </a>
+                            <!-- Payment Voucher List -->
+                            <a href="{% url 'payment_voucher_list' %}" class="tnd-card tnd-mint">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                              </div>
+                              <span class="tnd-label">Payment Voucher List</span>
+                            </a>
+                        
+                            <!-- Tenant SMS Send -->
+                            <a href="{% url 'varatiya_bulk_sms' %}" class="tnd-card tnd-sand">
+                              <div class="tnd-icon-box">
+                                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                              </div>
+                              <span class="tnd-label">Tenant SMS Send</span>
+                            </a>
+                        
+                          </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+

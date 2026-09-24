@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ book.book_name }} - Cheques - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    {% include 'partials/mobile.html' %}
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+
+        {% include 'partials/sidebar_list.html' %}
+
+        <div class="flex-1 bg-slate-100 dark:bg-darkmode-700 rounded-[30px] px-4 pb-10 md:px-[22px]">
+
+            {% include 'partials/header_dashboard.html' %}
+
+            <div class="btp-cheque-container mt-10">
+
+                <!-- Header -->
+                <div class="btp-cheque-header flex flex-col md:flex-row justify-between md:items-center mb-8 gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800 mb-1">
+                            Cheques for {{ book.book_name }} <span class="text-slate-500 text-base">({{ book.book_number }})</span>
+                        </h1>
+                        <p class="text-slate-500 text-sm">Manage and track all cheque records easily</p>
+                    </div>
+                    <div class="flex gap-3 items-center">
+                        <button id="toggleForm" class="btp-btn-add flex items-center gap-2">
+                            <i class="fa fa-plus"></i> Add Cheque
+                        </button>
+                        <a href="{% url 'cheque_book_list' %}" class="btp-btn-back flex items-center gap-2">
+                            <i class="fa fa-arrow-left"></i> Back
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Add Cheque Form (toggle) -->
+                <div id="addForm" class="btp-form-card hidden">
+                    <h2 class="text-lg font-semibold text-slate-700 mb-4">Add New Cheque</h2>
+                    <form method="post" class="btp-form space-y-3">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btp-btn-add w-fit flex items-center gap-2">
+                            <i class="fa fa-save"></i> Save Cheque
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Search -->
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="btp-list-title text-lg font-semibold text-slate-700">All Cheques</h2>
+                    <input type="text" id="searchInput" placeholder="Search cheque or payee..." class="btp-search">
+                </div>
+
+                <!-- Cheques Table -->
+                <div class="btp-table-wrapper overflow-x-auto">
+                    <table class="btp-table w-full text-sm text-left text-slate-700" id="chequeTable">
+                        <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+                            <tr>
+                                <th>Cheque No</th>
+                                <th>Payee</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200">
+                            {% for cheque in cheques %}
+                            <tr class="cheque-row hover:bg-slate-50 transition cursor-pointer" data-id="{{ cheque.id }}">
+                                <td>{{ cheque.cheque_number }}</td>
+                                <td>{{ cheque.payee_name }}</td>
+                                <td>{{ cheque.amount }}</td>
+                                <td>
+                                    <span class="status-{{ cheque.status }}">{{ cheque.get_status_display }}</span>
+                                </td>
+                                <td class="space-x-2">
+                                    <button onclick="location.href='{% url 'edit_cheque' cheque.id %}'" class="btp-btn-action btp-edit">✏️ Edit</button>
+                                    <button onclick="if(confirm('Delete this cheque?')) location.href='{% url 'delete_cheque' cheque.id %}'" class="btp-btn-action btp-delete">🗑 Delete</button>
+                                </td>
+                            </tr>
+                            <tr class="cheque-details hidden" id="details-{{ cheque.id }}">
+                                <td colspan="5" class="bg-slate-50">
+                                    <div class="p-4 text-slate-600">
+                                        <strong>Remarks:</strong> {{ cheque.remarks|default:"None" }}<br>
+                                        <strong>Issue Date:</strong> {{ cheque.issue_date|date:"M d, Y" }}<br>
+                                        <strong>Book:</strong> {{ cheque.cheque_book.account }}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center py-6 text-slate-500">No Cheques Found</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- === JS for Toggle + Expand === -->
+<script>
+document.getElementById('toggleForm').addEventListener('click', () => {
+    const form = document.getElementById('addForm');
+    form.classList.toggle('hidden');
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+document.querySelectorAll('.cheque-row').forEach(row => {
+    row.addEventListener('click', () => {
+        const id = row.dataset.id;
+        document.getElementById('details-' + id).classList.toggle('hidden');
+    });
+});
+
+document.getElementById('searchInput').addEventListener('input', function () {
+    const filter = this.value.toLowerCase();
+    document.querySelectorAll('#chequeTable tbody tr.cheque-row').forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+        const detail = document.getElementById('details-' + row.dataset.id);
+        if (detail) detail.style.display = text.includes(filter) ? '' : 'none';
+    });
+});
+</script>
+
+<!-- === Styles === -->
+<style>
+.btp-cheque-container {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    padding: 40px 45px;
+}
+
+/* Buttons */
+.btp-btn-add {
+    background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(59,130,246,0.2);
+}
+.btp-btn-add:hover {
+    background: linear-gradient(135deg, #4338ca, #2563eb);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+}
+
+.btp-btn-back {
+    background: #f1f5f9;
+    color: #1e293b;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+.btp-btn-back:hover {
+    background: #e2e8f0;
+    transform: translateY(-1px);
+}
+
+/* Table + Status */
+.btp-table th, .btp-table td { padding: 12px 14px; }
+.status-unused { background: #3498db; color: #fff; padding: 4px 10px; border-radius: 6px; }
+.status-used { background: #9b59b6; color: #fff; padding: 4px 10px; border-radius: 6px; }
+.status-issued { background: #f39c12; color: #fff; padding: 4px 10px; border-radius: 6px; }
+.status-cleared { background: #2ecc71; color: #fff; padding: 4px 10px; border-radius: 6px; }
+.status-cancelled { background: #e74c3c; color: #fff; padding: 4px 10px; border-radius: 6px; }
+
+/* Edit/Delete Buttons */
+.btp-btn-action {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.btp-edit { background: #10b981; color: #fff; }
+.btp-edit:hover { background: #059669; }
+.btp-delete { background: #ef4444; color: #fff; }
+.btp-delete:hover { background: #dc2626; }
+
+/* Search */
+.btp-search {
+    border: 1px solid #d0d7e2;
+    border-radius: 8px;
+    padding: 8px 12px;
+    width: 250px;
+    transition: border-color 0.3s ease;
+}
+.btp-search:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+/* Form Card */
+.btp-form-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    margin-bottom: 30px;
+}
+.btp-form-card h2 { font-size: 20px; color: #1e355f; margin-bottom: 15px; }
+.btp-form input, .btp-form select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #d0d7e2; font-size: 14px; outline: none; transition: all 0.2s ease; }
+.btp-form input:focus, .btp-form select:focus { border-color: #2c6fff; box-shadow: 0 0 0 3px rgba(44,111,255,0.15); }
+
+/* Animation */
+.cheque-details { animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+
+/* Font Awesome */
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css");
+</style>
+{% endblock %}

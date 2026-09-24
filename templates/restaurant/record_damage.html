@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Record Damage Food - The Galleria</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .win-button {
+      background: linear-gradient(to bottom, #f6f6f6 0%, #e0e0e0 100%);
+      border: 1px solid #777;
+      border-radius: 2px;
+      padding: 4px 10px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .win-button:hover { background: linear-gradient(to bottom, #e0e0e0 0%, #cccccc 100%); }
+  </style>
+</head>
+<body class="bg-[#dcdcdc] p-2 font-sans text-xs">
+
+<div class="max-w-[700px] mx-auto bg-[#e8e8e8] border-2 border-red-600 p-2 shadow-2xl">
+  
+  <!-- Header Bar -->
+  <div class="bg-red-700 text-white font-bold px-3 py-1.5 flex justify-between items-center text-sm mb-2">
+    <span>⚠️ Record Damaged / Wasted Food</span>
+    <a href="{% url 'restaurant_sales_list' %}" class="text-white hover:underline text-xs">← Back to POS Sales</a>
+  </div>
+
+  <!-- Form Section -->
+  <form method="POST" class="bg-white p-3 border border-gray-300 space-y-3">
+    {% csrf_token %}
+
+   <div>
+      <label class="block font-semibold mb-1 text-gray-700">Select Item</label>
+      <select name="item_id" id="damageItemSelect" required class="w-full border border-gray-400 p-1.5 bg-white rounded">
+        <option value="">-- Select Item (Alphabetical) --</option>
+        {% for stock_item in items %}
+          <option value="{{ stock_item.id }}" data-stock="{{ stock_item.available_qty }}">
+            {% if stock_item.item_name %}{{ stock_item.item_name.rest_item_name }}{% else %}Item #{{ stock_item.id }}{% endif %}
+            ({{ stock_item.item_code }})
+          </option>
+        {% endfor %}
+      </select>
+      <div class="mt-1 text-[11px] text-gray-600">
+        Current stock: <span id="currentStockDisplay" class="font-bold text-red-700">-</span>
+      </div>
+    </div>
+
+    <div>
+      <label class="block font-semibold mb-1 text-gray-700">Reason / Remark</label>
+      <textarea name="reason" rows="3" class="w-full border border-gray-400 p-1.5 rounded" placeholder="State reason (e.g., Spoiled, Cook error, Expired)..."></textarea>
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2 border-t">
+      <a href="{% url 'restaurant_sales_list' %}" class="win-button text-black no-underline">Cancel</a>
+      <button type="submit" class="bg-red-700 hover:bg-red-800 text-white font-bold px-4 py-1 rounded">Save Damage Record</button>
+    </div>
+  </form>
+
+</div>
+
+</body>
+</html>

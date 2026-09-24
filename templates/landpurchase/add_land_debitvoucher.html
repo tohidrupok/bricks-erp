@@ -1,0 +1,214 @@
+<!-- templates/CreditVoucher.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Land Payment Voucher Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-lg font-medium">Land Payment Voucher Name</h2>
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                        <a href="{% url 'add_land_debitvoucher' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Refresh</button>
+                        </a>
+                        <br/>
+                         <!-- Type Fields -->
+                      <form method="POST" class="space-y-6">
+                          {% csrf_token %}
+                          <input type="hidden" name="create_dr_by" value="{{ request.user.get_full_name }}" />
+                    
+                          <!-- Land Purchase -->
+                          <div>
+                            <label class="block font-medium mb-2">Land Purchase</label>
+                            <select id="id_land_purchase" name="land_purchase" class="w-full border-gray-300 rounded-md shadow-sm p-2 text-sm">
+                              <option value="">---------</option>
+                              {% for obj in landDebits %}
+                                <option value="{{ obj.pk }}" {% if obj.pk|stringformat:"s" == form.land_purchase.value|stringformat:"s" %}selected{% endif %}>
+                                  {{ obj.land_supplier.owner_name }}
+                                </option>
+                              {% endfor %}
+                            </select>
+                            {% for error in form.land_purchase.errors %}
+                              <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                          </div>
+                    
+                          <!-- Type -->
+                          <div>
+                            <label for="id_type" class="block font-medium mb-2">Type</label>
+                            <select id="id_type" name="type" class="w-full border-gray-300 rounded-md shadow-sm p-2 text-sm" onchange="toggleTypeFields()">
+                              <option value="">Select Type</option>
+                              <option value="Land_owner" {% if form.type.value == "Land_owner" %}selected{% endif %}>Land Owner</option>
+                              <option value="Expense" {% if form.type.value == "Expense" %}selected{% endif %}>Expense</option>
+                            </select>
+                            {% for error in form.type.errors %}
+                              <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                          </div>
+                    
+                          <!-- Land Owner -->
+                          <div id="land_owner_field" class="hidden">
+                            <label class="block font-medium mb-2">Land Owner Name</label>
+                            <select id="id_owner" name="owner" class="w-full border-gray-300 rounded-md shadow-sm p-2 text-sm">
+                              <option value="">Select Land Owner</option>
+                              {% for choice in form.owner.field.choices %}
+                                <option value="{{ choice.0 }}" {% if choice.0 == form.owner.value %}selected{% endif %}>{{ choice.1 }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                    
+                          <!-- Expense -->
+                          <div id="expense_field" class="hidden">
+                            <label class="block font-medium mb-2">Expense Name</label>
+                            <select id="id_expense" name="expense" class="w-full border-gray-300 rounded-md shadow-sm p-2 text-sm">
+                              <option value="">Select Expense</option>
+                              {% for choice in form.expense.field.choices %}
+                                <option value="{{ choice.0 }}" {% if choice.0 == form.expense.value %}selected{% endif %}>{{ choice.1 }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                    
+                          <!-- Head of Account -->
+                          <div>
+                            <label class="block font-medium mb-2">Head of Account</label>
+                            {{ form.head_of_account }}
+                          </div>
+                    
+                          <!-- Cash Type -->
+                          <div>
+                            <label class="block font-medium mb-2">Cash Type</label>
+                            {{ form.cash_type }}
+                          </div>
+                    
+                          <!-- Cheque Number -->
+                          <div id="cheque_row">
+                            <label class="block font-medium mb-2">Cheque Number</label>
+                            <input type="text" id="id_cheque_number" name="cheque_number"
+                                   value="{{ form.cheque_number.value }}"
+                                   class="w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                                   placeholder="Enter Cheque Number">
+                          </div>
+                    
+                          <!-- MR/Bill No -->
+                          <div>
+                            <label class="block font-medium mb-2">M.R / Bill No</label>
+                            {{ form.mr_or_bill_no }}
+                          </div>
+                    
+                          <!-- Date -->
+                          <div>
+                            <label class="block font-medium mb-2">Date</label>
+                            {{ form.date }}
+                          </div>
+                    
+                          <!-- Amount -->
+                          <div>
+                            <label class="block font-medium mb-2">Amount</label>
+                            {{ form.amount }}
+                          </div>
+                    
+                          <!-- Remark -->
+                          <div>
+                            <label class="block font-medium mb-2">Remark / Particulars</label>
+                            {{ form.remark }}
+                          </div>
+                    
+                          <!-- Carrier -->
+                          <div>
+                            <label class="block font-medium mb-2">Carrier</label>
+                            {{ form.carrier }}
+                          </div>
+                          <div class="mb-4">
+                                <label class="font-medium text-lg text-gray-800 block mb-2">Advance Pay</label>
+                                <label class="inline-flex items-center mr-6">
+                                    <input type="radio" name="advance_pay" value="True"
+                                           {% if form.advance_pay.value == True %}checked{% endif %}>
+                                    <span class="ml-2">Yes</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="advance_pay" value="False"
+                                           {% if form.advance_pay.value == False %}checked{% endif %}>
+                                    <span class="ml-2">No</span>
+                                </label>
+                                {% for error in form.advance_pay.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                    
+                          <!-- Buttons -->
+                          <div class="text-center pt-4">
+                            <button type="submit" style="background-color:#1e3c98" class="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-6 py-2 rounded-lg shadow">
+                              Save Voucher
+                            </button>
+                            <a href="{% url 'land_debitvoucher_list' %}" style="margin-left:0.5%;background-color:#1e3c98" class="ml-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg shadow">
+                              Back to List
+                            </a>
+                          </div>
+                        </form>
+                                        <script>
+                        function toggleTypeFields() {
+                          const type = document.getElementById("id_type").value;
+                          const ownerField = document.getElementById("land_owner_field");
+                          const expenseField = document.getElementById("expense_field");
+                    
+                          ownerField.classList.add("hidden");
+                          expenseField.classList.add("hidden");
+                    
+                          document.getElementById("id_owner").removeAttribute("required");
+                          document.getElementById("id_expense").removeAttribute("required");
+                    
+                          if (type === "Land_owner") {
+                            ownerField.classList.remove("hidden");
+                            document.getElementById("id_owner").setAttribute("required", true);
+                            document.getElementById("id_expense").value = "";
+                          } else if (type === "Expense") {
+                            expenseField.classList.remove("hidden");
+                            document.getElementById("id_expense").setAttribute("required", true);
+                            document.getElementById("id_owner").value = "";
+                          }
+                        }
+                    
+                        function toggleChequeField() {
+                          const cashTypeSelect = document.getElementById('id_cash_type');
+                          const chequeRow = document.getElementById('cheque_row');
+                          const selectedValue = cashTypeSelect.value;
+                    
+                          if (selectedValue.toLowerCase().includes('cash')) {
+                            chequeRow.style.display = 'none';
+                            document.getElementById("id_cheque_number").value = "";
+                          } else {
+                            chequeRow.style.display = 'block';
+                          }
+                        }
+                    
+                        document.addEventListener("DOMContentLoaded", () => {
+                          toggleTypeFields();
+                          toggleChequeField();
+                          document.getElementById("id_type").addEventListener("change", toggleTypeFields);
+                          document.getElementById("id_cash_type").addEventListener("change", toggleChequeField);
+                        });
+                      </script>
+
+        
+                        <br>  
+                    </div>
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,206 @@
+<!-- templates/rda_employee/rda_employee_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}RDA Employees List - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            {% include 'partials/header.html' %}
+
+            <h2 class="intro-y mt-10 text-lg font-medium">
+                {% if status_filter == 'inactive' %}Inactive Employees (Project-wise){% else %}Employees List (Project-wise){% endif %}
+            </h2>
+
+            {% if messages %}
+            <ul class="mt-3">
+                {% for message in messages %}
+                <li class="message {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <div class="mt-5 grid grid-cols-12 gap-6">
+                <!-- Action Controls Bar -->
+                <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                    <a href="{% url 'rda_employee_add' %}">
+                        <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Add New Employee</button>
+                    </a>
+
+                    <a href="{% url 'rda_employee_list' %}">
+                        <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Refresh</button>
+                    </a>
+
+                    <!-- Filter Toggle Active / Inactive -->
+                    {% if status_filter == 'inactive' %}
+                        <a href="{% url 'rda_employee_list' %}">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer bg-primary border-primary text-white mr-2 shadow-md">
+                                View Active Employees
+                            </button>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'rda_employee_list' %}?status=inactive">
+                            <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer bg-warning border-warning text-white mr-2 shadow-md">
+                                View Inactive Employees
+                            </button>
+                        </a>
+                    {% endif %}
+
+                    <div class="mx-auto hidden text-slate-500 md:block"></div>
+
+                    <!-- Search Box -->
+                    <div class="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">
+                        <div class="relative w-56 text-slate-500 mb-4">
+                            <input id="searchInput" type="text" placeholder="Search..." class="w-full p-2 text-sm border rounded-md shadow-sm focus:ring-4 focus:ring-primary" oninput="handleSearch()">
+                            <i class="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4">🔍</i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Section: Grouped Project Tables -->
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                    {% regroup employees by project_name as project_groups %}
+
+                    {% for project in project_groups %}
+                        <!-- Project Title Banner -->
+                        <div class="mt-8 mb-3 flex items-center justify-between bg-slate-200 dark:bg-darkmode-600 px-4 py-2 rounded-md border-l-4 border-primary">
+                            <h3 class="text-md font-bold text-slate-700 dark:text-slate-200">
+                                📂 Project: {% if project.grouper %}{{ project.grouper }}{% else %}Unassigned{% endif %}
+                            </h3>
+                            <span class="text-xs bg-primary text-white px-3 py-1 rounded-full font-semibold">
+                                Total: {{ project.list|length }} Employee{% if project.list|length > 1 %}s{% endif %}
+                            </span>
+                        </div>
+
+                        <!-- Separate Table per Project -->
+                        <table class="w-full text-left border-separate border-spacing-y-[10px] mb-6">
+                            <thead>
+                                <tr>
+                                    <th class="font-medium px-5 py-3 whitespace-nowrap border-b-0">Photo</th>
+                                    <th class="font-medium px-5 py-3 whitespace-nowrap border-b-0">Name</th>
+                                    <th class="font-medium px-5 py-3 whitespace-nowrap border-b-0">UserID</th>
+                                    <th class="font-medium px-5 py-3 whitespace-nowrap border-b-0">Type</th>
+                                    <th class="font-medium px-5 py-3 whitespace-nowrap border-b-0">Phone</th>
+                                    <th class="font-medium px-5 py-3 whitespace-nowrap border-b-0">Position</th>
+                                    <th class="font-medium px-5 py-3 whitespace-nowrap border-b-0">Salary</th>
+                                    <th class="font-medium px-5 py-3 whitespace-nowrap border-b-0">Status</th>
+                                    <th class="font-medium px-5 py-3 whitespace-nowrap border-b-0 text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for emp in project.list %}
+                                <tr class="intro-x employee-row">
+                                    <!-- Photo -->
+                                    <td class="px-5 py-3 border-b box shadow-[5px_3px_5px_#00000005] dark:bg-darkmode-600">
+                                        {% if emp.rda_photo %}
+                                            <img src="{{ emp.rda_photo.url }}" alt="Employee Photo" class="w-12 h-12 object-cover rounded-full">
+                                        {% else %}
+                                            <span class="text-xs text-gray-400">No Photo</span>
+                                        {% endif %}
+                                    </td>
+                                    
+                                    <!-- Employee Info -->
+                                    <td class="px-5 py-3 border-b box shadow-[5px_3px_5px_#00000005] dark:bg-darkmode-600 font-medium">{{ emp.rda_emp_name }}</td>
+                                    <td class="px-5 py-3 border-b box shadow-[5px_3px_5px_#00000005] dark:bg-darkmode-600">E-0{{ emp.id }}</td>
+                                    <td class="px-5 py-3 border-b box shadow-[5px_3px_5px_#00000005] dark:bg-darkmode-600">{{ emp.rda_emp_type }}</td>
+                                    <td class="px-5 py-3 border-b box shadow-[5px_3px_5px_#00000005] dark:bg-darkmode-600">{{ emp.rda_phone }}</td>
+                                    <td class="px-5 py-3 border-b box shadow-[5px_3px_5px_#00000005] dark:bg-darkmode-600">{{ emp.rda_position }}</td>
+                                    
+                                    <!-- Salary Values (Update field names if different in your model) -->
+                                    <td class="px-5 py-3 border-b box shadow-[5px_3px_5px_#00000005] dark:bg-darkmode-600 font-semibold text-slate-700 dark:text-slate-200">
+                                        {% if emp.rda_salary %}
+                                            ৳{{ emp.rda_salary }}
+                                        {% else %}
+                                            <span class="text-gray-400">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <!-- Status -->
+                                    <td class="px-5 py-3 border-b box shadow-[5px_3px_5px_#00000005] dark:bg-darkmode-600">
+                                        {% if emp.rda_active_status %}
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700">Active</span>
+                                        {% else %}
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700">Inactive</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <!-- Action Buttons -->
+                                    <td class="px-5 py-3 border-b box w-56 text-center shadow-[5px_3px_5px_#00000005] dark:bg-darkmode-600">
+                                        <div class="flex items-center justify-center gap-3">
+                                            <!-- Toggle Status -->
+                                            <form method="post" action="{% url 'rda_employee_toggle_status' emp.pk %}" class="inline">
+                                                {% csrf_token %}
+                                                 <a href="{% url 'rda_employee_edit' emp.pk %}" class="flex items-center text-green-600 hover:underline">
+                                                    <i data-lucide="edit" class="stroke-1.5 mr-1 h-4 w-4"></i> Update
+                                                </a>
+                                                {% if emp.rda_active_status %}
+                                                    <button type="submit" class="flex items-center text-orange-600 hover:underline bg-transparent border-0 p-0 cursor-pointer">
+                                                        <i data-lucide="user-x" class="stroke-1.5 mr-1 h-4 w-4"></i> Deactivate
+                                                    </button>
+                                                {% else %}
+                                                    <button type="submit" class="flex items-center text-blue-600 hover:underline bg-transparent border-0 p-0 cursor-pointer">
+                                                        <i data-lucide="user-check" class="stroke-1.5 mr-1 h-4 w-4"></i> Activate
+                                                    </button>
+                                                {% endif %}
+                                            </form>
+
+                                            {% if request.session.department == "admin" %}
+                                            <a href="{% url 'rda_employee_edit' emp.pk %}" class="flex items-center text-green-600 hover:underline">
+                                                <i data-lucide="edit" class="stroke-1.5 mr-1 h-4 w-4"></i> Update
+                                            </a>
+                                            <a href="{% url 'rda_employee_delete' emp.pk %}" class="flex items-center text-red-600 hover:underline">
+                                                <i data-lucide="trash" class="stroke-1.5 mr-1 h-4 w-4"></i> Delete
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% empty %}
+                        <div class="text-center py-10 bg-white dark:bg-darkmode-600 rounded-md shadow mt-5 text-gray-500">
+                            {% if status_filter == 'inactive' %}No inactive employees found.{% else %}No employees found.{% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <!-- Search Filter (Filters rows across all project tables) -->
+                    <script>
+                        function handleSearch() {
+                            let searchValue = document.getElementById('searchInput').value.toLowerCase();
+                            let rows = document.querySelectorAll(".employee-row");
+
+                            rows.forEach(row => {
+                                let columns = row.getElementsByTagName("td");
+                                let rowText = "";
+                                for (let i = 0; i < columns.length; i++) {
+                                    rowText += columns[i].textContent.toLowerCase();
+                                }
+                                row.style.display = rowText.includes(searchValue) ? "" : "none";
+                            });
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

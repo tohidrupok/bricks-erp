@@ -1,0 +1,441 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shift & Stock Control Dashboard{% endblock %}
+
+{% block content %}
+<!-- Chart.js for stock analytics -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Display + mono type pairing: condensed industrial display for headers/tickets, mono for data -->
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    :root{
+        --kds-bg: #f4f5f7;
+        --kds-surface: #ffffff;
+        --kds-surface-raised: #f8f9fb;
+        --kds-border: #e2e5ea;
+        --kds-text: #1b2129;
+        --kds-text-muted: #6b7480;
+        --kds-accent: #e0611f;
+        --kds-accent-dim: #e0611f14;
+        --kds-good: #1a9d6d;
+        --kds-warn: #b8790a;
+        --kds-bad: #d63c3c;
+        --font-display: 'Oswald', sans-serif;
+        --font-body: 'Inter', sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+        --shadow-sm: 0 1px 2px rgba(20,24,29,0.06), 0 1px 1px rgba(20,24,29,0.04);
+        --shadow-md: 0 2px 8px rgba(20,24,29,0.08);
+    }
+
+    .kds-wrap{
+        background: var(--kds-bg);
+        color: var(--kds-text);
+        font-family: var(--font-body);
+        border-radius: 16px;
+        padding: 28px;
+        margin: -1rem;
+    }
+
+    .kds-wrap h1, .kds-wrap h2, .kds-wrap h3, .kds-wrap h5, .kds-wrap h6,
+    .kds-title{ font-family: var(--font-display); letter-spacing: 0.02em; text-transform: uppercase; }
+
+    /* ---------- Header ---------- */
+    .kds-header{
+        display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center;
+        gap:16px; margin-bottom:24px; padding-bottom:20px; border-bottom:1px solid var(--kds-border);
+    }
+    .kds-header h1{ font-size:1.55rem; margin:0; color:var(--kds-text); font-weight:600; }
+    .kds-eyebrow{ font-family: var(--font-mono); font-size:0.72rem; color:var(--kds-text-muted); letter-spacing:0.08em; }
+    .kds-status-pill{
+        display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono);
+        font-size:0.75rem; padding:5px 12px; border-radius:20px; border:1px solid var(--kds-border);
+        background: var(--kds-surface); box-shadow: var(--shadow-sm);
+    }
+    .dot{ width:8px; height:8px; border-radius:50%; }
+    .dot.live{ background:var(--kds-good); box-shadow:0 0 6px var(--kds-good); animation: pulse 1.8s infinite; }
+    .dot.off{ background:var(--kds-text-muted); }
+    @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+    .kds-actions .btn{
+        font-family:var(--font-display); text-transform:uppercase; letter-spacing:0.03em;
+        font-size:0.8rem; border-radius:8px; padding:9px 16px; border:none;
+    }
+    .btn-kds-start{ background: var(--kds-good); color:#fff; box-shadow: var(--shadow-sm); }
+    .btn-kds-start:hover{ background:#158058; color:#fff; }
+    .btn-kds-stop{ background: var(--kds-bad); color:#fff; box-shadow: var(--shadow-sm); }
+    .btn-kds-stop:hover{ background:#b93030; color:#fff; }
+    .btn-kds-outline{ background: var(--kds-surface); color:var(--kds-text); border:1px solid var(--kds-border) !important; }
+    .btn-kds-outline:hover{ background:var(--kds-surface-raised); color:var(--kds-text); border-color:#c9ced6 !important; }
+    .btn-kds-warn{ background: var(--kds-warn); color:#fff; box-shadow: var(--shadow-sm); }
+    .btn-kds-warn:hover{ background:#9c6608; color:#fff; }
+
+    .kds-alert{
+        background: var(--kds-accent-dim); border:1px solid #e0611f33; border-radius:10px;
+        padding:14px 18px; margin-bottom:20px; font-size:0.9rem; color:var(--kds-text);
+    }
+    .kds-alert strong{ color: var(--kds-accent); }
+    .kds-msg{
+        background: var(--kds-surface); border:1px solid var(--kds-border); border-radius:10px;
+        padding:12px 18px; margin-bottom:16px; font-size:0.88rem; color:var(--kds-text); box-shadow: var(--shadow-sm);
+    }
+
+    /* ---------- KPI ring cards ---------- */
+    .kpi-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+    @media (max-width:900px){ .kpi-row{ grid-template-columns:repeat(2,1fr);} }
+    .kpi-card{
+        background: var(--kds-surface); border:1px solid var(--kds-border); border-radius:12px;
+        padding:18px; display:flex; align-items:center; gap:14px; box-shadow: var(--shadow-sm);
+    }
+    .kpi-ring{ position:relative; width:56px; height:56px; flex:none; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+    .kpi-ring span{ font-family:var(--font-mono); font-weight:600; font-size:0.95rem; }
+    .kpi-label{ font-size:0.72rem; color:var(--kds-text-muted); text-transform:uppercase; letter-spacing:0.06em; font-family:var(--font-mono); margin-bottom:2px; }
+    .kpi-value{ font-family:var(--font-display); font-size:1.5rem; font-weight:600; }
+
+    /* ---------- Panels ---------- */
+    .kds-panel{
+        background: var(--kds-surface); border:1px solid var(--kds-border); border-radius:12px;
+        padding:20px; height:100%; box-shadow: var(--shadow-sm);
+    }
+    .kds-panel-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+    .kds-panel-head h5{ font-size:0.85rem; color:var(--kds-text-muted); margin:0; font-weight:600; }
+    .kds-tag{ font-family:var(--font-mono); font-size:0.68rem; padding:3px 9px; border-radius:20px; background:var(--kds-surface-raised); color:var(--kds-text-muted); border:1px solid var(--kds-border); }
+
+    /* ---------- Ticket rail (recent stock top-ups) ---------- */
+    .ticket-rail{ display:flex; flex-direction:column; gap:10px; max-height:280px; overflow-y:auto; padding-right:4px; }
+    .ticket{
+        background: var(--kds-surface-raised); border-left:3px solid var(--kds-good); border-radius:6px;
+        padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px;
+    }
+    .ticket-item{ font-weight:600; font-size:0.85rem; color: var(--kds-text); }
+    .ticket-qty{ font-family:var(--font-mono); color:var(--kds-good); font-weight:600; font-size:0.85rem; }
+    .ticket-status{ font-family:var(--font-mono); font-size:0.65rem; color:var(--kds-text-muted); text-transform:uppercase; }
+
+    /* ---------- Inventory table ---------- */
+    .kds-table-wrap{ background: var(--kds-surface); border:1px solid var(--kds-border); border-radius:12px; overflow:hidden; box-shadow: var(--shadow-sm); }
+    .kds-table-head{ display:flex; justify-content:space-between; align-items:center; padding:18px 20px; border-bottom:1px solid var(--kds-border); flex-wrap:wrap; gap:10px; background: var(--kds-surface-raised); }
+    .kds-table-head h5{ margin:0; font-size:1rem; color: var(--kds-text); }
+    .kds-table-head small{ color:var(--kds-text-muted); font-size:0.78rem; }
+    #searchInput{
+        background: var(--kds-surface); border:1px solid var(--kds-border); color:var(--kds-text);
+        font-family:var(--font-mono); font-size:0.82rem;
+    }
+    #searchInput::placeholder{ color:var(--kds-text-muted); }
+    #searchInput:focus{ background:var(--kds-surface); color:var(--kds-text); border-color:var(--kds-accent); box-shadow:0 0 0 3px var(--kds-accent-dim); outline:none; }
+
+    table.kds-table{ width:100%; margin:0; color:var(--kds-text); }
+    table.kds-table thead th{
+        font-family:var(--font-mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em;
+        color:var(--kds-text-muted); border-bottom:1px solid var(--kds-border); padding:10px 20px; font-weight:600;
+        background: var(--kds-surface-raised);
+    }
+    table.kds-table tbody tr{ border-bottom:1px solid var(--kds-border); }
+    table.kds-table tbody tr:last-child{ border-bottom:none; }
+    table.kds-table tbody tr:hover{ background: var(--kds-surface-raised); }
+    table.kds-table td{ padding:12px 20px; vertical-align:middle; font-size:0.88rem; }
+    .code-cell{ font-family:var(--font-mono); color:var(--kds-text-muted); font-size:0.8rem; }
+    .name-cell{ font-weight:600; color: var(--kds-text); }
+
+    .stock-bar-wrap{ display:flex; align-items:center; gap:10px; }
+    .stock-bar-track{ flex:1; height:6px; border-radius:4px; background:var(--kds-border); overflow:hidden; min-width:70px; }
+    .stock-bar-fill{ height:100%; border-radius:4px; }
+    .stock-qty-num{ font-family:var(--font-mono); font-weight:600; min-width:44px; text-align:right; }
+
+    .status-chip{ font-family:var(--font-mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.04em; padding:4px 10px; border-radius:20px; display:inline-block; }
+    .chip-good{ background:#1a9d6d18; color:var(--kds-good); }
+    .chip-warn{ background:#b8790a18; color:var(--kds-warn); }
+    .chip-bad{ background:#d63c3c18; color:var(--kds-bad); }
+
+    .req-form input[type="number"]{
+        background: var(--kds-surface); border:1px solid var(--kds-border); color:var(--kds-text); font-family:var(--font-mono);
+    }
+    .req-form input[type="number"]:focus{ border-color:var(--kds-accent); box-shadow:none; outline:none; }
+    .req-form button{
+        background: var(--kds-accent); border:none; color:#fff; font-family:var(--font-display);
+        text-transform:uppercase; font-size:0.72rem; letter-spacing:0.03em; font-weight:600;
+    }
+    .req-form button:hover{ background:#c9520f; }
+
+    .empty-row{ text-align:center; padding:40px 20px; color:var(--kds-text-muted); font-family:var(--font-mono); font-size:0.85rem; }
+</style>
+
+<div class="kds-wrap">
+    <!-- Header -->
+    <div class="kds-header">
+        <div>
+            <div class="kds-eyebrow mb-1">FLOOR CONTROL &bull; INVENTORY</div>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <h1>Shift &amp; Stock Control</h1>
+                {% if active_shift %}
+                    <span class="kds-status-pill"><span class="dot live"></span> ACTIVE &bull; SHIFT #{{ active_shift.id }}</span>
+                {% else %}
+                    <span class="kds-status-pill"><span class="dot off"></span> SHIFT INACTIVE</span>
+                {% endif %}
+            </div>
+            <div class="kds-eyebrow mt-2">
+                USER: {{ request.user.username }} &bull; EMPLOYEE: {{ emp_profile.rda_emp_name|default:"N/A" }}
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-2 kds-actions">
+            <a href="{% url 'restaurant_sales_list' %}" class="btn btn-kds-outline">POS</a>
+            <a href="{% url 'start_work' %}" class="btn btn-kds-outline">📄 Opening Report</a>
+            {% if not active_shift %}
+                <a href="{% url 'start_work' %}" class="btn btn-kds-start">▶ Start Shift</a>
+            {% else %}
+                <!-- FIX: this now correctly links to the opening report for THIS shift,
+                     instead of re-triggering start_work as it did before. -->
+                <!--<a href="{% url 'opening_stock_report' active_shift.id %}" class="btn btn-kds-outline">📄 Opening Report</a>-->
+                <a href="{% url 'stop_work' %}" class="btn btn-kds-stop" onclick="return confirm('Stop shift and lock closing stock?')">⏹ Stop Work</a>
+            {% endif %}
+            <a href="{% url 'add_damage_food' %}" class="btn btn-kds-warn">⚠ Log Damage</a>
+        </div>
+    </div>
+
+    {% if not active_shift %}
+        <div class="kds-alert">
+            <strong>Pre-shift checklist —</strong> review stock below. Items flagged <span class="status-chip chip-bad">out of stock</span>
+            can be topped up instantly with <em>+ Add</em> — top-ups are added straight to opening stock, no approval needed.
+            Then start the shift to lock in today's opening balances.
+        </div>
+    {% endif %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="kds-msg">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- KPI ring cards -->
+    <div class="kpi-row">
+        <div class="kpi-card">
+            <div class="kpi-ring" style="background:conic-gradient(var(--kds-accent) 0deg 360deg, var(--kds-border) 0deg); ">
+                <div style="position:absolute; inset:5px; background:var(--kds-surface); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                    <span style="color:var(--kds-accent);">{{ items_data|length }}</span>
+                </div>
+            </div>
+            <div>
+                <div class="kpi-label">Tracked Items</div>
+                <div class="kpi-value">{{ items_data|length }}</div>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-ring" id="ringHealthy" style="background:conic-gradient(var(--kds-good) 0deg, var(--kds-border) 0deg);">
+                <div style="position:absolute; inset:5px; background:var(--kds-surface); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                    <span style="color:var(--kds-good);" id="kpiHealthy">0</span>
+                </div>
+            </div>
+            <div>
+                <div class="kpi-label">Healthy</div>
+                <div class="kpi-value" style="color:var(--kds-good);" id="kpiHealthyBig">0</div>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-ring" id="ringLow" style="background:conic-gradient(var(--kds-warn) 0deg, var(--kds-border) 0deg);">
+                <div style="position:absolute; inset:5px; background:var(--kds-surface); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                    <span style="color:var(--kds-warn);" id="kpiLow">0</span>
+                </div>
+            </div>
+            <div>
+                <div class="kpi-label">Low Stock</div>
+                <div class="kpi-value" style="color:var(--kds-warn);" id="kpiLowBig">0</div>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-ring" id="ringCritical" style="background:conic-gradient(var(--kds-bad) 0deg, var(--kds-border) 0deg);">
+                <div style="position:absolute; inset:5px; background:var(--kds-surface); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                    <span style="color:var(--kds-bad);" id="kpiCritical">0</span>
+                </div>
+            </div>
+            <div>
+                <div class="kpi-label">Out of Stock</div>
+                <div class="kpi-value" style="color:var(--kds-bad);" id="kpiCriticalBig">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics row: bar chart + doughnut + recent top-ups rail -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-5">
+            <div class="kds-panel">
+                <div class="kds-panel-head">
+                    <h5>Inventory Levels</h5>
+                    <span class="kds-tag">Live</span>
+                </div>
+                <canvas id="stockAnalyticsChart" style="max-height:220px;"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="kds-panel">
+                <div class="kds-panel-head">
+                    <h5>Status Split</h5>
+                    <span class="kds-tag">%</span>
+                </div>
+                <canvas id="stockStatusChart" style="max-height:220px;"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="kds-panel">
+                <div class="kds-panel-head">
+                    <h5>Recent Stock Top-Ups</h5>
+                    {% if my_recent_requests %}<span class="kds-tag">{{ my_recent_requests|length }}</span>{% endif %}
+                </div>
+                {% if my_recent_requests %}
+                <div class="ticket-rail">
+                    {% for req in my_recent_requests %}
+                    <div class="ticket">
+                        <div>
+                            <div class="ticket-item">{{ req.item_amount.item_name.rest_item_name|default:"N/A" }}</div>
+                            <div class="ticket-status">Added {{ req.id }}</div>
+                        </div>
+                        <div class="ticket-qty">+{{ req.requested_qty }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                    <div class="empty-row" style="padding:30px 10px;">No stock top-ups yet this shift.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory table -->
+    <div class="kds-table-wrap">
+        <div class="kds-table-head">
+            <div>
+                <h5>Item Opening &amp; Available Stock</h5>
+                <small>Top up stock instantly — additions only, never decreases</small>
+            </div>
+            <input type="text" id="searchInput" onkeyup="filterStockTable()" placeholder="Search item code or name…" class="form-control form-control-sm" style="width:240px;">
+        </div>
+        <div class="table-responsive">
+            <table class="kds-table" id="stockControlTable">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Item Name</th>
+                        <th>Available</th>
+                        <th>Status</th>
+                        <th class="text-center">Top-Up</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in items_data %}
+                    <tr data-qty="{{ row.available_qty }}">
+                        <td class="code-cell">{{ row.item.item_code }}</td>
+                        <td class="name-cell">{{ row.item.item_name.rest_item_name|default:"N/A" }}</td>
+                        <td>
+                            <div class="stock-bar-wrap">
+                                <div class="stock-bar-track">
+                                    <div class="stock-bar-fill js-stock-fill" data-qty="{{ row.available_qty|default:0 }}"></div>
+                                </div>
+                                <span class="stock-qty-num">{{ row.available_qty }}</span>
+                                <small class="text-muted">{{ row.item.unit|default:"" }}</small>
+                            </div>
+                        </td>
+                        <td><span class="status-chip js-status-chip" data-qty="{{ row.available_qty|default:0 }}">{{ row.label }}</span></td>
+                        <td class="text-center">
+                            <form action="{% url 'request_stock_increase' %}" method="POST" class="d-inline-flex align-items-center gap-2 justify-content-center req-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="item_id" value="{{ row.item.id }}">
+                                <div class="input-group input-group-sm" style="width:130px;">
+                                    <input type="number" name="quantity" min="1" value="10" class="form-control" required>
+                                    <button type="submit" class="btn" title="Add stock instantly">+ Add</button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="empty-row">No restaurant inventory items found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterStockTable() {
+        const input = document.getElementById("searchInput").value.toLowerCase();
+        document.querySelectorAll("#stockControlTable tbody tr").forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const itemNames = [
+            {% for row in items_data %}"{{ row.item.item_name.rest_item_name|default:'N/A'|escapejs }}",{% endfor %}
+        ];
+        const quantities = [
+            {% for row in items_data %}{{ row.available_qty|default:0 }},{% endfor %}
+        ];
+
+        // KPI counts
+        let healthy = 0, low = 0, critical = 0;
+        quantities.forEach(q => { if (q <= 0) critical++; else if (q < 10) low++; else healthy++; });
+        const total = Math.max(quantities.length, 1);
+
+        document.getElementById('kpiHealthy').textContent = healthy;
+        document.getElementById('kpiHealthyBig').textContent = healthy;
+        document.getElementById('kpiLow').textContent = low;
+        document.getElementById('kpiLowBig').textContent = low;
+        document.getElementById('kpiCritical').textContent = critical;
+        document.getElementById('kpiCriticalBig').textContent = critical;
+
+        document.getElementById('ringHealthy').style.background =
+            `conic-gradient(var(--kds-good) ${(healthy/total)*360}deg, #e2e5ea 0deg)`;
+        document.getElementById('ringLow').style.background =
+            `conic-gradient(var(--kds-warn) ${(low/total)*360}deg, #e2e5ea 0deg)`;
+        document.getElementById('ringCritical').style.background =
+            `conic-gradient(var(--kds-bad) ${(critical/total)*360}deg, #e2e5ea 0deg)`;
+
+        // Row-level stock bars & chips (data-driven, replaces server badge_color if present)
+        document.querySelectorAll('.js-stock-fill').forEach(el => {
+            const qty = parseFloat(el.dataset.qty) || 0;
+            const maxQty = Math.max(...quantities, 1);
+            const pct = Math.min(100, (qty / maxQty) * 100);
+            el.style.width = pct + '%';
+            el.style.background = qty <= 0 ? 'var(--kds-bad)' : (qty < 10 ? 'var(--kds-warn)' : 'var(--kds-good)');
+        });
+        document.querySelectorAll('.js-status-chip').forEach(el => {
+            const qty = parseFloat(el.dataset.qty) || 0;
+            el.classList.add(qty <= 0 ? 'chip-bad' : (qty < 10 ? 'chip-warn' : 'chip-good'));
+        });
+
+        const gridColor = '#e2e5ea';
+        const textColor = '#6b7480';
+
+        if (itemNames.length > 0) {
+            const barColors = quantities.map(q => q <= 0 ? '#d63c3c' : (q < 10 ? '#b8790a' : '#1a9d6d'));
+            new Chart(document.getElementById('stockAnalyticsChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: itemNames,
+                    datasets: [{ label: 'Available Qty', data: quantities, backgroundColor: barColors, borderRadius: 4 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: gridColor } },
+                        y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } }
+                    }
+                }
+            });
+
+            new Chart(document.getElementById('stockStatusChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Healthy', 'Low', 'Out of Stock'],
+                    datasets: [{ data: [healthy, low, critical], backgroundColor: ['#1a9d6d', '#b8790a', '#d63c3c'], borderWidth: 0 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '65%',
+                    plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 12 } } }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

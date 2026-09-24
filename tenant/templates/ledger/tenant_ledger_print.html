@@ -1,0 +1,180 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tenant Ledger (Print)</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 11px; background-color: silver; padding: 20px; }
+    .card { background: #fff; border-radius: 6px; padding: 20px; max-width: 960px; margin: auto; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .logo img { height: 50px; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .label-box { background-color: #dbeafe; color: #000; padding: 4px 10px; font-weight: bold; font-size: 13px; border-radius: 4px; }
+    .sub-head { font-size: 11px; color: #555; margin-top: -18px; margin-bottom: 8px; line-height: 1.4; }
+    .table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+    .table th, .table td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+    .text-right { text-align: right; }
+    .section { margin-top: 12px; font-size: 11.5px; }
+    .signature-section { margin-top: 30px; display: flex; justify-content: space-between; text-align: center; }
+    .signature-box { flex: 1; padding: 8px; }
+    .signature-line { display: block; margin-top: 10px; border-top: 1px solid #000; width: 100%; }
+    .footer { display: flex; justify-content: flex-end; align-items: center; font-size: 12px; color: #333; margin-top: 20px; padding-top: 10px; border-top: 1px solid #ccc; flex-wrap: wrap; gap: 5px; }
+    .back-btn, .print-btn, .qr-btn, .whatsapp-btn { padding: 6px 14px; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; color: #fff; }
+    .back-btn { background-color: green; }
+    .print-btn { background-color: #1e3c98; }
+    .qr-btn { background-color: #10b981; }
+    .whatsapp-btn { background-color: #25D366; }
+    @media print { .no-print { display: none !important; } body { background: white; padding: 0; } .card { box-shadow: none; border: none; margin: 0; padding: 0; } }
+    /* QR Popup */
+    #qrPopup { display: none; position: fixed; inset:0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; }
+    #qrPopupContent { background:#fff; padding:20px; border-radius:12px; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.3); }
+    #qrcode { margin-bottom: 10px; }
+    #qrPopup button { margin: 0 5px; padding: 6px 12px; border:none; border-radius:4px; cursor:pointer; }
+    #downloadQR { background:#3b82f6; color:#fff; }
+    #closeQR { background:#6b7280; color:#fff; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Header -->
+  <div class="card-header">
+    <div class="logo">
+      <img src="{% static '/images/BTP_logo_webp.webp' %}" alt="Company Logo">
+    </div>
+      <!-- Tenant Main Info (CENTER) -->
+  <div style="text-align:center; flex:1;">
+    <div style="font-size:22px; font-weight:900; letter-spacing:0.5px;">
+      {{ varatiya.name }}
+    </div>
+
+    <div style="font-size:12px; margin-top:6px; line-height:1.6;">
+      <strong>Contact:</strong> {{ varatiya.contact }} |
+      <strong>Occupation:</strong> {{ varatiya.occupation|default:"N/A" }} |
+      <strong>Members:</strong> {{ varatiya.number_of_members }}
+      <br>
+      <strong>Address:</strong> {{ varatiya.permanent_address }}
+    </div>
+  </div>
+    <div style="text-align: right;">
+      <div class="label-box">Tenant Ledger Report</div>
+      <p style="font-size: 11px; margin-top: 4px;">Printing Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+    </div>
+  </div>
+
+  <!-- Tenant Info -->
+  <div class="sub-head">
+    
+    {% if rows %}
+      {% with last_row=rows|last %}
+      <strong>Period:</strong> {{ rows.0.date }} to {{ last_row.date }}
+      {% endwith %}
+    {% endif %}
+  </div>
+
+  <hr style="margin: 8px 0;">
+
+  <!-- Ledger Table -->
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Description</th>
+        <th>Bill Month</th>
+        <th class="text-right">Debit</th>
+        <th class="text-right">Credit</th>
+        <th class="text-right">Balance</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.date }}</td>
+        <td style="text-align:left;">{{ row.description }}</td>
+        <td>{{ row.bill_month }}</td>
+        <td class="text-right">{{ row.debit|floatformat:2 }}</td>
+        <td class="text-right">{{ row.credit|floatformat:2 }}</td>
+        <td class="text-right" style="font-weight:600;">{{ row.balance|floatformat:2 }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" style="text-align:center;">No records found</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr style="font-weight:bold; background:#f0f0f0;">
+        <td colspan="3" class="text-right">Total</td>
+        <td class="text-right">{{ total_debit|floatformat:2 }}</td>
+        <td class="text-right">{{ total_credit|floatformat:2 }}</td>
+        <td class="text-right">{{ receivable|floatformat:2 }}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <!-- Signatures -->
+  <div class="signature-section">
+    <div class="signature-box">
+      <span class="signature-line"></span>
+      Received By
+    </div>
+    <div class="signature-box">
+      <span class="signature-line"></span>
+      Prepared By
+    </div>
+    <div class="signature-box">
+      <span class="signature-line"></span>
+      Approved By
+    </div>
+  </div>
+
+<!-- Footer Buttons -->
+<div class="footer no-print">
+  <button onclick="window.history.back()" class="back-btn">← Back</button>
+  <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+  <button onclick="showQRPopup()" class="qr-btn">📱 QR Code</button>
+  <!-- WhatsApp Button -->
+  <a href="https://wa.me/{{ varatiya.contact|default_if_none:'' }}?text={{ 'Dear ' | add:varatiya.name | add:', your report has been generated by BTP Limited. Please check your report at the following link: ' | add:request.build_absolute_uri | add:'. If you have any questions, contact us.'|urlencode }}" target="_blank" class="whatsapp-btn">💬 WhatsApp</a>
+</div>
+
+</div>
+
+<!-- QR Popup -->
+<div id="qrPopup" class="flex">
+  <div id="qrPopupContent">
+    <h3>QR Code for this page</h3>
+    <div id="qrcode"></div>
+    <button id="downloadQR" onclick="downloadQR()">⬇ Download</button>
+    <button id="closeQR" onclick="closeQRPopup()">✖ Close</button>
+  </div>
+</div>
+
+<script>
+  function showQRPopup() {
+    document.getElementById('qrPopup').style.display = 'flex';
+    document.getElementById('qrcode').innerHTML = '';
+    new QRCode(document.getElementById('qrcode'), {
+      text: window.location.href,
+      width: 180,
+      height: 180
+    });
+  }
+  function closeQRPopup() {
+    document.getElementById('qrPopup').style.display = 'none';
+  }
+  function downloadQR() {
+    const qrCanvas = document.querySelector('#qrcode canvas');
+    if(qrCanvas){
+      const link = document.createElement('a');
+      link.href = qrCanvas.toDataURL('image/png');
+      link.download = 'tenant_ledger_qr.png';
+      link.click();
+    }
+  }
+</script>
+
+</body>
+</html>

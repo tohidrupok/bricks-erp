@@ -1,0 +1,241 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Supplier Ledger Voucher Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      background-color: #f3f4f6;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #0A8754;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .logo img {
+      height: 60px;
+    }
+
+    .voucher-info p {
+      margin: 3px 0;
+      font-size: 13px;
+      color: #0A8754;
+    }
+
+    .section-title {
+      font-size: 18px;
+      color: #0A8754;
+      font-weight: bold;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .filter-info {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      font-size: 11px;
+      margin-bottom: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      font-size: 11px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #0A8754;
+      color: #fff;
+    }
+
+    td {
+      background-color: #f9f9f9;
+    }
+
+    tfoot td {
+      font-weight: bold;
+    }
+
+    .signature {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .signature div {
+      flex: 1;
+      padding: 8px;
+      border-top: 2px solid #0A8754;
+    }
+
+    .footer-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 30px;
+      padding-top: 10px;
+      border-top: 1px solid #ddd;
+      font-size: 12px;
+      color: #555;
+    }
+
+    .back-btn, .print-btn {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .back-btn { background-color: green; color: white; }
+    .print-btn { background-color: #1e3c98; color: white; }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white; padding: 0; }
+      .container { box-shadow: none; border: none; margin: 0; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <img src="{% static '/images/BTP_logo_bricks.webp' %}" alt="Company Logo" />
+    </div>
+    <div class="voucher-info">
+      <p>Voucher No.: {{ voucher.pk }}</p>
+      <p>Printing Date: {{ print_time|date:"F j, Y, H:i" }}</p>
+    </div>
+  </div>
+
+  <!-- Title -->
+  <div class="section-title">Supplier Ledger Voucher Report</div>
+
+  <!-- Filter Summary -->
+  <div class="filter-info">
+    <div><strong>Project:</strong> {{ selected_filters.project|default:"All" }}</div><br/>
+    <div><strong>Date From:</strong> {{ selected_filters.from_date|default:"-" }}</div><br/>
+    <div><strong>Date To:</strong> {{ selected_filters.to_date|default:"-" }}</div>
+  </div>
+
+  {% if report_data %}
+    {% for item in report_data %}
+      <h3 style="font-size: 14px; margin-bottom: 8px; border-bottom: 1px solid #ccc;">
+        Supplier: {{ item.supplier.supplier_name }}
+      </h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Chq/Rec No.</th>
+            <th>Payment</th>
+            <th>Received</th>
+            <th>Balance</th>
+            <th>Account</th>
+            <th>Carrier</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in item.ledger_entries %}
+          <tr>
+            <td>{{ entry.date|date:"Y-m-d" }}</td>
+            <td>{{ entry.description }}</td>
+            <td>{{ entry.chq_rec_no }}</td>
+            <td>{% if entry.payment %}{{ entry.payment|floatformat:2 }}{% else %}-{% endif %}</td>
+            <td>{% if entry.received %}{{ entry.received|floatformat:2 }}{% else %}-{% endif %}</td>
+            <td>{{ entry.balance|floatformat:2 }}</td>
+            <td>{{ entry.head_name }}</td>
+            <td>{{ entry.carrier }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8">No ledger entries for this supplier.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3">Totals:</td>
+            <td>{{ item.debit_total|floatformat:2 }}</td>
+            <td>{{ item.boq_total|floatformat:2 }}</td>
+            <td>{{ item.balance|floatformat:2 }}</td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table>
+    {% endfor %}
+
+    <!-- Grand Totals -->
+    <div style="margin-top: 15px; font-weight: bold; border-top: 1px solid #ccc; padding-top: 8px;">
+      <p>Total Amount: {{ total_boq|floatformat:2 }}</p>
+      <p>Total Debit Amount: {{ total_debit|floatformat:2 }}</p>
+      <p>Final Balance: {{ final_balance|floatformat:2 }}</p>
+    </div>
+  {% else %}
+    <p style="text-align:center; padding: 10px; color: gray;">No ledger entries found for selected filters.</p>
+  {% endif %}
+
+  <!-- Signatures -->
+  <div class="signature">
+    <div>Prepared by</div>
+    <div>Checked by</div>
+    <div>Received by</div>
+    <div>Approved by</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-flex no-print">
+    <div>
+      <button onclick="window.location.href='{% url 'supplier_ledger_manage' %}'" class="back-btn">
+        ← Back to List
+      </button>
+    </div>
+    <div>
+      <p>© 2026 BRICKS LIMITED | System-generated document</p>
+    </div>
+    <div>
+      <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

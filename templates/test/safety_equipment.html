@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Safety Equipment Costing</title>
+    <style>
+        table, th, td { border: 1px solid black; border-collapse: collapse; padding: 6px; }
+        input { width: 150px; }
+    </style>
+</head>
+<body>
+
+<h2>Safety Equipment Costing</h2>
+
+<label>Project Name: </label>
+<input type="text" id="projectName" placeholder="Enter project name" />
+<br><br>
+
+<table id="equipmentTable">
+    <thead>
+        <tr>
+            <th>Item Name</th>
+            <th>Cost</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+</table>
+
+<br>
+<button onclick="addRow()">Add Equipment</button>
+<h3>Total Cost: <span id="totalCost">0.00</span></h3>
+<br>
+<button type="button" onclick="saveEquipment()">Save Safety Equipment</button>
+
+<script>
+    function addRow() {
+        const tbody = document.getElementById('tableBody');
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td><input type="text" class="itemName" /></td>
+            <td><input type="number" class="itemCost" onchange="calculateTotal()" /></td>
+            <td><button onclick="deleteRow(this)">Delete</button></td>
+        `;
+
+        tbody.appendChild(row);
+    }
+
+    function deleteRow(btn) {
+        btn.closest('tr').remove();
+        calculateTotal();
+    }
+
+    function calculateTotal() {
+        let total = 0;
+        const costInputs = document.querySelectorAll('.itemCost');
+        costInputs.forEach(input => {
+            total += parseFloat(input.value) || 0;
+        });
+
+        document.getElementById('totalCost').textContent = total.toFixed(2);
+    }
+
+    function saveEquipment() {
+    const projectName = document.getElementById('projectName').value.trim();
+    const rows = document.querySelectorAll('#tableBody tr');
+    const items = [];
+    let totalCost = 0;  // Variable to track total cost
+
+    rows.forEach(row => {
+        const itemName = row.querySelector('.itemName').value;
+        const itemCost = parseFloat(row.querySelector('.itemCost').value) || 0;
+        
+        if (itemName && itemCost) {
+            // Calculate the total cost dynamically
+            totalCost += itemCost;  // Add each item cost to total cost
+
+            items.push({
+                item_name: itemName,
+                item_cost: itemCost
+            });
+        }
+    });
+
+    // Debugging the data collected
+    console.log("Project Name:", projectName);
+    console.log("Items:", items);
+    console.log("Total Cost:", totalCost);  // Log total cost
+
+    if (items.length === 0) {
+        alert("No items to save!");
+        return;
+    }
+
+    fetch("/dashboard/save_safety_equipment/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({
+            project_name: projectName,
+            items: items,
+            total_cost: totalCost  // Include the total cost in the request
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        // Debugging the response from the server
+        console.log("Response from server:", data);
+        alert(data.message || "Safety equipment data saved successfully!");
+    })
+    .catch(err => {
+        console.error("Error:", err);
+        alert("Error saving safety equipment data.");
+    });
+}
+
+
+
+    window.onload = function () {
+        addRow();
+    };
+</script>
+
+</body>
+</html>

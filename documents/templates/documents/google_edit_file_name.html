@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Edit File Name{% endblock %}
+{% block content %}
+<div style="max-width:480px; margin:60px auto; padding:32px; background:#fff; border-radius:18px; box-shadow:0 4px 24px rgba(0,0,0,.08); border:1.5px solid #E2E8F0;">
+    <h2 style="font-size:18px; font-weight:700; margin:0 0 24px;">✏️ Edit File Name</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <label style="font-size:12px; font-weight:600; color:#64748B; text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:7px;">File Name</label>
+        <input type="text" name="name" value="{{ file_obj.name }}"
+            style="width:100%; padding:10px 14px; border:1.5px solid #E2E8F0; border-radius:6px; font-size:14px; box-sizing:border-box; outline:none;"
+            required>
+        <div style="display:flex; gap:12px; margin-top:24px;">
+            <button type="submit" style="flex:1; padding:11px; background:#2563EB; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">
+                💾 Save
+            </button>
+            <a href="{% url 'google_tracker_file_system' file_obj.folder_id %}"
+               style="flex:1; padding:11px; background:#F8FAFC; color:#64748B; border:1.5px solid #E2E8F0; border-radius:6px; font-weight:600; text-align:center; text-decoration:none;">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'office_inventory/base.html' %}
+{% block header %}{{ title }}{% endblock %}
+{% block content %}
+<div class="card card-stat p-4" style="max-width:650px;">
+<form method="post" novalidate>{% csrf_token %}
+{% for field in form %}
+  {% if field.name == 'responsible_employee' or field.name == 'responsible_note' %}
+    <div class="mb-3 damage-target-field" data-field="{{ field.name }}">
+      <label class="form-label">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+    </div>
+  {% else %}
+    <div class="mb-3">
+      <label class="form-label">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+      {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+    </div>
+  {% endif %}
+{% endfor %}
+<button class="btn btn-primary">Save Damage Record</button>
+<a href="{% url 'office_inventory:damage_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+</div>
+
+{{ responsible_employee_map|json_script:"responsible-employee-map" }}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const mapEl = document.getElementById('responsible-employee-map');
+    const responsibleEmployeeMap = mapEl ? JSON.parse(mapEl.textContent) : {};
+
+    const typeField = document.querySelector('[id$="responsible_type"]');
+    const employeeWrap = document.querySelector('.damage-target-field[data-field="responsible_employee"]');
+    const noteWrap = document.querySelector('.damage-target-field[data-field="responsible_note"]');
+
+    function sync() {
+        if (!typeField) return;
+        const isEmployee = responsibleEmployeeMap[typeField.value];
+        if (isEmployee === undefined) {
+            if (employeeWrap) employeeWrap.style.display = '';
+            if (noteWrap) noteWrap.style.display = '';
+            return;
+        }
+        if (employeeWrap) employeeWrap.style.display = isEmployee ? '' : 'none';
+        if (noteWrap) noteWrap.style.display = isEmployee ? 'none' : '';
+    }
+    if (typeField) {
+        typeField.addEventListener('change', sync);
+        sync();
+    }
+});
+</script>
+{% endblock %}

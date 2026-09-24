@@ -1,0 +1,219 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Restaurant Supplier List - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+            
+                <h2 class="intro-y mt-10 text-lg font-medium">Restaurant Supplier List</h2>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                        <a href="{% url 'add_restaurant_supplier' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-primary border-primary text-white mr-2 shadow-md">Add Supplier Name</button>
+                        </a>
+                        <a href="{% url 'restaurant_supplier_name' %}">
+                            <button data-tw-merge="" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 bg-success border-success text-white mr-2 shadow-md">Refresh</button>
+                        </a>                       
+                        <div class="mx-auto hidden text-slate-500 md:block">                             </div>
+            
+                        <div class="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">                           
+                            <div class="relative w-56 text-slate-500 mb-4">
+                                <input id="searchInput" type="text" placeholder="Search..." class="w-full p-2 text-sm border rounded-md shadow-sm focus:ring-4 focus:ring-primary" oninput="handleSearch()">
+                                <i class="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4">🔍</i>
+                            </div>
+                        </div>
+                    </div>
+            
+                  <!-- BEGIN: Head of Account List -->
+                   <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+<table class="w-full text-left border-separate border-spacing-y-[10px]">
+
+<thead>
+<tr>
+<th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Code</th>
+<th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Supplier Name</th>
+<th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Contact Person</th>
+<th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Phone / Mobile</th>
+<th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Address</th>
+<th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Pur. Commission %</th>
+<th class="font-medium px-5 py-3 border-b dark:border-darkmode-300">Opening Balance</th>
+<th class="font-medium px-5 py-3 border-b dark:border-darkmode-300 text-center">Actions</th>
+</tr>
+</thead>
+
+<tbody id="tableBody">
+{% for restSupplier in restSuppliers %}
+<tr>
+
+<td class="px-5 py-3 border-b dark:border-darkmode-300">
+{{ restSupplier.rest_supplier_code }}
+</td>
+
+<td class="px-5 py-3 border-b dark:border-darkmode-300">
+{{ restSupplier.rest_supplier_name }}
+</td>
+
+<td class="px-5 py-3 border-b dark:border-darkmode-300">
+{{ restSupplier.contact_person }}
+</td>
+
+<td class="px-5 py-3 border-b dark:border-darkmode-300">
+{{ restSupplier.phone_mobile }}
+</td>
+
+<td class="px-5 py-3 border-b dark:border-darkmode-300">
+{{ restSupplier.address }}
+</td>
+
+<td class="px-5 py-3 border-b dark:border-darkmode-300">
+{{ restSupplier.purchase_commission }} %
+</td>
+
+<td class="px-5 py-3 border-b dark:border-darkmode-300">
+{{ restSupplier.opening_balance }}
+</td>
+
+<td class="px-5 py-3 border-b dark:border-darkmode-300 text-center">
+
+<a href="{% url 'edit_restaurant_supplier' restSupplier.pk %}" 
+class="text-blue-600 hover:text-blue-700">
+<i class="fas fa-edit mr-2"></i>Edit
+</a>
+
+|
+
+<a href="{% url 'delete_restaurant_supplier' restSupplier.pk %}" 
+class="text-red-600 hover:text-red-700">
+<i class="fas fa-trash mr-2"></i>Delete
+</a>
+
+</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="8" class="text-center text-gray-500 py-4">
+No Supplier Available.
+</td>
+</tr>
+
+{% endfor %}
+</tbody>
+</table>
+</div>
+                    
+                    <!-- END: Property Owners List -->
+            
+                    <!-- BEGIN: Pagination -->
+                    <div class="intro-y col-span-12 flex flex-wrap items-center sm:flex-row sm:flex-nowrap">
+                        <!-- Showing entries text -->
+                        <div class="mx-auto hidden text-slate-500 md:block">
+                            Showing {{ tenants.start_index }} to {{ tenants.end_index }} of {{ tenants.paginator.count }} entries
+                        </div>
+                    
+                        <!-- Pagination navigation -->
+                        <nav class="w-full sm:mr-auto sm:w-auto">
+                            <ul class="flex w-full mr-0 sm:mr-auto sm:w-auto">
+                                <!-- Previous Page -->
+                                {% if tenants.has_previous %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <a href="?page={{ tenants.previous_page_number }}&page_size={{ tenants.paginator.per_page }}" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer">
+                                            <i class="chevrons-left h-4 w-4"></i> <!-- Left Chevron icon -->
+                                            Previous
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <span class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-not-allowed">
+                                            <i class="chevrons-left h-4 w-4"></i>
+                                            Previous
+                                        </span>
+                                    </li>
+                                {% endif %}
+                    
+                                <!-- Page Numbers -->
+                                {% for num in tenants.paginator.page_range %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        {% if num == tenants.number %}
+                                            <a href="#" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer bg-primary text-white">{{ num }}</a>
+                                        {% else %}
+                                            <a href="?page={{ num }}&page_size={{ tenants.paginator.per_page }}" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer">{{ num }}</a>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                    
+                                <!-- Next Page -->
+                                {% if tenants.has_next %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <a href="?page={{ tenants.next_page_number }}&page_size={{ tenants.paginator.per_page }}" class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-pointer">
+                                            Next
+                                            <i class="chevron-right h-4 w-4"></i> <!-- Right Chevron icon -->
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="flex-1 sm:flex-initial">
+                                        <span class="transition duration-200 border items-center justify-center py-2 rounded-md cursor-not-allowed">
+                                            Next
+                                            <i class="chevron-right h-4 w-4"></i>
+                                        </span>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    
+                        <!-- Page Size Selector -->
+                        <form method="get" action="" class="inline-block">
+                            <select name="page_size" onchange="this.form.submit()" class="transition duration-200 ease-in-out text-sm border-slate-200 shadow-sm rounded-md py-2 px-3 pr-8 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50">
+                                <option value="10" {% if tenants.paginator.per_page == 10 %}selected{% endif %}>10</option>
+                                <option value="25" {% if tenants.paginator.per_page == 25 %}selected{% endif %}>25</option>
+                                <option value="50" {% if tenants.paginator.per_page == 50 %}selected{% endif %}>50</option>
+                            </select>
+                        </form>
+                    </div>
+                    
+                    <!-- END: Pagination -->
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,204 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Expense Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-lg font-medium">Expense Costing</h2>
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <style>
+                            .form-buttons {
+                                display: flex;
+                                gap: 15px;
+                                margin-top: 20px;
+                                flex-wrap: wrap;
+                            }
+                        
+                            .form-buttons button {
+                                background-color: #3498db; /* Blue button */
+                                color: white;
+                                border: none;
+                                padding: 10px 16px;
+                                border-radius: 5px;
+                                font-size: 15px;
+                                cursor: pointer;
+                                transition: background-color 0.3s ease;
+                            }
+                        
+                            .form-buttons button:hover {
+                                background-color: #2980b9;
+                            }
+                        </style>
+                        
+                        <div class="project-info-row">
+                            <label for="projectName">Project Name:</label>
+                            <input type="text" id="projectName" value="{{ projects.project_first_name }}" placeholder="Enter project name" style="border:none;font-weight:bold;" readonly>
+                        </div>
+                        <br> <br>
+                        <div class="table-container">
+                            <table id="equipmentTable">
+                                <thead>
+                                    <tr>
+                                        <th>Item Name</th>
+                                        <th>Quantity</th>                                   
+                                        <th>Item Cost (Per Unit)</th>
+                                        <th>Total Cost</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody">
+                                    <!-- Rows will be added dynamically -->
+                                </tbody>
+                            </table>                            
+                        </div>                        
+                        <div class="form-buttons">
+                            <button type="button" onclick="addRow()">➕ Add Row</button>
+                            <button type="button" onclick="saveExpense()">💾 Save Expense</button>
+                            <a href="{% url 'boq_list' %}" style="margin-left:0.5%;background-color:#1e3c98" class="px-8 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Back to List</a>
+                      </div>
+                        
+                        <h3 style="margin-top: 20px;">Total Cost: <span id="totalCost">0.00</span></h3>
+                        
+                        <script>
+                           function addRow() {
+                                const tbody = document.getElementById('tableBody');
+                                const row = document.createElement('tr');
+
+                                row.innerHTML = `
+                                    <td><input type="text" class="itemName" /></td>
+                                    <td><input type="number" class="quantity" min="1" value="1" onchange="calculateRowTotal(this)" /></td>
+                                    <td><input type="number" class="unitCost" step="0.01" value="0.00" onchange="calculateRowTotal(this)" /></td>
+                                    <td><input type="text" class="itemCost" value="0.00" readonly /></td>
+                                    <td><button onclick="deleteRow(this)">Delete</button></td>
+                                `;
+
+                                tbody.appendChild(row);
+                            }
+
+                            function deleteRow(btn) {
+                                btn.closest('tr').remove();
+                                calculateTotal();
+                            }
+
+                            function calculateRowTotal(input) {
+                                const row = input.closest('tr');
+                                const qty = parseFloat(row.querySelector('.quantity').value) || 0;
+                                const unitCost = parseFloat(row.querySelector('.unitCost').value) || 0;
+                                const total = qty * unitCost;
+
+                                row.querySelector('.itemCost').value = total.toFixed(2);
+                                calculateTotal();
+                            }
+
+                            function calculateTotal() {
+                                let total = 0;
+                                const costInputs = document.querySelectorAll('.itemCost');
+                                costInputs.forEach(input => {
+                                    total += parseFloat(input.value) || 0;
+                                });
+
+                                document.getElementById('totalCost').textContent = total.toFixed(2);
+                            }
+
+                            function saveExpense() {
+                                const projectName = document.getElementById('projectName').value.trim();
+                                const rows = document.querySelectorAll('#tableBody tr');
+                                const items = [];
+                                let totalCost = 0;
+
+                                rows.forEach(row => {
+                                    const itemName = row.querySelector('.itemName').value;
+                                    const quantity = parseInt(row.querySelector('.quantity').value) || 0;
+                                    const unitCost = parseFloat(row.querySelector('.unitCost').value) || 0;
+                                    const itemCost = parseFloat(row.querySelector('.itemCost').value) || 0;
+
+                                    if (itemName && quantity > 0 && unitCost > 0) {
+                                        totalCost += itemCost;
+
+                                        items.push({
+                                            item_name: itemName,
+                                            quantity: quantity,
+                                            item_cost: unitCost
+                                        });
+                                    }
+                                });
+
+                                if (!projectName) {
+                                    alert("Project name is required!");
+                                    return;
+                                }
+
+                                if (items.length === 0) {
+                                    alert("No valid items to save!");
+                                    return;
+                                }
+
+                                fetch("/dashboard/save-expense/", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "X-CSRFToken": getCookie("csrftoken") // if not using @csrf_exempt
+                                    },
+                                    body: JSON.stringify({
+                                        project_name: projectName,
+                                        items: items
+                                    })
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    console.log(data);
+                                    alert(data.message || "Expense data saved successfully!");
+                                    if (data.message.includes('success')) {
+                                        setTimeout(() => {
+                                            window.location.href = "{% url 'boq_list' %}";
+                                        }, 500);
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error("Error:", err);
+                                    alert("Error saving Expense data.");
+                                });
+                            }
+
+                            // Optional: if you're not using @csrf_exempt
+                            function getCookie(name) {
+                                let cookieValue = null;
+                                if (document.cookie && document.cookie !== '') {
+                                    const cookies = document.cookie.split(';');
+                                    for (let i = 0; i < cookies.length; i++) {
+                                        const cookie = cookies[i].trim();
+                                        if (cookie.startsWith(name + '=')) {
+                                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                            break;
+                                        }
+                                    }
+                                }
+                                return cookieValue;
+                            }
+                            window.onload = function () {
+                                addRow();
+                            };
+                        </script>
+                    </div>
+                </div>
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

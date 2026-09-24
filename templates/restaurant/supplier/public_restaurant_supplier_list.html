@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Public Restaurant Supplier List</title>
+
+<style>
+
+body{
+    background:#eef2f7;
+    font-family:Arial,sans-serif;
+    margin:0;
+    padding:0;
+}
+
+/* ===== TOP HEADER ===== */
+
+.top-header{
+    max-width:1200px;
+    margin:20px auto;
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.header-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.page-title{
+    margin:0;
+    font-size:28px;
+    color:#0d6efd;
+    font-weight:bold;
+}
+
+.page-subtitle{
+    color:#6c757d;
+    margin-top:5px;
+    font-size:14px;
+}
+
+.nav-links{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.nav-btn{
+    text-decoration:none;
+    color:#fff;
+    padding:10px 16px;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:bold;
+    transition:.3s;
+}
+
+.nav-btn:hover{
+    opacity:.9;
+}
+
+.home-btn{
+    background:#0d6efd;
+}
+
+.category-btn{
+    background:#fd7e14;
+}
+
+.item-btn{
+    background:#20c997;
+}
+
+.req-btn{
+    background:#6f42c1;
+}
+
+.report-btn{
+    background:#6c757d;
+}
+
+.add-btn{
+    background:#198754;
+}
+
+
+/* CONTAINER */
+
+.container{
+    max-width:1200px;
+    margin:20px auto;
+    padding:0 15px;
+}
+
+/* CARD */
+
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+/* FILTER */
+
+.filter-box{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin-top:15px;
+    background:#f8f9fa;
+    padding:15px;
+    border-radius:10px;
+}
+
+input{
+    padding:10px;
+    border:1px solid #ddd;
+    border-radius:6px;
+}
+
+/* TABLE */
+
+.table-box{
+    margin-top:20px;
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#0d6efd;
+    color:#fff;
+    padding:12px;
+}
+
+td{
+    padding:12px;
+    border-bottom:1px solid #eee;
+}
+
+tbody tr:hover{
+    background:#f1f5ff;
+}
+
+/* STATUS */
+
+.active{
+    color:green;
+    font-weight:bold;
+}
+
+.inactive{
+    color:red;
+    font-weight:bold;
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+    .header-row{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .nav-links{
+        width:100%;
+    }
+
+    .nav-btn{
+        flex:1;
+        text-align:center;
+    }
+
+    .page-title{
+        font-size:22px;
+    }
+
+    .filter-box{
+        grid-template-columns:1fr;
+    }
+
+}
+
+.action-btns {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Common button style */
+.action-btns a {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* Edit Button */
+.btn-edit {
+    background: linear-gradient(135deg, #4f8cff, #2563eb);
+    color: #fff;
+}
+
+.btn-edit:hover {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    transform: translateY(-1px);
+}
+
+/* Delete Button */
+.btn-delete {
+    background: linear-gradient(135deg, #ff5f6d, #dc2626);
+    color: #fff;
+}
+
+.btn-delete:hover {
+    background: linear-gradient(135deg, #dc2626, #991b1b);
+    transform: translateY(-1px);
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ================= TOP MENU ================= -->
+<div class="top-header">
+
+    <div class="header-row">
+
+        <div>
+            <h2 class="page-title">
+                🏢 Supplier Management
+            </h2>
+
+            <div class="page-subtitle">
+                Restaurant Requisition Management System
+            </div>
+        </div>
+
+        <div class="nav-links">
+
+            <a href="{% url 'public_restaurant_home' %}" class="nav-btn home-btn">
+                🏠 Home
+            </a>
+             <a href="{% url 'restau_requisition_list_public' %}" class="nav-btn req-btn">
+                📋 Back
+            </a>
+
+            <a href="{% url 'public_restaurant_item_name' %}" class="nav-btn item-btn">
+                📦 Item List
+            </a>
+           
+            <a href="{% url 'public_restaurant_supplier_list' %}" class="nav-btn report-btn">
+                    🔄 Refresh
+                </a>
+
+            <a href="{% url 'public_add_restaurant_supplier' %}" class="nav-btn add-btn">
+                ➕ Add Supplier
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ================= CONTENT ================= -->
+<div class="container">
+
+    <div class="card">
+        
+        <!-- FILTER -->
+        <form method="GET" class="filter-box">
+        
+            <input type="text" name="search" placeholder="🔍 Search supplier name...">
+        
+            <input type="text" name="phone" placeholder="📞 Phone">
+        
+            <input type="text" name="code" placeholder="🏷 Supplier Code">
+        
+            <button type="submit" class="btn btn-blue">
+                Filter Search
+            </button>
+        
+        </form>
+
+        <!-- TABLE -->
+        <div class="table-box">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Supplier Name</th>
+                        <th>Account</th>
+                        <th>Contact Person</th>
+                        <th>Phone</th>
+                        <th>Opening Balance</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for supplier in restSuppliers %}
+                    <tr>
+                        <td>{{ supplier.rest_supplier_code }}</td>
+                        <td>{{ supplier.rest_supplier_name }}</td>
+                        <td>{{ supplier.rest_supplier_account }}</td>
+                        <td>{{ supplier.contact_person }}</td>
+                        <td>{{ supplier.phone_mobile }}</td>
+                        <td>{{ supplier.opening_balance }}</td>
+
+                        <td>
+                            {% if supplier.opening_balance >= 0 %}
+                                <span class="active">Active</span>
+                            {% else %}
+                                <span class="inactive">Inactive</span>
+                            {% endif %}
+                        </td>
+
+                       <td class="action-btns">
+                            <a href="{% url 'public_edit_restaurant_supplier' supplier.id %}" class="btn-edit">
+                                ✏️ Edit
+                            </a>
+                        
+                            <a href="{% url 'public_delete_restaurant_supplier' supplier.id %}" class="btn-delete">
+                                🗑️ Delete
+                            </a>
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align:center;">No suppliers found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

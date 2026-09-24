@@ -1,0 +1,225 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Transaction Ledger Voucher Report</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 12px;
+      background-color: #f0f0f0;
+      padding: 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    }
+    .logo img {
+      height: 48px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .label-box {
+      background-color: #f3f4f6;
+      color: #111827;
+      padding: 6px 14px;
+      font-weight: bold;
+      font-size: 14px;
+      border-left: 4px solid #2563eb;
+      border-radius: 4px;
+    }
+    .sub-head {
+      font-size: 12px;
+      color: #4b5563;
+      margin-top: -14px;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    .project-name {
+      margin: 10px 0 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1d4ed8;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+      margin-top: 8px;
+    }
+    th {
+      background-color: #e5e7eb;
+      padding: 8px;
+      text-align: left;
+      font-weight: bold;
+      color: #111827;
+      border: 1px solid #d1d5db;
+    }
+    td {
+      border: 1px solid #e5e7eb;
+      padding: 6px 8px;
+    }
+    tr:nth-child(even) {
+      background-color: #f9fafb;
+    }
+    tr:hover {
+      background-color: #f3f4f6;
+    }
+    .text-right {
+      text-align: right;
+    }
+    .section {
+      margin-top: 14px;
+      font-size: 12px;
+    }
+    .signature-section {
+      margin-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      text-align: center;
+    }
+    .signature-box {
+      flex: 1;
+      padding: 8px;
+    }
+    .signature-line {
+      display: block;
+      margin-top: 10px;
+      border-top: 1px solid #000;
+      width: 100%;
+    }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #374151;
+      margin-top: 30px;
+      padding-top: 10px;
+      border-top: 1px solid #d1d5db;
+      flex-wrap: wrap;
+    }
+    .print-btn {
+      background-color: #1e3a8a;
+      color: white;
+      padding: 6px 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background: white;
+        padding: 0;
+      }
+      .card {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <div class="logo">
+      <img src="{% static '/images/BTP_logo_webp.webp' %}" alt="Company Logo">
+    </div>
+    <div style="text-align: right;">
+      <div class="label-box">Transaction Ledger Voucher Report</div>
+      <p style="font-size: 11px; margin-top: 4px;">
+        Printing Date: {{ print_time|date:"F j, Y, g:i a" }}
+      </p>
+    </div>
+  </div>
+
+  <div class="sub-head">
+    House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br>
+    01993005558, 09639246230, 09639246231 <br>
+    md2bayid@gmail.com, thebtplimited@gmail.com, www.btplimited.com
+  </div>
+
+  <hr style="margin: 10px 0;">
+
+  {% if selected_filters.from_date or selected_filters.to_date %}
+  <div class="project-name">
+    Date Range:
+    {{ selected_filters.from_date|default:"--" }} to {{ selected_filters.to_date|default:"--" }}
+  </div>
+  {% endif %}
+
+  {% for project, rows in entry_data.items %}
+  <h3 class="project-name font-bold text-lg mt-6 mb-2">Project: {{ project }}</h3>
+  <table class="w-full table-auto border border-gray-400 text-sm mb-6">
+    <thead class="bg-gray-200">
+      <tr>
+        <th class="border px-2 py-1">Date</th>
+        <th class="border px-2 py-1">Head of Account</th>
+        <th class="border px-2 py-1">Description</th>
+        <th class="border px-2 py-1">User</th>
+        <th class="border px-2 py-1">Cash Type</th>
+        <th class="border px-2 py-1">Bill No</th>
+        <th class="border px-2 py-1 text-right">Debit</th>
+        <th class="border px-2 py-1 text-right">Credit</th>
+        <th class="border px-2 py-1 text-right">Balance</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+        {% with entry=row.entry %}
+          <tr class="border-b">
+            <td class="border px-2 py-1">{{ entry.date }}</td>
+            <td class="border px-2 py-1">{{ entry.head_of_account.head_name }}</td>
+            <td class="border px-2 py-1">{{ entry.type_name }} - {{ entry.particulars }}</td>
+            <td class="border px-2 py-1">{{ entry.create_by }}</td>
+            <td class="border px-2 py-1">{{ entry.cash_type.cash_type_name }}</td>
+            <td class="border px-2 py-1">{{ entry.reference }}</td>
+            <td class="border px-2 py-1 text-right">{{ row.debit|floatformat:2 }}</td>
+            <td class="border px-2 py-1 text-right">{{ row.credit|floatformat:2 }}</td>
+            <td class="border px-2 py-1 text-right font-semibold">{{ row.balance|floatformat:2 }}</td>
+          </tr>
+        {% endwith %}
+      {% endfor %}
+    </tbody>
+  </table>
+{% endfor %}
+
+  <div class="section" style="font-weight:bold;font-size:16px">
+    <strong>Balance in words:</strong> {{ balance_in_words|default:"N/A" }}.
+  </div>
+
+  <div class="signature-section">
+    <div class="signature-box"><span class="signature-line"></span>Prepared By</div>
+    <div class="signature-box"><span class="signature-line"></span>Checked By</div>
+    <div class="signature-box"><span class="signature-line"></span>Forwarded By</div>
+    <div class="signature-box"><span class="signature-line"></span>Approved By</div>
+  </div>
+
+  <div class="footer">
+    <div>© 2025 BTP LIMITED | System Generated</div>
+    <div class="no-print">
+      <a href="{% url 'transaction_reports_list' %}" class="btn">← Back to List</a>&nbsp;&nbsp;&nbsp;&nbsp;
+      <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

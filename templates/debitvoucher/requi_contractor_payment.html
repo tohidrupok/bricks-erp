@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contractor Payment Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-lg font-medium">Contractor Payment Name</h2>
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                        <form method="POST" class="w-full max-w-4xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                            {% csrf_token %}
+                            <input type="hidden" name="create_dr" value="{{ request.user.get_full_name }}">
+                            <h2 class="text-xl font-semibold mb-6 text-center text-gray-800">Contractor Requisition Payment</h2>
+                            
+                            <!-- Type -->
+                            <div class="mb-4">
+                              <label for="id_type" class="font-medium text-lg text-gray-800">Type</label>
+                              <!-- Removed disabled so hidden input takes priority reliably -->
+                              <select id="id_type" name="type"
+                                      class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2 bg-gray-100 pointer-events-none"
+                                      tabindex="-1" aria-hidden="true">
+                                <option value="Contractor" selected>Contractor</option>
+                              </select>
+                              <input type="hidden" name="type" value="Contractor">
+                            </div>
+                            
+                            <!-- Contractor Name Field -->
+                            <div class="mb-4" id="contractor_field">
+                              <label for="id_contructor" class="font-medium text-lg text-gray-800">Contractor Name</label>
+                              <!-- Removed disabled attribute -->
+                              <select id="id_contructor" name="contructor"
+                                      class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2 bg-gray-100 pointer-events-none"
+                                      tabindex="-1" aria-hidden="true">
+                                <option value="{{ contractor.id }}" selected>{{ contractor.supervisor_name }}</option>
+                              </select>
+                              <input type="hidden" name="contructor" value="{{ contractor.id }}">
+                            </div>
+                            
+                            <!-- Head of Account Combo Box -->
+                            <div class="mb-4">
+                              <label for="comboInput" class="font-medium text-lg text-gray-800 block mb-1">
+                                Head of Account
+                              </label>
+                              <div class="relative">
+                                <input type="text" id="comboInput"
+                                       placeholder="Type to search..."
+                                       class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                       oninput="filterComboList()"
+                                       onclick="toggleComboList()" autocomplete="off" />
+                                
+                                <ul id="comboList"
+                                    class="absolute z-10 w-full bg-white border border-slate-300 rounded-md mt-1 max-h-48 overflow-y-auto hidden">
+                                  {% for choice in form.head_of_account.field.choices %}
+                                    <li class="p-2 hover:bg-blue-100 cursor-pointer"
+                                        onclick="selectComboItem('{{ choice.1|escapejs }}', '{{ choice.0 }}')"
+                                        data-value="{{ choice.0 }}">
+                                      {{ choice.1 }}
+                                    </li>
+                                  {% endfor %}
+                                </ul>
+                                <input type="hidden" name="head_of_account" id="comboHidden" value="{{ form.head_of_account.value|default:'' }}">
+                              </div>
+                              {% for error in form.head_of_account.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                              {% endfor %}
+                            </div>
+                            <script>
+                            function toggleComboList() {
+                              document.getElementById("comboList").classList.remove("hidden");
+                            }
+                            function filterComboList() {
+                              const input = document.getElementById("comboInput").value.toLowerCase();
+                              const items = document.querySelectorAll("#comboList li");
+                              items.forEach(item => {
+                                const text = item.textContent.toLowerCase();
+                                item.style.display = text.includes(input) ? "" : "none";
+                              });
+                            }
+                            function selectComboItem(label, value) {
+                              document.getElementById("comboInput").value = label;
+                              document.getElementById("comboHidden").value = value;
+                              document.getElementById("comboList").classList.add("hidden");
+                            }
+                            </script>
+
+                            <!-- Bill Phase -->
+                            <div class="mb-4">
+                                <label for="id_bill_phase" class="font-medium text-lg text-gray-800">Bill About</label>
+                                <input type="text" id="id_bill_phase" name="bill_phase"
+                                    class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                    placeholder="Enter Bill Phase"
+                                    value="{{ form.bill_phase.value|default_if_none:'' }}">
+                            </div>
+
+                            <!-- Honour Date -->
+                            <div class="mb-4">
+                                <label for="id_bill_date" class="font-medium text-lg text-gray-800">Honour Date</label>
+                                <input type="date" id="id_bill_date" name="bill_date"
+                                    class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                    value="{{ form.bill_date.value|default:today }}">
+                            </div>
+
+                            <!-- Project Name -->
+                            <div class="mb-4">
+                                <label for="id_project" class="font-medium text-lg text-gray-800">Project Name</label>
+                                <select id="id_project" name="project_name"
+                                    class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                    {% for choice in form.project_name.field.choices %}
+                                        <option value="{{ choice.0 }}" {% if choice.0|slugify == form.project_name.value|slugify %}selected{% endif %}>{{ choice.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Cash Type -->
+                            <div class="mb-4">
+                                <label for="id_cash_type" class="font-medium text-lg text-gray-800">Cash Type</label>
+                                <select id="id_cash_type" name="cash_type"
+                                    class="w-full text-sm border-slate-200 shadow-sm rounded-md p-2 border border-slate-300">
+                                    <option value="" disabled {% if not form.cash_type.value %} selected {% endif %}>Select Cash Type</option>
+                                    {% for value, label in form.cash_type.field.choices %}
+                                        <option value="{{ value }}" {% if value == form.cash_type.value %} selected {% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Cheque Number -->
+                            <div id="chequeNumberField" class="mb-4 hidden">
+                                <label for="cheque_number" class="font-medium text-lg text-gray-800">Cheque Number</label>
+                                <select id="cheque_number" name="cheque_number" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                  <option value="">-- Select Cheque --</option>
+                                </select>
+                            </div>
+
+                            <!-- Cheque Fetching JS -->
+                            <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                const cashTypeSelect = document.getElementById("id_cash_type");
+                                const chequeSelect = document.getElementById("cheque_number");
+                                const chequeFieldDiv = document.getElementById("chequeNumberField");
+
+                                cashTypeSelect.addEventListener("change", function() {
+                                    const cashTypeId = this.value;
+                                    if (cashTypeId) {
+                                        chequeFieldDiv.classList.remove("hidden");
+                                        chequeSelect.innerHTML = '<option value="">Loading...</option>';
+                                        fetch(`/dashboard/get-cheques/${cashTypeId}/`)
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                chequeSelect.innerHTML = '<option value="">-- Select Cheque --</option>';
+                                                if (data.length === 0) {
+                                                    chequeSelect.innerHTML = '<option value="">No unused cheques available</option>';
+                                                } else {
+                                                    data.sort((a, b) => parseInt(a.cheque_number, 10) - parseInt(b.cheque_number, 10));
+                                                    data.forEach(cheque => {
+                                                        const option = document.createElement("option");
+                                                        option.value = cheque.id;
+                                                        option.textContent = cheque.cheque_number;
+                                                        chequeSelect.appendChild(option);
+                                                    });
+                                                }
+                                            })
+                                            .catch(error => {
+                                                chequeSelect.innerHTML = '<option value="">Error loading cheques</option>';
+                                            });
+                                    } else {
+                                        chequeFieldDiv.classList.add("hidden");
+                                        chequeSelect.innerHTML = '<option value="">-- Select Cheque --</option>';
+                                    }
+                                });
+                            });
+                            </script>
+
+                            <!-- M.R/Bill No -->
+                            <div class="mb-4">
+                                <label for="id_mr_or_bill_no" class="font-medium text-lg text-gray-800">M.R/Bill No</label>
+                                <input type="text" id="id_mr_or_bill_no" name="mr_or_bill_no"
+                                    class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                    placeholder="Enter M.R/Bill No"
+                                    value="{{ form.mr_or_bill_no.value|default_if_none:'' }}">
+                            </div>
+
+                            <!-- Entry Date -->
+                            <div class="mb-4">
+                                <label for="id_date" class="font-medium text-lg text-gray-800">Entry Date</label>
+                                <input type="date" id="id_date" name="date"
+                                    class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                    value="{{ form.date.value|default:today }}">
+                            </div>
+
+                            <!-- Amount -->
+                            <div class="mb-4">
+                                <label for="id_amount" class="font-medium text-lg text-gray-800">
+                                    Amount <span class="text-gray-500 text-sm">(Max: {{ max_amount|floatformat:2 }} Taka)</span>
+                                </label>
+                                <input type="number" step="0.01" id="id_amount" name="amount"
+                                    class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                    value="{% if form.amount.value %}{{ form.amount.value }}{% else %}{{ max_amount|floatformat:2 }}{% endif %}"
+                                    max="{{ max_amount }}">
+                            </div>
+
+                            <!-- Amount Validation JS -->
+                            <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                const amountInput = document.getElementById("id_amount");
+                                const maxAmount = parseFloat("{{ max_amount|default:0 }}") || 0;
+
+                                amountInput.addEventListener("input", function() {
+                                    const current = parseFloat(this.value || 0);
+                                    if (current > maxAmount) {
+                                        alert(`⚠️ You cannot pay more than ${maxAmount.toFixed(2)} Taka.`);
+                                        this.value = maxAmount.toFixed(2);
+                                    }
+                                });
+                            });
+                            </script>
+
+                            <!-- Particulars -->
+                            <div class="mb-4">
+                                <label for="id_particulars" class="font-medium text-lg text-gray-800">Particulars</label>
+                                <textarea id="id_particulars" name="particulars"
+                                    class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                    rows="3">{{ form.particulars.value|default_if_none:'' }}</textarea>
+                            </div>
+
+                            <!-- Carrier -->
+                            <div class="mb-4">
+                                <label for="id_carrier" class="font-medium text-lg text-gray-800">Carrier</label>
+                                <input type="text" id="id_carrier" name="carrier"
+                                    class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2"
+                                    value="{{ form.carrier.value|default_if_none:'' }}">
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="mt-5 text-right">
+                                <button type="submit" style="background-color:#1e3d9a" class="bg-blue-600 text-white px-5 py-2 rounded-md shadow-md hover:bg-blue-700">Save Payment</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

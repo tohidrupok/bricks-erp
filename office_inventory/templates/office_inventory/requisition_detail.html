@@ -1,0 +1,64 @@
+{% extends 'office_inventory/base.html' %}
+{% block header %}Requisition {{ req.req_no }}{% endblock %}
+{% block content %}
+<div class="card card-stat p-4 mb-3">
+  <div class="row">
+    <div class="col-md-6">
+      <p><strong>Department:</strong> {{ req.department }}</p>
+      <p><strong>Employee:</strong> {{ req.employee }}</p>
+      <p><strong>Item:</strong> {{ req.item }}</p>
+      <p><strong>Place:</strong> {{ req.location.full_path|default:"-" }}</p>
+      <p><strong>Requested Qty:</strong> {{ req.requested_qty }} {{ req.unit|default:"" }}</p>
+    </div>
+    <div class="col-md-6">
+      <p><strong>Status:</strong> <span class="badge bg-info">{{ req.get_status_display }}</span></p>
+      <p><strong>Dept Approver:</strong> {{ req.dept_approver|default:"-" }} (Qty: {{ req.approved_qty|default:"-" }})</p>
+      <p><strong>Admin Approver:</strong> {{ req.admin_approver|default:"-" }}</p>
+      <p><strong>Store Officer:</strong> {{ req.store_officer|default:"-" }} - Issued Qty: {{ req.issued_qty|default:"-" }}</p>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between mt-3 mb-2 small text-muted flex-wrap">
+    <span>Employee</span><span>&rarr;</span><span>Dept Approval</span><span>&rarr;</span>
+    <span>Admin Approval</span><span>&rarr;</span><span>Store Issue</span><span>&rarr;</span><span>Stock Updated</span>
+  </div>
+
+
+    {% if request.session.department == "admin" %}
+      {% if can_admin_approve %}
+      <form method="post" action="{% url 'office_inventory:requisition_admin_approve' req.pk %}" class="mt-3 d-flex gap-2 align-items-center flex-wrap">
+        {% csrf_token %}
+        <input type="number" name="approved_qty" class="form-control form-control-sm" style="width:130px" placeholder="Approve qty" min="1">
+        <button name="action" value="approve" class="btn btn-success btn-sm">Approve (Admin)</button>
+        <button name="action" value="reject" class="btn btn-outline-danger btn-sm">Reject</button>
+      </form>
+      {% endif %}
+      {% if can_dept_approve %}
+          <form method="post" action="{% url 'office_inventory:requisition_dept_approve' req.pk %}" class="mt-3 d-flex gap-2 align-items-center flex-wrap">
+            {% csrf_token %}
+            <input type="number" name="approved_qty" class="form-control form-control-sm" style="width:130px" placeholder="Approve qty" min="1" max="{{ req.requested_qty }}">
+            <button name="action" value="approve" class="btn btn-success btn-sm">Approve (Dept)</button>
+            <button name="action" value="reject" class="btn btn-outline-danger btn-sm">Reject</button>
+          </form>
+          {% endif %}
+      
+    {% else %}
+        {% if can_dept_approve %}
+          <form method="post" action="{% url 'office_inventory:requisition_dept_approve' req.pk %}" class="mt-3 d-flex gap-2 align-items-center flex-wrap">
+            {% csrf_token %}
+            <input type="number" name="approved_qty" class="form-control form-control-sm" style="width:130px" placeholder="Approve qty" min="1" max="{{ req.requested_qty }}">
+            <button name="action" value="approve" class="btn btn-success btn-sm">Approve (Dept)</button>
+            <button name="action" value="reject" class="btn btn-outline-danger btn-sm">Reject</button>
+          </form>
+          {% endif %}
+      {% endif %}
+   
+  {% if can_issue %}
+  <form method="post" action="{% url 'office_inventory:requisition_issue' req.pk %}" class="mt-3 d-flex gap-2 align-items-center flex-wrap">
+    {% csrf_token %}
+    <input type="number" name="issued_qty" class="form-control form-control-sm" style="width:130px" placeholder="Issue qty" min="1">
+    <button class="btn btn-primary btn-sm">Issue &amp; Deduct Stock</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

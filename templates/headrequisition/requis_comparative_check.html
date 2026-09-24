@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Requisition Comparative - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: silver;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 960px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 10px;
+      min-width: 800px;
+    }
+
+    .table th,
+    .table td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .print-btn {
+      background-color: #1e3c98;
+      color: white;
+      padding: 5px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .card {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+</style>
+
+<div class="card" style="max-width: 960px; margin: 20px auto; font-family: Arial, sans-serif; font-size: 13px;">
+  <h2 style="font-weight: bold; margin-bottom: 20px;">
+    Requisition Comparative Sheet : {{ project.project_first_name|default:"N/A" }}
+  </h2>
+
+  <div style="overflow-x: auto;">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for vendor in vendor_names %}
+            <th colspan="5" style="background-color: #f3f4f6; text-align: center;">
+              {{ vendor }}
+            </th>
+          {% endfor %}
+        </tr>
+        <tr>
+          {% for vendor in vendor_names %}
+            <th style="background-color: #f3f4f6;">Description</th>
+            <th style="background-color: #f3f4f6;">Qty</th>
+            <th style="background-color: #f3f4f6;">Unit</th>
+            <th style="background-color: #f3f4f6;">Rate</th>
+            <th style="background-color: #f3f4f6;">Amount</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          <tr>
+            {% for item in row.vendors %}
+              <td style="border: 1px solid #ccc; padding: 6px;">{{ row.description }}</td>
+              <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">{{ item.qty }}</td>
+              <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">{{ item.unit }}</td>
+              <td style="border: 1px solid #ccc; padding: 6px; text-align: right;
+                         {% if item.is_min %}
+                           background-color: #d1fae5;
+                           font-weight: bold;
+                         {% elif item.is_max %}
+                           color: red;
+                         {% endif %}
+                         ">
+                {{ item.rate|floatformat:2 }}
+              </td>
+              <td style="border: 1px solid #ccc; padding: 6px; text-align: right;">
+                {{ item.amount|floatformat:2|intcomma }}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+        <tr style="font-weight: bold; background-color: #e5e7eb;">
+          {% for total in vendor_totals_list %}
+            <td colspan="4" style="text-align: right; border: 1px solid #ccc; padding: 6px;">Total</td>
+            <td style="border: 1px solid #ccc; padding: 6px; text-align: right;">
+              {{ total|floatformat:2|intcomma }}
+            </td>
+          {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <a href="{% url 'requisition_comparative_list' %}" style="
+      background-color: #1e3c98;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: bold;
+    ">
+      ← Back to Requisition List
+    </a>
+
+    <div class="no-print">
+      <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

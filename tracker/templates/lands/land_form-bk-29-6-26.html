@@ -1,0 +1,56 @@
+{% extends "lands/base.html" %}
+{% block title %}{{ action }} Land Record | জমি রেকর্ড{% endblock %}
+{% block content %}
+<div class="container-sm">
+  <div class="breadcrumb">
+    <a href="{% url 'tracker:list' %}">Records</a> /
+    {% if record %}<a href="{% url 'tracker:detail' record.pk %}">{{ record.file_no }}</a> / {% endif %}
+    {{ action }}
+  </div>
+
+  <div class="page-header">
+    <h1>{{ action }} Land Record</h1>
+    <div class="bn-title">{% if action == 'Create' %}নতুন জমির রেকর্ড যোগ করুন{% else %}জমির রেকর্ড সম্পাদনা করুন{% endif %}</div>
+  </div>
+
+  <div class="card">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group">
+          <label for="file_no">File No <span class="bn-label">ফাইল নং</span></label>
+          <input type="text" id="file_no" name="file_no" required placeholder="e.g. LR-2024-001" value="{{ record.file_no|default:'' }}">
+        </div>
+        <div class="form-group">
+          <label for="date">Date <span class="bn-label">তারিখ</span></label>
+          <input type="date" id="date" name="date" required value="{{ record.date|date:'Y-m-d'|default:today }}">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="area">Area / Location <span class="bn-label">এলাকা</span></label>
+          <input type="text" id="area" name="area" required placeholder="Village, Upazila, District" value="{{ record.area|default:'' }}">
+        </div>
+        <div class="form-group">
+          <label for="land_dag_no">Land Dag No <span class="bn-label">দাগ নং</span></label>
+          <input type="text" id="land_dag_no" name="land_dag_no" required placeholder="e.g. 452/B" value="{{ record.land_dag_no|default:'' }}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="description">Description <span class="bn-label">বিবরণ</span></label>
+        <textarea id="description" name="description" placeholder="Additional notes about this land record...">{{ record.description|default:'' }}</textarea>
+      </div>
+      <div style="display:flex;gap:10px;padding-top:8px">
+        <button type="submit" class="btn btn-primary">
+          {% if action == 'Create' %}Create Record / রেকর্ড তৈরি করুন{% else %}Save Changes / পরিবর্তন সংরক্ষণ করুন{% endif %}
+        </button>
+        {% if record %}
+          <a href="{% url 'tracker:detail' record.pk %}" class="btn btn-secondary">Cancel</a>
+        {% else %}
+          <a href="{% url 'tracker:list' %}" class="btn btn-secondary">Cancel</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

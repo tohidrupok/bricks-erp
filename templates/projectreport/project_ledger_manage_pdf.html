@@ -1,0 +1,951 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Ledger Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #0f2942;
+      --primary-light: #1e3a5f;
+      --bg-main: #f4f6f9;
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+
+      --accent-blue: #2563eb;
+      --accent-green: #10b981;
+      --accent-orange: #f59e0b;
+      --accent-purple: #8b5cf6;
+      --accent-teal: #14b8a6;
+      --accent-red: #ef4444;
+      --accent-indigo: #6366f1;
+      --accent-pink: #ec4899;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: 20px auto;
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background-color: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-container img {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .header-meta {
+      text-align: right;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .sub-head {
+      background: #f8fafc;
+      font-size: 11px;
+      padding: 8px 24px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .content {
+      padding: 24px;
+    }
+
+    /* Project Header Card (no photo - text + progress ring only) */
+    .project-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .project-card .pname {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .status-badge {
+      display: inline-block;
+      background-color: #dcfce7;
+      color: #15803d;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 12px;
+      margin-left: 8px;
+      text-transform: uppercase;
+    }
+
+    .project-info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px 16px;
+      margin-top: 12px;
+    }
+
+    .project-info-grid div {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .project-info-grid div strong {
+      color: var(--text-main);
+    }
+
+    .progress-box {
+      text-align: center;
+      padding-left: 24px;
+      border-left: 1px solid var(--border-color);
+    }
+
+    /* --- Ring / donut charts (real conic-gradient charts, not just a bordered circle) --- */
+    .progress-ring {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      position: relative;
+      margin: 0 auto;
+    }
+
+    .progress-ring-hole {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70%;
+      height: 70%;
+      background: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .progress-ring-value {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent-green);
+    }
+
+    .progress-circle-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      font-weight: 500;
+    }
+
+    /* Stat Cards Grid */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      border-radius: 6px;
+      padding: 12px 14px;
+      color: #ffffff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .stat-card .card-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      opacity: 0.9;
+      font-weight: 500;
+      display: block;
+    }
+
+    .stat-card .card-value {
+      font-size: 15px;
+      font-weight: 700;
+      display: block;
+      margin-top: 4px;
+    }
+
+    .bg-blue   { background-color: var(--accent-blue); }
+    .bg-green  { background-color: var(--accent-green); }
+    .bg-orange { background-color: var(--accent-orange); }
+    .bg-purple { background-color: var(--accent-purple); }
+    .bg-teal   { background-color: var(--accent-teal); }
+    .bg-red    { background-color: var(--accent-red); }
+    .bg-indigo { background-color: var(--accent-indigo); }
+    .bg-pink   { background-color: var(--accent-pink); }
+
+    /* Layout Columns */
+    .row-3-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    /* Panels */
+    .panel {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 14px;
+    }
+
+    .panel h4 {
+      margin-bottom: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 6px;
+    }
+
+    /* --- BOQ Progress donut panel (mirrors the dashboard's ring + legend + item counts) --- */
+    .donut-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .donut {
+      width: 108px;
+      height: 108px;
+      border-radius: 50%;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .donut-hole {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 68%;
+      height: 68%;
+      background: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .donut-total {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .donut-total-label {
+      font-size: 9px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      font-size: 11px;
+      flex: 1;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      flex-shrink: 0;
+    }
+
+    .legend-name {
+      display: flex;
+      align-items: center;
+      color: var(--text-main);
+    }
+
+    .legend-pct {
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .donut-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .donut-stat .value {
+      display: block;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .donut-stat .label {
+      display: block;
+      font-size: 9px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    th, td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background-color: #f8fafc;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 10px;
+    }
+
+    td.num, th.num { text-align: right; }
+    td.center, th.center { text-align: center; }
+
+    tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    .table-bordered {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .table-bordered th, .table-bordered td {
+      border-right: 1px solid var(--border-color);
+    }
+
+    .table-bordered th:last-child, .table-bordered td:last-child {
+      border-right: none;
+    }
+
+    .total-row {
+      font-weight: 700;
+      background-color: #f1f5f9 !important;
+    }
+
+    /* Progress Bars (still used for Stock Overview / Finance Overview panels) */
+    .bar-row {
+      margin-bottom: 8px;
+    }
+
+    .bar-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      margin-bottom: 3px;
+    }
+
+    .bar-track {
+      background: #e2e8f0;
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+
+    .section-title {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 13px;
+      margin: 20px 0 10px 0;
+      padding-left: 8px;
+      border-left: 4px solid var(--accent-blue);
+      text-transform: uppercase;
+    }
+
+    .amount-words {
+      margin-top: 12px;
+      font-weight: 600;
+      font-size: 12px;
+      text-align: right;
+      color: var(--text-muted);
+    }
+
+    /* Buttons */
+    .no-print {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background 0.2s;
+    }
+
+    .btn-back { background-color: #e2e8f0; color: var(--text-main); margin-right: 8px; }
+    .btn-back:hover { background-color: #cbd5e1; }
+    .btn-print { background-color: var(--accent-blue); color: #ffffff; }
+    .btn-print:hover { background-color: #1d4ed8; }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { background-color: #ffffff; }
+      .page { box-shadow: none; max-width: 100%; margin: 0; }
+      .stat-card, .status-badge, .bar-fill, .donut, .progress-ring {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="header-row">
+    <div class="logo-container">
+      <img src="{% static 'images/BTP_logo_bricks.webp' %}" alt="Company Logo" />
+    </div>
+    <div class="header-meta">
+      <span style="color:black;font-weight:bold;font-size:18px">Project Ledger Report</span><br/>
+      <strong>Print Date:</strong> {{ print_time|date:"F j, Y, g:i a" }}<br/>
+      {% if selected_filters.from_date %}
+        <strong>Range:</strong> {{ selected_filters.from_date|date:"d M Y" }} &ndash; {{ selected_filters.to_date|date:"d M Y" }}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="sub-head">
+    Bonanai, Dhaka-1216<br>
+      01993005558, 09639246230, 09639246231 <br>
+      bricks@gmail.com, bricks@gmail.com, www.bricks.com
+  </div>
+
+  <div class="content">
+
+  {% if report_data %}
+    {% for block in report_data %}
+
+      <!-- Project Info Card (no photo, just data + progress ring) -->
+      <div class="project-card">
+        <div style="flex: 1;">
+          <div>
+            <span class="pname">{{ block.project.project_first_name }}</span>
+            <span class="status-badge">{{ block.project.project_type }}</span>
+          </div>
+          <div class="project-info-grid">
+            <div><strong>Location:</strong> {{ block.project.location|default:"-" }}</div>
+            <div><strong>Owner:</strong> {{ block.project.project_owner|default:"-" }}</div>
+            <div><strong>Duration:</strong> {{ block.project.project_duration }} months</div>
+            <div><strong>Start Date:</strong> {{ block.project.project_start_date|date:"d M Y"|default:"-" }}</div>
+            <div><strong>Target End:</strong> {{ block.project.project_end_date|date:"d M Y"|default:"-" }}</div>
+            <div><strong>Size:</strong> {{ block.project.project_size_sq_ft|intcomma }} sq.ft</div>
+            <div><strong>Floors:</strong> {{ block.project.number_of_floors }}</div>
+            <div><strong>Units:</strong> {{ block.project.number_of_units }}</div>
+            <div><strong>Units / Floor:</strong> {{ block.project.units_per_floor }}</div>
+          </div>
+        </div>
+        <div class="progress-box">
+          <div class="progress-ring" style="background: {{ block.progress_ring_style }};">
+            <div class="progress-ring-hole">
+              <span class="progress-ring-value">{{ block.overall_pct|floatformat:0 }}%</span>
+            </div>
+          </div>
+          <div class="progress-circle-label">Overall Progress</div>
+        </div>
+      </div>
+
+      <!-- Stat Cards Grid -->
+      <div class="card-grid">
+        <div class="stat-card bg-blue">
+          <span class="card-label">Total Budget (BOQ)</span>
+          <span class="card-value">&#2547; {{ block.boq_total|floatformat:2|intcomma }}</span>
+        </div>
+        <div class="stat-card bg-green">
+          <span class="card-label">Total Purchase (Expense)</span>
+          <span class="card-value">&#2547; {{ block.inventory_total|floatformat:2|intcomma }}</span>
+        </div>
+        <div class="stat-card bg-orange">
+          <span class="card-label">Budget Balance</span>
+          <span class="card-value">&#2547; {{ block.budget_balance|floatformat:2|intcomma }}</span>
+        </div>
+        <div class="stat-card bg-purple">
+          <span class="card-label">Project Progress</span>
+          <span class="card-value">{{ block.overall_pct|floatformat:0 }}%</span>
+        </div>
+        <div class="stat-card bg-teal">
+          <span class="card-label">Current Stock Value</span>
+          <span class="card-value">&#2547; {{ block.stock_value|floatformat:2|intcomma }}</span>
+        </div>
+        <div class="stat-card bg-red">
+          <span class="card-label">Total Payment (Debit)</span>
+          <span class="card-value">&#2547; {{ block.ledger_total_payment|floatformat:2|intcomma }}</span>
+        </div>
+        <div class="stat-card bg-indigo">
+          <span class="card-label">Client Collection</span>
+          <span class="card-value">&#2547; {{ block.client_collection|floatformat:2|intcomma }}</span>
+        </div>
+        <div class="stat-card bg-pink">
+          <span class="card-label">Profit / Loss (Net Ledger)</span>
+          <span class="card-value">&#2547; {{ block.profit_loss|floatformat:2|intcomma }}</span>
+        </div>
+      </div>
+
+      <!-- Row 1: Panels -->
+      <div class="row-3-col">
+        <!-- Budget Summary -->
+        <div class="panel">
+          <h4>Budget Summary (BOQ)</h4>
+          {% if block.boq_list %}
+          <table>
+            <thead>
+              <tr><th>Item</th><th class="center">Unit</th><th class="num">Qty</th><th class="num">Amount</th></tr>
+            </thead>
+            <tbody>
+              {% for boq in block.boq_list %}
+              <tr>
+                <td>{{ boq.item_name }}</td>
+                <td class="center">{{ boq.unit }}</td>
+                <td class="num">{{ boq.qty }}</td>
+                <td class="num">{{ boq.amount|floatformat:2|intcomma }}</td>
+              </tr>
+              {% endfor %}
+              <tr class="total-row">
+                <td colspan="3">Total</td>
+                <td class="num">{{ block.boq_total|floatformat:2|intcomma }}</td>
+              </tr>
+            </tbody>
+          </table>
+          {% else %}
+          <p style="color:var(--text-muted);">No BOQ items found.</p>
+          {% endif %}
+        </div>
+
+        <!-- BOQ Progress: real donut ring + legend + item-count grid (matches dashboard) -->
+        <div class="panel">
+          <h4>BOQ Progress ({{ block.boq_item_count }} Items)</h4>
+          {% if block.boq_status_summary %}
+            <div class="donut-wrap">
+              <div class="donut" style="background: {{ block.boq_donut_style }};">
+                <div class="donut-hole">
+                  <span class="donut-total">{{ block.boq_item_count }}</span>
+                  <span class="donut-total-label">Total Items</span>
+                </div>
+              </div>
+              <div class="donut-legend">
+                {% for s in block.boq_status_summary %}
+                <div class="legend-row">
+                  <span class="legend-name">
+                    <span class="legend-dot" style="background-color: {{ s.color }};"></span>{{ s.status }}
+                  </span>
+                  <span class="legend-pct">{{ s.count_pct|floatformat:0 }}% ({{ s.count }})</span>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="donut-stats-grid">
+              {% for s in block.boq_status_summary %}
+              <div class="donut-stat">
+                <span class="value">{{ s.count }}</span>
+                <span class="label">{{ s.status }}</span>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+          <p style="color:var(--text-muted);">No BOQ status data found.</p>
+          {% endif %}
+        </div>
+
+        <!-- Stock Overview -->
+        <div class="panel">
+          <h4>Stock Overview (Top Items)</h4>
+          {% if block.stock_overview_top %}
+            {% for s in block.stock_overview_top %}
+            <div class="bar-row">
+              <div class="bar-meta">
+                <span>{{ s.item_name }}</span>
+                <span>{{ s.balance }} / {{ s.received }} {{ s.unit }}</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width:{{ s.balance_pct|floatformat:0 }}%; background-color: var(--accent-teal);"></div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+          <p style="color:var(--text-muted);">No stock data found.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Row 2: Panels -->
+      <div class="row-3-col">
+        <!-- Requisition & Status -->
+        <div class="panel">
+          <h4>Purchase & Requisition Status</h4>
+          <table>
+            <tbody>
+              <tr><td>Requisitions</td><td class="num"><strong>{{ block.requisition_count }}</strong></td></tr>
+              <tr><td>Purchase / Inventory Entries</td><td class="num"><strong>{{ block.inventory_count }}</strong></td></tr>
+              <tr><td>Ledger Transactions</td><td class="num"><strong>{{ block.ledger_count }}</strong></td></tr>
+              <tr><td>Payable / Receivable Entries</td><td class="num"><strong>{{ block.loanvoucher_count }}</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Stock Ledger -->
+        <div class="panel">
+          <h4>Stock Ledger (Full)</h4>
+          {% if block.stock_summary %}
+          <table>
+            <thead>
+              <tr><th>Item</th><th class="num">Recv</th><th class="num">Issued</th><th class="num">Bal</th></tr>
+            </thead>
+            <tbody>
+              {% for s in block.stock_summary %}
+              <tr>
+                <td>{{ s.item_name }}</td>
+                <td class="num">{{ s.received }}</td>
+                <td class="num">{{ s.issued }}</td>
+                <td class="num">{{ s.balance }}</td>
+              </tr>
+              {% endfor %}
+              <tr class="total-row">
+                <td colspan="3">Stock Value</td>
+                <td class="num">{{ block.stock_value|floatformat:2|intcomma }}</td>
+              </tr>
+            </tbody>
+          </table>
+          {% else %}
+          <p style="color:var(--text-muted);">No stock data found.</p>
+          {% endif %}
+        </div>
+
+        <!-- Payable / Receivable -->
+        <div class="panel">
+          <h4>Payable / Receivable (By Status)</h4>
+          {% if block.loan_status_summary %}
+          <table>
+            <thead>
+              <tr><th>Status</th><th class="center">Count</th><th class="num">Amount</th></tr>
+            </thead>
+            <tbody>
+              {% for l in block.loan_status_summary %}
+              <tr>
+                <td>{{ l.status }}</td>
+                <td class="center">{{ l.count }}</td>
+                <td class="num">{{ l.amount|floatformat:2|intcomma }}</td>
+              </tr>
+              {% endfor %}
+              <tr class="total-row">
+                <td colspan="2">Total</td>
+                <td class="num">{{ block.loanvoucher_total|floatformat:2|intcomma }}</td>
+              </tr>
+            </tbody>
+          </table>
+          {% else %}
+          <p style="color:var(--text-muted);">No data found.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Expense Heads Bar Overview -->
+      <div class="panel" style="margin-bottom: 20px;">
+        <h4>Finance Overview &mdash; Top Expense Heads</h4>
+        {% if block.head_breakdown %}
+          {% for h in block.head_breakdown %}
+          <div class="bar-row">
+            <div class="bar-meta">
+              <span>{{ h.head }}</span>
+              <strong>&#2547; {{ h.debit|floatformat:2|intcomma }}</strong>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:{{ h.pct|floatformat:0 }}%; background-color: var(--accent-purple);"></div>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+        <p style="color:var(--text-muted);">No ledger transactions found for this period.</p>
+        {% endif %}
+      </div>
+
+      <!-- Detail Tables -->
+      {% if block.ledger_list %}
+      <h3 class="section-title">Approved - Payment / Received (Ledger Detail)</h3>
+      <div class="table-bordered">
+        <table>
+          <thead>
+            <tr>
+              <th class="center">Date</th><th>Head</th><th>Account</th><th>Name</th><th>Description</th><th class="num">Payment</th><th class="num">Received</th><th class="num">Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for entry in block.ledger_list %}
+            <tr>
+              <td class="center">{{ entry.date|date:"d M Y" }}</td>
+              <td>{{ entry.head }}</td>
+              <td>{{ entry.cash_type }}</td>
+              <td>{{ entry.type_name }}</td>
+              <td>{{ entry.description }}</td>
+              <td class="num">{{ entry.debit|floatformat:2|intcomma }}</td>
+              <td class="num">{{ entry.credit|floatformat:2|intcomma }}</td>
+              <td class="num">{{ entry.running_balance|floatformat:2|intcomma }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+              <td colspan="5" style="text-align: right;">Total:</td>
+              <td class="num">{{ block.ledger_total_payment|floatformat:2|intcomma }}</td>
+              <td class="num">{{ block.ledger_total_received|floatformat:2|intcomma }}</td>
+              <td class="num">{{ block.project_ledger|floatformat:2|intcomma }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+      {% if block.requisition_list %}
+      <h3 class="section-title">Approved - Requisition</h3>
+      <div class="table-bordered">
+        <table>
+          <thead>
+            <tr><th class="center">Date</th><th>Remarks</th><th>Item</th><th class="center">Unit</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th></tr>
+          </thead>
+          <tbody>
+            {% for req in block.requisition_list %}
+            <tr>
+              <td class="center">{{ req.requisition_date|date:"d M Y" }}</td>
+              <td>{{ req.remark }}</td>
+              <td>{{ req.item_name }}</td>
+              <td class="center">{{ req.unit }}</td>
+              <td class="num">{{ req.qty }}</td>
+              <td class="num">{{ req.rate|floatformat:2|intcomma }}</td>
+              <td class="num">{{ req.amount|floatformat:2|intcomma }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+              <td colspan="6" style="text-align: right;">Total:</td>
+              <td class="num">{{ block.requisition_total|floatformat:2|intcomma }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+      {% if block.inventory_list %}
+      <h3 class="section-title">Approved - Purchase</h3>
+      <div class="table-bordered">
+        <table>
+          <thead>
+            <tr><th class="center">Date</th><th>Supplier</th><th>Item</th><th class="num">Qty</th><th class="num">Unit Price</th><th class="num">Total</th></tr>
+          </thead>
+          <tbody>
+            {% for inv in block.inventory_list %}
+            <tr>
+              <td class="center">{{ inv.requisition_date|date:"d M Y" }}</td>
+              <td>{{ inv.vendor_name }}</td>
+              <td>{{ inv.item_name }}</td>
+              <td class="num">{{ inv.qty|floatformat:2 }}</td>
+              <td class="num">{{ inv.rate|floatformat:2|intcomma }}</td>
+              <td class="num">{{ inv.amount|floatformat:2|intcomma }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+              <td colspan="5" style="text-align: right;">Total:</td>
+              <td class="num">{{ block.inventory_total|floatformat:2|intcomma }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+      {% if block.loanvoucher_list %}
+      <h3 class="section-title">Approved - Payable / Receivable</h3>
+      <div class="table-bordered">
+        <table>
+          <thead>
+            <tr><th class="center">Date</th><th>Status</th><th>Name</th><th>Bank/Cash</th><th>MR/Bill No</th><th>Description</th><th class="num">Amount</th></tr>
+          </thead>
+          <tbody>
+            {% for loan in block.loanvoucher_list %}
+            <tr>
+              <td class="center">{{ loan.date|date:"d M Y" }}</td>
+              <td>{{ loan.loan_status }}</td>
+              <td>
+                {% if loan.customer_name %}{{ loan.customer_name }}
+                {% elif loan.conductor_name %}{{ loan.conductor_name.supervisor_name }}
+                {% elif loan.expense_name %}{{ loan.expense_name }}
+                {% elif loan.vendor_name %}{{ loan.vendor_name }}
+                {% else %}-{% endif %}
+              </td>
+              <td>
+                {% if loan.bankName %}{{ loan.bankName }}
+                {% elif loan.cash_type %}{{ loan.cash_type }}
+                {% else %}-{% endif %}
+              </td>
+              <td>{{ loan.mr_or_bill_no }}</td>
+              <td>{{ loan.particulars }}</td>
+              <td class="num">{{ loan.amount|floatformat:2|intcomma }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+              <td colspan="6" style="text-align: right;">Total:</td>
+              <td class="num">{{ block.loanvoucher_total|floatformat:2|intcomma }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+    {% endfor %}
+
+    <!-- Overall Summary -->
+    <h2 class="section-title" style="margin-top: 30px;">Overall Summary (All Projects)</h2>
+
+    <div class="card-grid">
+      <div class="stat-card bg-blue">
+        <span class="card-label">Total BOQ (Budget)</span>
+        <span class="card-value">&#2547; {{ grand_boq_total|floatformat:2|intcomma }}</span>
+      </div>
+      <div class="stat-card bg-green">
+        <span class="card-label">Total Purchase</span>
+        <span class="card-value">&#2547; {{ grand_inventory_total|floatformat:2|intcomma }}</span>
+      </div>
+      <div class="stat-card bg-orange">
+        <span class="card-label">Budget Balance</span>
+        <span class="card-value">&#2547; {{ grand_budget_balance|floatformat:2|intcomma }}</span>
+      </div>
+      <div class="stat-card bg-purple">
+        <span class="card-label">Profit / Loss (Net)</span>
+        <span class="card-value">&#2547; {{ grand_profit_loss|floatformat:2|intcomma }}</span>
+      </div>
+      <div class="stat-card bg-red">
+        <span class="card-label">Total Payment</span>
+        <span class="card-value">&#2547; {{ grand_ledger_total_payment|floatformat:2|intcomma }}</span>
+      </div>
+      <div class="stat-card bg-indigo">
+        <span class="card-label">Total Received</span>
+        <span class="card-value">&#2547; {{ grand_ledger_total_received|floatformat:2|intcomma }}</span>
+      </div>
+      <div class="stat-card bg-teal">
+        <span class="card-label">Current Stock Value</span>
+        <span class="card-value">&#2547; {{ grand_stock_value|floatformat:2|intcomma }}</span>
+      </div>
+      <div class="stat-card bg-pink">
+        <span class="card-label">Payable / Receivable</span>
+        <span class="card-value">&#2547; {{ grand_loanvoucher_total|floatformat:2|intcomma }}</span>
+      </div>
+    </div>
+
+    <div class="table-bordered" style="margin-top: 14px;">
+      <table>
+        <thead>
+          <tr><th>Type</th><th class="num">Total Amount (Taka)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>BOQ</td><td class="num">{{ grand_boq_total|floatformat:2|intcomma }}</td></tr>
+          <tr><td>Requisition</td><td class="num">{{ grand_requisition_total|floatformat:2|intcomma }}</td></tr>
+          <tr><td>Purchase / Inventory</td><td class="num">{{ grand_inventory_total|floatformat:2|intcomma }}</td></tr>
+          <tr><td>Payable / Receivable</td><td class="num">{{ grand_loanvoucher_total|floatformat:2|intcomma }}</td></tr>
+          <tr><td>Received (Credit)</td><td class="num">{{ grand_ledger_total_received|floatformat:2|intcomma }}</td></tr>
+          <tr><td>Payment (Debit)</td><td class="num">{{ grand_ledger_total_payment|floatformat:2|intcomma }}</td></tr>
+          <tr class="total-row">
+            <td>Grand Total (BOQ + Requisition + Inventory + Payable/Receivable)</td>
+            <td class="num">{{ grand_total_amount|floatformat:2|intcomma }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="amount-words">Amount in Words: {{ grand_total_in_words }}</p>
+
+  {% else %}
+    <p style="text-align: center; color: var(--text-muted); padding: 40px 0;">No records found for the selected filters.</p>
+  {% endif %}
+
+    <div class="no-print">
+      <a href="{% url 'project_ledger_manage' %}" class="btn btn-back">&#8592; Back</a>
+      <button onclick="window.print()" class="btn btn-print">&#128424; Print Report</button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

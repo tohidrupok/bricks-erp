@@ -1,0 +1,11 @@
+{% extends 'office_inventory/base.html' %}
+{% block header %}Delete Responsible Type{% endblock %}
+{% block content %}
+<div class="card card-stat p-4" style="max-width:500px;">
+  <p>Are you sure you want to delete responsible type <strong>{{ d_type.name }}</strong>?</p>
+  <form method="post">{% csrf_token %}
+    <button class="btn btn-danger">Yes, Delete</button>
+    <a href="{% url 'office_inventory:damage_type_list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

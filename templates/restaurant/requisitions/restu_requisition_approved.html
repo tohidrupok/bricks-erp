@@ -1,0 +1,286 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Restaurant Requisition Approval</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: #ccc;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 960px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .logo img {
+      height: 50px;
+    }
+
+    .label-box {
+      background-color: #e2f0d9;
+      padding: 4px 10px;
+      font-weight: bold;
+      font-size: 14px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    .header-right p {
+      margin: 2px 0;
+      font-size: 11px;
+      color: #666;
+    }
+
+    .sub-head {
+      font-size: 11px;
+      color: #555;
+      line-height: 1.4;
+      margin-top: -10px;
+      margin-bottom: 5px;
+    }
+
+    .info-block {
+      font-size: 12px;
+      margin: 15px 0;
+    }
+
+    .info-block p {
+      margin: 3px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 12px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 6px 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f8f9fa;
+      font-weight: bold;
+    }
+
+    td {
+      background-color: #fff;
+    }
+
+    .left {
+      text-align: left;
+    }
+
+    .amount-in-words {
+      margin-top: 12px;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .signature-section {
+      margin-top: 35px;
+      display: flex;
+      justify-content: space-between;
+      text-align: center;
+    }
+
+    .signature-box {
+      flex: 1;
+      padding: 8px;
+    }
+
+    .signature-box:not(:last-child) {
+      margin-right: 10px;
+    }
+
+    .signature-line {
+      margin-top: 10px;
+      border-top: 1px solid #000;
+      width: 100%;
+      display: block;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 11px;
+      text-align: center;
+      color: #777;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+
+    .print-btn {
+      background-color: #1f3bb3;
+      color: white;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .no-print {
+      margin-top: 15px;
+      text-align: right;
+    }
+
+    @media print {
+      .no-print, .footer {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .card {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <!-- Header -->
+    <div class="header-row">
+      <div class="logo">
+        <img src="{% static 'images/resturant-logo.png' %}" alt="Company Logo">
+      </div>
+      <div class="header-right" style="text-align: right;">
+        <div class="label-box">Approval Requisition Summary</div>
+        <p>Printing Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="sub-head">
+      House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br>
+      01993005558, 09639246230, 09639246231 <br>
+      md2bayid@gmail.com, thebtplimited@gmail.com, www.btplimited.com
+    </div>
+
+    <hr style="margin: 8px 0; border-color: #ddd;" />
+
+   <div class="flex justify-between items-start gap-6 info-block">
+  
+  <!-- Left Side: Project & Supplier(s) -->
+<div class="w-1/2">
+  <p><strong>Project:</strong> {{ project.project_first_name }}</p>
+</div>
+
+<!-- Debug + Approval ID (same line block) -->
+<div style="color:red;font-weight:bold;margin-bottom:10px;">
+    Total Records Found: {{ requisition_items|length }}
+    &nbsp;&nbsp;|&nbsp;&nbsp;
+   <spam style="color:black"> Approval ID: {{ requisition_items.0.requi_uniq_id }}</spam>
+</div>
+<!-- Requisition Items Table -->
+<table border="1" cellpadding="6" cellspacing="0" style="width:100%; border-collapse: collapse; margin-top: 15px;">
+
+    <thead>
+        <tr style="background:#f2f2f2;">
+            <th>SL</th>
+            <th>Item Name</th>
+            <th>Unit</th>
+            <th>Qty</th>
+            <th>Rate</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for item in requisition_items %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ item.item_name }}</td>
+            <td>{{ item.unit }}</td>
+            <td>{{ item.qty }}</td>
+            <td>{{ item.rate }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" style="text-align:center; color:red;">
+                No items found
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+
+</table>
+
+<!-- Amount In Words -->
+<div class="amount-in-words">
+    <strong>
+        In Words:
+    </strong>
+
+    {{ amount_in_words }} Only.
+</div>
+
+    <!-- Signature Section -->
+    <div class="signature-section">
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Prepared by
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Checked by
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Approved by
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Authorized by
+      </div>
+    </div>
+
+    <!-- Footer -->
+  <div class="footer no-print">
+  © 2026 BTP LIMITED. | This is a system-generated document.
+
+  <div style="margin-top: 10px;">
+
+    <!-- Back Button -->
+    <button onclick="window.location.href='{% url 'restau_requisition_list' %}'"
+            class="print-btn">
+      ⬅ Back
+    </button>
+
+    <!-- Print Button -->
+    <button onclick="window.print()" class="print-btn">
+      🖨 Print
+    </button>
+
+  </div>
+</div>
+
+  </div>
+</body>
+</html>

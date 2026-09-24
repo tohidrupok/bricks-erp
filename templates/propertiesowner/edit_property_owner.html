@@ -1,0 +1,177 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Properties Owner Update- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h1 class="text-xl font-bold mb-4">Update Property Owner: {{ property_owner.owner_name }}</h1>
+
+                <form method="POST" enctype="multipart/form-data" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                    {% csrf_token %}
+                    
+                    <!-- Owner Name -->
+                    <div class="mb-6">
+                        <label for="id_owner_name" class="block text-sm font-medium text-gray-700">Owner Name</label>
+                        <input type="text" id="owner_name" name="owner_name" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ property_owner.owner_name }}" placeholder="Enter the property Owner Name">
+                        {% if form.owner_name.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.owner_name.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Contact Information -->
+                    <div class="mb-6">
+                        <label for="id_contact_information" class="block text-sm font-medium text-gray-700">Contact Information</label>
+                        <textarea id="contact_information" name="contact_information" class="w-full text-sm border-slate-200 shadow-sm rounded-md" placeholder="Enter the address of the property">{{ property_owner.contact_information }}</textarea>
+                        {% if form.contact_information.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.contact_information.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Owner Type -->
+                    <div class="mb-6">
+                        <label for="id_owner_type" class="block text-sm font-medium text-gray-700">Owner Type</label>
+                        <input type="text" id="owner_type" name="owner_type" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ property_owner.owner_type }}" placeholder="Enter property Owner Type">
+                        {% if form.owner_type.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.owner_type.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Ownership Type -->
+                    <div class="mb-6">
+                        <label for="id_ownership_type" class="block text-sm font-medium text-gray-700">Ownership Type</label>
+                        <input type="text" id="ownership_type" name="ownership_type" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ property_owner.ownership_type }}" placeholder="Enter property Ownership Type">
+                        {% if form.ownership_type.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.ownership_type.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- NID Card -->
+                    <div class="mb-6">
+                        <label for="id_nid_card_details" class="block text-sm font-medium text-gray-700">NID Card (PDF, PNG, JPG, JPEG)</label>
+                        <input type="file" name="nid_card_details" id="nid_card_details" class="w-full text-sm">
+                        {% if form.nid_card_details.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.nid_card_details.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {% if property_owner.nid_card_details %}
+                            <div class="mt-2">
+                                <a href="{{ property_owner.nid_card_details.url }}" class="text-blue-600" target="_blank">View current NID Card</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Telephone Number -->
+                    <div class="mb-6">
+                        <label for="id_telephone_number" class="block text-sm font-medium text-gray-700">Telephone Number</label>
+                        <input type="text" id="telephone_number" name="telephone_number" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ property_owner.telephone_number }}" placeholder="Enter the telephone number">
+                        {% if form.telephone_number.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.telephone_number.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Current Address -->
+                    <div class="mb-6">
+                        <label for="id_current_address" class="block text-sm font-medium text-gray-700">Current Address</label>
+                        <textarea id="current_address" name="current_address" class="w-full text-sm border-slate-200 shadow-sm rounded-md" placeholder="Enter the current address">{{ property_owner.current_address }}</textarea>
+                        {% if form.current_address.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.current_address.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Utility Bill -->
+                    <div class="mb-6">
+                        <label for="id_utility_bill" class="block text-sm font-medium text-gray-700">Utility Bill </label>
+                        <input type="file" name="utility_bill" id="utility_bill" class="w-full text-sm">
+                        {% if form.utility_bill.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.utility_bill.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {% if property_owner.utility_bill %}
+                            <div class="mt-2">
+                                <a href="{{ property_owner.utility_bill.url }}" class="text-blue-600" target="_blank">View current Utility Bill</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Photo -->
+                    <div class="mb-6">
+                        <label for="id_photo" class="block text-sm font-medium text-gray-700">Photo</label>
+                        <input type="file" name="photo" id="photo" class="w-full text-sm">
+                        {% if form.photo.errors %}
+                            <ul class="text-red-600 mt-1">
+                                {% for error in form.photo.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {% if property_owner.photo %}
+                            <div class="mt-2">
+                                <img src="{{ property_owner.photo.url }}" alt="Owner Photo" class="w-32 h-32 object-cover rounded-full">
+                            </div>
+                        {% endif %}
+                    </div>
+                
+                    <!-- Save Changes Button -->                   
+                    <div class="mt-8 text-center flex justify-center space-x-4">
+                        <!-- Save Changes Button -->
+                        <button type="submit" style="background-color:#1e3c98" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            Save Changes
+                        </button>
+                    
+                        <!-- Back to Property List Button -->
+                        <a href="{% url 'property_owner_list' %}" style="margin-left:0.5%;background-color:#1e3c98" class="px-8 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-300 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-gray-300">
+                            Back to Property Owners List
+                        </a>
+                    </div>                  
+                </form>
+          
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

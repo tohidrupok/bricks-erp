@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Audit History: {{ employee.rda_emp_name }} - BM ERP{% endblock %}
+
+{% block content %}
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            {% include 'partials/header.html' %}                
+            <div class="intro-y bg-white rounded-2xl border border-slate-200 p-6 shadow-sm mt-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4 text-center sm:text-left flex-col sm:flex-row">
+                    <div class="w-16 h-16 rounded-full overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0 shadow-inner">
+                        {% if employee.rda_photo %}
+                        <img src="{{ employee.rda_photo.url }}" class="w-full h-full object-cover">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center font-bold text-slate-400 text-xs uppercase bg-slate-200">
+                            {{ employee.rda_emp_name|slice:":2" }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">{{ employee.rda_emp_name }}</h2>
+                        <p class="text-xs font-medium text-slate-500 mt-0.5">{{ employee.rda_position }}</p>
+                        <div class="flex flex-wrap gap-2 mt-2 justify-center sm:justify-start">
+                            <span class="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                                📌 {{ employee.project_name.project_first_name|default:"General Workspace" }}
+                            </span>
+                            <span class="text-[10px] text-slate-600 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                ID: #{{ employee.id }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-end border-t sm:border-0 pt-4 sm:pt-0">
+                    <div class="hidden md:flex items-center gap-4 text-right px-4 border-r border-slate-200">
+                        <div>
+                            <span class="block text-[10px] uppercase tracking-wider text-slate-400 font-bold">Pending</span>
+                            <span class="text-base font-black text-amber-600">{{ pending_tasks.count }}</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] uppercase tracking-wider text-slate-400 font-bold">Completed</span>
+                            <span class="text-base font-black text-emerald-600">{{ completed_tasks.count }}</span>
+                        </div>
+                    </div>
+                    <a href="javascript:history.back()" class="w-full sm:w-auto text-center bg-white hover:bg-slate-50 border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-xs font-semibold transition shadow-sm">
+                        ⬅️ Back to Overview
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-12 gap-6">
+                
+                <div class="intro-y col-span-12 xl:col-span-6 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <h3 class="text-sm font-bold text-amber-600 uppercase tracking-wide flex items-center gap-1.5">
+                            ⏳ Running Active Tasks
+                        </h3>
+                        <span class="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-bold border border-amber-100">
+                            {{ pending_tasks.count }} Current
+                        </span>
+                    </div>
+
+                    <div class="space-y-4 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
+                        {% for task in pending_tasks %}
+                        <div class="border-2 border-dashed border-slate-200 rounded-xl p-4 bg-slate-50/50 hover:bg-slate-50 transition">
+                            <div class="flex items-start justify-between gap-4 mb-2">
+                                <h4 class="font-bold text-sm text-slate-800 leading-tight">{{ task.title }}</h4>
+                                <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold uppercase tracking-wider flex-shrink-0">
+                                    Pending
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-600 mb-4 whitespace-pre-line leading-relaxed">{{ task.description }}</p>
+                            
+                            <div class="text-[11px] text-slate-500 flex justify-between items-center border-t border-slate-200/60 pt-3 mt-2">
+                                <span class="flex items-center gap-1">
+                                    📅 Deadline: <strong class="text-rose-600 font-bold">{{ task.deadline|date:"d M Y" }}</strong>
+                                </span>
+                                {% if task.attachment %}
+                                <a href="{{ task.attachment.url }}" target="_blank" class="text-blue-600 font-semibold hover:underline flex items-center gap-1">
+                                    📁 Reference File
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-12 border border-dashed rounded-xl bg-slate-50/50">
+                            <span class="text-2xl block mb-2">☕</span>
+                            <p class="text-xs text-slate-400">No active operational actions currently assigned.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="intro-y col-span-12 xl:col-span-6 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <h3 class="text-sm font-bold text-emerald-600 uppercase tracking-wide flex items-center gap-1.5">
+                            ✅ Completed Records History
+                        </h3>
+                        <span class="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-bold border border-emerald-100">
+                            {{ completed_tasks.count }} Archival
+                        </span>
+                    </div>
+
+                    <div class="space-y-4 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
+                        {% for task in completed_tasks %}
+                        <div class="border border-slate-200 rounded-xl p-4 bg-white shadow-sm hover:border-slate-300 transition">
+                            <div class="flex items-start justify-between gap-4 mb-2">
+                                <h4 class="font-bold text-sm text-slate-800 leading-tight">{{ task.title }}</h4>
+                                <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold uppercase tracking-wider flex-shrink-0">
+                                    Closed
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-500 mb-3 whitespace-pre-line leading-relaxed">{{ task.description }}</p>
+
+                            <div class="bg-emerald-50/40 border border-emerald-100/70 rounded-xl p-3 my-3">
+                                <span class="block text-[10px] font-bold text-emerald-800 uppercase tracking-wider mb-1">
+                                    Employee Execution Briefing:
+                                </span>
+                                <p class="text-xs text-slate-700 italic leading-relaxed">
+                                    "{{ task.completion_note|default:"No completion notes provided." }}"
+                                </p>
+                            </div>
+
+                            <div class="text-[11px] text-slate-400 flex justify-between items-center mt-3 pt-3 border-t border-slate-100">
+                                <span class="flex items-center gap-1 text-slate-500">
+                                    🏁 Finished: <strong class="text-slate-700 font-semibold">{{ task.completed_at|date:"d M Y h:i A" }}</strong>
+                                </span>
+                                {% if task.emp_attachment %}
+                                <a href="{{ task.emp_attachment.url }}" target="_blank" class="text-blue-600 font-semibold hover:underline flex items-center gap-1">
+                                    📁 Download File
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-12 border border-dashed rounded-xl bg-slate-50/50">
+                            <span class="text-2xl block mb-2">📦</span>
+                            <p class="text-xs text-slate-400">No historic workflow records found for this employee.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        </div>
+</div>
+{% endblock %}

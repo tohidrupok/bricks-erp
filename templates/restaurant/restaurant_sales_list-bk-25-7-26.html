@@ -1,0 +1,528 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Galleria Restaurant & Cafe - POS Sales</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    input, select, button, textarea {
+      font-size: 0.8rem;
+    }
+    .win-button {
+      background: linear-gradient(to bottom, #f6f6f6 0%, #e0e0e0 100%);
+      border: 1px solid #777;
+      border-radius: 2px;
+      padding: 4px 8px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .win-button:hover {
+      background: linear-gradient(to bottom, #e0e0e0 0%, #cccccc 100%);
+    }
+
+    /* Print Styles */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printableInvoiceArea, #printableInvoiceArea * {
+        visibility: visible;
+      }
+      #printableInvoiceArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="bg-[#dcdcdc] p-1 sm:p-2 font-sans text-xs">
+
+<form id="salesForm" method="POST" class="w-full max-w-[1150px] mx-auto bg-[#e8e8e8] border-2 border-[#c09d38] p-1.5 shadow-2xl">
+  {% csrf_token %}
+
+  <!-- Top Banner Header -->
+  <div class="bg-[#c09d38] text-white font-bold px-2 py-1 text-xs sm:text-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 mb-1">
+    <span>The Galleria Restaurant & Cafe</span>
+    {% if sale_instance %}
+      <span class="bg-red-600 text-white px-2 py-0.5 rounded text-xs">EDIT MODE: {{ sale_instance.invoice_no }}</span>
+    {% endif %}
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-12 gap-1.5">
+
+    <!-- LEFT SIDEBAR: Accounts & Balances -->
+    <div class="col-span-1 md:col-span-3 flex flex-col justify-between gap-2">
+      <div class="hidden md:flex flex-col items-center justify-center p-2 border border-gray-300 bg-white min-h-[140px]">
+        <img src="https://cdn-icons-png.flaticon.com/512/3081/3081840.png" alt="Sale Tag" class="w-20 h-20 object-contain">
+      </div>
+
+      <div class="space-y-1 bg-[#d4af37] p-1.5 rounded-sm border border-[#a68a2a] text-white font-bold">
+        <div class="flex justify-between items-center bg-[#c09d38] p-1 border border-yellow-600">
+          <span>Account Balance</span>
+          <input type="text" readonly value="3420.80" class="w-24 text-right bg-white text-black px-1 font-bold border">
+        </div>
+        <div class="flex justify-between items-center bg-[#c09d38] p-1 border border-yellow-600">
+          <span>Total Invoice</span>
+          <input type="text" readonly value="{{ invoice_list.count|default:'0' }}" class="w-24 text-right bg-white text-black px-1 border">
+        </div>
+        <div class="flex justify-between items-center bg-[#c09d38] p-1 border border-yellow-600">
+          <span>Total Sale</span>
+          <input type="text" readonly value="0.00" class="w-24 text-right bg-white text-black px-1 border">
+        </div>
+        <div class="flex justify-between items-center bg-[#c09d38] p-1 border border-yellow-600">
+          <span>Total Commission</span>
+          <input type="text" readonly value="0.00" class="w-24 text-right bg-white text-black px-1 border">
+        </div>
+        <div class="flex justify-between items-center bg-[#c09d38] p-1 border border-yellow-600">
+          <span>Total Paid</span>
+          <input type="text" readonly value="0.00" class="w-24 text-right bg-white text-black px-1 border">
+        </div>
+        <div class="flex justify-between items-center bg-[#c09d38] p-1 border border-yellow-600">
+          <span>Total Balance</span>
+          <input type="text" readonly value="0.00" class="w-24 text-right bg-white text-black px-1 border">
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT MAIN CONTENT AREA -->
+    <div class="col-span-1 md:col-span-9 flex flex-col space-y-1.5">
+
+      <!-- Header Inputs (Customer & Date) -->
+      <div class="bg-[#ededed] p-1.5 border border-gray-300 space-y-1">
+        <div class="flex flex-wrap items-center gap-1.5">
+          <label class="w-16 font-medium">Date</label>
+          <input type="date" id="sale_date" name="sale_date" 
+                 value="{% if sale_instance %}{{ sale_instance.sale_date|date:'Y-m-d' }}{% endif %}" 
+                 class="border px-1 py-0.5 w-full sm:w-36 bg-white" required>
+        </div>
+        <div class="flex flex-wrap items-center gap-1.5">
+          <label class="w-16 font-medium">Customer</label>
+          <select name="customer" required class="flex-1 min-w-[180px] border px-1 py-0.5 bg-white">
+            <option value="">Select Customer</option>
+            {% for customer in restCustomers %}
+              <option value="{{ customer.id }}" {% if sale_instance and sale_instance.customer.id == customer.id %}selected{% endif %}>
+                {{ customer.rest_customer_code }} - {{ customer.rest_customer_name }}
+              </option>
+            {% endfor %}
+          </select>
+          <a href="{% url 'add_restaurant_customer' %}" class="win-button no-underline text-black whitespace-nowrap">Create Customer</a>
+        </div>
+        <div class="flex flex-wrap items-center gap-1.5">
+          <label class="w-16 font-medium">Address</label>
+          <input type="text" readonly value="- , -" class="flex-1 border px-1 py-0.5 bg-gray-100 text-gray-500">
+        </div>
+      </div>
+
+      <!-- Item Controls & POS Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-1.5 bg-[#ededed] p-1.5 border border-gray-300">
+        
+        <!-- Left Side Controls -->
+        <div class="col-span-1 md:col-span-4 space-y-1 border-b md:border-b-0 md:border-r pb-2 md:pb-0 md:pr-1.5">
+          <div class="flex gap-1">
+            <input type="text" id="codeSearchInput" placeholder="Code" class="w-full border px-1 py-0.5 bg-white uppercase">
+            <button type="button" id="openItemListBtn" class="win-button text-xs font-semibold whitespace-nowrap">Item list</button>
+            <button type="button" id="clearInputsBtn" class="win-button text-xs">Clear</button>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-semibold text-gray-600">Select Item</label>
+            <select id="itemSelect" class="w-full border px-1 py-0.5 bg-white">
+              <option value="">-- Select Item --</option>
+              {% for item in restSalItems %}
+                <option value="{{ item.id }}" 
+                        data-code="{{ item.item.rest_item_code }}" 
+                        data-name="{{ item.item_name }}" 
+                        data-price="{{ item.selling_price }}" 
+                        data-stock="{{ item.opening_stock }}">
+                  {{ item.item.rest_item_code }} - {{ item.item_name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-1 gap-1">
+            <div class="flex justify-between items-center">
+              <label>Stock</label>
+              <input type="text" id="disp_stock" readonly class="w-24 bg-[#c09d38] text-white font-bold px-1 py-0.5 text-right border">
+            </div>
+            <div class="flex justify-between items-center">
+              <label>Quantity</label>
+              <input type="number" id="disp_qty" value="1" min="1" class="w-24 border px-1 py-0.5 text-right bg-white">
+            </div>
+            <div class="flex justify-between items-center">
+              <label>Rate</label>
+              <input type="text" id="disp_rate" readonly class="w-24 border px-1 py-0.5 text-right bg-gray-100">
+            </div>
+            <div class="flex justify-between items-center">
+              <label>Account</label>
+              <select class="w-24 border px-0.5 py-0.5 bg-white">
+                <option>CASH, 001-0001</option>
+              </select>
+            </div>
+          </div>
+          <button type="button" id="addItemBtn" class="win-button w-full py-1 mt-1 font-bold text-blue-800">Add ></button>
+        </div>
+
+        <!-- POS Items Table -->
+        <div class="col-span-1 md:col-span-8 flex flex-col justify-between">
+          <div class="overflow-x-auto max-h-[200px] border bg-white">
+            <table id="itemsTable" class="w-full min-w-[400px] text-left text-xs border-collapse">
+              <thead class="bg-[#dcdcdc] border-b text-gray-700 sticky top-0">
+                <tr>
+                  <th class="border px-1 py-0.5">Item Name</th>
+                  <th class="border px-1 py-0.5 text-center w-12">Qty</th>
+                  <th class="border px-1 py-0.5 text-right w-16">Rate</th>
+                  <th class="border px-1 py-0.5 text-right w-20">Amount</th>
+                  <th class="border px-1 py-0.5 text-center w-6">❌</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if sale_instance %}
+                  {% for s_item in sale_instance.items.all %}
+                  <tr>
+                    <td class="border px-1 py-0.5">
+                      {{ s_item.item.item_name }}
+                      <input type="hidden" name="item_{{ s_item.item.id }}" value="{{ s_item.item.id }}">
+                    </td>
+                    <td class="border px-1 py-0.5 text-center">
+                      <input type="number" name="qty_{{ s_item.item.id }}" value="{{ s_item.quantity }}" min="1" class="w-12 text-center border row-qty">
+                    </td>
+                    <td class="border px-1 py-0.5 text-right font-mono">{{ s_item.price }}</td>
+                    <td class="border px-1 py-0.5 text-right font-mono row-amount">{{ s_item.amount }}</td>
+                    <td class="border px-1 py-0.5 text-center">
+                      <button type="button" class="removeRow text-red-600 font-bold">✕</button>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+          <div class="flex justify-end items-center space-x-2 pt-1">
+            <span class="font-bold">Total</span>
+            <input type="text" id="subtotal" readonly value="0.00" class="w-24 border px-1 py-0.5 text-right bg-gray-100 font-bold">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Invoice Footer & Billing Calculations -->
+      <div class="bg-[#ededed] p-1.5 border border-gray-300 space-y-1.5">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 items-center">
+          <div class="flex items-center space-x-1">
+            <label class="font-medium">Discount</label>
+            <input type="number" id="discount" name="discount" value="{{ sale_instance.discount|default:'0' }}" class="w-full border px-1 py-0.5 text-right bg-white">
+          </div>
+          <div class="flex items-center space-x-1">
+            <label class="font-bold text-gray-700 whitespace-nowrap">Total Bill</label>
+            <input type="text" id="grandTotal" name="total_amount" readonly value="{{ sale_instance.final_amount|default:'0.00' }}" class="w-full bg-[#c09d38] text-white font-bold text-right px-1 py-1 text-sm border">
+          </div>
+          <div class="flex items-center space-x-1">
+            <label class="font-medium whitespace-nowrap">Paid Amt</label>
+            <input type="number" class="w-full border px-1 py-0.5 text-right bg-white">
+          </div>
+          <div class="flex items-center space-x-1">
+            <label class="font-medium whitespace-nowrap">Return Amt</label>
+            <input type="text" readonly value="0.00" class="w-full border px-1 py-0.5 text-right bg-gray-100">
+          </div>
+        </div>
+
+        <!-- Note Text Field -->
+        <div>
+          <input type="text" name="note" placeholder="Add Note here..." value="{{ sale_instance.note|default:'' }}" class="w-full border px-1.5 py-0.5 bg-white">
+        </div>
+
+        <!-- Invoice Print Actions -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5 pt-1 border-t">
+          <div class="flex items-center space-x-1 w-full sm:w-auto">
+            <label class="font-semibold whitespace-nowrap">Invoice No</label>
+            <input type="text" id="invoiceId" name="invoice_no" value="{{ next_invoice }}" class="w-full sm:w-36 border px-1 py-0.5 font-bold bg-white" readonly>
+          </div>
+          
+          <div class="grid grid-cols-2 sm:flex gap-1 w-full sm:w-auto">
+            {% if sale_instance %}
+              <a href="{% url 'restaurant_sales_view' sale_instance.id %}?auto_print=true" target="_blank" class="win-button text-black text-center no-underline">3" Invoice</a>
+              <a href="{% url 'restaurant_sales_challan' sale_instance.id %}?auto_print=true" target="_blank" class="win-button text-black text-center no-underline">Challan</a>
+            {% else %}
+              <button type="button" onclick="alert('Please save the sale first before printing.')" class="win-button">3" Invoice</button>
+              <button type="button" onclick="alert('Please save the sale first before printing.')" class="win-button">Challan</button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom Action Strip -->
+  <div class="bg-[#c09d38] p-1.5 mt-1.5 flex flex-col sm:flex-row justify-between items-center gap-1.5 text-white">
+    <div class="flex items-center space-x-2 font-medium text-xs">
+      <span>Select Date & Press Enter</span>
+      <label class="flex items-center space-x-1 ml-2 text-black cursor-pointer">
+        <input type="checkbox" name="auto_print" id="autoPrintCheckbox" checked>
+        <span class="text-white">Auto Print</span>
+      </label>
+    </div>
+    <div class="flex space-x-1 w-full sm:w-auto justify-end">
+      <button type="submit" class="win-button text-black font-bold px-4 flex-1 sm:flex-none">Save</button>
+      <a href="{% url 'restaurant_sales_list' %}" class="win-button text-black px-3 text-center no-underline flex-1 sm:flex-none">Refresh</a>
+      <a href="{% url 'home' %}" class="win-button text-black px-3 text-center font-bold no-underline flex-1 sm:flex-none">Exit</a>
+    </div>
+  </div>
+
+  <!-- Collapsible Toggle Button for Latest Invoices Check -->
+  <div class="mt-2">
+    <button type="button" 
+            onclick="toggleLatestInvoices()" 
+            class="win-button text-black font-semibold text-xs py-1 px-3 inline-flex items-center gap-2">
+      <span>📋 Show / Hide Latest Invoices Check</span>
+      <span id="invoiceToggleIcon">▼</span>
+    </button>
+  </div>
+
+  <!-- Recent Invoices List Table (Hidden by default) -->
+  <div id="latestInvoicesSection" class="hidden mt-1.5 bg-white border border-gray-400 p-1.5 shadow-sm">
+    <h3 class="font-bold text-gray-800 mb-1 border-b pb-0.5 text-xs">Latest Invoices Check</h3>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[550px] text-left text-xs border-collapse">
+        <thead class="bg-gray-200 border-b">
+          <tr>
+            <th class="border px-1.5 py-1 text-center w-8">#</th>
+            <th class="border px-1.5 py-1">Invoice No</th>
+            <th class="border px-1.5 py-1">Customer</th>
+            <th class="border px-1.5 py-1 text-right">Final Amount</th>
+            <th class="border px-1.5 py-1 text-center">Date</th>
+            <th class="border px-1.5 py-1 text-center w-32">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inv in invoice_list %}
+          <tr class="hover:bg-yellow-50">
+            <td class="border px-1.5 py-1 text-center">{{ forloop.counter }}</td>
+            <td class="border px-1.5 py-1 font-bold text-blue-900">{{ inv.invoice_no }}</td>
+            <td class="border px-1.5 py-1">{{ inv.customer.rest_customer_name|default:"Walk-in Customer" }}</td>
+            <td class="border px-1.5 py-1 text-right font-mono">{{ inv.final_amount }}</td>
+            <td class="border px-1.5 py-1 text-center">{{ inv.sale_date|date:"m/d/Y" }}</td>
+            <td class="border px-1.5 py-1 text-center">
+              <div class="inline-flex gap-1">
+                <!-- Rich Receipt View -->
+                <a href="{% url 'restaurant_sales_view' inv.id %}" 
+                   class="bg-blue-600 text-white px-2 py-0.5 rounded text-[10px] font-semibold no-underline hover:bg-blue-700">
+                  Invoice
+                </a>
+                <!-- Correct Challan View -->
+                <!--<a href="{% url 'restaurant_sales_challan' inv.id %}?auto_print=true" -->
+                <!--   target="_blank" -->
+                <!--   class="bg-green-600 text-white px-2 py-0.5 rounded text-[10px] font-semibold no-underline hover:bg-green-700">-->
+                <!--  Challan-->
+                <!--</a>-->
+                <a href="{% url 'restaurant_sales_challan' inv.id %}" 
+                   class="bg-green-600 text-white px-2 py-0.5 rounded text-[10px] font-semibold no-underline hover:bg-green-700">
+                  Challan
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="border px-1 py-1 text-center text-gray-500">No invoices saved yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</form>
+
+<!-- Modal: Item Search Popup -->
+<div id="itemListModal" class="hidden fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-2">
+  <div class="bg-white w-full max-w-[520px] border-2 border-gray-700 p-2 shadow-2xl rounded">
+    <div class="flex justify-between items-center bg-[#c09d38] text-white p-1 font-bold mb-2">
+      <span>Item List Browser</span>
+      <button type="button" id="closeModalBtn" class="text-white font-bold px-1">✕</button>
+    </div>
+    <div class="max-h-[250px] overflow-y-auto overflow-x-auto border">
+      <table class="w-full text-xs text-left border-collapse min-w-[350px]">
+        <thead class="bg-gray-200 border-b sticky top-0">
+          <tr>
+            <th class="border px-1 py-1">Code</th>
+            <th class="border px-1 py-1">Item Name</th>
+            <th class="border px-1 py-1 text-right">Price</th>
+            <th class="border px-1 py-1 text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in restSalItems %}
+          <tr class="hover:bg-yellow-100">
+            <td class="border px-1 py-1 font-bold">{{ item.item.rest_item_code }}</td>
+            <td class="border px-1 py-1">{{ item.item_name }}</td>
+            <td class="border px-1 py-1 text-right">{{ item.selling_price }}</td>
+            <td class="border px-1 py-1 text-center">
+              <button type="button" onclick="selectModalItem('{{ item.id }}')" class="win-button text-xs">Select</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const dateInput = document.getElementById("sale_date");
+    if (!dateInput.value) {
+      dateInput.value = new Date().toISOString().split("T")[0];
+    }
+    calculateTotals();
+  });
+
+  // Collapsible Toggle Function
+  function toggleLatestInvoices() {
+    const section = document.getElementById("latestInvoicesSection");
+    const icon = document.getElementById("invoiceToggleIcon");
+    if (section.classList.contains("hidden")) {
+      section.classList.remove("hidden");
+      icon.textContent = "▲";
+    } else {
+      section.classList.add("hidden");
+      icon.textContent = "▼";
+    }
+  }
+
+  // Search by Item Code
+  document.getElementById("codeSearchInput").addEventListener("input", function() {
+    const code = this.value.trim().toUpperCase();
+    const select = document.getElementById("itemSelect");
+    let matchFound = false;
+
+    for (let option of select.options) {
+      if (option.dataset.code && option.dataset.code.toUpperCase() === code) {
+        select.value = option.value;
+        select.dispatchEvent(new Event('change'));
+        matchFound = true;
+        break;
+      }
+    }
+    if (!matchFound && code === '') {
+      select.value = '';
+      select.dispatchEvent(new Event('change'));
+    }
+  });
+
+  // Fill Stock/Price inputs upon selection
+  document.getElementById("itemSelect").addEventListener("change", function() {
+    const selected = this.options[this.selectedIndex];
+    if (selected.value) {
+      document.getElementById("disp_stock").value = selected.dataset.stock || "0";
+      document.getElementById("disp_rate").value = parseFloat(selected.dataset.price || 0).toFixed(2);
+      if (selected.dataset.code) {
+        document.getElementById("codeSearchInput").value = selected.dataset.code;
+      }
+    } else {
+      document.getElementById("disp_stock").value = "";
+      document.getElementById("disp_rate").value = "";
+      document.getElementById("codeSearchInput").value = "";
+    }
+  });
+
+  // Clear Controls
+  document.getElementById("clearInputsBtn").addEventListener("click", function() {
+    document.getElementById("itemSelect").value = "";
+    document.getElementById("codeSearchInput").value = "";
+    document.getElementById("disp_stock").value = "";
+    document.getElementById("disp_rate").value = "";
+    document.getElementById("disp_qty").value = "1";
+  });
+
+  // Add Item to Table
+  document.getElementById("addItemBtn").addEventListener("click", function() {
+    const select = document.getElementById("itemSelect");
+    const itemId = select.value;
+    if (!itemId) return;
+
+    const itemName = select.options[select.selectedIndex].dataset.name || select.options[select.selectedIndex].text;
+    const rate = parseFloat(document.getElementById("disp_rate").value) || 0;
+    const qty = parseInt(document.getElementById("disp_qty").value) || 1;
+    const amount = rate * qty;
+
+    const tbody = document.querySelector("#itemsTable tbody");
+    const existingRow = tbody.querySelector(`input[name="item_${itemId}"]`);
+
+    if (existingRow) {
+      const row = existingRow.closest("tr");
+      const qtyInput = row.querySelector(".row-qty");
+      qtyInput.value = parseInt(qtyInput.value) + qty;
+    } else {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td class="border px-1 py-0.5">
+          ${itemName}
+          <input type="hidden" name="item_${itemId}" value="${itemId}">
+        </td>
+        <td class="border px-1 py-0.5 text-center">
+          <input type="number" name="qty_${itemId}" value="${qty}" min="1" class="w-12 text-center border row-qty">
+        </td>
+        <td class="border px-1 py-0.5 text-right font-mono">${rate.toFixed(2)}</td>
+        <td class="border px-1 py-0.5 text-right font-mono row-amount">${amount.toFixed(2)}</td>
+        <td class="border px-1 py-0.5 text-center">
+          <button type="button" class="removeRow text-red-600 font-bold">✕</button>
+        </td>
+      `;
+      tbody.appendChild(row);
+    }
+
+    calculateTotals();
+  });
+
+  // Remove Item
+  document.addEventListener("click", function(e) {
+    if (e.target.classList.contains("removeRow")) {
+      e.target.closest("tr").remove();
+      calculateTotals();
+    }
+  });
+
+  // Calculate Table Totals
+  function calculateTotals() {
+    let subtotal = 0;
+    document.querySelectorAll("#itemsTable tbody tr").forEach(row => {
+      const qty = parseFloat(row.querySelector('.row-qty').value) || 0;
+      const rate = parseFloat(row.cells[2].innerText) || 0;
+      const amount = qty * rate;
+      row.querySelector('.row-amount').innerText = amount.toFixed(2);
+      subtotal += amount;
+    });
+
+    document.getElementById("subtotal").value = subtotal.toFixed(2);
+    const discount = parseFloat(document.getElementById("discount").value) || 0;
+    const grandTotal = Math.max(0, subtotal - discount);
+    document.getElementById("grandTotal").value = grandTotal.toFixed(2);
+  }
+
+  document.addEventListener("input", function(e) {
+    if (e.target.classList.contains("row-qty") || e.target.id === "discount") {
+      calculateTotals();
+    }
+  });
+
+  // Modal Functionality
+  const modal = document.getElementById("itemListModal");
+  document.getElementById("openItemListBtn").addEventListener("click", () => modal.classList.remove("hidden"));
+  document.getElementById("closeModalBtn").addEventListener("click", () => modal.classList.add("hidden"));
+
+  function selectModalItem(id) {
+    const select = document.getElementById("itemSelect");
+    select.value = id;
+    select.dispatchEvent(new Event('change'));
+    modal.classList.add("hidden");
+  }
+</script>
+
+</body>
+</html>

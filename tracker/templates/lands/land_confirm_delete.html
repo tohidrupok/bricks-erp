@@ -1,0 +1,20 @@
+{% extends "lands/base.html" %}
+{% block content %}
+<div class="container-sm">
+  <div class="card" style="text-align:center;padding:36px">
+    <div style="width:48px;height:48px;background:var(--danger-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+      <svg width="22" height="22" fill="none" stroke="var(--danger)" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h2 style="font-size:18px;margin-bottom:8px">Delete Land Record?</h2>
+    <p style="color:var(--text-2);margin-bottom:6px">This will permanently delete <strong>{{ record.file_no }}</strong> and all {{ record.owners.count }} owner record{% if record.owners.count != 1 %}s{% endif %}.</p>
+    <p style="font-size:13px;color:var(--text-3);margin-bottom:24px">এই রেকর্ড এবং সকল উত্তরাধিকারীর তথ্য মুছে যাবে।</p>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <form method="post" style="display:inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete / হ্যাঁ, মুছুন</button>
+      </form>
+      <a href="{% url 'tracker:detail' record.pk %}" class="btn btn-secondary">Cancel / বাতিল</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

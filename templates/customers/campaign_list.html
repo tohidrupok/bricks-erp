@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Campaign List - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <div class="container mx-auto mt-10 ml-10"> 
+                <!-- END: Top Bar -->
+
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Campaign Management</h2>
+                    <a href="{% url 'campaign_add' %}" style="background-color:#1e3c98" class="text-white px-4 py-2 rounded-md shadow-md">
+                        + Add New Campaign
+                    </a>
+                </div>
+
+                <div class="bg-white shadow-lg rounded-lg p-5">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-200 text-slate-700 uppercase text-sm">
+                                    <th class="p-3">Thumbnail</th>
+                                    <th class="p-3">Campaign ID</th>
+                                    <th class="p-3">Name</th>
+                                    <th class="p-3">Project</th>
+                                    <th class="p-3">Start Date</th>
+                                    <th class="p-3">End Date</th>
+                                    <th class="p-3 text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for camp in campaigns %}
+                                <tr class="border-b hover:bg-slate-50 text-sm">
+                                    <td class="p-3">
+                                        {% if camp.thumbnail %}
+                                            <img src="{{ camp.thumbnail.url }}" alt="Thumb" class="h-10 w-10 object-cover rounded">
+                                        {% else %}
+                                            <span class="text-gray-400">No Image</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="p-3 font-semibold">{{ camp.campaign_id }}</td>
+                                    <td class="p-3">{{ camp.name }}</td>
+                                    <td class="p-3">{{ camp.project_name.project_first_name|default:"N/A" }}</td>
+                                    <td class="p-3">{{ camp.start_date|default:"-" }}</td>
+                                    <td class="p-3">{{ camp.end_date|default:"-" }}</td>
+                                  <td class="p-3 text-center space-x-1 whitespace-nowrap">
+                                        <!-- View Button -->
+                                        <a href="{% url 'campaign_detail' camp.id %}"  style="background-color:green;color:white"
+                                           class="inline-flex items-center px-3 py-1.5 bg-cyan-50 hover:bg-cyan-100 text-cyan-600 font-medium text-xs rounded-md transition duration-200 shadow-sm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            View
+                                        </a>
+                                    
+                                        <!-- Edit Button -->
+                                        <a href="{% url 'campaign_edit' camp.id %}" style="background-color:blue;color:white"
+                                           class="inline-flex items-center px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-600 font-medium text-xs rounded-md transition duration-200 shadow-sm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                            Edit
+                                        </a>
+                                    
+                                        <!-- Delete Button -->
+                                        <a href="{% url 'campaign_delete' camp.id %}" style="background-color:red;color:white"
+                                           onclick="return confirm('Are you sure you want to delete this campaign?');" 
+                                           class="inline-flex items-center px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium text-xs rounded-md transition duration-200 shadow-sm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            Delete
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center p-4 text-gray-500">No campaigns found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                </div>   
+            </div>
+        </div>
+    </div>
+{% endblock %}

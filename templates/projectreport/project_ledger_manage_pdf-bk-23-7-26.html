@@ -1,0 +1,595 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Project Ledger Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: #ccc;
+      padding: 20px;
+      color: #000;
+    }
+    .invoice-box {
+      background: #fff;
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+    .header-row {
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .logo img {
+      height: 50px;
+      float: left;
+    }
+    .header-info {
+      float: right;
+      text-align: right;
+      margin-top: 10px;
+      font-size: 11px;
+    }
+    .sub-head {
+      clear: both;
+      font-size: 11px;
+      margin-bottom: 10px;
+      color: #444;
+    }
+    hr {
+      margin: 8px 0;
+      border-color: #ccc;
+    }
+    p {
+      margin: 4px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 11px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    th {
+      background-color: #f1f5f9;
+      font-weight: bold;
+    }
+    td.description {
+      text-align: left;
+    }
+
+    /* ---- Project header block (mirrors dashboard project card) ---- */
+    .project-title-row {
+      background-color: #0f3d5e;
+      color: #ffffff;
+      font-weight: bold;
+      font-size: 14px;
+      padding: 8px 10px;
+      margin-top: 24px;
+      border-radius: 4px 4px 0 0;
+    }
+    .project-title-row .status-badge {
+      float: right;
+      background-color: #16a34a;
+      color: #fff;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .project-detail-table td {
+      text-align: left;
+      border: 1px solid #dde3ea;
+      background: #f8fafc;
+      font-size: 10.5px;
+      padding: 5px 8px;
+    }
+    .project-detail-table td b {
+      color: #0f3d5e;
+    }
+
+    /* ---- Summary cards (table-based, since PDF renderer has no flex/grid) ---- */
+    .card-row {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 6px;
+      margin-top: 10px;
+    }
+    .card-row td {
+      border: none;
+      border-radius: 6px;
+      color: #ffffff;
+      text-align: left;
+      padding: 8px 10px;
+      width: 25%;
+      vertical-align: top;
+    }
+    .card-label {
+      font-size: 9.5px;
+      opacity: 0.9;
+      display: block;
+    }
+    .card-value {
+      font-size: 14px;
+      font-weight: bold;
+      display: block;
+      margin-top: 2px;
+    }
+    .card-blue    { background-color: #2563eb; }
+    .card-green   { background-color: #16a34a; }
+    .card-orange  { background-color: #d97706; }
+    .card-purple  { background-color: #7c3aed; }
+    .card-teal    { background-color: #0891b2; }
+    .card-red     { background-color: #dc2626; }
+    .card-indigo  { background-color: #4f46e5; }
+    .card-pink    { background-color: #db2777; }
+
+    /* ---- Section headers ---- */
+    .section-title {
+      color: #0f3d5e;
+      font-weight: bold;
+      font-size: 13px;
+      margin-top: 18px;
+      border-left: 4px solid #2563eb;
+      padding-left: 8px;
+    }
+
+    .group-summary {
+      font-weight: bold;
+      text-align: right;
+      margin-top: 4px;
+      font-size: 12px;
+    }
+    .amount-words {
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 12px;
+      text-align: right;
+      font-style: italic;
+    }
+    .no-print {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .no-print a,
+    .no-print button {
+      display: inline-block;
+      margin: 0 8px;
+      padding: 8px 16px;
+      color: white;
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: bold;
+      border: none;
+    }
+    .btn-back {
+      background-color: #3490dc;
+    }
+    .btn-print {
+      background-color: #38c172;
+    }
+    .print-time {
+      font-style: italic;
+      margin-top: 8px;
+      text-align: right;
+      font-size: 11px;
+      color: #555;
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      .invoice-box {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        max-width: 100%;
+      }
+      body {
+        background-color: white;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="invoice-box">
+  <div class="header-row">
+    <div class="logo">
+      <img src="{% static 'images/BTP_logo_webp.webp' %}" alt="Company Logo" />
+    </div>
+    <div class="header-info">
+      <div style="background-color:#e2f0d9;font-size:18px">&nbsp; Project Ledger Report &nbsp;</div>
+      <div>Print Date: {{ print_time|date:"F j, Y, g:i a" }}</div>
+    </div>
+  </div>
+
+  <div class="sub-head">
+    House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br />
+    01993005558, 09639246230, 09639246231 <br>
+    md2bayid@gmail.com, thebtplimited@gmail.com, www.btplimited.com
+  </div>
+
+  <hr />
+
+  <p style="color:blue;font-size:14px">
+    Date Range:
+    {% if selected_filters.from_date %} {{ selected_filters.from_date|date:"d M Y" }} {% endif %}
+    {% if selected_filters.to_date %} to {{ selected_filters.to_date|date:"d M Y" }} {% endif %}
+  </p>
+
+  {% if report_data %}
+
+    <!-- ===================== GRAND SUMMARY (overall dashboard-style cards) ===================== -->
+    <h2 class="section-title">Overall Summary</h2>
+    <table class="card-row">
+      <tr>
+        <td class="card-blue">
+          <span class="card-label">Total BOQ (Budget)</span>
+          <span class="card-value">&#2547; {{ grand_boq_total|floatformat:2|intcomma }}</span>
+        </td>
+        <td class="card-green">
+          <span class="card-label">Total Purchase (Inventory)</span>
+          <span class="card-value">&#2547; {{ grand_inventory_total|floatformat:2|intcomma }}</span>
+        </td>
+        <td class="card-orange">
+          <span class="card-label">Budget Balance</span>
+          <span class="card-value">&#2547; {{ grand_budget_balance|floatformat:2|intcomma }}</span>
+        </td>
+        <td class="card-purple">
+          <span class="card-label">Profit / Loss (Net Ledger)</span>
+          <span class="card-value">&#2547; {{ grand_profit_loss|floatformat:2|intcomma }}</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="card-red">
+          <span class="card-label">Total Payment (Debit)</span>
+          <span class="card-value">&#2547; {{ grand_ledger_total_payment|floatformat:2|intcomma }}</span>
+        </td>
+        <td class="card-indigo">
+          <span class="card-label">Total Received (Credit)</span>
+          <span class="card-value">&#2547; {{ grand_ledger_total_received|floatformat:2|intcomma }}</span>
+        </td>
+        <td class="card-teal">
+          <span class="card-label">Current Stock Value</span>
+          <span class="card-value">&#2547; {{ grand_stock_value|floatformat:2|intcomma }}</span>
+        </td>
+        <td class="card-pink">
+          <span class="card-label">Payable / Receivable</span>
+          <span class="card-value">&#2547; {{ grand_loanvoucher_total|floatformat:2|intcomma }}</span>
+        </td>
+      </tr>
+    </table>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Total Amount (Taka)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>BOQ</td><td>{{ grand_boq_total|floatformat:2 }}</td></tr>
+        <tr><td>Requisition</td><td>{{ grand_requisition_total|floatformat:2 }}</td></tr>
+        <tr><td>Purchase / Inventory</td><td>{{ grand_inventory_total|floatformat:2 }}</td></tr>
+        <tr><td>Payable / Receivable</td><td>{{ grand_loanvoucher_total|floatformat:2 }}</td></tr>
+        <tr><td>Received (Credit)</td><td>{{ grand_ledger_total_received|floatformat:2 }}</td></tr>
+        <tr><td>Payment (Debit)</td><td>{{ grand_ledger_total_payment|floatformat:2 }}</td></tr>
+        <tr style="font-weight:bold;background:#f1f5f9;">
+          <td>Grand Total (BOQ+Requisition+Inventory+LoanVoucher)</td>
+          <td>{{ grand_total_amount|floatformat:2 }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="amount-words">Amount in Words: {{ grand_total_in_words }}</p>
+
+    <hr>
+
+    <!-- ===================== PER-PROJECT SECTIONS ===================== -->
+    {% for block in report_data %}
+
+      <div class="project-title-row">
+        {{ block.project.project_first_name }}
+        <span class="status-badge">{{ block.project.project_type }}</span>
+      </div>
+      <table class="project-detail-table">
+        <tr>
+          <td><b>Location:</b> {{ block.project.location|default:"-" }}</td>
+          <td><b>Owner:</b> {{ block.project.project_owner|default:"-" }}</td>
+          <td><b>Start Date:</b> {{ block.project.project_start_date|date:"d M Y"|default:"-" }}</td>
+          <td><b>Target Completion:</b> {{ block.project.project_end_date|date:"d M Y"|default:"-" }}</td>
+        </tr>
+        <tr>
+          <td><b>Duration:</b> {{ block.project.project_duration }} months</td>
+          <td><b>Floors:</b> {{ block.project.number_of_floors }}</td>
+          <td><b>Units:</b> {{ block.project.number_of_units }}</td>
+          <td><b>Size:</b> {{ block.project.project_size_sq_ft|intcomma }} sq.ft</td>
+        </tr>
+      </table>
+
+      <!-- Project-level summary cards -->
+      <table class="card-row">
+        <tr>
+          <td class="card-blue">
+            <span class="card-label">Total Budget (BOQ)</span>
+            <span class="card-value">&#2547; {{ block.boq_total|floatformat:2|intcomma }}</span>
+          </td>
+          <td class="card-green">
+            <span class="card-label">Total Purchase (Inventory)</span>
+            <span class="card-value">&#2547; {{ block.inventory_total|floatformat:2|intcomma }}</span>
+          </td>
+          <td class="card-orange">
+            <span class="card-label">Budget Balance</span>
+            <span class="card-value">&#2547; {{ block.budget_balance|floatformat:2|intcomma }}</span>
+          </td>
+          <td class="card-purple">
+            <span class="card-label">Profit / Loss (Net Ledger)</span>
+            <span class="card-value">&#2547; {{ block.profit_loss|floatformat:2|intcomma }}</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="card-red">
+            <span class="card-label">Payment (Debit)</span>
+            <span class="card-value">&#2547; {{ block.ledger_total_payment|floatformat:2|intcomma }}</span>
+          </td>
+          <td class="card-indigo">
+            <span class="card-label">Received (Credit)</span>
+            <span class="card-value">&#2547; {{ block.ledger_total_received|floatformat:2|intcomma }}</span>
+          </td>
+          <td class="card-teal">
+            <span class="card-label">Current Stock Value</span>
+            <span class="card-value">&#2547; {{ block.stock_value|floatformat:2|intcomma }}</span>
+          </td>
+          <td class="card-pink">
+            <span class="card-label">Payable / Receivable</span>
+            <span class="card-value">&#2547; {{ block.loanvoucher_total|floatformat:2|intcomma }}</span>
+          </td>
+        </tr>
+      </table>
+
+      <!-- BOQ Progress (status-wise breakdown, table form instead of donut) -->
+      {% if block.boq_status_summary %}
+      <h3 class="section-title">BOQ Progress ({{ block.boq_item_count }} Items)</h3>
+      <table>
+        <thead>
+          <tr><th>Status</th><th>Item Count</th><th>Amount (Taka)</th></tr>
+        </thead>
+        <tbody>
+          {% for s in block.boq_status_summary %}
+          <tr>
+            <td style="text-align:left">{{ s.status }}</td>
+            <td>{{ s.count }}</td>
+            <td>{{ s.amount|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+
+      <!-- Payment / Received Ledger with running balance -->
+      {% if block.ledger_list %}
+      <h3 class="section-title">Approved - Payment / Received (Ledger)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Head</th>
+            <th>Account</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Payment</th>
+            <th>Received</th>
+            <th>Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in block.ledger_list %}
+          <tr>
+            <td>{{ entry.date|date:"d M Y" }}</td>
+            <td style="text-align:left">{{ entry.head }}</td>
+            <td style="text-align:left">{{ entry.cash_type }}</td>
+            <td style="text-align:left">{{ entry.type_name }}</td>
+            <td class="description">{{ entry.description }}</td>
+            <td>{{ entry.debit|floatformat:2 }}</td>
+            <td>{{ entry.credit|floatformat:2 }}</td>
+            <td>{{ entry.running_balance|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+          <tr style="font-weight: bold; font-size:12px; background: #f1f5f9;">
+            <td colspan="5" style="text-align: right;">Total:</td>
+            <td>{{ block.ledger_total_payment|floatformat:2 }}</td>
+            <td>{{ block.ledger_total_received|floatformat:2 }}</td>
+            <td>{{ block.project_ledger|floatformat:2 }}</td>
+          </tr>
+        </tbody>
+      </table>
+      {% endif %}
+
+      <!-- BOQ list -->
+      {% if block.boq_list %}
+      <h3 class="section-title">Approved - BOQ</h3>
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Item</th><th>Unit</th><th>Qty</th><th>Rate</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+          {% for boq in block.boq_list %}
+          <tr>
+            <td>{{ boq.boq_date|date:"d M Y" }}</td>
+            <td style="text-align:left">{{ boq.item_name }}</td>
+            <td>{{ boq.unit }}</td>
+            <td>{{ boq.qty }}</td>
+            <td>{{ boq.rate|floatformat:2 }}</td>
+            <td>{{ boq.amount|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+          <tr style="font-weight: bold; font-size:12px;background: #f1f5f9;">
+            <td colspan="5" style="text-align: right;">Total:</td>
+            <td>{{ block.boq_total|floatformat:2 }}</td>
+          </tr>
+        </tbody>
+      </table>
+      {% endif %}
+
+      <!-- Requisition -->
+      {% if block.requisition_list %}
+      <h3 class="section-title">Approved - Requisition</h3>
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Remarks</th><th>Item</th><th>Unit</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>
+        </thead>
+        <tbody>
+          {% for req in block.requisition_list %}
+          <tr>
+            <td>{{ req.requisition_date|date:"d M Y" }}</td>
+            <td width="300" class="description">{{ req.remark }}</td>
+            <td style="text-align:left">{{ req.item_name }}</td>
+            <td>{{ req.unit }}</td>
+            <td>{{ req.qty }}</td>
+            <td>{{ req.rate|floatformat:2 }}</td>
+            <td>{{ req.amount|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+          <tr style="font-weight: bold; font-size:12px; background: #f1f5f9;">
+            <td colspan="6" style="text-align: right;">Total:</td>
+            <td>{{ block.requisition_total|floatformat:2 }}</td>
+          </tr>
+        </tbody>
+      </table>
+      {% endif %}
+
+      <!-- Purchase / Inventory -->
+      {% if block.inventory_list %}
+      <h3 class="section-title">Approved - Purchase</h3>
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Supplier</th><th>Item</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+          {% for inv in block.inventory_list %}
+          <tr>
+            <td>{{ inv.requisition_date|date:"d M Y" }}</td>
+            <td style="text-align:left">{{ inv.vendor_name }}</td>
+            <td style="text-align:left">{{ inv.item_name }}</td>
+            <td>{{ inv.qty|floatformat:2 }}</td>
+            <td>{{ inv.rate|floatformat:2 }}</td>
+            <td>{{ inv.amount|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+          <tr style="font-weight: bold; font-size:12px; background: #f1f5f9;">
+            <td colspan="5" style="text-align: right;">Total:</td>
+            <td>{{ block.inventory_total|floatformat:2 }}</td>
+          </tr>
+        </tbody>
+      </table>
+      {% endif %}
+
+      <!-- Stock Ledger (aggregated, mirrors "Store & Stock" widget) -->
+      {% if block.stock_summary %}
+      <h3 class="section-title">Stock Ledger (Item-wise Balance)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Unit</th>
+            <th>Received</th>
+            <th>Issued</th>
+            <th>Balance</th>
+            <th>Stock Value (Taka)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in block.stock_summary %}
+          <tr>
+            <td style="text-align:left">{{ s.item_name }}</td>
+            <td>{{ s.unit }}</td>
+            <td>{{ s.received }}</td>
+            <td>{{ s.issued }}</td>
+            <td>{{ s.balance }}</td>
+            <td>{{ s.stock_value|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+          <tr style="font-weight: bold; font-size:12px; background: #f1f5f9;">
+            <td colspan="5" style="text-align: right;">Total Stock Value:</td>
+            <td>{{ block.stock_value|floatformat:2 }}</td>
+          </tr>
+        </tbody>
+      </table>
+      {% endif %}
+
+      <!-- Payable / Receivable -->
+      {% if block.loanvoucher_list %}
+      <h3 class="section-title">Approved - Payable / Receivable</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Name</th>
+            <th>Bank/Cash</th>
+            <th>MR/Bill No</th>
+            <th>Description</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for loan in block.loanvoucher_list %}
+          <tr>
+            <td>{{ loan.date|date:"d M Y" }}</td>
+            <td>{{ loan.loan_status }}</td>
+            <td>
+                {% if loan.customer_name %}
+                    {{ loan.customer_name }}
+                {% elif loan.conductor_name %}
+                    {{ loan.conductor_name.supervisor_name }}
+                {% elif loan.expense_name %}
+                    {{ loan.expense_name }}
+                {% elif loan.vendor_name %}
+                    {{ loan.vendor_name }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>
+              {% if loan.bankName %}{{ loan.bankName }}
+              {% elif loan.cash_type %}{{ loan.cash_type }}
+              {% else %}-{% endif %}
+            </td>
+            <td>{{ loan.mr_or_bill_no }}</td>
+            <td class="description">{{ loan.particulars }}</td>
+            <td>{{ loan.amount|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+          <tr style="font-weight: bold; font-size:12px; background: #f1f5f9;">
+            <td colspan="6" style="text-align: right;">Total:</td>
+            <td colspan="2">{{ block.loanvoucher_total|floatformat:2 }}</td>
+          </tr>
+        </tbody>
+      </table>
+      {% endif %}
+
+      <br />
+    {% endfor %}
+  {% else %}
+    <p>No records found for the selected filters.</p>
+  {% endif %}
+
+  <div class="no-print">
+    <a href="{% url 'project_ledger_manage' %}" class="btn-back">&#8592; Back</a>
+    <button onclick="window.print()" class="btn-print">&#128424; Print</button>
+  </div>
+</div>
+
+</body>
+</html>

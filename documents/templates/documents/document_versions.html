@@ -1,0 +1,14 @@
+<h2>Versions for {{ document.title }}</h2>
+
+{% if versions %}
+    <ul>
+        {% for version in versions %}
+            <li>Version {{ version.version_number }} - <a href="{{ version.file.url }}">Download</a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No versions available for this document.</p>
+{% endif %}
+
+<!-- Link to go back to the document list -->
+<a href="{% url 'document_list' %}">Back to Documents</a>

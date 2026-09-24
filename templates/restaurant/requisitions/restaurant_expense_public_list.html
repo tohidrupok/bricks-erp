@@ -1,0 +1,389 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+
+body{
+    background:#eef2f7;
+}
+
+/* HEADER */
+
+.top-header{
+    max-width:1200px;
+    margin:20px auto;
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.header-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:15px;
+}
+
+.page-title{
+    margin:0;
+    color:#198754;
+    font-size:28px;
+    font-weight:bold;
+}
+
+.page-subtitle{
+    color:#6c757d;
+    margin-top:5px;
+}
+
+.nav-links{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.nav-btn{
+    text-decoration:none;
+    color:#fff;
+    padding:10px 16px;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:bold;
+    transition:.3s;
+}
+
+.nav-btn:hover{
+    opacity:.9;
+}
+
+.home-btn{background:#0d6efd;}
+.expense-btn{background:#198754;}
+.supplier-btn{background:#fd7e14;}
+.category-btn{background:#6f42c1;}
+.refresh-btn{background:#6c757d;}
+
+
+/* CARD */
+
+.container-box{
+    max-width:1200px;
+    margin:auto;
+}
+
+.card{
+    background:#fff;
+    border:none;
+    border-radius:15px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    overflow:hidden;
+}
+
+.card-header{
+    background:#198754;
+    color:white;
+    padding:20px;
+}
+
+.card-header h3{
+    margin:0;
+}
+
+/* FILTER */
+
+.filter{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    flex-wrap:wrap;
+    padding:20px;
+}
+
+.search-box{
+    flex:1;
+}
+
+.search-box input{
+    width:100%;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:8px;
+}
+
+.add-btn{
+    background:#198754;
+    color:white;
+    text-decoration:none;
+    padding:12px 20px;
+    border-radius:8px;
+    font-weight:bold;
+}
+
+/* TABLE */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+thead{
+    background:#0d6efd;
+    color:white;
+}
+
+th{
+    padding:14px;
+}
+
+td{
+    padding:14px;
+    border-bottom:1px solid #eee;
+}
+
+tbody tr:hover{
+    background:#f7fbff;
+}
+
+.amount{
+    background:#e8fff0;
+    color:#198754;
+    padding:5px 12px;
+    border-radius:20px;
+    font-weight:bold;
+}
+
+.btn{
+    padding:7px 12px;
+    border-radius:6px;
+    color:white;
+    text-decoration:none;
+    font-size:14px;
+}
+
+.btn-edit{
+    background:#0d6efd;
+}
+
+.btn-delete{
+    background:#dc3545;
+}
+
+.no-data{
+    text-align:center;
+    color:#999;
+}
+
+@media(max-width:768px){
+
+    .header-row{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .filter{
+        flex-direction:column;
+    }
+
+    table{
+        font-size:13px;
+    }
+
+}
+
+</style>
+
+
+<!-- HEADER -->
+
+<div class="top-header">
+
+    <div class="header-row">
+
+        <div>
+            <h2 class="page-title">
+                🍽 Restaurant Expense
+            </h2>
+
+            <div class="page-subtitle">
+                Public Restaurant Expense Management
+            </div>
+        </div>
+
+        <div class="nav-links">
+
+            <a href="{% url 'public_restaurant_home' %}" class="nav-btn home-btn">
+                🏠 Home
+            </a>
+            <a href="{% url 'public_restaurant_requisition_exp_category' %}" class="nav-btn category-btn">
+                📂 Expense Category
+            </a>
+            <a href="{% url 'restaurant_expense_public_list' %}" class="nav-btn expense-btn">
+                💰 Expense
+            </a>
+
+            <a href="{% url 'public_restaurant_supplier_list' %}" class="nav-btn supplier-btn">
+                🏢 Supplier
+            </a>
+
+            <a href="{% url 'public_restaurant_requisition_category' %}" class="nav-btn category-btn">
+                📂 Item Category
+            </a>
+
+            <a href="{% url 'restaurant_expense_public_list' %}" class="nav-btn refresh-btn">
+                🔄 Refresh
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="container-box">
+
+    <div class="card">
+
+        <div class="card-header">
+            <h3>Expense List</h3>
+        </div>
+
+
+        <!-- SEARCH + ADD -->
+
+        <div class="filter">
+
+            <div class="search-box">
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="🔍 Search expense..."
+                    onkeyup="searchTable()">
+            </div>
+
+            <div>
+                <a href="{% url 'add_restaurant_expense_public' %}" class="add-btn">
+                    + Add Expense
+                </a>
+            </div>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div class="table-responsive">
+
+        <table>
+
+            <thead>
+
+            <tr>
+                <th>SL</th>
+                <th>Project</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Expense Name</th>
+                <th>Amount</th>
+                <th width="160">Action</th>
+            </tr>
+
+            </thead>
+
+            <tbody id="expenseTable">
+
+            {% for expense in expenses %}
+
+            <tr>
+
+                <td>{{ forloop.counter }}</td>
+
+                <td>
+                    {{ expense.project_name }}
+                </td>
+                
+                <td>
+                    {{ expense.restu_expense_type }}
+                </td>
+                
+                <td>
+                    {{ expense.restu_cate_name }}
+                </td>
+
+                <td>
+                    {{ expense.restu_expense_name }}
+                </td>
+
+                <td>
+                    <span class="amount">
+                        ৳{{ expense.restu_expense_amount }}
+                    </span>
+                </td>
+
+                <td>
+
+                    <a href="{% url 'edit_restaurant_expense_public' expense.id %}"
+                       class="btn btn-edit">
+                        Edit
+                    </a>
+
+                    <a href="{% url 'delete_restaurant_expense_public' expense.id %}"
+                       class="btn btn-delete"
+                       onclick="return confirm('Are you sure?')">
+                        Delete
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="6" class="no-data">
+                    No expense records found.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+function searchTable(){
+
+    let input = document.getElementById("searchInput").value.toLowerCase();
+
+    let rows = document.querySelectorAll("#expenseTable tr");
+
+    rows.forEach(function(row){
+
+        let text = row.innerText.toLowerCase();
+
+        if(text.indexOf(input) > -1){
+            row.style.display="";
+        }
+        else{
+            row.style.display="none";
+        }
+
+    });
+
+}
+
+</script>
+
+{% endblock %}

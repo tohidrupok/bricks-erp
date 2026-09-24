@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3>Lead Follow-up: {{ lead_instance.lead_name }}</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="followup_date" class="form-label">Follow-up Date</label>
+                        <input type="date" class="form-control" id="followup_date" name="followup_date" value="{{ today }}" required>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="status" class="form-label">Lead Status</label>
+                        <select name="status" id="status" class="form-select">
+                            <option value="open" {% if lead_instance.status == 'open' %}selected{% endif %}>Open</option>
+                            <option value="close" {% if lead_instance.status == 'close' %}selected{% endif %}>Close</option>
+                            <option value="junk" {% if lead_instance.status == 'junk' %}selected{% endif %}>Junk</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Customer Feedback / Rating Field -->
+                    <div class="col-md-6 mb-3">
+                        <label for="customer_feedback_rating" class="form-label">Customer Feedback Rating (1-5)</label>
+                        <input type="number" min="1" max="5" class="form-control" id="customer_feedback_rating" name="customer_feedback_rating" value="{{ lead_instance.customer_feedback_rating }}">
+                    </div>
+
+                    <!-- Salesperson Possibility Marking Field -->
+                    <div class="col-md-6 mb-3">
+                        <label for="salesperson_marking" class="form-label">Salesperson Possibility Marking (%)</label>
+                        <input type="number" step="0.01" min="0" max="100" class="form-control" id="salesperson_marking" name="salesperson_marking" value="{{ lead_instance.salesperson_marking_possibility }}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="followup_note" class="form-label">Follow-up Note</label>
+                    <textarea class="form-control" id="followup_note" name="followup_note" rows="3" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success">Save Follow-up Details</button>
+                <a href="{% url 'toggle_lead_status' lead_instance.id %}" class="btn btn-outline-danger float-end">
+                    {% if lead_instance.status == 'junk' %} Restore Lead {% else %} Move to Junk {% endif %}
+                </a>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow mt-4 mb-5">
+        <div class="card-header bg-secondary text-white">
+            <h4>Past Follow-ups History</h4>
+        </div>
+        <div class="card-body">
+            <ul class="list-group">
+                {% for f in previous_followups %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span><strong>Date:</strong> {{ f.followup_date }}</span>
+                            <span><strong>Salesperson Marking:</strong> {{ f.salesperson_marking }}%</span>
+                        </div>
+                        <p class="mb-0 mt-1"><strong>Note:</strong> {{ f.followup_note }}</p>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted">No follow-ups recorded yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

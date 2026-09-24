@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Land Dashboard - BM ERP{% endblock %}
+
+{% block content %} 
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    {% include 'partials/mobile.html' %}
+    
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+        
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px] pt-4">
+            {% include 'partials/header.html' %}
+            
+            <div class="intro-y flex items-center mt-8">
+                <h2 class="text-lg font-medium mr-auto">Land Purchase Dashboard Summary</h2>
+            </div>
+
+            <div class="grid grid-cols-12 gap-6 mt-5">
+                <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
+                    <div class="bg-white dark:bg-darkmode-600 rounded-lg p-5 shadow-sm border border-slate-200/60 dark:border-darkmode-400">
+                        <div class="flex items-center text-slate-500 text-xs font-medium uppercase tracking-wider">
+                            <span>Total Purchases</span>
+                        </div>
+                        <div class="text-2xl font-bold mt-2 text-slate-700 dark:text-slate-300">{{ total_records }}</div>
+                        <div class="text-xs text-slate-400 mt-1">Recorded Land entries</div>
+                    </div>
+                </div>
+
+                <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
+                    <div class="bg-white dark:bg-darkmode-600 rounded-lg p-5 shadow-sm border border-slate-200/60 dark:border-darkmode-400">
+                        <div class="flex items-center text-slate-500 text-xs font-medium uppercase tracking-wider">
+                            <span>Total Land Area</span>
+                        </div>
+                        <div class="text-2xl font-bold mt-2 text-primary">
+                            {{ total_area|floatformat:3 }} <span class="text-xs font-normal text-slate-500">Decimal</span>
+                        </div>
+                        <div class="text-xs text-slate-400 mt-1">Accumulated plot size</div>
+                    </div>
+                </div>
+
+                <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
+                    <div class="bg-white dark:bg-darkmode-600 rounded-lg p-5 shadow-sm border border-slate-200/60 dark:border-darkmode-400">
+                        <div class="flex items-center text-slate-500 text-xs font-medium uppercase tracking-wider">
+                            <span>Total Investment</span>
+                        </div>
+                        <div class="text-2xl font-bold mt-2 text-success">৳{{ total_investment|floatformat:3 }}</div>
+                        <div class="text-xs text-slate-400 mt-1">Total contract values</div>
+                    </div>
+                </div>
+
+                <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
+                    <div class="bg-white dark:bg-darkmode-600 rounded-lg p-5 shadow-sm border border-slate-200/60 dark:border-darkmode-400">
+                        <div class="flex items-center text-slate-500 text-xs font-medium uppercase tracking-wider">
+                            <span>Pending Approvals</span>
+                        </div>
+                        <div class="text-2xl font-bold mt-2 text-danger">{{ pending_approvals }}</div>
+                        <div class="text-xs text-slate-400 mt-1">Awaiting Verification</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 grid grid-cols-12 gap-6">
+               <div class="intro-y col-span-12 flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white dark:bg-darkmode-600 p-4 rounded-lg shadow-sm gap-4">
+    
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <a href="{% url 'land_add' %}" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium bg-primary border-primary text-white shadow-md hover:bg-opacity-90 text-sm">
+                            ➕ Add New Land
+                        </a>
+                        <a href="{% url 'land_dashboard' %}" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium bg-slate-200 border-slate-200 text-slate-600 hover:bg-slate-300 text-sm">
+                            🔄 Refresh
+                        </a>
+                        <a href="{% url 'land_list' %}" class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium bg-primary border-primary text-white shadow-md hover:bg-opacity-90 text-sm">
+                            Land List
+                        </a>
+                    </div>
+                
+                    <div class="w-full sm:w-auto sm:ml-auto flex justify-end">
+                        <div class="relative w-full sm:w-64 text-slate-500">
+                            <input 
+                                id="searchInput" 
+                                type="text" 
+                                placeholder="Search..." 
+                                class="w-full pl-3 pr-10 py-2 text-sm border border-slate-200 rounded-md shadow-sm focus:ring-4 focus:ring-primary focus:border-primary focus:outline-none dark:bg-darkmode-800 dark:border-transparent dark:text-slate-300" 
+                                oninput="handleSearch()"
+                            />
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                                🔍
+                            </div>
+                        </div>
+                    </div>
+                
+                </div>
+
+                <div class="overflow-x-auto bg-white dark:bg-darkmode-600 rounded-lg shadow-sm col-span-12 border border-slate-200/60 dark:border-darkmode-400">
+                    <table class="min-w-full divide-y divide-slate-200 dark:divide-darkmode-400 text-left">
+                        <thead class="bg-slate-50 dark:bg-darkmode-700">
+                            <tr>
+                                <th class="px-4 py-3 text-xs font-semibold uppercase text-slate-600 dark:text-slate-400">File_No</th>
+                                <th class="px-4 py-3 text-xs font-semibold uppercase text-slate-600 dark:text-slate-400">Mouza Name</th>
+                                <th class="px-4 py-3 text-xs font-semibold uppercase text-slate-600 dark:text-slate-400">Dag Numbers (CS/SA/RS/CT)</th>
+                                <th class="px-4 py-3 text-xs font-semibold uppercase text-slate-600 dark:text-slate-400">Agreement</th>
+                                <th class="px-4 py-3 text-xs font-semibold uppercase text-slate-600 dark:text-slate-400">Agreement_Date</th>
+                                <th class="px-4 py-3 text-center text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 text-primary">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-darkmode-400" id="tableBody">
+                            {% for land in landpurchases %}
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-darkmode-400/50 transition duration-150">
+                                <td class="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">
+                                    <span class="bg-slate-100 dark:bg-darkmode-800 px-2 py-1 rounded text-xs font-mono">{{ land.file_name|default:"-" }}</span>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">{{ land.mouza_name|default:"-" }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-xs text-slate-500">
+                                    <div class="grid grid-cols-2 gap-x-2">
+                                        <span><strong>CS:</strong> {{ land.cs_dag_no|default:"N/A" }}</span>
+                                        <span><strong>SA:</strong> {{ land.sa_dag_no|default:"N/A" }}</span>
+                                        <span><strong>RS:</strong> {{ land.rs_dag_no|default:"N/A" }}</span>
+                                        <span><strong>CT:</strong> {{ land.ct_dag_no|default:"N/A" }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    {% if land.did_agreement == 'Yes' %}
+                                        <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-success/20 text-success">Yes</span>
+                                    {% else %}
+                                        <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-200 text-slate-600">No</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">
+                                    {{ land.agreement_date|date:"Y-m-d"|default:"-" }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-center">
+                                    <a href="{% url 'land_detail' land.id %}" style="background-color:#1e3a8a"
+                                       class="inline-flex items-center justify-center gap-1 bg-lime-600 hover:bg-lime-700 text-white text-xs font-medium py-1.5 px-3 rounded shadow-sm transition">
+                                        📄 View Details
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-8 text-slate-400 dark:text-slate-500 bg-slate-50/50">
+                                    No records found matching your selection criteria.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <script>
+                            function handleSearch() {
+                                let searchValue = document.getElementById('searchInput').value.toLowerCase();
+                                let rows = document.querySelectorAll("#tableBody tr");
+                    
+                                rows.forEach(row => {
+                                    let columns = row.getElementsByTagName("td");
+                                    let rowText = "";
+                                    
+                                    // Combine text content of all columns in the row for searching
+                                    for (let i = 0; i < columns.length; i++) {
+                                        rowText += columns[i].textContent.toLowerCase(); // Get all text in row
+                                    }
+                    
+                                    // If search term is found in the row's combined text, show the row, else hide it
+                                    if (rowText.includes(searchValue)) {
+                                        row.style.display = ""; // Show row
+                                    } else {
+                                        row.style.display = "none"; // Hide row
+                                    }
+                                });
+                            }
+                        </script>
+                </div>
+            </div>
+
+        </div>
+        </div>
+</div>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Salary Payment Add - BM ERP{% endblock %}
+
+{% block content %}  
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        {% include 'partials/mobile.html' %}
+        <div class="mt-[4.7rem] flex md:mt-0">
+            {% include 'partials/sidebar_list.html' %}
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                {% include 'partials/header.html' %}
+                
+                <h2 class="intro-y mt-10 text-lg font-semibold text-gray-900">Salary Payment Entry</h2>
+
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                  <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                    <form method="POST" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+                      {% csrf_token %}
+                        
+                        <!-- Head of Account -->
+                        <div class="mb-4">
+                          <label class="font-medium text-lg text-gray-800">Head of Account</label>
+                          <select class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2" disabled>
+                            {% for head in head_of_accounts %}
+                              <option selected>{{ head.head_name }}</option>
+                            {% endfor %}
+                          </select>
+                          <input type="hidden" name="head_of_account" value="{{ head_of_accounts.0.id }}">
+                        </div>
+
+                        <!-- Project Name -->
+                        <div class="mb-4">
+                            <label for="id_project_name" class="font-medium text-lg text-gray-800">Project Name</label>
+                            {{ form.project_name }}
+                            {% for error in form.project_name.errors %}
+                                <p class="text-red-600 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                      <!-- Employee -->
+                      <div class="mb-6">
+                        <label for="id_employee" class="block mb-2 font-semibold text-gray-700">Employee</label>
+                        <select name="employee" id="id_employee" class="w-full border rounded px-3 py-2">
+                            <option value="">---------</option>
+                            <!-- Render all active employees with a data-project attribute for instant filtering -->
+                            {% for emp in form.fields.employee.queryset %}
+                                <option value="{{ emp.id }}" data-project="{{ emp.project_name_id }}" {% if form.employee.value|stringformat:"s" == emp.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ emp.rda_emp_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% for error in form.employee.errors %}
+                          <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                      </div>
+
+                      <!-- Date -->
+                      <div class="mb-6">
+                          <label for="id_date" class="block mb-2 font-semibold text-gray-700">Date</label>
+                          {{ form.date }}
+                      </div>
+
+                      <!-- Cash Type -->
+                      <div class="mb-4">
+                            <label for="id_cash_type" class="font-medium text-lg text-gray-800">Cash Type</label>
+                            {{ form.cash_type }}
+                      </div>
+
+                      <!-- Cheque Number -->
+                      <div id="chequeNumberField" class="mb-4 hidden">
+                        <label for="id_cheque_number" class="font-medium text-lg text-gray-800">Cheque Number</label>
+                        {{ form.cheque_number }}
+                        {% for error in form.cheque_number.errors %}
+                            <p class="text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                        
+                      <!-- Month of Salary -->
+                      <div class="mb-6">
+                        <label for="id_monthofsalary" class="block mb-2 font-semibold text-gray-700">Month of Salary</label>
+                        {{ form.monthofsalary }}
+                        {% for error in form.monthofsalary.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    
+                      <!-- Amount -->
+                      <div class="mb-6">
+                        <label for="id_amount" class="block mb-2 font-semibold text-gray-700">Amount</label>
+                        {{ form.amount }}
+                      </div>
+
+                      <!-- Reason -->
+                      <div class="mb-6">
+                        <label for="id_reason" class="block mb-2 font-semibold text-gray-700">Reason</label>
+                        {{ form.reason }}
+                      </div>
+
+                      <!-- Buttons -->
+                      <div class="flex justify-center space-x-4 mt-8">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-semibold" style="background-color:#1e3c98">
+                          Save Salary Payment
+                        </button>
+                        <a href="{% url 'salary_list' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md font-semibold" style="margin-left:0.5%;background-color:#1e3c98">
+                            Back to List
+                        </a>
+                      </div>
+                    </form>
+                    
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const cashTypeSelect = document.getElementById('id_cash_type');
+                            const chequeField = document.getElementById('chequeNumberField');
+                            
+                            function toggleChequeField() {
+                                if (!cashTypeSelect || !chequeField) return;
+                                if (cashTypeSelect.value === '1' || !cashTypeSelect.value) {
+                                    chequeField.classList.add('hidden');
+                                } else {
+                                    chequeField.classList.remove('hidden');
+                                }
+                            }
+
+                            if (cashTypeSelect) {
+                                cashTypeSelect.addEventListener('change', toggleChequeField);
+                                toggleChequeField();
+                            }
+
+                            const projectSelect = document.getElementById('id_project_name');
+                            const employeeSelect = document.getElementById('id_employee');
+                            
+                            if (projectSelect && employeeSelect) {
+                                const allEmployeeOptions = Array.from(employeeSelect.querySelectorAll('option'));
+
+                                function filterEmployees() {
+                                    const selectedProjectId = projectSelect.value;
+                                    const currentlySelectedEmp = employeeSelect.value;
+
+                                    // Clear current options except default
+                                    employeeSelect.innerHTML = '<option value="">---------</option>';
+
+                                    allEmployeeOptions.forEach(function(opt) {
+                                        if (!opt.value) return; // skip placeholder
+                                        const empProjectId = opt.getAttribute('data-project');
+                                        
+                                        // Show employee if they match the chosen project
+                                        if (empProjectId === selectedProjectId) {
+                                            employeeSelect.appendChild(opt);
+                                        }
+                                    });
+
+                                    // Keep selection if it belongs to this project
+                                    employeeSelect.value = currentlySelectedEmp;
+                                }
+
+                                projectSelect.addEventListener('change', filterEmployees);
+                                
+                                // Run on page load if a project is already picked
+                                if (projectSelect.value) {
+                                    filterEmployees();
+                                }
+                            }
+                        });
+                    </script>
+                  </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

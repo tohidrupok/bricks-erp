@@ -1,0 +1,335 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BOQ Summary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        /* --- Client/Company Header styles --- */
+        .client-header {
+            text-align: center;
+            color: #1f3bb3;
+            font-weight: bold;
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .client-sub-header {
+            text-align: center;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 4px;
+        }
+
+        .client-contact {
+            text-align: center;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+
+        .memo-box {
+            position: absolute;
+            right: 60px;
+            top: 20px;
+            border: 2px solid #ccc;
+            padding: 10px;
+            width: 140px;
+            text-align: center;
+        }
+
+        .memo-box h3 {
+            margin: 0;
+            color: green;
+        }
+
+        .memo-box p {
+            color: red;
+            font-weight: bold;
+            margin: 4px 0 0 0;
+        }
+
+        /* --- Your BOQ styles --- */
+        .header {
+            text-align: center;
+            color: #0A8754;
+            font-weight: bold;
+            font-size: 22px;
+            margin-top: 60px; /* to avoid overlap with memo box */
+            margin-bottom: 5px;
+        }
+
+        .sub-header {
+            text-align: center;
+            font-size: 13px;
+            margin: 0 0 15px 0;
+        }
+
+        .section-title {
+            margin-top: 30px;
+            font-weight: bold;
+            font-size: 16px;
+            color: #000;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 3px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #000;
+        }
+
+        th {
+            background: #f0f0f0;
+            font-weight: bold;
+        }
+
+        th, td {
+            padding: 6px;
+            text-align: center;
+        }
+
+        .description {
+            text-align: left;
+        }
+
+        .total-row td {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+
+        .summary-table td {
+            font-weight: bold;
+        }
+
+        .footer {
+            font-size: 11px;
+            text-align: center;
+            margin-top: 40px;
+            color: #777;
+        }
+
+        .no-print {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        /* New styles for separate percentage block */
+        .percentage-section {
+            margin-top: 20px;
+            font-size: 14px;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            background-color: #f9f9f9;
+            font-weight: bold;
+        }
+
+        .percentage-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .memo-box {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+
+    <!-- Memo Box -->
+    <div class="memo-box">
+        <h3>Purchase</h3>
+        <p>Invoice</p>
+    </div>
+
+    <!-- Your Original BOQ Header Section -->
+    <div class="header">BOQ SUMMARY</div>
+    <div class="sub-header">
+        Project: {{ project.project_first_name }}<br>
+        Date: {{ project.current_date }}
+    </div>
+
+    <!-- BOQ Sections -->
+    {% for category_type, categories in boq_by_type_and_category.items %}
+        <div class="section-title">{{ category_type }}</div>
+        {% for category_name, data in categories.items %}
+            <p><strong>{{ category_name }}</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Unit</th>
+                        <th>Qty</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in data.items %}
+                    <tr>
+                        <td class="description">{{ item.item_name }}</td>
+                        <td>{{ item.unit }}</td>
+                        <td>{{ item.qty }}</td>
+                        <td>{{ item.rate }}</td>
+                        <td>{{ item.amount }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="total-row">
+                        <td colspan="4" style="text-align: right;">Total</td>
+                        <td>{{ data.total|floatformat:2 }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        {% endfor %}
+    {% endfor %}
+
+    <!-- Employee Costs -->
+    <div class="section-title">Employee Costs</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Monthly Salary</th>
+                <th>Duration (months)</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for emp in employee_costs %}
+            <tr>
+                <td>{{ emp.employee_name }}</td>
+                <td>{{ emp.first_month_salary }}</td>
+                <td>{{ emp.project_duration_months }}</td>
+                <td>{{ emp.total_salary }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="3" style="text-align: right;">Total</td>
+                <td>{{ employee_cost_total|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Equipment Costs -->
+    <div class="section-title">Safety Equipment</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Unit Cost</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in safety_equipment %}
+            <tr>
+                <td>{{ item.item_name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.item_cost }}</td>
+                <td>{{ item.total_cost }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="3" style="text-align: right;">Total</td>
+                <td>{{ safety_equipment_total|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Other Expenses -->
+    <div class="section-title">Other Expenses</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Unit Cost</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in expense_costs %}
+            <tr>
+                <td>{{ item.item_name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.item_cost }}</td>
+                <td>{{ item.total_cost }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="3" style="text-align: right;">Total</td>
+                <td>{{ expense_cost_total|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Final Summary -->
+    <div class="section-title">Summary</div>
+    <table>
+        <tbody>
+            {% for item in total_by_category_type %}
+            <tr><td>{{ item.category_type }}</td><td>Tk {{ item.total_amount|floatformat:2 }}</td></tr>
+            {% endfor %}
+            <tr><td>Employee Cost</td><td>Tk {{ employee_cost_total|floatformat:2 }}</td></tr>
+            <tr><td>Equipment Cost</td><td>Tk {{ safety_equipment_total|floatformat:2 }}</td></tr>
+            <tr><td>Expense Cost</td><td>Tk {{ expense_cost_total|floatformat:2 }}</td></tr>
+            <tr><td><strong>Grand Total</strong></td><td><strong>Tk {{ grand_total|floatformat:2 }}</strong></td></tr>
+        </tbody>
+    </table>
+
+    <!-- Separate Percentage Info -->
+    <div class="percentage-section">
+        <div class="percentage-row">
+            <div>Percentage (%): {{ project.percentage|floatformat:2 }}</div>
+        </div>
+        <div class="percentage-row">
+            <div>Percentage Value (Tk): {{ project.percentage_value|floatformat:2 }}</div>
+        </div>
+        <div class="percentage-row">
+            <div></div>
+            <div>Final Total(Tk): {{ project.final_total_with_extra|floatformat:2 }}</div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        © {{ year }} BTP Construction Ltd. | System-generated document.
+    </div>
+
+    <!-- Optional Print Button -->
+    <div class="no-print">
+        <button onclick="window.print()" style="margin-top:20px; background:#0A8754; color:#fff; padding:10px 20px; border:none; border-radius:5px;">Print</button>
+    </div>
+</div>
+</body>
+</html>

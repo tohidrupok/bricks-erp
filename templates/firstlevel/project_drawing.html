@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Project Details - BM ERP{% endblock %}
+
+{% block content %}
+
+<!-- ===================== ICON SPRITE (inline SVG, no library needed) ===================== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-building" viewBox="0 0 24 24"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="m3 21 8.02-14.26"/><path d="m12.99 6.74 1.93 3.44"/><path d="M19 12c-3.36 3.36-8.64 3.36-12 0"/><path d="m21 21-2.16-3.84"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8M16 13H8M16 17H8"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+</svg>
+
+<style>
+    /* ---------- Original helper styles (kept) ---------- */
+    .detail-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .dark .detail-card {
+        background: #232a3b;
+    }
+
+    .detail-label {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 5px;
+    }
+
+    .detail-value {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    .dark .detail-value {
+        color: #f8fafc;
+    }
+
+    .status-completed {
+        color: #16a34a;
+        background: #dcfce7;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .status-pending {
+        color: #dc2626;
+        background: #fee2e2;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    /* ---------- Dashboard ---------- */
+    .pd {
+        --pd-brand: #1e3c98;
+        --pd-brand-2: #3557d1;
+        --pd-ink: #0f172a;
+        --pd-muted: #64748b;
+        --pd-line: #e2e8f0;
+        --pd-card: #ffffff;
+        --pd-soft: #f8fafc;
+        width: 100%;
+        color: var(--pd-ink);
+    }
+    .dark .pd {
+        --pd-ink: #e2e8f0;
+        --pd-muted: #94a3b8;
+        --pd-line: #334155;
+        --pd-card: #1e293b;
+        --pd-soft: #0f172a;
+    }
+
+    .pd-i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+    /* ---------- Hero ---------- */
+    .pd-hero { position: relative; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 22px 28px; color: #fff; background: linear-gradient(120deg, var(--pd-brand) 0%, var(--pd-brand-2) 100%); border-radius: 18px; box-shadow: 0 10px 30px -14px rgba(30, 60, 152, .55); overflow: hidden; }
+    .pd-hero::after { content: ""; position: absolute; right: -40px; top: -70px; width: 220px; height: 220px; border-radius: 50%; background: rgba(255, 255, 255, .09); }
+    .pd-hero::before { content: ""; position: absolute; right: 110px; bottom: -90px; width: 150px; height: 150px; border-radius: 50%; background: rgba(255, 255, 255, .06); }
+    .pd-hero > * { position: relative; z-index: 1; }
+    .pd-hero-ico { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 14px; background: rgba(255, 255, 255, .18); border: 1px solid rgba(255, 255, 255, .25); }
+    .pd-hero-ico .pd-i { width: 26px; height: 26px; }
+    .pd-hero-text { min-width: 0; }
+    .pd-title { font-size: 21px; font-weight: 700; line-height: 1.25; margin: 0; letter-spacing: -.01em; }
+    .pd-sub { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 13px; opacity: .9; overflow-wrap: anywhere; }
+    .pd-sub .pd-i { width: 14px; height: 14px; }
+    .pd-hero-side { margin-left: auto; }
+    .pd-back { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 13px; font-size: 13px; font-weight: 600; color: #fff; text-decoration: none; border-radius: 9px; background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .28); transition: background-color .15s; }
+    .pd-back:hover { background: rgba(255, 255, 255, .28); color: #fff; }
+    .pd-back .pd-i { width: 15px; height: 15px; }
+    @media (max-width: 640px) { .pd-hero { padding: 18px 16px; } }
+
+    /* ---------- Panel ---------- */
+    .pd-panel { background: var(--pd-card); border: 1px solid var(--pd-line); border-radius: 18px; box-shadow: 0 10px 30px -14px rgba(15, 23, 42, .18); overflow: hidden; }
+    .pd-panel-head { display: flex; align-items: center; gap: 12px; padding: 16px 22px; border-bottom: 1px solid var(--pd-line); }
+    .pd-panel-ico { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; color: var(--pd-brand-2); background: color-mix(in srgb, var(--pd-brand-2) 12%, transparent); }
+    .dark .pd-panel-ico { color: #93a8ff; }
+    .pd-panel-ico .pd-i { width: 17px; height: 17px; }
+    .pd-panel-head h3 { font-size: 16px; font-weight: 650; margin: 0; }
+    .pd-count { margin-left: auto; padding: 3px 11px; font-size: 12px; font-weight: 600; border-radius: 999px; color: var(--pd-brand-2); background: color-mix(in srgb, var(--pd-brand-2) 12%, transparent); }
+    .dark .pd-count { color: #93a8ff; }
+    .pd-panel-body { padding: 8px 10px 12px; }
+    @media (max-width: 640px) { .pd-panel-head { padding: 14px 16px; } }
+
+    /* ---------- Table ---------- */
+    .pd-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; }
+    .pd-table th { padding: 11px 14px; text-align: left; font-size: 12.5px; font-weight: 600; color: var(--pd-muted); white-space: nowrap; background: var(--pd-soft); border-top: 1px solid var(--pd-line); border-bottom: 1px solid var(--pd-line); }
+    .pd-table th:first-child { border-left: 1px solid var(--pd-line); border-radius: 10px 0 0 10px; }
+    .pd-table th:last-child { border-right: 1px solid var(--pd-line); border-radius: 0 10px 10px 0; }
+    .pd-table td { padding: 13px 14px; color: var(--pd-ink); border-bottom: 1px solid var(--pd-line); vertical-align: middle; white-space: nowrap; }
+    .pd-table tbody tr:last-child td { border-bottom: 0; }
+    .pd-table tbody tr { transition: background-color .12s; }
+    .pd-table tbody tr:hover td { background: var(--pd-soft); }
+    .pd-sl { display: inline-grid; place-items: center; min-width: 28px; height: 28px; padding: 0 6px; font-size: 12.5px; font-weight: 650; border-radius: 8px; color: var(--pd-muted); background: var(--pd-soft); border: 1px solid var(--pd-line); }
+    .pd-doc { display: inline-flex; align-items: center; gap: 10px; font-weight: 650; }
+    .pd-doc-ico { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; color: #0891b2; background: color-mix(in srgb, #0891b2 13%, transparent); flex-shrink: 0; }
+    .pd-doc-ico .pd-i { width: 16px; height: 16px; }
+    .pd-cell { display: inline-flex; align-items: center; gap: 7px; }
+    .pd-cell .pd-i { width: 15px; height: 15px; color: var(--pd-muted); }
+
+    .pd-view { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; font-size: 12.5px; font-weight: 600; text-decoration: none; border-radius: 8px; color: var(--pd-brand-2); background: color-mix(in srgb, var(--pd-brand-2) 12%, transparent); transition: background-color .15s, color .15s; }
+    .dark .pd-view { color: #93a8ff; }
+    .pd-view:hover { background: var(--pd-brand-2); color: #fff; }
+    .pd-view:focus-visible { outline: 3px solid rgba(53, 87, 209, .45); outline-offset: 2px; }
+    .pd-view .pd-i { width: 14px; height: 14px; }
+
+    /* ---------- Empty state ---------- */
+    .pd-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 44px 16px; text-align: center; color: var(--pd-muted); }
+    .pd-empty-ico { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; color: var(--pd-brand-2); background: color-mix(in srgb, var(--pd-brand-2) 12%, transparent); }
+    .dark .pd-empty-ico { color: #93a8ff; }
+    .pd-empty-ico .pd-i { width: 26px; height: 26px; }
+</style>
+
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+
+
+    <div class="mt-[4.7rem] flex md:mt-0">
+
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+
+
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+
+
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+            <div class="content pd">
+
+                <div class="pd-hero mt-8 mb-6">
+
+                    <span class="pd-hero-ico"><svg class="pd-i"><use href="#i-compass"/></svg></span>
+
+                    <div class="pd-hero-text">
+                        <h2 class="pd-title">
+                            Project Drawing
+                        </h2>
+
+                        <div class="pd-sub">
+                            <svg class="pd-i"><use href="#i-building"/></svg>
+                            {{ project.project_first_name }}
+                        </div>
+                    </div>
+
+                    <div class="pd-hero-side">
+                        <a href="{% url 'first_level_details' project.id %}"
+                        class="pd-back">
+                            <svg class="pd-i"><use href="#i-back"/></svg>
+                            Back to Dashboard
+                        </a>
+                    </div>
+
+                </div>
+
+
+                <div class="pd-panel">
+
+                    <div class="pd-panel-head">
+                        <span class="pd-panel-ico"><svg class="pd-i"><use href="#i-file"/></svg></span>
+                        <h3>
+                            Drawing Documents
+                        </h3>
+                        {% if documents %}
+                        <span class="pd-count">{{ documents|length }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if documents %}
+
+                    <div class="pd-panel-body overflow-x-auto">
+
+                        <table class="pd-table">
+
+                            <thead>
+                                <tr>
+                                    <th>SL</th>
+                                    <th>Title</th>
+                                    <th>Document</th>
+                                    <th>Uploaded At</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for document in documents %}
+
+                                <tr>
+
+                                    <td>
+                                        <span class="pd-sl">{{ forloop.counter }}</span>
+                                    </td>
+
+                                    <td>
+                                        <span class="pd-doc">
+                                            <span class="pd-doc-ico"><svg class="pd-i"><use href="#i-compass"/></svg></span>
+                                            {{ document.title|default:"Drawing Document" }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <a href="{{ document.document.url }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="pd-view">
+                                            <svg class="pd-i"><use href="#i-external"/></svg>
+                                            View Document
+                                        </a>
+                                    </td>
+
+                                    <td>
+                                        <span class="pd-cell"><svg class="pd-i"><use href="#i-clock"/></svg>{{ document.uploaded_at|date:"d M Y H:i" }}</span>
+                                    </td>
+
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    {% else %}
+
+                    <div class="pd-empty">
+                        <span class="pd-empty-ico"><svg class="pd-i"><use href="#i-compass"/></svg></span>
+                        <div>
+                            No drawing documents found.
+                        </div>
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        </div>
+        <!-- END: Content -->
+
+    </div>
+
+</div>
+
+{% endblock %}

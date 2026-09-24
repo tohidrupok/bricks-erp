@@ -1,0 +1,112 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Attendance Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-lg font-medium">Attendance</h2>
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible p-5">
+                       <form method="POST" enctype="multipart/form-data" class="w-full max-w-3xl mx-auto bg-white p-5 shadow-lg rounded-lg">
+							{% csrf_token %}
+
+							<!-- Employee -->
+							<div class="mb-4">
+								<label for="employee" class="font-medium text-lg text-gray-800">Employee</label>
+								{{ form.employee }}
+								{% for error in form.employee.errors %}
+									<p class="text-red-600 text-sm">{{ error }}</p>
+								{% endfor %}
+							</div>
+							<div class="mb-4">
+                                <label for="id_emp_shift" class="font-medium text-lg text-gray-800">Shift Name</label>
+                                <select name="emp_shift" id="id_emp_shift"
+                                    class="w-full text-sm border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90
+                                           focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary">
+                                    <option value="">Select Shift Name</option>
+                                    <option value="Morning" {% if form.emp_shift.value == "Morning" %}selected{% endif %}>Morning</option>
+                                    <option value="Evening" {% if form.emp_shift.value == "Evening" %}selected{% endif %}>Evening</option>
+                                </select>
+                                {% for error in form.emp_shift.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+
+							<!-- Date -->
+							<div class="mb-4">
+								<label for="date" class="font-medium text-lg text-gray-800">Date</label>
+								{{ form.date }}
+								{% for error in form.date.errors %}
+									<p class="text-red-600 text-sm">{{ error }}</p>
+								{% endfor %}
+							</div>
+
+							<!-- Check In -->
+							<div class="mb-4">
+								<label for="check_in" class="font-medium text-lg text-gray-800">Check In</label>
+								{{ form.check_in }}
+								{% for error in form.check_in.errors %}
+									<p class="text-red-600 text-sm">{{ error }}</p>
+								{% endfor %}
+							</div>
+
+							<!-- Check Out -->
+							<div class="mb-4">
+								<label for="check_out" class="font-medium text-lg text-gray-800">Check Out</label>
+								{{ form.check_out }}
+								{% for error in form.check_out.errors %}
+									<p class="text-red-600 text-sm">{{ error }}</p>
+								{% endfor %}
+							</div>
+							<div class="mb-4">
+                                <label for="id_att_status" class="font-medium text-lg text-gray-800">Attendance Status</label>
+                                <select name="att_status" id="id_att_status" class="w-full text-sm border border-slate-300 shadow-sm rounded-md p-2">
+                                    {% for value, label in form.att_status.field.choices %}
+                                        <option value="{{ value }}" {% if form.att_status.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% for error in form.att_status.errors %}
+                                    <p class="text-red-600 text-sm">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+
+							<!-- Buttons -->
+							<div class="text-center mt-6">
+								<button type="submit" style="background-color:#1e3c98"
+										class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md">
+									Save Attendance
+								</button>
+								<a href="{% url 'restaurant_attendance_list' %}" style="margin-left:0.5%;background-color:#1e3c98"
+								   class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md ml-2">
+									Back to List
+								</a>
+							</div>
+						</form>
+
+
+                        <br>  
+                    </div>
+                    
+                    
+                </div>
+           
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

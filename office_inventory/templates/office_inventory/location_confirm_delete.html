@@ -1,0 +1,25 @@
+{% extends 'office_inventory/base.html' %}
+
+{% block header %}Delete Location{% endblock %}
+
+{% block content %}
+<div class="card card-stat p-3 border-danger" style="max-width: 500px; margin: 40px auto; text-align: center;">
+    <div class="card-header mb-3">
+        <h3 class="text-danger">Confirm Deletion</h3>
+    </div>
+    
+    <p class="mb-4">
+        Are you absolutely sure you want to completely remove the physical location 
+        <strong>{{ location.name }} ({{ location.code }})</strong>?<br> 
+        <span class="text-danger font-weight-bold">This action cannot be undone.</span>
+    </p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="d-flex justify-content-center gap-3">
+            <button type="submit" class="btn btn-danger">Confirm Delete</button>
+            <a href="{% url 'office_inventory:location_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

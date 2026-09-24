@@ -1,0 +1,81 @@
+{% extends "lands/base.html" %}
+{% block title %}{{ action }} Land Record | জমি রেকর্ড{% endblock %}
+{% block content %}
+<div class="container-sm">
+  <div class="breadcrumb">
+    <a href="{% url 'tracker:list' %}">Records</a> /
+    {% if record %}<a href="{% url 'tracker:detail' record.pk %}">{{ record.file_no }}</a> / {% endif %}
+    {{ action }}
+  </div>
+
+  <div class="page-header">
+    <h1>{{ action }} Land Record</h1>
+    <div class="bn-title">{% if action == 'Create' %}নতুন জমির রেকর্ড যোগ করুন{% else %}জমির রেকর্ড সম্পাদনা করুন{% endif %}</div>
+  </div>
+
+  <div class="card">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <div class="form-group" style="flex: 1;">
+          <label for="file_no">File No <span class="bn-label">ফাইল নং</span></label>
+          <input type="text" id="file_no" name="file_no" style="width:100%; padding:8px;" required placeholder="e.g. LR-2024-001" value="{{ record.file_no|default:'' }}">
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label for="date">Date <span class="bn-label">তারিখ</span></label>
+          <input type="date" id="date" name="date" style="width:100%; padding:8px;" required value="{{ record.date|date:'Y-m-d'|default:today }}">
+        </div>
+      </div>
+
+      <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <div class="form-group" style="flex: 1;">
+          <label for="area">Area / Location <span class="bn-label">এলাকা</span></label>
+          <input type="text" id="area" name="area" style="width:100%; padding:8px;" required placeholder="Village, Upazila, District" value="{{ record.area|default:'' }}">
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label for="mouza_name">Mouza Name <span class="bn-label">মৌজার নাম</span></label>
+          <input type="text" id="mouza_name" name="mouza_name" style="width:100%; padding:8px;" placeholder="e.g. Haripur" value="{{ record.mouza_name|default:'' }}">
+        </div>
+      </div>
+
+      <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <div class="form-group" style="flex: 1;">
+          <label for="land_dag_no">General Dag No <span class="bn-label">প্রধান দাগ নং</span></label>
+          <input type="text" id="land_dag_no" name="land_dag_no" style="width:100%; padding:8px;" placeholder="e.g. 452/B" value="{{ record.land_dag_no|default:'' }}">
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label for="cs_dag_no">CS Dag No <span class="bn-label">সিএস দাগ নং</span></label>
+          <input type="text" id="cs_dag_no" name="cs_dag_no" style="width:100%; padding:8px;" value="{{ record.cs_dag_no|default:'' }}">
+        </div>
+      </div>
+
+      <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <div class="form-group" style="flex: 1;">
+          <label for="sa_dag_no">SA Dag No <span class="bn-label">এসএ দাগ নং</span></label>
+          <input type="text" id="sa_dag_no" name="sa_dag_no" style="width:100%; padding:8px;" value="{{ record.sa_dag_no|default:'' }}">
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label for="rs_dag_no">RS Dag No <span class="bn-label">আরএস দাগ নং</span></label>
+          <input type="text" id="rs_dag_no" name="rs_dag_no" style="width:100%; padding:8px;" value="{{ record.rs_dag_no|default:'' }}">
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label for="ct_dag_no">CT Dag No <span class="bn-label">সিটি দাগ নং</span></label>
+          <input type="text" id="ct_dag_no" name="ct_dag_no" style="width:100%; padding:8px;" value="{{ record.ct_dag_no|default:'' }}">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 15px;">
+        <label for="description">Description <span class="bn-label">বিবরণ</span></label>
+        <textarea id="description" name="description" style="width:100%; height:100px; padding:8px;" placeholder="Additional notes about this land record...">{{ record.description|default:'' }}</textarea>
+      </div>
+
+      <div style="display:flex; gap:10px; padding-top:8px">
+        <button type="submit" class="btn btn-primary">
+          {% if action == 'Create' %}Create Record / রেকর্ড তৈরি করুন{% else %}Save Changes / পরিবর্তন সংরক্ষণ করুন{% endif %}
+        </button>
+        <a href="{% if record %}{% url 'tracker:detail' record.pk %}{% else %}{% url 'tracker:list' %}{% endif %}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

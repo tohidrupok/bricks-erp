@@ -1,0 +1,261 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>POS Sales Entry - The Galleria Restaurant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-yellow-100 min-h-screen flex justify-center items-start p-6">
+
+<div class="bg-white w-full max-w-[1100px] border-2 border-yellow-600 shadow-xl rounded-xl overflow-hidden">
+  <!-- Header -->
+  <div class="bg-yellow-600 text-white px-6 py-3 text-xl font-bold flex justify-between items-center">
+    <span>The Galleria Restaurant & Cafe</span>
+    <img src="{% static '/images/resturant-logo.png' %}" alt="Logo" class="w-20 h-10">
+  </div>
+
+  <!-- Sub-header -->
+  <div class="bg-yellow-200 text-yellow-900 font-semibold px-6 py-2 border-b border-gray-300">
+    POS Sales Entry
+  </div>
+
+  <!-- Content Area -->
+  <div class="flex flex-col md:flex-row p-6 gap-6">
+
+    <!-- Left visual -->
+    <div class="md:w-1/3 flex justify-center items-center">
+      <img src="https://cdn-icons-png.flaticon.com/512/3081/3081840.png" alt="Sales Graphic" class="w-48 h-48">
+    </div>
+
+    <!-- Right form -->
+    <div style="margin-top: -20px;" class="md:w-2/3 w-full">
+      <form id="salesForm" method="POST" class="space-y-4">
+        {% csrf_token %}
+
+        <!-- Top Fields -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-semibold text-gray-700">Customer</label>
+            <select name="customer" required class="w-full border rounded px-3 py-2 focus:outline-yellow-500">
+              <option value="">Select Customer</option>
+              {% for customer in restCustomers %}
+                <option value="{{ customer.id }}">{{ customer.rest_customer_name }} ({{ customer.rest_customer_code }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700">Date</label>
+              <input type="date" id="sale_date" name="sale_date" class="w-full border rounded px-3 py-2 focus:outline-yellow-500"/>
+
+              <script>
+                // set current date in input field
+                document.addEventListener("DOMContentLoaded", function() {
+                    const today = new Date();
+                    const formattedDate = today.toISOString().split("T")[0]; // yyyy-mm-dd
+                    document.getElementById("sale_date").value = formattedDate;
+                });
+              </script>
+          </div>
+        </div>
+
+        <!-- Item Selection -->
+        <div>
+          <label class="block font-semibold text-gray-700">Add Item</label>
+          <div class="flex gap-2">
+            <select id="itemSelect" class="flex-1 border rounded px-3 py-2 focus:outline-yellow-500">
+              <option value="">-- Select Item --</option>
+              <!-- {% for item in restSalItems %}
+                <option value="{{ item.id }}" data-price="{{ item.selling_price }}">{{ item.item_name }} -  ( {{ item.opening_stock }} )</option>
+              {% endfor %} -->
+              {% for item in restSalItems %}
+                <option value="{{ item.id }}" data-price="{{ item.selling_price }}">
+                  {{ item.item_name }} - ({{ item.opening_stock }})
+                </option>
+              {% endfor %}
+            </select>
+            <button type="button" id="addItemBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Add</button>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="border rounded-lg overflow-y-auto max-h-72">
+          <table id="itemsTable" class="w-full text-sm border-collapse">
+            <thead class="bg-gray-200 sticky top-0 text-gray-800">
+              <tr>
+                <th class="border px-2 py-1 w-8">#</th>
+                <th class="border px-2 py-1 text-left">Item</th>
+                <th class="border px-2 py-1 w-20">Qty</th>
+                <th class="border px-2 py-1 w-24 text-right">Price</th>
+                <th class="border px-2 py-1 w-28 text-right">Amount</th>
+                <th class="border px-2 py-1 w-16">❌</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- rows will be added dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Invoice + Totals -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-4">
+          <div>
+            <label class="block font-semibold text-gray-700">Invoice ID</label>
+            <input type="text" id="invoiceId" name="invoice_no" value="{{ next_invoice }}"
+                  class="w-full border rounded px-3 py-2 bg-gray-100 font-bold" readonly>
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700">Discount</label>
+            <input type="number" id="discount" name="discount" class="w-full border rounded px-3 py-2 text-right" value="0" min="0">
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700">Total Amount</label>
+            <input type="text" id="grandTotal" name="total_amount" class="w-full border rounded px-3 py-2 bg-gray-100 font-bold text-right" readonly/>
+          </div>
+        </div>
+
+      <!-- Footer Note + Buttons -->
+      <div class="flex flex-wrap justify-between gap-4 pt-4">
+        
+        <!-- Note Field (Left Side) -->
+        <div class="flex-1 max-w-md">
+          <textarea id="note" name="note" placeholder="Note"
+            class="w-full border rounded px-3 py-2" style="height:42px"></textarea>
+        </div>
+
+        <!-- Buttons (Right Side) -->
+        <div class="flex items-start gap-3">
+          <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow">
+            Save
+          </button>
+          <a href="{% url 'restaurant_sales_list' %}" 
+            class="bg-gray-400 text-white px-6 py-2 rounded-lg shadow text-center">
+            Refresh
+          </a>
+          <a href="{% url 'home' %}" 
+            class="bg-black hover:bg-gray-900 text-white px-6 py-2 rounded-lg shadow">
+            Exit
+          </a>
+        </div>
+
+      </div>
+
+      </form>
+
+        <!-- Invoice List -->
+        <div class="mt-6 border-t pt-4">
+          <h2 class="font-bold text-gray-700 mb-2">Latest Invoices</h2>
+          <div class="overflow-y-auto max-h-64">
+            <table class="w-full text-sm border-collapse">
+              <thead class="bg-gray-200 text-gray-800">
+                <tr>
+                  <th class="border px-2 py-1 w-8">#</th>
+                  <th class="border px-2 py-1 text-left">Invoice ID</th>
+                  <th class="border px-2 py-1 text-left">Customer</th>
+                  <th class="border px-2 py-1 text-right">Total Amount</th>
+                  <th class="border px-2 py-1 text-center">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for sale in invoice_list %}
+                <tr>
+                  <td class="border px-2 py-1 text-center">{{ forloop.counter }}</td>
+                  <td class="border px-2 py-1">
+                    <a href="{% url 'restaurant_invoice_view' sale.id %}" class="text-blue-600 hover:underline">
+                      {{ sale.invoice_no }}
+                    </a>
+                  </td>
+                  <td class="border px-2 py-1">{{ sale.customer.rest_customer_name }}</td>
+                  <td class="border px-2 py-1 text-right">{{ sale.final_amount }}</td>
+                  <td class="border px-2 py-1 text-center">{{ sale.sale_date }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td class="border px-2 py-1 text-center" colspan="5">No invoices yet.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // === Auto-generate Invoice ID (temporary for UI) ===
+  document.getElementById("invoiceId").value = "INV-" + Date.now();
+
+  // === Add item to table ===
+  document.getElementById("addItemBtn").addEventListener("click", function() {
+    const select = document.getElementById("itemSelect");
+    const itemId = select.value;
+    if (!itemId) return;
+
+    const itemName = select.options[select.selectedIndex].text;
+    const price = parseFloat(select.options[select.selectedIndex].dataset.price);
+
+    const tbody = document.querySelector("#itemsTable tbody");
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+      <td class="border px-2 py-1 text-center"></td>
+      <td class="border px-2 py-1">${itemName}<input type="hidden" name="item_${itemId}" value="${itemId}"></td>
+      <td class="border px-2 py-1 text-center">
+        <input type="number" name="qty_${itemId}" value="1" min="1" class="w-16 border rounded text-center">
+      </td>
+      <td class="border px-2 py-1 text-right">${price.toFixed(2)}</td>
+      <td class="border px-2 py-1 text-right">
+        <input type="text" name="amount_${itemId}" class="w-20 border rounded text-right bg-gray-50" readonly value="${price.toFixed(2)}">
+      </td>
+      <td class="border px-2 py-1 text-center">
+        <button type="button" class="removeRow text-red-600 font-bold">X</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+    updateRowNumbers();
+    calculateTotals();
+  });
+
+  // === Remove item row ===
+  document.addEventListener("click", function(e) {
+    if (e.target.classList.contains("removeRow")) {
+      e.target.closest("tr").remove();
+      updateRowNumbers();
+      calculateTotals();
+    }
+  });
+
+  // === Update row numbers ===
+  function updateRowNumbers() {
+    document.querySelectorAll("#itemsTable tbody tr").forEach((row, index) => {
+      row.cells[0].innerText = index + 1;
+    });
+  }
+
+  // === Calculate totals (with discount) ===
+  function calculateTotals() {
+    let subtotal = 0;
+    document.querySelectorAll("#itemsTable tbody tr").forEach(row => {
+      const qty = parseFloat(row.querySelector('input[type="number"]').value) || 0;
+      const price = parseFloat(row.cells[3].innerText) || 0;
+      const amount = qty * price;
+      row.querySelector('input[type="text"]').value = amount.toFixed(2);
+      subtotal += amount;
+    });
+
+    const discount = parseFloat(document.getElementById("discount").value) || 0;
+    const grandTotal = subtotal - discount;
+    document.getElementById("grandTotal").value = grandTotal.toFixed(2);
+  }
+
+  // Recalculate on qty or discount change
+  document.addEventListener("input", function(e) {
+    if (e.target.type === "number" || e.target.id === "discount") {
+      calculateTotals();
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Resturant Requisition List - BM ERP{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    background-color: silver;
+    padding: 20px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+    font-size: 12px;
+  }
+
+  th {
+    background-color: #f3f4f6;
+    font-weight: bold;
+  }
+
+  .btn-view {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #84cc16;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    text-decoration: none;
+    min-width: 80px;
+  }
+
+  .no-data {
+    text-align: center;
+    color: #6b7280;
+    font-size: 13px;
+    padding: 20px 0;
+  }
+
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+
+    body {
+      background: white;
+      padding: 0;
+    }
+
+    .card {
+      box-shadow: none;
+      border: none;
+      margin: 0;
+      padding: 0;
+    }
+  }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+  {% include 'partials/mobile.html' %}
+  <div class="mt-[4.7rem] flex md:mt-0">
+    {% include 'partials/sidebar_list.html' %}
+    <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 dark:bg-darkmode-700 md:px-[22px]">
+      {% include 'partials/header.html' %}
+        
+      <h2 class="intro-y mt-10 text-lg font-medium">Resturant Requisition List</h2>
+        
+      {% if messages %}
+      <ul>
+        {% for message in messages %}
+        <li class="message {{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+        
+      <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap text-[12px] space-x-2">
+        <a href="javascript:void(0);" onclick="openPopup()">
+          <button class="px-3 py-1.5 text-xs font-semibold bg-primary text-white border border-primary rounded shadow hover:bg-primary/90">
+            ➕ Add Requisition
+          </button>
+        </a>
+        &nbsp; &nbsp;
+        <a href="{% url 'restau_requisition_list' %}">
+          <button style="background-color:#84cc16" class="px-3 py-1.5 text-xs font-semibold bg-green-600 text-white border border-green-600 rounded shadow hover:bg-green-700 mr-3">
+            🔄 Refresh
+          </button>
+        </a>
+         
+       <!--{% if request.session.department == "admin" %}-->
+       <!--     <a href="javascript:void(0);" onclick="openPopupDel()">-->
+       <!--         <button style="background-color:#00008B" class="px-3 py-1.5 text-xs font-semibold bg-purple-600 text-white border border-purple-600 rounded shadow hover:bg-purple-700 mr-3">-->
+       <!--             🛠 Admin Confirm-->
+       <!--         </button>-->
+       <!--     </a>-->
+       <!-- {% elif request.session.department == "accounts" %}-->
+            <a href="javascript:void(0);" onclick="openPopupAcct()">
+               <button style="background-color:#00008B" class="px-3 py-1.5 text-xs font-semibold bg-purple-600 text-white border border-purple-600 rounded shadow hover:bg-purple-700 mr-3">
+                    💰 Accounts Confirm
+                </button>
+             </a>
+        <!--{% endif %}-->
+                            
+        <a href="javascript:void(0);" onclick="openPopupSummary()">
+          <button style="background-color:#FFA500" class="px-3 py-1.5 text-xs font-semibold bg-cyan-600 text-white border border-cyan-600 rounded shadow hover:bg-cyan-700">
+            📊 Summary
+          </button>
+        </a>
+        
+        &nbsp; &nbsp;
+        <div class="flex-grow"></div>
+        
+        <div class="relative w-48 mt-2 sm:mt-0">
+          <input id="searchInput" type="text" placeholder="🔍 Search..."
+            class="w-full text-xs py-1.5 pl-3 pr-8 border rounded-md shadow-sm focus:ring focus:ring-blue-300 focus:outline-none"
+            oninput="handleSearch()">
+        </div>
+      </div>
+        
+      <div class="card mt-10">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+          <h1 class="text-xl font-bold text-gray-800" style="margin: 0;">Requisition Summary</h1>
+          <a href="{% url 'print_day_wise_requisitions' %}" target="_blank" class="no-print"
+             style="padding: 8px 15px; background: #007bff; color: #fff; text-decoration: none; border-radius: 5px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 5px;">
+             🖨️ Print Today's Requisitions
+          </a>
+        </div>
+
+        <table class="w-full text-sm text-left text-gray-700">
+          <thead>
+            <tr>
+              <th>SL</th>
+              <th>Requisition ID</th>
+              <th>Requisition Date</th>
+              <th>Project Name</th>
+              <th>Supplier(s)</th>
+              <th>Total Amount</th>
+              <th>Status</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            {% for row in grouped_data %}
+            <tr class="border-t">
+              <td class="py-2 px-3">{{ forloop.counter }}</td>
+              <td class="py-2 px-3">
+                {% if row.requi_uniq_id %}
+                  <span class="text-blue-700 font-semibold"> {{ row.requi_uniq_id }}</span>
+                {% else %}
+                  <span class="text-gray-700">By Project</span>
+                {% endif %}
+              </td>
+              <td class="py-2 px-3">{{ row.requisition_date }}</td>
+              <td class="py-2 px-3">{{ row.project_name.project_first_name }}</td>
+              <td class="py-2 px-3">
+                {% for vendor in row.vendor_names %}
+                  <div>{{ vendor }}</div>
+                {% empty %}
+                  <div class="text-gray-400 italic">No Supplier</div>
+                {% endfor %}
+              </td>
+              <td class="py-2 px-3">৳{{ row.total_amount }}</td>
+              <td class="py-2 px-3">
+                {% if row.status == "Approved" %}
+                    <span style="background-color:green" class="px-3 py-1 rounded text-white bg-green-600 text-sm font-semibold">
+                        Approved
+                    </span>
+                {% else %}
+                    <span style="background-color:red" class="px-3 py-1 rounded text-white bg-red-600 text-sm font-semibold">
+                        Pending
+                    </span>
+                {% endif %}
+              </td>
+              <td class="py-2 px-3 text-center">
+                {% if row.requi_uniq_id %}
+                  <a href="{% url 'restu_requisition_by_project' row.requi_uniq_id %}" class="btn-view text-blue-600 underline">📄 View</a>
+                  <a href="{% url 'restu_requisition_approved' row.requi_uniq_id %}" style="background-color:green" class="btn-view text-green-600 underline">📄 Print</a>
+                {% else %}
+                  <a href="{% url 'restu_requisition_by_fallback' row.project_id %}?requisition_date={{ row.requisition_date|date:'Y-m-d' }}&vendor_name={{ row.vendor_names|join:','|urlencode }}" class="btn-view text-yellow-600 underline">
+                    📄 View
+                  </a>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="8" class="text-center text-gray-500 py-4">No requisitions available.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <script>
+          function handleSearch() {
+              let searchValue = document.getElementById('searchInput').value.toLowerCase();
+              let rows = document.querySelectorAll("#tableBody tr");
+              rows.forEach(row => {
+                  let columns = row.getElementsByTagName("td");
+                  let rowText = "";
+                  for (let i = 0; i < columns.length; i++) {
+                      rowText += columns[i].textContent.toLowerCase();
+                  }
+                  if (rowText.includes(searchValue)) {
+                      row.style.display = "";
+                  } else {
+                      row.style.display = "none";
+                  }
+              });
+          }
+      </script>
+
+      <div id="popup" style="display: none;">
+          <div class="popup-content">
+              <h3>Select Project and Employee </h3>
+              <form id="popup-form">
+                  <label for="project-select" class="form-label">Project Name:</label>
+                  <select id="project-select" class="form-select" required>
+                      <option value="">Select a Project</option>
+                      {% for projectFirst in projects_firts %}
+                          <option value="{{ projectFirst.id }}">{{ projectFirst.project_first_name }}</option>
+                      {% endfor %}
+                  </select>
+                  <label for="employee-select" class="form-label">Employee:</label>                               
+                  <select id="employee-select" class="form-select" required>
+                      <option value="">Select an Employee</option>
+                      {% for employee in employees %}
+                          <option value="{{ employee.id }}">{{ employee.rda_emp_name }}</option>
+                      {% endfor %}
+                  </select>
+                  <label for="type-select" class="form-label">Select Type:</label>                               
+                  <select id="type-select" class="form-select" required>
+                      <option value="">Select a Type</option> 
+                      <option value="Supplier">Supplier</option>
+                  </select>
+                  <div class="popup-actions">
+                      <button type="button" class="cancel-btn" onclick="closePopup()">Cancel</button>
+                      <button type="button" class="submit-btn" onclick="submitPopup()">Submit</button>
+                  </div>
+              </form>
+          </div>
+      </div>
+
+      <div id="popupdel" style="display: none;">
+          <div class="popup-content">
+              <h3>Confirm Requisition</h3>
+              <form id="popup-form-del">
+                  <label for="project-select-del" class="form-label">Project Name:</label>
+                  <select id="project-select-del" class="form-select" required>
+                      <option value="">Select a Project</option>
+                      {% for projectFirst in projects_firts %}
+                      <option value="{{ projectFirst.id }}">{{ projectFirst.project_first_name }}</option>
+                      {% endfor %}
+                  </select>
+                  <div class="popup-actions">
+                      <button type="button" class="cancel-btn" onclick="closePopupDel()">Cancel</button>
+                      <button type="button" class="submit-btn" onclick="submitPopupDel()">Submit</button>
+                  </div>
+              </form>
+          </div>
+      </div>
+
+      <div id="popupacct" style="display: none;">
+          <div class="popup-content">
+              <h3>Accounts Confirm Requisition</h3>
+              <form id="popup-form-acct">
+                  <label for="project-select-acct" class="form-label">Project Name:</label>
+                  <select id="project-select-acct" class="form-select" required>
+                      <option value="">Select a Project</option>
+                      {% for projectFirst in projects_firts %}
+                      <option value="{{ projectFirst.id }}">{{ projectFirst.project_first_name }}</option>
+                      {% endfor %}
+                  </select>
+                  <div class="popup-actions">
+                      <button type="button" class="cancel-btn" onclick="closePopupAcct()">Cancel</button>
+                      <button type="button" class="submit-btn" onclick="submitPopupAcct()">Submit</button>
+                  </div>
+              </form>
+          </div>
+      </div>
+
+      <style>
+          #popup, #popupdel, #popupacct {
+              position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+              background: rgba(0, 0, 0, 0.5); display: none;
+              justify-content: center; align-items: center; z-index: 1000;
+          }
+          .popup-content { background: white; padding: 30px; border-radius: 10px; width: 400px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+          .popup-content h3 { margin-bottom: 20px; font-size: 20px; font-weight: bold; color: #333; }
+          .form-label { display: block; margin-bottom: 8px; text-align: left; font-size: 14px; color: #555; }
+          .form-select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; transition: border 0.3s; }
+          .form-select:focus { border-color: #4caf50; outline: none; }
+          .popup-actions { display: flex; justify-content: space-between; }
+          .popup-actions button { padding: 10px 20px; border: none; border-radius: 5px; font-size: 14px; cursor: pointer; transition: background 0.3s; width: 45%; }
+          .cancel-btn { background-color: #f44336; color: white; }
+          .submit-btn { background-color: #4caf50; color: white; }
+          .cancel-btn:hover { background-color: #d32f2f; }
+          .submit-btn:hover { background-color: #45a049; }
+          @media (max-width: 600px) { .popup-content { width: 90%; } }
+      </style>
+
+      <script>
+          function openPopup() { document.getElementById('popup').style.display = 'flex'; }
+          function closePopup() { document.getElementById('popup').style.display = 'none'; }
+          function submitPopup() {
+              const project_id = document.getElementById('project-select').value;
+              const employee = document.getElementById('employee-select').value;
+              const type = document.getElementById('type-select').value;
+              if (!project_id || !employee) {
+                  alert('Please select a project and an employee!');
+                  return;
+              }
+              window.location.href = "{% url 'rest_requisitions_create' %}?project_id=" + encodeURIComponent(project_id) + "&employee=" + encodeURIComponent(employee)+ "&type=" + encodeURIComponent(type);
+          }
+
+          function openPopupDel() { document.getElementById('popupdel').style.display = 'flex'; }
+          function closePopupDel() { document.getElementById('popupdel').style.display = 'none'; }
+          function submitPopupDel() {
+              const project_id = document.getElementById('project-select-del').value;
+              if (!project_id) { alert('Please select a project!'); return; }
+              window.location.href = "{% url 'requisition_confirmation' %}?project_id=" + encodeURIComponent(project_id);
+          }
+
+          function openPopupAcct() { document.getElementById('popupacct').style.display = 'flex'; }
+          function closePopupAcct() { document.getElementById('popupacct').style.display = 'none'; }
+          function submitPopupAcct() {
+              const project_id = document.getElementById('project-select-acct').value;
+              if (!project_id) { alert('Please select a project!'); return; }
+              window.location.href = "{% url 'rest_requisition_acct_confirmation' %}?project_id=" + encodeURIComponent(project_id); // Adjust action route name if needed
+          }
+      </script>
+    </div>
+  </div>
+</div>
+{% endblock %}

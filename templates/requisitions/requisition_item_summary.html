@@ -1,0 +1,369 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Requisition Summary</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      background-color: #ccc;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 960px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .logo img {
+      height: 50px;
+    }
+
+    .label-box {
+      background-color: #e2f0d9;
+      padding: 4px 10px;
+      font-weight: bold;
+      font-size: 14px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    .header-right p {
+      margin: 2px 0;
+      font-size: 11px;
+      color: #666;
+    }
+
+    .sub-head {
+      font-size: 11px;
+      color: #555;
+      line-height: 1.4;
+      margin-top: -10px;
+      margin-bottom: 5px;
+    }
+
+    .info-block {
+      font-size: 12px;
+      margin: 15px 0;
+    }
+
+    .info-block p {
+      margin: 3px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 12px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 6px 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f8f9fa;
+      font-weight: bold;
+    }
+
+    td {
+      background-color: #fff;
+    }
+
+    .left {
+      text-align: left;
+    }
+
+    .amount-in-words {
+      margin-top: 12px;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .signature-section {
+      margin-top: 35px;
+      display: flex;
+      justify-content: space-between;
+      text-align: center;
+    }
+
+    .signature-box {
+      flex: 1;
+      padding: 8px;
+    }
+
+    .signature-box:not(:last-child) {
+      margin-right: 10px;
+    }
+
+    .signature-line {
+      margin-top: 10px;
+      border-top: 1px solid #000;
+      width: 100%;
+      display: block;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 11px;
+      text-align: center;
+      color: #777;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+
+    .print-btn {
+      background-color: #1f3bb3;
+      color: white;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .no-print {
+      margin-top: 15px;
+      text-align: right;
+    }
+
+    @media print {
+      .no-print, .footer {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .card {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+    .status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        color: #fff;
+        font-size: 11px;
+        font-weight: bold;
+        margin-left: 8px;
+    }
+    
+    .status.approved {
+        background: #198754;
+    }
+    
+    .status.pending {
+        background: #dc3545;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <!-- Header -->
+    <div class="header-row">
+      <div class="logo">
+        <img src="{% static 'images/BTP_logo_bricks.webp' %}" alt="Company Logo">
+      </div>
+      {% if requisition_items %}
+        <p>
+            <strong>Requisition ID:</strong>
+
+            {% if requisition_items.0.requi_uniq_id %}
+                {{ requisition_items.0.requi_uniq_id }}
+                <span class="status approved">Approved</span>
+            {% else %}
+                <span class="status pending">Pending</span>
+            {% endif %}
+        </p>
+        {% endif %}
+      <div class="header-right" style="text-align: right;">
+        <div class="label-box">Requisition Summary</div>
+        <p>Printing Date: {{ print_time|date:"F j, Y, g:i a" }}</p>
+      </div>
+    </div>
+    <br/>
+    <!-- Address -->
+    <div class="sub-head">
+      Bonanai, Dhaka-1216<br>
+      01993005558, 09639246230, 09639246231 <br>
+      bricks@gmail.com, bricks@gmail.com, www.bricks.com
+    </div>
+
+    <hr style="margin: 8px 0; border-color: #ddd;" />
+
+   <div class="flex justify-between items-start gap-6 info-block">
+  
+  <!-- Left Side: Project & Supplier(s) -->
+  <div class="w-1/2">
+    <p><strong>Project:</strong> {{ project.project_first_name }}</p>
+
+    {% if supplier %}
+      <p><strong>Supplier:</strong> {{ supplier.supplier_name }}</p>
+    {% else %}
+      <p><strong>Suppliers:</strong> 
+        {% for s in suppliers %}
+          {{ s.supplier_name }}{% if not forloop.last %}, {% endif %}
+        {% empty %} None
+        {% endfor %}
+      </p>
+    {% endif %}
+  </div>
+
+  <!-- Right Side: Requisition Date & Employee(s) -->
+  <div class="w-1/2 text-right">
+    {% if requisition_date %}
+      <p><strong>Requisition Date:</strong> {{ requisition_date }}</p>
+    {% endif %}
+    {% if requisition_items %}
+        <p><strong>Requisition ID:</strong> {{ requisition_items.0.requi_uniq_id }}</p>
+    {% endif %}
+
+
+    {% if employees %}
+      <p><strong>Employee Name:</strong>
+        {% for employee in employees %}
+          {{ employee.employee_name }} ({{ employee.get_emp_type_display }}){% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </p>
+    {% endif %}
+  </div>
+
+</div>
+
+
+    <!-- Table -->
+    <!--<table>-->
+    <!--  <thead>-->
+    <!--    <tr>-->
+    <!--      <th>SL</th>-->
+    <!--      <th>Item Name</th>-->
+    <!--      <th>Unit</th>-->
+    <!--      <th>Quantity</th>-->
+    <!--      <th>Rate (Tk)</th>-->
+    <!--      <th>Amount (Tk)</th>-->
+    <!--      <th>Description</th>-->
+    <!--    </tr>-->
+    <!--  </thead>-->
+    <!--  <tbody>-->
+    <!--    {% for item in requisition_items %}-->
+    <!--    <tr>-->
+    <!--      <td>{{ forloop.counter }}</td>-->
+    <!--      <td class="left"><strong>{{ item.item_name }}</strong></td>-->
+    <!--      <td>{{ item.unit }}</td>-->
+    <!--      <td>{{ item.qty }}</td>-->
+    <!--      <td style="text-align: right;">{{ item.rate|floatformat:2 }}</td>-->
+    <!--      <td style="text-align: right;">{{ item.amount|floatformat:2|intcomma }}</td>-->
+    <!--      <td>{{ item.description }}</td>-->
+    <!--    </tr>-->
+    <!--    {% empty %}-->
+    <!--    <tr>-->
+    <!--      <td colspan="7" style="text-align: center;">No Requisition items found.</td>-->
+    <!--    </tr>-->
+    <!--    {% endfor %}-->
+    <!--    <tr>-->
+    <!--      <td colspan="5" style="text-align:right; font-weight:bold;">Total Amount (Tk)</td>-->
+    <!--      <td colspan="2" style="text-align:right;"><strong>BDT {{ total_amount|floatformat:2|intcomma }}</strong></td>-->
+    <!--    </tr>-->
+    <!--  </tbody>-->
+    <!--</table>-->
+    <!-- Table -->
+<table>
+  <thead>
+    <tr>
+      <th>SL</th>
+      <th>Item Name</th>
+      <th>Unit</th>
+      <th>Req. Qty</th>
+      <th>Available Qty</th> <!-- New Header Column -->
+      <th>Rate (Tk)</th>
+      <th>Amount (Tk)</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in requisition_items %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td class="left"><strong>{{ item.item_name }}</strong></td>
+      <td>{{ item.unit }}</td>
+      <td>{{ item.qty }}</td>
+      <!-- Available Quantity Display -->
+      <td style="font-weight: bold; color: {% if item.available_qty < item.qty %}#dc3545{% else %}#198754{% endif %};">
+        {{ item.available_qty }}
+      </td>
+      <td style="text-align: right;">{{ item.rate|floatformat:2 }}</td>
+      <td style="text-align: right;">{{ item.amount|floatformat:2|intcomma }}</td>
+      <td>{{ item.description }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="8" style="text-align: center;">No Requisition items found.</td>
+    </tr>
+    {% endfor %}
+    <tr>
+      <td colspan="7" style="text-align:right; font-weight:bold;">Total Amount (Tk)</td>
+      <td colspan="1" style="text-align:right;"><strong>BDT {{ total_amount|floatformat:2|intcomma }}</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+    <!-- Amount in Words -->
+    <div class="amount-in-words">
+      In Words: {{ amount_in_words }} Only.
+    </div>
+
+    <!-- Signature Section -->
+    <div class="signature-section">
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Prepared by
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Checked by
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Approved by
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Authorized by
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer no-print">
+      © 2026 BRICKS LIMITED. | This is a system-generated document.
+      <div style="margin-top: 10px;">
+        <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

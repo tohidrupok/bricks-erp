@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Requisitions - BM ERP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg-page: #f4f6fb;
+        --bg-panel: #ffffff;
+        --bg-panel-soft: #f7f9fd;
+        --bg-row: #ffffff;
+        --bg-row-alt: #f8f9fc;
+        --bg-input: #ffffff;
+        --border-subtle: #e1e5ee;
+        --border-faint: #ebedf3;
+        --text-primary: #1c2333;
+        --text-muted: #6b7280;
+        --text-dim: #9ca3af;
+        --accent-blue: #3b6fe0;
+        --accent-teal: #0d9f8d;
+        --accent-amber: #d9860a;
+        --accent-red: #e0475a;
+        --accent-purple: #7c5cff;
+        --radius-lg: 18px;
+        --radius-md: 12px;
+        --radius-sm: 7px;
+        --radius-pill: 999px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background: var(--bg-page);
+        color: var(--text-primary);
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+
+    h1, h2, h3 { font-family: 'Sora', sans-serif; letter-spacing: -0.01em; }
+
+    .top-header {
+        max-width: 1320px; margin: 24px auto 0; padding: 22px 26px;
+        background: var(--bg-panel);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 10px 24px -18px rgba(20,30,60,.18);
+    }
+    .header-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .page-title { margin: 0; font-size: 24px; font-weight: 800; color: var(--text-primary); display:flex; align-items:center; gap:10px; }
+    .page-title .dot { width:9px; height:9px; border-radius:50%; background: var(--accent-teal); box-shadow: 0 0 0 4px rgba(13,159,141,.14); }
+    .page-subtitle { margin-top: 5px; color: var(--text-muted); font-size: 13px; letter-spacing: .01em; }
+
+    .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+    .nav-btn {
+        text-decoration: none; color: var(--text-primary);
+        padding: 9px 15px; border-radius: var(--radius-sm);
+        font-size: 13px; font-weight: 600;
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-panel-soft);
+        cursor: pointer; transition: .15s ease;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .nav-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); transform: translateY(-1px); }
+    .home-btn { color: #2f6fe0; }
+    .supplier-btn { color: #0d9f8d; }
+    .category-btn { color: #b9750a; }
+    .req-btn { color: #7c5cff; }
+    .refresh-btn { color: var(--text-muted); }
+
+    .container { max-width: 1320px; margin: 20px auto 60px; padding: 0 26px; }
+    .card {
+        background: var(--bg-panel);
+        border: 1px solid var(--border-subtle);
+        padding: 24px; border-radius: var(--radius-lg);
+        box-shadow: 0 10px 24px -18px rgba(20,30,60,.18);
+    }
+    .card h2 { margin: 0 0 18px; font-size: 18px; font-weight: 700; color: var(--text-primary); }
+    .card h2 .muted { color: var(--text-muted); font-weight: 500; font-size: 13px; }
+
+    /* ---------------- Filter bar ---------------- */
+    .filter-actions { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+    .filter-control {
+        padding: 9px 12px; border-radius: var(--radius-sm);
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-input); color: var(--text-primary);
+        font-size: 13px; font-family: inherit;
+    }
+    .filter-control::placeholder { color: var(--text-dim); }
+    .filter-control:focus { outline: none; border-color: var(--accent-blue); }
+    .search-wrap { position: relative; flex: 1; min-width: 180px; }
+    .search-wrap .filter-control { width: 100%; padding-left: 34px; }
+    .search-wrap::before {
+        content: "\1F50D"; position: absolute; left: 12px; top: 50%;
+        transform: translateY(-50%); font-size: 12px; opacity: .6;
+    }
+
+    /* ---------------- Table ---------------- */
+    .table-scroll { overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--border-faint); }
+    table { width: 100%; border-collapse: collapse; min-width: 1080px; }
+    th {
+        background: #f6f8fc; color: var(--text-muted);
+        padding: 12px 14px; text-align: left;
+        font-size: 11px; text-transform: uppercase; letter-spacing: .06em; font-weight: 700;
+        border-bottom: 1px solid var(--border-subtle);
+        position: sticky; top: 0;
+    }
+    td { padding: 11px 14px; border-bottom: 1px solid var(--border-faint); vertical-align: middle; font-size: 13.5px; }
+    tbody tr:not(.group-header-row):nth-child(odd) { background: var(--bg-row-alt); }
+    tbody tr:not(.group-header-row):hover { background: #eef2fb; }
+
+    .inline-input, .inline-select {
+        width: 100%; padding: 7px 9px; border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm); box-sizing: border-box; font-size: 13px;
+        background: var(--bg-input); color: var(--text-primary); font-family: inherit;
+    }
+    .inline-input:focus, .inline-select:focus { border-color: var(--accent-blue); outline: none; }
+    .readonly-input { background: #f2f6fb; color: var(--accent-teal); font-weight: 700; cursor: not-allowed; border-color: var(--border-faint); }
+
+    .item-name-cell { color: var(--text-primary); font-weight: 600; }
+    .date-cell { color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+    /* ---------------- Group header row: cells aligned to real columns ---------------- */
+    .group-header-row td {
+        background: #eef3fc;
+        color: #2952a3; font-weight: 700; font-size: 13px;
+        padding: 12px 14px; border-bottom: 1px solid var(--border-subtle);
+        letter-spacing: .02em;
+        white-space: nowrap;
+    }
+    .group-label-cell { display: flex; align-items: center; gap: 10px; }
+    .group-count-badge {
+        background: #dbe6fb; color: #2952a3; font-size: 11px; font-weight: 700;
+        padding: 2px 9px; border-radius: var(--radius-pill);
+    }
+    .group-amount-cell { color: var(--accent-teal); font-size: 14px; font-weight: 800; }
+    .group-status-pill {
+        display: inline-flex; align-items: center; padding: 4px 11px;
+        border-radius: var(--radius-pill); font-size: 11px; font-weight: 700;
+    }
+    .group-status-pill.approved { color: var(--accent-teal); background: rgba(13,159,141,.1); }
+    .group-status-pill.pending  { color: var(--accent-amber); background: rgba(217,134,10,.1); }
+    .group-status-pill.mixed    { color: var(--accent-blue);  background: rgba(59,111,224,.1); }
+
+    .group-toggle-btn {
+        background: #ffffff; color: var(--accent-blue);
+        border: 1px solid var(--border-subtle);
+        padding: 6px 14px; border-radius: var(--radius-pill);
+        font-size: 12px; font-weight: 700; letter-spacing: .02em;
+        cursor: pointer; transition: .15s ease; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .group-toggle-btn:hover { border-color: var(--accent-blue); background: #eef3fc; }
+    .group-toggle-btn .chevron { transition: transform .15s ease; display: inline-block; }
+    .group-toggle-btn.expanded .chevron { transform: rotate(90deg); }
+
+    /* ---------------- Status / calc-mode pills ---------------- */
+    .status-select { font-weight: 700; }
+    .status-select.pending  { color: var(--accent-amber); border-color: rgba(217,134,10,.35); background: rgba(217,134,10,.07); }
+    .status-select.approved { color: var(--accent-teal);  border-color: rgba(13,159,141,.35); background: rgba(13,159,141,.07); }
+    .status-select.rejected { color: var(--accent-red);   border-color: rgba(224,71,90,.35); background: rgba(224,71,90,.07); }
+
+    .rate-cell-container { display: flex; gap: 6px; align-items: center; }
+    .toggle-calc-btn {
+        background: rgba(59,111,224,.08); color: var(--accent-blue);
+        border: 1px solid rgba(59,111,224,.3);
+        padding: 7px 10px; border-radius: var(--radius-pill);
+        font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        cursor: pointer; min-width: 58px; text-align: center; transition: .15s ease;
+    }
+    .toggle-calc-btn.mode-whole { background: rgba(217,134,10,.09); color: var(--accent-amber); border-color: rgba(217,134,10,.3); }
+    .toggle-calc-btn:hover { filter: brightness(0.97); }
+
+    /* ---------------- Actions ---------------- */
+    .view-btn {
+        width: 32px; height: 32px; border-radius: var(--radius-sm);
+        border: 1px solid var(--border-subtle); background: var(--bg-input);
+        color: var(--text-muted); cursor: pointer; display: inline-flex;
+        align-items: center; justify-content: center; font-size: 15px; transition: .15s ease;
+    }
+    .view-btn:hover { color: var(--accent-blue); border-color: var(--accent-blue); }
+
+    /* ---------------- Summary ---------------- */
+    .summary-box {
+        margin-top: 20px; padding: 18px 22px;
+        background: #f4f8ff;
+        border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
+        display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    }
+    .summary-title { font-size: 13.5px; font-weight: 600; color: var(--text-muted); }
+    .summary-amount { font-size: 24px; font-weight: 800; color: var(--accent-teal); font-variant-numeric: tabular-nums; }
+    .summary-amount .cur { font-size: 13px; color: var(--text-muted); font-weight: 700; margin-right: 4px; }
+
+    /* ---------------- Toasts ---------------- */
+    #toast-container { position: fixed; top: 22px; right: 22px; z-index: 9999; }
+    .toast-message {
+        background: var(--bg-panel); color: var(--text-primary);
+        border: 1px solid var(--border-subtle); padding: 12px 20px;
+        border-radius: var(--radius-sm); margin-bottom: 10px; font-weight: 600; font-size: 13px;
+        box-shadow: 0 12px 24px -10px rgba(20,30,60,.2);
+        animation: slideIn .3s ease forwards;
+    }
+    .toast-success { border-left: 4px solid var(--accent-teal); }
+    .toast-error { border-left: 4px solid var(--accent-red); }
+    @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+    /* ---------------- Detail modal ---------------- */
+    .modal-overlay {
+        display: none; position: fixed; inset: 0; background: rgba(30,40,60,.35);
+        z-index: 10000; align-items: center; justify-content: center; padding: 20px;
+        backdrop-filter: blur(2px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-card {
+        background: var(--bg-panel); border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-lg); width: 100%; max-width: 460px;
+        box-shadow: 0 30px 60px -20px rgba(20,30,60,.35); overflow: hidden;
+    }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--border-faint); }
+    .modal-head-title { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 14px; color: var(--text-muted); }
+    .modal-close { width: 30px; height: 30px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-input); color: var(--text-muted); cursor: pointer; }
+    .modal-close:hover { color: var(--accent-red); border-color: var(--accent-red); }
+    .modal-body { padding: 22px; }
+    .modal-item-name { font-size: 20px; font-weight: 800; margin-bottom: 18px; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
+    .modal-field-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-dim); margin-bottom: 4px; }
+    .modal-field-value { font-size: 14.5px; font-weight: 700; color: var(--text-primary); }
+    .modal-field-value.accent { color: var(--accent-teal); }
+    .modal-pill { display: inline-block; padding: 3px 10px; border-radius: var(--radius-pill); font-size: 11.5px; font-weight: 700; }
+
+    .empty-row td { text-align: center; color: var(--text-dim); font-style: italic; padding: 32px; }
+
+    @media (max-width: 720px) {
+        .top-header, .container { padding-left: 14px; padding-right: 14px; }
+    }
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<div class="top-header">
+    <div class="header-row">
+        <div>
+            <h2 class="page-title"><span class="dot"></span>Restaurant Supplier</h2>
+            <div class="page-subtitle">Public Requisition Management</div>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'public_restaurant_home' %}{{ url_suffix }}" class="nav-btn home-btn">🏠 Home</a>
+            <a href="{% url 'restau_requisition_list_public' %}{{ url_suffix }}" class="nav-btn category-btn">📦 Back</a>
+            <a href="{% url 'restaurant_expense_public_list' %}{{ url_suffix }}" class="nav-btn refresh-btn">💰 Expense</a>
+            <a href="{% url 'public_restaurant_supplier_list' %}{{ url_suffix }}" class="nav-btn supplier-btn">🏢 Supplier</a>
+            <a href="{% url 'public_restaurant_item_name' %}{{ url_suffix }}" class="nav-btn req-btn">📦 Item List</a>
+            <a href="" id="dynamicRefreshBtn" class="nav-btn refresh-btn">🔄 Refresh</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>Requisition List <span class="muted">— Purchase Pending</span></h2>
+
+        <div class="filter-actions">
+            <a href="{% url 'requisition_jewel_purchase_list' %}{{ url_suffix }}" class="nav-btn category-btn">📂 Purchase Update</a>
+
+            <div class="search-wrap">
+                <input type="text" id="searchInput" class="filter-control" placeholder="Search table..." onkeyup="handleFilter()">
+            </div>
+
+            <select id="supplierFilter" class="filter-control" onchange="handleFilter()" style="width: 190px;">
+                <option value="">All Suppliers</option>
+                {% for supplier in suppliers %}
+                    <option value="{{ supplier.rest_supplier_name }}">{{ supplier.rest_supplier_name }}</option>
+                {% endfor %}
+            </select>
+
+            <input type="date" id="fromDate" class="filter-control" onchange="handleFilter()" title="From Requisition Date">
+            <input type="date" id="toDate" class="filter-control" onchange="handleFilter()" title="To Requisition Date">
+
+            <select id="projectFilter" class="filter-control" onchange="executeWorkspaceRouting(this.value)" style="width: 190px;">
+                <option value="">All Projects</option>
+                {% for project in projects_firts %}
+                    <option value="{{ project.id }}" {% if current_project|slugify == project.id|slugify %}selected{% endif %}>
+                        {{ project.project_first_name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <button type="button" onclick="expandAllGroups()" class="nav-btn supplier-btn">⬇ Expand All</button>
+            <button type="button" onclick="collapseAllGroups()" class="nav-btn category-btn">⬆ Collapse All</button>
+            <button type="button" onclick="clearFilters()" class="nav-btn refresh-btn">Reset</button>
+        </div>
+
+        <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:44px;">SL</th>
+                    <th>Purchased At</th>
+                    <th>Project Name</th>
+                    <th>Item Name</th>
+                    <th>Supplier</th>
+                    <th style="width:90px;">Qty</th>
+                    <th style="width:150px;">Rate</th>
+                    <th style="width:110px;">Amount</th>
+                    <th style="width:150px;">Approval</th>
+                    <th style="width:56px;"></th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for row in grouped_data %}
+                <tr data-id="{{ row.id }}"
+                    data-calc-mode="{{ row.calc_mode }}"
+                    data-item="{{ row.item_name }}"
+                    data-supplier="{{ row.vendor_name }}"
+                    data-status="{{ row.purch_status }}"
+                    data-date="{{ row.requisition_date|date:'Y-m-d' }}"
+                    data-project="{{ row.project_name }}"
+                    data-employee="{{ row.employee_name }}"
+                    data-unit="{{ row.unit }}">
+                    <td class="row-sl">{{ forloop.counter }}</td>
+                    <td class="date-cell">{{ row.requisition_date }}</td>
+                    <td>{{ row.project_name }}</td>
+                    <td class="item-name-cell">{{ row.item_name }}</td>
+                    <td>
+                        <select class="inline-select supplier-select" onchange="updateSupplierDataAttribute(this); updateDatabaseField(this, 'vendor_name');">
+                            <option value="">Choose Supplier</option>
+                            {% for supplier in suppliers %}
+                                <option value="{{ supplier.rest_supplier_name }}" {% if supplier.rest_supplier_name == row.vendor_name %}selected{% endif %}>
+                                    {{ supplier.rest_supplier_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+
+                    <td>
+                        <input type="number" step="0.01" class="inline-input qty-field" value="{{ row.total_qty }}" oninput="calculateRowAndSave(this)">
+                    </td>
+
+                    <td>
+                        <div class="rate-cell-container">
+                            <input type="number" step="0.01" class="inline-input rate-field" value="{{ row.rate }}" oninput="calculateRowAndSave(this)">
+                            <button type="button" class="toggle-calc-btn {% if row.calc_mode == 'whole' %}mode-whole{% endif %}" onclick="toggleCalculationMode(this)">
+                                {% if row.calc_mode == 'whole' %}Whole{% else %}Unit{% endif %}
+                            </button>
+                        </div>
+                    </td>
+
+                    <td>
+                        <input type="number" step="0.01" class="inline-input amount-field readonly-input" value="{{ row.total_amount }}" readonly>
+                    </td>
+
+                    <td>
+                        <select class="inline-select status-select {{ row.purch_status }}" onchange="updateStatusDataAttribute(this); updateDatabaseField(this, 'approv_purch_status')">
+                            <option value="pending" {% if row.purch_status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="approved" {% if row.purch_status == 'approved' %}selected{% endif %}>Approved</option>
+                            <option value="rejected" {% if row.purch_status == 'rejected' %}selected{% endif %}>Rejected</option>
+                        </select>
+                    </td>
+
+                    <td>
+                        <button type="button" class="view-btn" title="View details" onclick="openPurchaseDetails(this)">👁</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row">
+                    <td colspan="10">No pending purchase requisitions displayed.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+
+        <div class="summary-box">
+            <span class="summary-title" id="summaryTitleText">Total Amount (Filtered View)</span>
+            <span class="summary-amount"><span class="cur">TK</span><span id="grandTotalDisplay">0.00</span></span>
+        </div>
+    </div>
+</div>
+
+<!-- ---------------- Purchase Details modal ---------------- -->
+<div class="modal-overlay" id="detailModal" onclick="if(event.target===this) closePurchaseDetails();">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div class="modal-head-title">📄 Purchase Details</div>
+            <button type="button" class="modal-close" onclick="closePurchaseDetails()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-item-name" id="md-item">—</div>
+            <div class="modal-grid">
+                <div>
+                    <div class="modal-field-label">Requisition Date</div>
+                    <div class="modal-field-value" id="md-date">—</div>
+                </div>
+                <div>
+                    <div class="modal-field-label">Project</div>
+                    <div class="modal-field-value" id="md-project">—</div>
+                </div>
+                <div>
+                    <div class="modal-field-label">Employee</div>
+                    <div class="modal-field-value" id="md-employee">—</div>
+                </div>
+                <div>
+                    <div class="modal-field-label">Supplier</div>
+                    <div class="modal-field-value" id="md-supplier">—</div>
+                </div>
+                <div>
+                    <div class="modal-field-label">Quantity</div>
+                    <div class="modal-field-value" id="md-qty">—</div>
+                </div>
+                <div>
+                    <div class="modal-field-label">Rate</div>
+                    <div class="modal-field-value" id="md-rate">—</div>
+                </div>
+                <div>
+                    <div class="modal-field-label">Total Amount</div>
+                    <div class="modal-field-value accent" id="md-amount">—</div>
+                </div>
+                <div>
+                    <div class="modal-field-label">Approval Status</div>
+                    <div class="modal-field-value"><span class="modal-pill" id="md-status">—</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let initialRowElements = [];
+// Tracks which supplier groups are currently expanded.
+// Empty by default => all groups start COLLAPSED.
+let expandedGroups = new Set();
+
+document.addEventListener("DOMContentLoaded", function() {
+    const refreshBtn = document.getElementById("dynamicRefreshBtn");
+    if (refreshBtn) {
+        refreshBtn.setAttribute("href", window.location.pathname + window.location.search);
+    }
+
+    let rowNodes = document.querySelectorAll("#tableBody tr:not(.empty-row)");
+    rowNodes.forEach(node => initialRowElements.push(node));
+
+    document.querySelectorAll('.status-select').forEach(sel => applyStatusPillClass(sel));
+
+    runTableVisibilityAndGroupingEngine();
+});
+
+function executeWorkspaceRouting(projectId) {
+    let employeeId = "";
+    if (String(projectId) === "36") { employeeId = "24"; }
+    else if (String(projectId) === "60") { employeeId = "54"; }
+
+    let baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    let params = [];
+    if (projectId) params.push(`project=${projectId}`);
+    if (employeeId) params.push(`employee=${employeeId}`);
+
+    window.location.href = baseUrl + (params.length > 0 ? "?" + params.join("&") : "");
+}
+
+function displayToast(message, alertType = "success") {
+    const container = document.getElementById("toast-container");
+    const el = document.createElement("div");
+    el.className = `toast-message toast-${alertType}`;
+    el.innerHTML = alertType === "success" ? `✓ ${message}` : `⚠️ ${message}`;
+    container.appendChild(el);
+
+    setTimeout(() => {
+        el.style.animation = "fadeOut 0.4s ease forwards";
+        setTimeout(() => el.remove(), 400);
+    }, 2500);
+}
+
+function applyStatusPillClass(selectEl) {
+    selectEl.classList.remove('pending', 'approved', 'rejected');
+    selectEl.classList.add(selectEl.value);
+}
+
+function updateSupplierDataAttribute(selectElement) {
+    let row = selectElement.closest('tr');
+    row.setAttribute('data-supplier', selectElement.value.trim());
+    runTableVisibilityAndGroupingEngine();
+}
+
+function updateStatusDataAttribute(selectElement) {
+    let row = selectElement.closest('tr');
+    row.setAttribute('data-status', selectElement.value.toLowerCase().trim());
+    applyStatusPillClass(selectElement);
+    runTableVisibilityAndGroupingEngine();
+}
+
+function handleFilter(){
+    runTableVisibilityAndGroupingEngine();
+}
+
+function clearFilters() {
+    document.getElementById("searchInput").value = "";
+    document.getElementById("supplierFilter").value = "";
+    document.getElementById("fromDate").value = "";
+    document.getElementById("toDate").value = "";
+    runTableVisibilityAndGroupingEngine();
+}
+
+function toggleGroup(groupTitle) {
+    if (expandedGroups.has(groupTitle)) {
+        expandedGroups.delete(groupTitle);
+    } else {
+        expandedGroups.add(groupTitle);
+    }
+    runTableVisibilityAndGroupingEngine();
+}
+
+function expandAllGroups() {
+    document.querySelectorAll('#tableBody tr:not(.empty-row)').forEach(row => {
+        expandedGroups.add(row.getAttribute('data-supplier') || "No Supplier Chosen");
+    });
+    runTableVisibilityAndGroupingEngine();
+}
+
+function collapseAllGroups() {
+    expandedGroups.clear();
+    runTableVisibilityAndGroupingEngine();
+}
+
+function cssSafe(str) {
+    return str.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+function escapeForJs(str) {
+    return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+/*
+ * Two-pass grouping:
+ *  Pass 1 - filter rows and bucket them per supplier, computing the
+ *           group's total amount + approval status while doing so.
+ *  Pass 2 - render each group's header row (label + item count + total
+ *           amount + status pill + show/hide toggle) followed by its
+ *           rows if the group is expanded.
+ */
+function runTableVisibilityAndGroupingEngine() {
+    let searchValue = document.getElementById("searchInput").value.toLowerCase().trim();
+    let selectedSupplier = document.getElementById("supplierFilter").value.toLowerCase().trim();
+    let fromDateVal = document.getElementById("fromDate").value;
+    let toDateVal = document.getElementById("toDate").value;
+
+    let tableBody = document.getElementById("tableBody");
+    document.querySelectorAll(".group-header-row").forEach(el => el.remove());
+
+    // ---- Pass 1: filter + bucket ----
+    let groups = new Map(); // name -> { rows: [], total: 0, approved: 0, pending: 0 }
+
+    initialRowElements.forEach(function(row) {
+        let rowText = row.textContent.toLowerCase();
+        let statusValue = row.getAttribute('data-status') || 'pending';
+        let rowSupplier = (row.getAttribute('data-supplier') || "").toLowerCase().trim();
+        let rowDate = row.getAttribute('data-date') || "";
+
+        let matchesSearch = (searchValue === "" || rowText.includes(searchValue));
+        let matchesSupplier = (selectedSupplier === "" || rowSupplier === selectedSupplier);
+        let matchesDate = true;
+        if (fromDateVal && rowDate) matchesDate = matchesDate && (rowDate >= fromDateVal);
+        if (toDateVal && rowDate) matchesDate = matchesDate && (rowDate <= toDateVal);
+        let isRejected = (statusValue === "rejected");
+
+        if (matchesSearch && matchesSupplier && matchesDate && !isRejected) {
+            let name = row.getAttribute('data-supplier') || "No Supplier Chosen";
+            if (!groups.has(name)) groups.set(name, { rows: [], total: 0, approved: 0, pending: 0 });
+            let g = groups.get(name);
+            g.rows.push(row);
+            g.total += parseFloat(row.querySelector('.amount-field').value) || 0;
+            if (statusValue === 'approved') g.approved++; else g.pending++;
+            row.style.display = "none"; // default hidden, pass 2 reveals if expanded
+        } else {
+            row.style.display = "none";
+        }
+    });
+
+    // ---- Pass 2: render ----
+    let sortedNames = [...groups.keys()].sort((a, b) => a.localeCompare(b));
+    let visualCounter = 1;
+
+    sortedNames.forEach(function(name) {
+        let g = groups.get(name);
+        let isExpanded = expandedGroups.has(name);
+
+        let statusLabel, statusClass;
+        if (g.approved > 0 && g.pending > 0) { statusLabel = 'Mixed'; statusClass = 'mixed'; }
+        else if (g.pending > 0) { statusLabel = 'Pending'; statusClass = 'pending'; }
+        else { statusLabel = 'Approved'; statusClass = 'approved'; }
+
+        let headingRow = document.createElement('tr');
+        headingRow.className = "group-header-row";
+        headingRow.innerHTML = `
+            <td colspan="5">
+                <div class="group-label-cell">
+                    🏢 Supplier: ${name}
+                    <span class="group-count-badge">${g.rows.length} item${g.rows.length === 1 ? '' : 's'}</span>
+                </div>
+            </td>
+            <td></td>
+            <td></td>
+            <td class="group-amount-cell">TK ${g.total.toFixed(2)}</td>
+            <td><span class="group-status-pill ${statusClass}">${statusLabel}</span></td>
+            <td>
+                <button type="button" class="group-toggle-btn ${isExpanded ? 'expanded' : ''}" onclick="toggleGroup('${escapeForJs(name)}')">
+                    <span class="chevron">▶</span> ${isExpanded ? 'Hide' : 'Show'}
+                </button>
+            </td>`;
+        tableBody.appendChild(headingRow);
+
+        if (isExpanded) {
+            g.rows.forEach(function(row) {
+                row.style.display = "";
+                let slCell = row.querySelector('.row-sl');
+                if (slCell) slCell.innerText = visualCounter++;
+                tableBody.appendChild(row);
+            });
+        }
+    });
+
+    calculateGrandTotal();
+}
+
+function calculateGrandTotal() {
+    let rows = initialRowElements;
+    let runningTotal = 0;
+
+    rows.forEach(function(row) {
+        let statusValue = row.getAttribute('data-status') || 'pending';
+        if (statusValue === "rejected") return;
+
+        let searchValue = document.getElementById("searchInput").value.toLowerCase().trim();
+        let selectedSupplier = document.getElementById("supplierFilter").value.toLowerCase().trim();
+        let fromDateVal = document.getElementById("fromDate").value;
+        let toDateVal = document.getElementById("toDate").value;
+
+        let rowText = row.textContent.toLowerCase();
+        let rowSupplier = (row.getAttribute('data-supplier') || "").toLowerCase().trim();
+        let rowDate = row.getAttribute('data-date') || "";
+
+        let matchesSearch = (searchValue === "" || rowText.includes(searchValue));
+        let matchesSupplier = (selectedSupplier === "" || rowSupplier === selectedSupplier);
+        let matchesDate = true;
+        if (fromDateVal && rowDate) matchesDate = matchesDate && (rowDate >= fromDateVal);
+        if (toDateVal && rowDate) matchesDate = matchesDate && (rowDate <= toDateVal);
+
+        if (matchesSearch && matchesSupplier && matchesDate) {
+            let amountField = row.querySelector('.amount-field');
+            if (amountField) {
+                runningTotal += parseFloat(amountField.value) || 0;
+            }
+        }
+    });
+
+    document.getElementById("grandTotalDisplay").innerText = runningTotal.toFixed(2);
+}
+
+function toggleCalculationMode(btnElement) {
+    let row = btnElement.closest('tr');
+    let currentMode = row.getAttribute('data-calc-mode') || 'unit';
+    let qtyInput = row.querySelector('.qty-field');
+    let rateInput = row.querySelector('.rate-field');
+    let amountInput = row.querySelector('.amount-field');
+
+    let nextMode = (currentMode === 'unit') ? 'whole' : 'unit';
+    row.setAttribute('data-calc-mode', nextMode);
+
+    let qty = parseFloat(qtyInput.value) || 0;
+    let rate = parseFloat(rateInput.value) || 0;
+
+    if (nextMode === 'whole') {
+        btnElement.innerText = "Whole";
+        btnElement.classList.add('mode-whole');
+        amountInput.value = rate.toFixed(2);
+    } else {
+        btnElement.innerText = "Unit";
+        btnElement.classList.remove('mode-whole');
+        amountInput.value = (qty * rate).toFixed(2);
+    }
+
+    runTableVisibilityAndGroupingEngine();
+    updateDatabaseField(btnElement, 'calc_mode');
+}
+
+function calculateRowAndSave(element) {
+    let row = element.closest('tr');
+    let qtyInput = row.querySelector('.qty-field');
+    let rateInput = row.querySelector('.rate-field');
+    let amountInput = row.querySelector('.amount-field');
+
+    let calcMode = row.getAttribute('data-calc-mode') || 'unit';
+
+    let qty = parseFloat(qtyInput.value) || 0;
+    let rate = parseFloat(rateInput.value) || 0;
+    let amount = 0;
+
+    if (calcMode === 'whole') {
+        amount = rate;
+    } else {
+        amount = qty * rate;
+    }
+
+    amountInput.value = amount.toFixed(2);
+
+    runTableVisibilityAndGroupingEngine();
+    let fieldName = element.classList.contains('qty-field') ? 'qty' : 'rate';
+    updateDatabaseField(element, fieldName);
+}
+
+function updateDatabaseField(element, fieldName) {
+    let row = element.closest('tr');
+    let recordId = row.getAttribute('data-id');
+    let calcMode = row.getAttribute('data-calc-mode') || 'unit';
+
+    let targetValue = (fieldName === 'calc_mode') ? calcMode : element.value;
+    let postUrl = window.location.pathname;
+
+    let targetHighlight = (fieldName === 'calc_mode') ? row.querySelector('.rate-field') : element;
+    targetHighlight.style.borderColor = "#d9860a";
+
+    fetch(postUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            'id': recordId,
+            'field': fieldName,
+            'value': targetValue,
+            'calc_mode': calcMode
+        })
+    })
+    .then(res => {
+        if(!res.ok) throw new Error('API failure encountered.');
+        return res.json();
+    })
+    .then(data => {
+        targetHighlight.style.borderColor = "#0d9f8d";
+        if (data.total_amount !== undefined) {
+            row.querySelector('.amount-field').value = parseFloat(data.total_amount).toFixed(2);
+            runTableVisibilityAndGroupingEngine();
+        }
+        displayToast(`Saved Row #${recordId}!`, "success");
+        setTimeout(() => { targetHighlight.style.borderColor = ""; }, 800);
+    })
+    .catch(err => {
+        console.error('Submission failed:', err);
+        targetHighlight.style.borderColor = "#e0475a";
+        displayToast(`Failed updating Row #${recordId}.`, "error");
+    });
+}
+
+/* ---------------- Purchase Details modal ---------------- */
+function openPurchaseDetails(btnElement) {
+    let row = btnElement.closest('tr');
+
+    document.getElementById('md-item').innerText = row.getAttribute('data-item') || '—';
+    document.getElementById('md-date').innerText = row.getAttribute('data-date') || '—';
+    document.getElementById('md-project').innerText = row.getAttribute('data-project') || '—';
+    document.getElementById('md-employee').innerText = row.getAttribute('data-employee') || '—';
+    document.getElementById('md-supplier').innerText = row.getAttribute('data-supplier') || 'No Supplier Chosen';
+
+    let qty = row.querySelector('.qty-field').value || '0';
+    let rate = row.querySelector('.rate-field').value || '0';
+    let amount = row.querySelector('.amount-field').value || '0';
+    let unit = row.getAttribute('data-unit') || '';
+
+    document.getElementById('md-qty').innerText = `${qty} ${unit}`.trim();
+    document.getElementById('md-rate').innerText = `TK ${parseFloat(rate).toFixed(2)}`;
+    document.getElementById('md-amount').innerText = `TK ${parseFloat(amount).toFixed(2)}`;
+
+    let status = row.getAttribute('data-status') || 'pending';
+    let statusEl = document.getElementById('md-status');
+    statusEl.innerText = status.charAt(0).toUpperCase() + status.slice(1);
+    statusEl.className = 'modal-pill status-select ' + status;
+
+    document.getElementById('detailModal').classList.add('open');
+}
+
+function closePurchaseDetails() {
+    document.getElementById('detailModal').classList.remove('open');
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePurchaseDetails();
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        let cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+</body>
+</html>

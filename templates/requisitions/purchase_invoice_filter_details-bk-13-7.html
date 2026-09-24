@@ -1,0 +1,288 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Purchase Invoice Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ccc;
+      padding: 20px;
+      font-size: 11px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 960px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .logo img {
+      height: 50px;
+    }
+
+    .label-box {
+      background-color: #e2f0d9;
+      color: #000;
+      padding: 4px 10px;
+      font-weight: bold;
+      font-size: 13px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .sub-head {
+      font-size: 11px;
+      color: #555;
+      margin-top: -18px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .info {
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+
+    .info p {
+      margin: 4px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      font-weight: bold;
+    }
+
+    td {
+      background-color: #fff;
+    }
+
+    .description {
+      text-align: left;
+    }
+
+    .amount-word {
+      font-weight: bold;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+
+    .signature-section {
+      margin-top: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      text-align: center;
+    }
+
+    .signature-box {
+      flex: 1;
+      padding: 8px;
+    }
+
+    .signature-box:not(:last-child) {
+      margin-right: 10px;
+    }
+
+    .signature-line {
+      display: block;
+      margin-top: 10px;
+      border-top: 1px solid #000;
+      width: 100%;
+    }
+
+    .footer {
+      margin-top: 30px;
+      text-align: right;
+    }
+
+    .print-btn {
+      background-color: #1f3bb3;
+      color: white;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background: white;
+        padding: 0;
+      }
+      .card {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+    
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 20px;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      border: none;
+      border-radius: 4px;
+      text-decoration: none;
+      text-align: center;
+      cursor: pointer;
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      transition: background-color 0.2s ease;
+      background-color:green;
+    }
+    
+    .back-btn {
+      background-color: #6b7280; /* Gray */
+    }
+    
+    .back-btn:hover {
+      background-color: #4b5563;
+    }
+    
+    .print-btn {
+      background-color: #1e3c98; /* Blue */
+    }
+    
+    .print-btn:hover {
+      background-color: #182f9c;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <!-- Header Section -->
+    <div class="header-row">
+      <div class="logo">
+        <img src="{% static '/images/BTP_logo_webp.webp' %}" alt="Company Logo" />
+      </div>
+      <div style="text-align: right;">
+        <div class="label-box">Purchase Ledger Details</div>
+        <p style="font-size: 11px; margin-top: 4px;">
+          Print Date: {{ print_time|date:"F j, Y, g:i a" }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Company Info -->
+    <div class="sub-head">
+      House-148 (4th Floor), Road-02, Block-A, Sec-12, Pallabi Bus Stand, Mirpur, Dhaka-1216<br />
+      +880191322203 | info@btpltd.com | btpltd.com
+    </div>
+
+    <hr style="margin: 8px 0; border-color: #ccc;" />
+
+    <!-- Invoice Info -->
+    <div class="info">
+      <p><strong>Voucher No:</strong> {{ voucher.pk }}</p>
+      <p><strong>Purchase ID:</strong> {{ purch_id }}</p>
+    </div>
+
+    <!-- Purchase Table -->
+    <table>
+      <thead>
+        <tr>
+          <th>SL</th>
+          <th>Project Name</th>
+          <th>Date</th>
+          <th>Item Name</th>
+          <th>Amount (Tk)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in requisitions %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ item.project_name.project_first_name }}</td>
+          <td>{{ item.requisition_date }}</td>
+          <td class="description"><b>{{ item.item_name }}</b></td>
+          <td style="text-align: right;">{{ item.amount|intcomma }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" style="text-align: center;">No purchase data found.</td>
+        </tr>
+        {% endfor %}
+        <tr>
+          <td colspan="4" style="text-align: right;"><strong>Total Amount (Tk)</strong></td>
+          <td style="text-align: right;"><strong>{{ total_amount|intcomma }}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Amount in Words -->
+    <div class="amount-word">
+      In Words: {{ amount_in_words }} Only.
+    </div>
+
+    <!-- Signature Section -->
+    <div class="signature-section">
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Prepared by
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Accounts
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Paid by
+      </div>
+      <div class="signature-box">
+        <span class="signature-line"></span>
+        Received by
+      </div>
+    </div>
+
+    <!-- Footer with Back and Print -->
+    <div class="footer no-print btn-group">
+      <a href="{% url 'purchase_invoice_filter' %}" class="btn">← Back to List</a>
+      &nbsp;&nbsp;&nbsp;
+      <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+    </div>
+
+
+
+  </div>
+</body>
+</html>

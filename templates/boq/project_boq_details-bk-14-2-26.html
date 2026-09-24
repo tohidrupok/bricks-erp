@@ -1,0 +1,293 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}BOQ Details- BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-2xl font-semibold text-gray-900">BOQ Details</h2>
+				{% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <span style="font-weight:bold;font-size:18px;color:green"><li class="message {{ message.tags }}">{{ message }}</li></span>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mt-6 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <div class="project-detail">							
+                            <!-- Project Header -->
+                            <h1 class="text-3xl font-semibold text-gray-900 mb-4">
+                                {{ project.project_first_name }}
+                            </h1>  
+                            <!-- BOQ Details -->
+                            <div class="mb-6">
+                               {% for category_type, categories in boq_by_type_and_category.items %}
+                                    <h3 class="text-xl font-semibold text-blue-800 my-4">{{ category_type }}</h3>
+                                     {% for category_name, data in categories.items %}
+                                        <h4 class="text-lg font-medium text-gray-700 mb-2">{{ category_name }}</h4>
+
+                                        <table class="min-w-full table-auto border-collapse border border-gray-300 mb-4">
+                                            <thead>
+                                                <tr class="bg-gray-200">
+                                                    <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Item Name</th>
+                                                    <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Unit</th>
+                                                    <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Quantity</th>
+                                                    <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Rate</th>
+                                                    <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in data.items %}
+                                                    <tr class="bg-white hover:bg-gray-100">
+                                                        <td class="border-b px-6 py-3 text-sm text-gray-700">{{ item.item_name }}</td>
+                                                        <td class="border-b px-6 py-3 text-sm text-gray-700">{{ item.unit }}</td>
+                                                        <td class="border-b px-6 py-3 text-sm text-gray-700">{{ item.qty }}</td>
+                                                        <td class="border-b px-6 py-3 text-sm text-gray-700">৳{{ item.rate }}</td>
+                                                        <td class="border-b px-6 py-3 text-sm text-gray-700">৳{{ item.amount }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+
+                                        <div class="text-right text-lg font-semibold text-gray-800 mb-6">
+                                            <span>Total for {{ category_name }}: </span>
+                                            <span class="text-primary">৳{{ data.total }}</span>
+                                        </div>
+                                    {% endfor %}
+                                    <hr class="my-6">
+                                {% endfor %}
+                                <!-- Employee Cost Details -->
+                                <h4 class="text-lg font-medium text-gray-700 mb-2">Employee Salary Details</h4>
+
+                                <table class="min-w-full table-auto border-collapse border border-gray-300">
+                                    <thead>
+                                        <tr class="bg-gray-200">
+                                            <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Employee Name</th>
+                                            <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">First Month Salary</th>
+                                            <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Project Duration (Months)</th>
+                                            <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Total Salary</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for employee in employees %}
+                                            <tr class="bg-white hover:bg-gray-100">
+                                                <td class="border-b px-6 py-3 text-sm text-gray-700">{{ employee.employee_name }}</td>
+                                                <td class="border-b px-6 py-3 text-sm text-gray-700">৳{{ employee.first_month_salary }}</td>
+                                                <td class="border-b px-6 py-3 text-sm text-gray-700">{{ employee.project_duration_months }} Months</td>
+                                                <td class="border-b px-6 py-3 text-sm text-gray-700">৳{{ employee.salary }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+
+                                <!-- Total Employee Salary -->
+                                <div class="mt-4 text-right text-lg font-semibold text-gray-800">
+                                    <span>Total Employee Salary: </span>
+                                    <span class="text-primary">৳{{ employee_cost_total }}</span>
+                                </div>
+
+                                <!-- Safety_Equipment Cost Details -->
+                                <h4 class="text-lg font-medium text-gray-700 mb-2">Safety Equipment Details</h4>
+
+                                <table class="min-w-full table-auto border-collapse border border-gray-300">
+                                    <thead>
+                                        <tr class="bg-gray-200">
+                                            <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Item Name</th>
+                                            <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Item Quantity</th>
+                                            <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Item Cost</th>
+                                            <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Total Cost</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for safety_equipment in safety_equipments %}
+                                            <tr class="bg-white hover:bg-gray-100">
+                                                <td class="border-b px-6 py-3 text-sm text-gray-700">{{ safety_equipment.item_name }}</td>
+                                                <td class="border-b px-6 py-3 text-sm text-gray-700">{{ safety_equipment.quantity }}</td>
+                                                <td class="border-b px-6 py-3 text-sm text-gray-700">{{ safety_equipment.item_cost }}</td>
+                                                <td class="border-b px-6 py-3 text-sm text-gray-700">৳{{ safety_equipment.total_cost }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+
+                                <!-- Total Safety_Equipment Cost -->
+                                <div class="mt-4 text-right text-lg font-semibold text-gray-800">
+                                    <span>Total Equipment Cost: </span>
+                                    <span class="text-primary">৳{{ safety_equipment_total }}</span>
+                                </div>
+
+                                 <!-- Expense Cost Details -->
+                                 <h4 class="text-lg font-medium text-gray-700 mb-2">Expense Details</h4>
+
+                                 <table class="min-w-full table-auto border-collapse border border-gray-300">
+                                     <thead>
+                                         <tr class="bg-gray-200">
+                                             <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Item Name</th>
+                                             <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Item Quantity</th>
+                                             <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Item Cost</th>
+                                             <th class="border-b px-6 py-2 text-left text-sm font-medium text-gray-600">Total Cost</th>
+                                         </tr>
+                                     </thead>
+                                     <tbody>
+                                         {% for expense_cost in expense_costs %}
+                                             <tr class="bg-white hover:bg-gray-100">
+                                                 <td class="border-b px-6 py-3 text-sm text-gray-700">{{ expense_cost.item_name }}</td>
+                                                 <td class="border-b px-6 py-3 text-sm text-gray-700">{{ expense_cost.quantity }}</td>
+                                                 <td class="border-b px-6 py-3 text-sm text-gray-700">{{ expense_cost.item_cost }}</td>
+                                                 <td class="border-b px-6 py-3 text-sm text-gray-700">৳{{ expense_cost.total_cost }}</td>
+                                             </tr>
+                                         {% endfor %}
+                                     </tbody>
+                                 </table>
+ 
+                                 <!-- Total Expense Cost -->
+                                 <div class="mt-4 text-right text-lg font-semibold text-gray-800">
+                                     <span>Total Expense Cost: </span>
+                                     <span class="text-primary">৳{{ expense_cost_total }}</span>
+                                 </div>
+                            
+                                 <form method="POST" action="">
+									{% csrf_token %}
+									<div class="flex justify-end">
+										<div class="bg-gray-50 p-4 rounded-lg shadow-md mt-6 w-full max-w-xs">
+											<h4 class="text-xl font-semibold text-gray-800">Summary</h4>
+											<ul class="mt-4">
+												{% for item in total_by_category_type %}
+												<li class="flex justify-between py-2 text-sm text-gray-700">
+													<span>{{ item.category_type }}</span>
+													<span class="font-semibold"> &nbsp; ৳ {{ item.total_amount }}</span>
+												</li>
+												{% endfor %}
+												<li class="flex justify-between py-2 text-sm text-gray-700">
+													<span>Employee Costing</span>
+													<span class="font-semibold"> &nbsp; ৳ {{ employee_cost_total }}</span>
+												</li>
+												<li class="flex justify-between py-2 text-sm text-gray-700">
+													<span>Equipment Cost</span>
+													<span class="font-semibold"> &nbsp; ৳ {{ safety_equipment_total }}</span>
+												</li>
+												<li class="flex justify-between py-2 text-sm text-gray-700">
+													<span>Expense Cost</span>
+													<span class="font-semibold"> &nbsp; ৳ {{ expense_cost_total }}</span>
+												</li>
+												<hr class="my-2">
+												<li class="flex justify-between py-2 text-lg font-semibold text-gray-800">
+													<span>Final Total</span>
+													<span class="text-primary"> &nbsp; ৳ {{ grand_total }}</span>
+												</li>
+											</ul>
+
+											{% if status == "Approved" %}
+											<!-- Input: Percentage -->
+											<div class="mt-4">
+												<label class="block text-sm font-medium text-gray-700 mb-1">Enter Percentage (%)</label>
+												<input type="number" name="percentage" id="percentage"
+													class="w-full px-3 py-2 border rounded-md"
+													min="0" max="100" oninput="calculateValue()" placeholder="e.g., 10"
+													value="{{ project.percentage }}">
+											</div>
+
+											<!-- Calculated Value -->
+											<div class="mt-2">
+												<label class="block text-sm font-medium text-gray-700 mb-1">Calculated Value (৳)</label>
+												<input type="text" id="calculated_value"
+													class="w-full px-3 py-2 border rounded-md bg-gray-100"
+													value="{{ project.percentage_value }}" readonly>
+											</div>
+
+											<!-- Total with Extra -->
+											<div class="mt-2">
+												<label class="block text-sm font-medium text-gray-700 mb-1">Total with Additional Value (৳)</label>
+												<input type="text" id="final_total_with_extra"
+													class="w-full px-3 py-2 border rounded-md bg-gray-100 font-semibold text-gray-800"
+													value="{{ project.final_total_with_extra }}" readonly>
+											</div>
+											{% endif %}
+											<!-- Update Button -->
+											<div class="mt-4">
+												<button type="submit" style="background-color:#1e3c98"
+													class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+													Update & Approved
+												</button>
+											</div>
+											
+										</div>
+									</div>
+								</form>
+                                
+                                <script>
+                                    function calculateValue() {
+                                        const percentage = parseFloat(document.getElementById("percentage").value);
+                                        const grandTotal = {{ grand_total|floatformat:2 }};
+                                        if (!isNaN(percentage)) {
+                                            const value = (percentage / 100) * grandTotal;
+                                            const final = grandTotal + value;
+                                            document.getElementById("calculated_value").value = '৳' + value.toFixed(2);
+                                            document.getElementById("final_total_with_extra").value = '৳' + final.toFixed(2);
+                                        } else {
+                                            document.getElementById("calculated_value").value = '';
+                                            document.getElementById("final_total_with_extra").value = '';
+                                        }
+                                    }
+                                </script>
+                                                                                        
+                            </div> 
+                            <!-- Back to Project List Button -->
+                            <div class="mt-8">
+                                <div class="flex flex-col sm:flex-row justify-center items-center gap-4 flex-wrap text-center">
+                                    <a href="{% url 'boq_list' %}" style="background-color:#1e3c98"
+                                       class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                        Back to BOQ List
+                                    </a>
+                                    {% if request.session.department == "admin" %}
+                                    <a href="{% url 'boq_pdf' project.id %}" 
+                                       target="_blank" style="background-color:#1e3c98"
+                                       class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                        PDF
+                                    </a>
+                                    {% else %}
+                                     <a href="{% url 'eng_boq_pdf' project.id %}" 
+                                       target="_blank" style="background-color:#1e3c98"
+                                       class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                        PDF
+                                    </a>
+                                    {% endif %}
+                                    <form id="boq-category-form" method="get" action="{% url 'boq_category_pdf' %}" target="_blank" class="inline-block">
+                                        <input type="hidden" name="project_id" value="{{ project.id }}">
+                                        
+                                        <select name="category_name" required  style="background-color:#1e3c98"
+                                                class="px-4 py-2 bg-blue-600 text-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                                onchange="document.getElementById('boq-category-form').submit();">
+                                            <option value="">-- Select BOQ Category PDF --</option>
+                                            {% for cat in boq_categories %}
+                                                <option value="{{ cat.boq_cat_name }}">{{ cat.boq_cat_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                </div>
+                            </div>
+                            
+
+                        </div>                        
+                    </div>
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

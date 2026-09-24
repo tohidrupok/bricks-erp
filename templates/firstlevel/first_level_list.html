@@ -1,0 +1,355 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}First Level List - BM ERP{% endblock %}
+
+{% block content %} 
+
+<!-- ===================== ICON SPRITE (inline SVG, no library needed) ===================== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-building" viewBox="0 0 24 24"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <symbol id="i-dashboard" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1Z"/><path d="M4 22v-7"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></symbol>
+    <symbol id="i-chev-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-chev-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+</svg>
+
+<style>
+    /* ---------- Original message styles (kept) ---------- */
+    .message.success {
+        color: green;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .message.error {
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    /* ---------- Base ---------- */
+    .pd {
+        --pd-brand: #1e3c98;
+        --pd-brand-2: #3557d1;
+        --pd-ink: #0f172a;
+        --pd-muted: #64748b;
+        --pd-line: #e2e8f0;
+        --pd-card: #ffffff;
+        --pd-soft: #f8fafc;
+        width: 100%;
+        color: var(--pd-ink);
+    }
+    .dark .pd {
+        --pd-ink: #e2e8f0;
+        --pd-muted: #94a3b8;
+        --pd-line: #334155;
+        --pd-card: #1e293b;
+        --pd-soft: #0f172a;
+    }
+
+    .pd-i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+    /* ---------- Page header ---------- */
+    .pd-head { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 14px 20px; }
+    .pd-head-text h2 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -.015em; line-height: 1.2; }
+    .pd-head-text p { margin: 5px 0 0; font-size: 13.5px; color: var(--pd-muted); }
+    .pd-head-actions { margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; }
+    @media (max-width: 640px) { .pd-head-actions { margin-left: 0; width: 100%; } .pd-head-actions .pd-btn { flex: 1; } }
+
+    /* ---------- Buttons ---------- */
+    .pd-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 38px; padding: 0 16px; font-size: 13.5px; font-weight: 600; line-height: 1; white-space: nowrap; text-decoration: none; cursor: pointer; border-radius: 10px; border: 1px solid transparent; transition: transform .12s, box-shadow .15s, background-color .15s, border-color .15s, filter .15s; }
+    .pd-btn .pd-i { width: 16px; height: 16px; }
+    .pd-btn:active { transform: translateY(1px); }
+    .pd-btn:focus-visible, .pd-icon-btn:focus-visible, .pd-page:focus-visible { outline: 3px solid rgba(53, 87, 209, .45); outline-offset: 2px; }
+    .pd-btn-primary { color: #fff; background: var(--pd-brand-2); box-shadow: 0 6px 14px -8px rgba(30, 60, 152, .85); }
+    .pd-btn-primary:hover { color: #fff; background: var(--pd-brand); }
+    .pd-btn-ghost { color: var(--pd-ink); background: var(--pd-card); border-color: var(--pd-line); }
+    .pd-btn-ghost:hover { color: var(--pd-ink); background: var(--pd-soft); border-color: #c3cde0; }
+
+    /* ---------- Messages ---------- */
+    .pd-messages { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .pd-messages .message { display: flex; align-items: center; gap: 10px; padding: 11px 14px; font-size: 13.5px; font-weight: 500; border-radius: 11px; border: 1px solid #bfdbfe; background: #eff6ff; color: #1e40af; }
+    .pd-messages .message.success { border-color: #bbf7d0; background: #f0fdf4; color: #166534; }
+    .pd-messages .message.error { border-color: #fecaca; background: #fef2f2; color: #991b1b; }
+    .pd-messages .message.warning { border-color: #fde68a; background: #fffbeb; color: #92400e; }
+    .dark .pd-messages .message { background: #1e2a52; border-color: #334155; color: #c7d2fe; }
+    .dark .pd-messages .message.success { background: #14301f; color: #86efac; }
+    .dark .pd-messages .message.error { background: #3b1a1f; color: #fca5a5; }
+    .dark .pd-messages .message.warning { background: #3b2f12; color: #fcd34d; }
+
+    /* ---------- Search ---------- */
+    .pd-bar { margin-top: 22px; }
+    .pd-search { position: relative; width: 340px; max-width: 100%; }
+    .pd-search .pd-i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; transition: color .15s; }
+    .pd-search:focus-within .pd-i { color: var(--pd-brand-2); }
+    .pd-search input { width: 100%; height: 42px; padding: 0 14px 0 42px; font-size: 14px; color: var(--pd-ink); background: var(--pd-card); border: 1px solid var(--pd-line); border-radius: 11px; outline: none; transition: border-color .15s, box-shadow .15s; }
+    .pd-search input::placeholder { color: #a3aec0; }
+    .pd-search input:hover { border-color: #c3cde0; }
+    .pd-search input:focus { border-color: var(--pd-brand-2); box-shadow: 0 0 0 4px rgba(53, 87, 209, .14); }
+
+    /* ---------- Project cards ---------- */
+    .pd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; margin-top: 16px; }
+
+    .pd-project { display: flex; flex-direction: column; gap: 16px; padding: 18px; background: var(--pd-card); border: 1px solid var(--pd-line); border-radius: 16px; box-shadow: 0 1px 2px rgba(15, 23, 42, .04); transition: border-color .15s, box-shadow .15s; }
+    .pd-project:hover { border-color: #c3cde0; box-shadow: 0 14px 28px -18px rgba(15, 23, 42, .3); }
+    .dark .pd-project:hover { border-color: #475569; }
+
+    .pd-project-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .pd-project-ico { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; color: var(--pd-brand-2); background: color-mix(in srgb, var(--pd-brand-2) 12%, transparent); }
+    .dark .pd-project-ico { color: #93a8ff; }
+    .pd-project-ico .pd-i { width: 21px; height: 21px; }
+    .pd-sl { padding: 3px 10px; font-size: 12px; font-weight: 650; color: var(--pd-muted); background: var(--pd-soft); border: 1px solid var(--pd-line); border-radius: 999px; font-variant-numeric: tabular-nums; }
+
+    .pd-project-name { margin: 0; font-size: 16.5px; font-weight: 650; line-height: 1.35; letter-spacing: -.005em; overflow-wrap: anywhere; }
+    .pd-owner { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+    .pd-owner-ico { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; color: var(--pd-muted); background: var(--pd-soft); border: 1px solid var(--pd-line); flex-shrink: 0; }
+    .pd-owner-ico .pd-i { width: 15px; height: 15px; }
+    .pd-owner-label { font-size: 11.5px; color: var(--pd-muted); line-height: 1.2; }
+    .pd-owner-name { font-size: 13.5px; font-weight: 550; line-height: 1.3; overflow-wrap: anywhere; }
+
+    .pd-project-foot { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 16px; border-top: 1px solid var(--pd-line); }
+    .pd-project-foot .pd-btn { flex: 1; }
+    .pd-icon-btn { --a: #3557d1; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; color: var(--pd-muted); background: var(--pd-card); border: 1px solid var(--pd-line); text-decoration: none; transition: color .15s, background-color .15s, border-color .15s; flex-shrink: 0; }
+    .pd-icon-btn .pd-i { width: 16px; height: 16px; }
+    .pd-icon-btn:hover { color: var(--a); border-color: color-mix(in srgb, var(--a) 45%, var(--pd-line)); background: color-mix(in srgb, var(--a) 8%, var(--pd-card)); }
+    .pd-icon-btn.is-danger { --a: #dc2626; }
+
+    /* ---------- Empty ---------- */
+    .pd-empty { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 48px 16px; text-align: center; color: var(--pd-muted); background: var(--pd-card); border: 1px dashed var(--pd-line); border-radius: 16px; }
+    .pd-empty-ico { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 14px; color: var(--pd-brand-2); background: color-mix(in srgb, var(--pd-brand-2) 12%, transparent); }
+    .pd-empty-ico .pd-i { width: 24px; height: 24px; }
+
+    /* ---------- Pagination ---------- */
+    .pd-pager { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-top: 24px; }
+    .pd-pager-info { font-size: 13px; color: var(--pd-muted); }
+    .pd-pager nav { margin-left: auto; }
+    .pd-pager ul { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+    .pd-page { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 36px; height: 36px; padding: 0 12px; font-size: 13px; font-weight: 600; text-decoration: none; color: var(--pd-ink); background: var(--pd-card); border: 1px solid var(--pd-line); border-radius: 9px; transition: background-color .15s, border-color .15s, color .15s; }
+    .pd-page .pd-i { width: 14px; height: 14px; }
+    a.pd-page:hover { border-color: var(--pd-brand-2); color: var(--pd-brand-2); }
+    .pd-page.is-active { color: #fff; background: var(--pd-brand-2); border-color: transparent; }
+    a.pd-page.is-active:hover { color: #fff; }
+    .pd-page.is-disabled { color: var(--pd-muted); opacity: .55; cursor: not-allowed; }
+    .pd-size { height: 36px; padding: 0 34px 0 12px; font-size: 13px; color: var(--pd-ink); background-color: var(--pd-card); border: 1px solid var(--pd-line); border-radius: 9px; outline: none; appearance: none; -webkit-appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; }
+    .pd-size:focus { border-color: var(--pd-brand-2); box-shadow: 0 0 0 4px rgba(53, 87, 209, .14); }
+    @media (max-width: 640px) { .pd-pager nav { margin-left: 0; width: 100%; } }
+</style>
+
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+                {% include 'partials/header.html' %}
+                <!-- END: Top Bar -->
+
+                <div class="pd">
+
+                    <!-- Page header -->
+                    <div class="pd-head mt-10">
+                        <div class="pd-head-text">
+                            <h2>Project List</h2>
+                            <p>{{ projects|length }} projects</p>
+                        </div>
+
+                        <div class="pd-head-actions">
+                            <a href="{% url 'first_level_list' %}" class="pd-btn pd-btn-ghost">
+                                <svg class="pd-i"><use href="#i-refresh"/></svg>Refresh
+                            </a>
+                            <a href="{% url 'first_level_add' %}" class="pd-btn pd-btn-primary">
+                                <svg class="pd-i"><use href="#i-plus"/></svg>Add New Project
+                            </a>
+                        </div>
+                    </div>
+
+                    {% if messages %}
+                    <ul class="pd-messages">
+                        {% for message in messages %}
+                        <li class="message {{ message.tags }}">
+                            <svg class="pd-i"><use href="#i-{% if message.tags == 'success' %}check{% elif message.tags == 'error' %}flag{% else %}sparkle{% endif %}"/></svg>
+                            <span>{{ message }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+
+                    <!-- Search -->
+                    <div class="pd-bar">
+                        <div class="pd-search">
+                            <svg class="pd-i"><use href="#i-search"/></svg>
+                            <input id="searchInput" type="text" placeholder="Search..." oninput="handleSearch()">
+                        </div>
+                    </div>
+
+                    <!-- BEGIN: Project List -->
+                    <div class="pd-grid" id="projectGrid">
+                        {% for project in projects %}
+                        <article class="pd-project" data-search="P-{{ forloop.counter|stringformat:'02d' }} {{ project.project_first_name }} {{ project.project_owner }}">
+
+                            <div class="pd-project-top">
+                                <span class="pd-project-ico"><svg class="pd-i"><use href="#i-building"/></svg></span>
+                                <!-- Serial Number -->
+                                <span class="pd-sl">P-{{ forloop.counter|stringformat:"02d" }}</span>
+                            </div>
+
+                            <div>
+                                <h3 class="pd-project-name">{{ project.project_first_name }}</h3>
+
+                                <div class="pd-owner">
+                                    <span class="pd-owner-ico"><svg class="pd-i"><use href="#i-user"/></svg></span>
+                                    <div>
+                                        <div class="pd-owner-label">Land Owner</div>
+                                        <div class="pd-owner-name">{{ project.project_owner }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pd-project-foot">
+                                <!-- Dashboard button -->
+                                <a href="{% url 'first_level_details' project.id %}" class="pd-btn pd-btn-primary">
+                                    <svg class="pd-i"><use href="#i-dashboard"/></svg>Dashboard
+                                </a>
+
+                                <!-- Edit button -->
+                                <a href="{% url 'first_level_edit' project.id %}" class="pd-icon-btn" title="Edit" aria-label="Edit">
+                                    <svg class="pd-i"><use href="#i-edit"/></svg>
+                                </a>
+
+                                <!-- Delete button -->
+                                {% if request.session.department == "admin" %}
+                                <a href="{% url 'first_level_delete' project.id %}" class="pd-icon-btn is-danger" title="Delete" aria-label="Delete">
+                                    <svg class="pd-i"><use href="#i-trash"/></svg>
+                                </a>
+                                {% else %}
+                                {% endif %}
+                            </div>
+
+                        </article>
+                        {% empty %}
+                        <div class="pd-empty">
+                            <span class="pd-empty-ico"><svg class="pd-i"><use href="#i-building"/></svg></span>
+                            <div>No projects found.</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div id="noResults" class="pd-empty" style="display: none; margin-top: 16px;">
+                        <span class="pd-empty-ico"><svg class="pd-i"><use href="#i-search"/></svg></span>
+                        <div>No matching projects.</div>
+                    </div>
+
+                    <script>
+                        function handleSearch() {
+                            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+                            const cards = document.querySelectorAll('#projectGrid .pd-project');
+                            let visible = 0;
+
+                            cards.forEach(function (card) {
+                                // Match against project serial, name and land owner
+                                const match = card.dataset.search.toLowerCase().includes(searchValue);
+                                card.style.display = match ? '' : 'none';
+                                if (match) { visible++; }
+                            });
+
+                            const noResults = document.getElementById('noResults');
+                            if (noResults) {
+                                noResults.style.display = (cards.length && !visible) ? 'flex' : 'none';
+                            }
+                        }
+                    </script>
+                    <!-- END: Project List -->
+            
+                    <!-- BEGIN: Pagination -->
+                    <div class="pd-pager">
+                        <!-- Showing entries text -->
+                        <div class="pd-pager-info">
+                            Showing {{ tenants.start_index }} to {{ tenants.end_index }} of {{ tenants.paginator.count }} entries
+                        </div>
+                    
+                        <!-- Pagination navigation -->
+                        <nav>
+                            <ul>
+                                <!-- Previous Page -->
+                                {% if tenants.has_previous %}
+                                    <li>
+                                        <a href="?page={{ tenants.previous_page_number }}&page_size={{ tenants.paginator.per_page }}" class="pd-page">
+                                            <svg class="pd-i"><use href="#i-chev-left"/></svg>
+                                            Previous
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li>
+                                        <span class="pd-page is-disabled">
+                                            <svg class="pd-i"><use href="#i-chev-left"/></svg>
+                                            Previous
+                                        </span>
+                                    </li>
+                                {% endif %}
+                    
+                                <!-- Page Numbers -->
+                                {% for num in tenants.paginator.page_range %}
+                                    <li>
+                                        {% if num == tenants.number %}
+                                            <a href="#" class="pd-page is-active">{{ num }}</a>
+                                        {% else %}
+                                            <a href="?page={{ num }}&page_size={{ tenants.paginator.per_page }}" class="pd-page">{{ num }}</a>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                    
+                                <!-- Next Page -->
+                                {% if tenants.has_next %}
+                                    <li>
+                                        <a href="?page={{ tenants.next_page_number }}&page_size={{ tenants.paginator.per_page }}" class="pd-page">
+                                            Next
+                                            <svg class="pd-i"><use href="#i-chev-right"/></svg>
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li>
+                                        <span class="pd-page is-disabled">
+                                            Next
+                                            <svg class="pd-i"><use href="#i-chev-right"/></svg>
+                                        </span>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    
+                        <!-- Page Size Selector -->
+                        <form method="get" action="" class="inline-block">
+                            <select name="page_size" onchange="this.form.submit()" class="pd-size">
+                                <option value="10" {% if tenants.paginator.per_page == 10 %}selected{% endif %}>10</option>
+                                <option value="25" {% if tenants.paginator.per_page == 25 %}selected{% endif %}>25</option>
+                                <option value="50" {% if tenants.paginator.per_page == 50 %}selected{% endif %}>50</option>
+                            </select>
+                        </form>
+                    </div>
+                    
+                    <!-- END: Pagination -->
+
+                </div>
+            </div>
+            
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,165 @@
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lease Payment Add - BM ERP{% endblock %}
+
+{% block content %} 
+    <div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+        <!-- BEGIN: Mobile Menu -->
+        {% include 'partials/mobile.html' %}
+        <!-- END: Mobile Menu -->
+        <div class="mt-[4.7rem] flex md:mt-0">
+            <!-- BEGIN: Side Menu -->
+            {% include 'partials/sidebar_list.html' %}
+            <!-- END: Side Menu -->
+            <!-- BEGIN: Content -->
+            <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+                <!-- BEGIN: Top Bar -->  
+				{% include 'partials/header.html' %}
+                
+                <!-- END: Top Bar -->
+                <h2 class="intro-y mt-10 text-lg font-medium">Sale Record Information</h2>
+                <div class="mt-5 grid grid-cols-12 gap-6">
+                    <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                        <div class="p-8 bg-white rounded-lg shadow-lg border border-gray-200">
+                            <h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+                                {% if form.instance.id %}Edit Sale Record{% else %}Add Sale Record{% endif %}
+                            </h1>
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                            
+                                <!-- Property Field -->
+                                <div class="mb-6">
+                                    <label for="property" class="font-medium text-lg text-gray-700">Property</label>
+                                    <select id="property" name="property" class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                                        {% for property in form.property.field.queryset %}
+                                            <option value="{{ property.id }}" {% if property.id == form.property.value %}selected{% endif %}>{{ property.address }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% for error in form.property.errors %}
+                                        <ul class="text-red-600 mt-1">
+                                            <li>{{ error }}</li>
+                                        </ul>
+                                    {% endfor %}
+                                </div>
+                            
+                                <!-- Buyer Field -->
+                                <div class="mb-6">
+                                    <label for="buyer" class="font-medium text-lg text-gray-700">Buyer</label>
+                                    <select id="buyer" name="buyer" class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                                        {% for buyer in form.buyer.field.queryset %}
+                                            <option value="{{ buyer.id }}" {% if buyer.id == form.buyer.value %}selected{% endif %}>{{ buyer.buyer_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% for error in form.buyer.errors %}
+                                        <ul class="text-red-600 mt-1">
+                                            <li>{{ error }}</li>
+                                        </ul>
+                                    {% endfor %}
+                                </div>
+                            
+                                <!-- Sale Price Field -->
+                                <div class="mb-6">
+                                    <label for="sale_price" class="font-medium text-lg text-gray-700">Sale Price</label>
+                                    <input type="number" id="sale_price" name="sale_price" value="{{ form.sale_price.value }}" class="w-full text-sm border-slate-200 shadow-sm rounded-md" placeholder="Enter Sale Price">
+                                    {% for error in form.sale_price.errors %}
+                                        <ul class="text-red-600 mt-1">
+                                            <li>{{ error }}</li>
+                                        </ul>
+                                    {% endfor %}
+                                </div>
+                            
+                                <!-- Sale Date Field -->
+                                <div class="mb-6">
+                                    <label for="sale_date" class="block text-sm font-medium text-gray-700">Sale Date</label>
+                                    <input type="date" id="sale_date" name="sale_date" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.sale_date.value|date:'Y-m-d' }}" placeholder="Enter Sale Date">
+                                    {% if form.sale_date.errors %}
+                                        <ul class="text-red-600 mt-1">
+                                            {% for error in form.sale_date.errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            
+                                <!-- Sale Status Field -->
+                                <div class="mb-6">
+                                    <label for="sale_status" class="block text-sm font-medium text-gray-700">Sale Status</label>
+                                    <select id="sale_status" name="sale_status" class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                                        <option value="Completed" {% if form.sale_status.value == 'Completed' %}selected{% endif %}>Completed</option>
+                                        <option value="Pending" {% if form.sale_status.value == 'Pending' %}selected{% endif %}>Pending</option>
+                                    </select>
+                                    {% for error in form.sale_status.errors %}
+                                        <ul class="text-red-600 mt-1">
+                                            <li>{{ error }}</li>
+                                        </ul>
+                                    {% endfor %}
+                                </div>
+                            
+                                <!-- Sale Agreement Document Field (File Upload) -->
+                                <div class="mb-6">
+                                    <label for="sale_agreement_document" class="font-medium text-lg text-gray-700">Sale Agreement Document</label>
+                                    <input type="file" id="sale_agreement_document" name="sale_agreement_document" class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                                    {% for error in form.sale_agreement_document.errors %}
+                                        <ul class="text-red-600 mt-1">
+                                            <li>{{ error }}</li>
+                                        </ul>
+                                    {% endfor %}
+                                </div>
+                            
+                                <!-- Payment Status Field -->
+                                <div class="mb-6">
+                                    <label for="payment_status" class="font-medium text-lg text-gray-700">Payment Status</label>
+                                    <select id="payment_status" name="payment_status" class="w-full text-sm border-slate-200 shadow-sm rounded-md">
+                                        <option value="Paid" {% if form.payment_status.value == 'Paid' %}selected{% endif %}>Paid</option>
+                                        <option value="Pending" {% if form.payment_status.value == 'Pending' %}selected{% endif %}>Pending</option>
+                                    </select>
+                                    {% for error in form.payment_status.errors %}
+                                        <ul class="text-red-600 mt-1">
+                                            <li>{{ error }}</li>
+                                        </ul>
+                                    {% endfor %}
+                                </div>
+                            
+                                <!-- Money Receipt No Field -->
+                                <div class="mb-6">
+                                    <label for="money_receipt_no" class="font-medium text-lg text-gray-700">Money Receipt No</label>
+                                    <input type="text" id="money_receipt_no" name="money_receipt_no" value="{{ form.money_receipt_no.value }}" class="w-full text-sm border-slate-200 shadow-sm rounded-md" placeholder="Enter Money Receipt No">
+                                    {% for error in form.money_receipt_no.errors %}
+                                        <ul class="text-red-600 mt-1">
+                                            <li>{{ error }}</li>
+                                        </ul>
+                                    {% endfor %}
+                                </div>
+                            
+                                <!-- Money Receipt Date Field -->                                
+                                <div class="mb-6">
+                                    <label for="money_receipt_date" class="block text-sm font-medium text-gray-700">Money Receipt Date</label>
+                                    <input type="date" id="money_receipt_date" name="money_receipt_date" class="w-full text-sm border-slate-200 shadow-sm rounded-md" value="{{ form.sale_date.value|date:'Y-m-d' }}" placeholder="Enter Money Receipt Date">
+                                    {% if form.money_receipt_date.errors %}
+                                        <ul class="text-red-600 mt-1">
+                                            {% for error in form.money_receipt_date.errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                                <!-- Buttons -->
+                                <div class="flex justify-center mt-6 space-x-4">
+                                    <button type="submit" style="background-color:#1e3c98" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                        {% if form.instance.id %}Update Sale Record{% else %}Save Sale Record{% endif %}
+                                    </button>
+                                    <a href="{% url 'sale_record_list' %}" style="margin-left:0.5%;background-color:#1e3c98" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-gray-300">
+                                        Cancel
+                                    </a>
+                                </div>
+                            </form> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END: Content -->
+        </div>
+    </div>
+{% endblock %}

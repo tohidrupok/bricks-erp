@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dailypayment Voucher edit - BM ERP{% endblock %}
+
+{% block content %} 
+<style>
+.message.success {
+    color: green;
+    background-color: #d4edda;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.message.error {
+    color: red;
+    background-color: #f8d7da;
+    padding: 10px;
+    border-radius: 5px;
+}
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+</style>
+
+
+<style>
+/* Message Styles */
+.message.success {
+    color: #166534;
+    background-color: #dcfce7;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.message.error {
+    color: #991b1b;
+    background-color: #fee2e2;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+/* Delete Card */
+.delete-card {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    max-width: 500px;
+    margin: 40px auto;
+    text-align: center;
+}
+
+.delete-card h3 {
+    margin-bottom: 15px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.delete-card p {
+    margin-bottom: 25px;
+    color: #374151;
+    font-size: 16px;
+}
+
+/* Buttons */
+.btn-danger {
+    background-color: #dc2626;
+    color: white;
+    padding: 8px 18px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+.btn-secondary {
+    background-color: #6b7280;
+    color: white;
+    padding: 8px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-left: 10px;
+    transition: 0.3s;
+}
+
+.btn-secondary:hover {
+    background-color: #4b5563;
+}
+</style>
+
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    {% include 'partials/mobile.html' %}
+    <div class="mt-[4.7rem] flex md:mt-0">
+        {% include 'partials/sidebar_list.html' %}
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            {% include 'partials/header.html' %}
+
+            <h2 class="intro-y mt-10 text-lg font-medium">Dailypayment Delete </h2>
+
+            {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                        <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <div class="mt-5 grid grid-cols-12 gap-6">
+                <div class="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
+                    <a href="{% url 'daily_payment_list' %}">
+                        <button class="transition duration-200 border inline-flex items-center justify-center py-2 px-3 rounded-md font-medium bg-success border-success text-white mr-2 shadow-md">
+                            Back
+                        </button>
+                    </a>    
+                </div>
+                <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                   <div class="delete-card">
+
+                    <h3>Are you sure you want to delete?</h3>
+            
+                    <p>
+                        <strong>Date:</strong> {{ daylipayment.date }} <br>
+                        <strong>Amount:</strong> {{ daylipayment.amount }}
+                    </p>
+            
+                    <form method="post">
+                        {% csrf_token %}
+            
+                        <button type="submit" class="btn-danger">
+                            Yes, Delete
+                        </button>
+            
+                        <a href="{% url 'daily_payment_list' %}" class="btn-secondary">
+                            Cancel
+                        </a>
+            
+                    </form>
+            
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

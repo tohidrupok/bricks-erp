@@ -1,0 +1,246 @@
+{% load static %}
+{% load menu_tags %}
+{% get_sidebar_menu as sidebar_menu %}
+
+<nav class="side-nav hidden w-[80px] overflow-x-hidden pb-16 pr-0 md:block xl:w-[230px]">
+    <a class="flex items-center pt-4 pl-5 intro-x" href="/">
+        <img src="{% static 'images/Bricks_Logo.png' %}" alt="BRICKS ERP">
+    </a>
+    <div class="my-6 side-nav__divider"></div>
+
+    <ul class="menu-app-sidebar">
+    {% for item in sidebar_menu %}
+        {% with title_lower=item.title|lower %}
+        <li class="menu-app-item {% if item.children %}has-children{% endif %}">
+            {% if item.children %}
+                <a href="javascript:;" class="menu-app-link menu-app-toggle {% if 'dashboard' in title_lower %}custom-dashboard-menu{% elif request.resolver_match.url_name == item.url %}is-active{% endif %}">
+                    <i data-lucide="{{ item.icon|default:'circle' }}" class="menu-app-icon"></i>
+                    <span class="menu-app-label">{{ item.title }}</span>
+                    <i data-lucide="chevron-down" class="menu-app-chevron"></i>
+                </a>
+            {% elif item.url %}
+                <a href="{% url item.url %}" class="menu-app-link {% if 'dashboard' in title_lower %}custom-dashboard-menu{% elif request.resolver_match.url_name == item.url %}is-active{% endif %}">
+                    <i data-lucide="{{ item.icon|default:'circle' }}" class="menu-app-icon"></i>
+                    <span class="menu-app-label">{{ item.title }}</span>
+                </a>
+            {% else %}
+                <a href="javascript:;" class="menu-app-link {% if 'dashboard' in title_lower %}custom-dashboard-menu{% elif request.resolver_match.url_name == item.url %}is-active{% endif %}">
+                    <i data-lucide="{{ item.icon|default:'circle' }}" class="menu-app-icon"></i>
+                    <span class="menu-app-label">{{ item.title }}</span>
+                </a>
+            {% endif %}
+
+            {% if item.children %}
+                <ul class="menu-app-submenu">
+                    {% for child in item.children %}
+                        <li>
+                            {% if child.url %}
+                                <a href="{% url child.url %}" class="menu-app-sublink {% if request.resolver_match.url_name == child.url %}is-active{% endif %}">
+                                    <i data-lucide="{{ child.icon|default:'zap' }}" class="menu-app-subicon"></i>
+                                    <span>{{ child.title }}</span>
+                                </a>
+                            {% else %}
+                                <a href="javascript:;" class="menu-app-sublink">
+                                    <i data-lucide="{{ child.icon|default:'zap' }}" class="menu-app-subicon"></i>
+                                    <span>{{ child.title }}</span>
+                                </a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </li>
+        {% endwith %}
+    {% endfor %}
+    </ul>
+</nav>
+
+<style>
+.menu-app-sidebar {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 0 0 16px !important;
+}
+
+.menu-app-item {
+    margin-bottom: 4px !important;
+    list-style: none !important;
+    position: relative !important;
+}
+
+.menu-app-link,
+.menu-app-sublink {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px 16px !important;
+    border-radius: 9999px 0 0 9999px !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+    white-space: nowrap !important;
+}
+
+.menu-app-link:hover,
+.menu-app-sublink:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+}
+
+/* GENERAL ACTIVE LINK */
+.menu-app-link.is-active,
+.menu-app-sublink.is-active {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    font-weight: 600 !important;
+}
+
+/* EXACT CURVED CUTOUT DESIGN FOR DASHBOARD (OR ANY ACTIVE LINK) */
+.menu-app-link.custom-dashboard-menu,
+.menu-app-link.is-active {
+    background-color: #f1f5f9 !important; /* Matches main content background */
+    color: #0f172a !important;
+    font-weight: 600 !important;
+    position: relative !important;
+    margin-right: -20px !important; /* Pulls right edge out to merge with content container */
+    border-top-left-radius: 9999px !important;
+    border-bottom-left-radius: 9999px !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+/* Top smooth inner curve cutout */
+.menu-app-link.custom-dashboard-menu::before,
+.menu-app-link.is-active::before {
+    content: "" !important;
+    position: absolute !important;
+    top: -20px !important;
+    right: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    background-color: transparent !important;
+    border-bottom-right-radius: 20px !important;
+    box-shadow: 5px 5px 0 5px #f1f5f9 !important; /* Matches content background color */
+    pointer-events: none !important;
+}
+
+/* Bottom smooth inner curve cutout */
+.menu-app-link.custom-dashboard-menu::after,
+.menu-app-link.is-active::after {
+    content: "" !important;
+    position: absolute !important;
+    bottom: -20px !important;
+    right: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    background-color: transparent !important;
+    border-top-right-radius: 20px !important;
+    box-shadow: 5px -5px 0 5px #f1f5f9 !important; /* Matches content background color */
+    pointer-events: none !important;
+}
+
+/* Icon color adjustments for the white active state */
+.menu-app-link.custom-dashboard-menu .menu-app-icon,
+.menu-app-link.custom-dashboard-menu .menu-app-chevron,
+.menu-app-link.is-active .menu-app-icon,
+.menu-app-link.is-active .menu-app-chevron {
+    color: #2563eb !important;
+    stroke: #2563eb !important;
+}
+
+.menu-app-icon {
+    width: 18px !important;
+    height: 18px !important;
+    flex-shrink: 0 !important;
+    stroke-width: 1.75 !important;
+}
+
+.menu-app-label {
+    flex: 1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.menu-app-chevron {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.2s ease !important;
+    opacity: 0.6 !important;
+}
+
+.menu-app-item.open > .menu-app-link .menu-app-chevron {
+    transform: rotate(180deg) !important;
+}
+
+.menu-app-submenu {
+    list-style: none !important;
+    margin: 4px 0 !important;
+    padding: 0 !important;
+    display: none !important;
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+}
+
+.menu-app-item.open > .menu-app-submenu {
+    display: block !important;
+}
+
+.menu-app-submenu li {
+    list-style: none !important;
+    display: block !important;
+}
+
+.menu-app-sublink {
+    padding: 10px 14px 10px 42px !important;
+    font-size: 13.5px !important;
+    font-weight: 400 !important;
+    border-radius: 8px !important;
+    margin: 2px 8px !important;
+}
+
+.menu-app-sublink.is-active {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+.menu-app-subicon {
+    width: 15px !important;
+    height: 15px !important;
+    flex-shrink: 0 !important;
+    opacity: 0.7 !important;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Toggle submenus on click and manage open state
+    document.querySelectorAll(".menu-app-toggle").forEach(function (toggle) {
+        toggle.addEventListener("click", function () {
+            var item = toggle.closest(".menu-app-item");
+            var wasOpen = item.classList.contains("open");
+            
+            document.querySelectorAll(".menu-app-item.open").forEach(function (openItem) {
+                if (openItem !== item) openItem.classList.remove("open");
+            });
+            
+            item.classList.toggle("open", !wasOpen);
+        });
+    });
+
+    // Auto-open parent menu if a child sublink is currently active
+    document.querySelectorAll(".menu-app-submenu .is-active").forEach(function (childLink) {
+        var parentItem = childLink.closest(".menu-app-item");
+        if (parentItem) {
+            parentItem.classList.add("open");
+        }
+    });
+
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+});
+</script>
