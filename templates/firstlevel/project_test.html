@@ -15,57 +15,25 @@
     <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
     <symbol id="i-back" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 21h14"/></symbol>
 </svg>
 
 <style>
     /* ---------- Original helper styles (kept) ---------- */
-    .detail-card {
-        background: white;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    }
-
-    .dark .detail-card {
-        background: #232a3b;
-    }
-
-    .detail-label {
-        font-size: 12px;
-        color: #64748b;
-        margin-bottom: 5px;
-    }
-
-    .detail-value {
-        font-size: 14px;
-        font-weight: 500;
-        color: #1e293b;
-    }
-
-    .dark .detail-value {
-        color: #f8fafc;
-    }
-
-    .status-completed {
-        color: #16a34a;
-        background: #dcfce7;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-size: 12px;
-        font-weight: 500;
-    }
-
-    .status-pending {
-        color: #dc2626;
-        background: #fee2e2;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-size: 12px;
-        font-weight: 500;
-    }
+    .detail-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+    .dark .detail-card { background: #232a3b; }
+    .detail-label { font-size: 12px; color: #64748b; margin-bottom: 5px; }
+    .detail-value { font-size: 14px; font-weight: 500; color: #1e293b; }
+    .dark .detail-value { color: #f8fafc; }
+    .status-completed { color: #16a34a; background: #dcfce7; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: 500; }
+    .status-pending { color: #dc2626; background: #fee2e2; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: 500; }
 
     /* ---------- Dashboard ---------- */
-    .pd {
+    :root {
         --pd-brand: #1e3c98;
         --pd-brand-2: #3557d1;
         --pd-ink: #0f172a;
@@ -73,16 +41,10 @@
         --pd-line: #e2e8f0;
         --pd-card: #ffffff;
         --pd-soft: #f8fafc;
-        width: 100%;
-        color: var(--pd-ink);
+        --pd-danger: #dc2626;
     }
-    .dark .pd {
-        --pd-ink: #e2e8f0;
-        --pd-muted: #94a3b8;
-        --pd-line: #334155;
-        --pd-card: #1e293b;
-        --pd-soft: #0f172a;
-    }
+    .dark { --pd-ink: #e2e8f0; --pd-muted: #94a3b8; --pd-line: #334155; --pd-card: #1e293b; --pd-soft: #0f172a; }
+    .pd { width: 100%; color: var(--pd-ink); }
 
     .pd-i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 
@@ -97,7 +59,7 @@
     .pd-title { font-size: 21px; font-weight: 700; line-height: 1.25; margin: 0; letter-spacing: -.01em; }
     .pd-sub { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 13px; opacity: .9; overflow-wrap: anywhere; }
     .pd-sub .pd-i { width: 14px; height: 14px; }
-    .pd-hero-side { margin-left: auto; }
+    .pd-hero-side { margin-left: auto; display: flex; gap: 10px; }
     .pd-back { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 13px; font-size: 13px; font-weight: 600; color: #fff; text-decoration: none; border-radius: 9px; background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .28); transition: background-color .15s; }
     .pd-back:hover { background: rgba(255, 255, 255, .28); color: #fff; }
     .pd-back .pd-i { width: 15px; height: 15px; }
@@ -110,10 +72,14 @@
     .dark .pd-panel-ico { color: #93a8ff; }
     .pd-panel-ico .pd-i { width: 17px; height: 17px; }
     .pd-panel-head h3 { font-size: 16px; font-weight: 650; margin: 0; }
-    .pd-count { margin-left: auto; padding: 3px 11px; font-size: 12px; font-weight: 600; border-radius: 999px; color: var(--pd-brand-2); background: color-mix(in srgb, var(--pd-brand-2) 12%, transparent); }
+    .pd-count { padding: 3px 11px; font-size: 12px; font-weight: 600; border-radius: 999px; color: var(--pd-brand-2); background: color-mix(in srgb, var(--pd-brand-2) 12%, transparent); }
     .dark .pd-count { color: #93a8ff; }
     .pd-panel-body { padding: 8px 10px 12px; }
-    @media (max-width: 640px) { .pd-panel-head { padding: 14px 16px; } }
+    @media (max-width: 640px) { .pd-panel-head { padding: 14px 16px; flex-wrap: wrap; } }
+
+    .pd-add-btn { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; font-size: 13px; font-weight: 600; color: #fff; border: none; border-radius: 9px; background: var(--pd-brand-2); cursor: pointer; transition: background-color .15s; }
+    .pd-add-btn:hover { background: var(--pd-brand); }
+    .pd-add-btn .pd-i { width: 15px; height: 15px; }
 
     /* ---------- Table ---------- */
     .pd-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; }
@@ -137,11 +103,43 @@
     .pd-view:focus-visible { outline: 3px solid rgba(53, 87, 209, .45); outline-offset: 2px; }
     .pd-view .pd-i { width: 14px; height: 14px; }
 
+    .pd-actions { display: inline-flex; align-items: center; gap: 6px; }
+    .pd-icon-btn { display: inline-grid; place-items: center; width: 32px; height: 32px; border: none; border-radius: 8px; cursor: pointer; background: var(--pd-soft); color: var(--pd-muted); transition: background-color .15s, color .15s; }
+    .pd-icon-btn .pd-i { width: 15px; height: 15px; }
+    .pd-icon-btn.edit:hover { background: color-mix(in srgb, var(--pd-brand-2) 15%, transparent); color: var(--pd-brand-2); }
+    .pd-icon-btn.delete:hover { background: color-mix(in srgb, var(--pd-danger) 15%, transparent); color: var(--pd-danger); }
+
     /* ---------- Empty state ---------- */
     .pd-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 44px 16px; text-align: center; color: var(--pd-muted); }
     .pd-empty-ico { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; color: var(--pd-brand-2); background: color-mix(in srgb, var(--pd-brand-2) 12%, transparent); }
     .dark .pd-empty-ico { color: #93a8ff; }
     .pd-empty-ico .pd-i { width: 26px; height: 26px; }
+
+    /* ---------- Modal ---------- */
+    .pd-modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, .55); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
+    .pd-modal-backdrop.open { display: flex; }
+    .pd-modal { width: 100%; max-width: 420px; background: var(--pd-card); border-radius: 16px; box-shadow: 0 20px 50px -12px rgba(0,0,0,.35); overflow: hidden; }
+    .pd-modal-head { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--pd-line); }
+    .pd-modal-head h4 { margin: 0; font-size: 15px; font-weight: 650; color: var(--pd-ink); }
+    .pd-modal-close { margin-left: auto; display: inline-grid; place-items: center; width: 30px; height: 30px; border: none; border-radius: 8px; background: var(--pd-soft); color: var(--pd-muted); cursor: pointer; }
+    .pd-modal-close .pd-i { width: 14px; height: 14px; }
+    .pd-modal-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+    .pd-field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--pd-muted); margin-bottom: 6px; }
+    .pd-field input[type="text"] { width: 100%; height: 38px; padding: 0 12px; border: 1px solid var(--pd-line); border-radius: 9px; background: var(--pd-soft); color: var(--pd-ink); font-size: 13.5px; }
+    .pd-field input[type="text"]:focus { outline: none; border-color: var(--pd-brand-2); }
+    .pd-file-drop { position: relative; display: flex; align-items: center; gap: 10px; padding: 12px; border: 1.5px dashed var(--pd-line); border-radius: 10px; background: var(--pd-soft); color: var(--pd-muted); font-size: 12.5px; }
+    .pd-file-drop .pd-i { width: 18px; height: 18px; color: var(--pd-brand-2); }
+    .pd-file-drop input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .pd-file-name { font-weight: 600; color: var(--pd-ink); }
+    .pd-modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--pd-line); }
+    .pd-btn { height: 36px; padding: 0 16px; font-size: 13px; font-weight: 600; border-radius: 9px; cursor: pointer; border: none; }
+    .pd-btn-ghost { background: var(--pd-soft); color: var(--pd-ink); }
+    .pd-btn-primary { background: var(--pd-brand-2); color: #fff; }
+    .pd-btn-primary:hover { background: var(--pd-brand); }
+    .pd-btn-danger { background: var(--pd-danger); color: #fff; }
+    .pd-btn-danger:hover { background: #b91c1c; }
+    .pd-modal-text { font-size: 13.5px; color: var(--pd-ink); }
+    .pd-modal-text strong { font-weight: 650; }
 </style>
 
 
@@ -174,10 +172,7 @@
                     <span class="pd-hero-ico"><svg class="pd-i"><use href="#i-flask"/></svg></span>
 
                     <div class="pd-hero-text">
-                        <h2 class="pd-title">
-                            Project Test
-                        </h2>
-
+                        <h2 class="pd-title">Project Test</h2>
                         <div class="pd-sub">
                             <svg class="pd-i"><use href="#i-building"/></svg>
                             {{ project.project_first_name }}
@@ -185,8 +180,7 @@
                     </div>
 
                     <div class="pd-hero-side">
-                        <a href="{% url 'first_level_details' project.id %}"
-                        class="pd-back">
+                        <a href="{% url 'first_level_details' project.id %}" class="pd-back">
                             <svg class="pd-i"><use href="#i-back"/></svg>
                             Back to Dashboard
                         </a>
@@ -199,12 +193,15 @@
 
                     <div class="pd-panel-head">
                         <span class="pd-panel-ico"><svg class="pd-i"><use href="#i-file"/></svg></span>
-                        <h3>
-                            Test Documents
-                        </h3>
+                        <h3>Test Documents</h3>
                         {% if documents %}
                         <span class="pd-count">{{ documents|length }}</span>
                         {% endif %}
+
+                        <button type="button" class="pd-add-btn" onclick="pdOpenModal('pd-add-modal')">
+                            <svg class="pd-i"><use href="#i-plus"/></svg>
+                            Add Document
+                        </button>
                     </div>
 
                     {% if documents %}
@@ -219,6 +216,7 @@
                                     <th>Title</th>
                                     <th>Document</th>
                                     <th>Uploaded At</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
 
@@ -228,9 +226,7 @@
 
                                 <tr>
 
-                                    <td>
-                                        <span class="pd-sl">{{ forloop.counter }}</span>
-                                    </td>
+                                    <td><span class="pd-sl">{{ forloop.counter }}</span></td>
 
                                     <td>
                                         <span class="pd-doc">
@@ -240,10 +236,7 @@
                                     </td>
 
                                     <td>
-                                        <a href="{{ document.document.url }}"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="pd-view">
+                                        <a href="{{ document.document.url }}" target="_blank" rel="noopener noreferrer" class="pd-view">
                                             <svg class="pd-i"><use href="#i-external"/></svg>
                                             View Document
                                         </a>
@@ -251,6 +244,21 @@
 
                                     <td>
                                         <span class="pd-cell"><svg class="pd-i"><use href="#i-clock"/></svg>{{ document.uploaded_at|date:"d M Y H:i" }}</span>
+                                    </td>
+
+                                    <td>
+                                        <span class="pd-actions">
+                                            <button type="button" class="pd-icon-btn edit"
+                                                onclick="pdOpenEdit('{{ document.id }}', '{{ document.title|default:''|escapejs }}')"
+                                                title="Edit">
+                                                <svg class="pd-i"><use href="#i-edit"/></svg>
+                                            </button>
+                                            <button type="button" class="pd-icon-btn delete"
+                                                onclick="pdOpenDelete('{{ document.id }}', '{{ document.title|default:'Test Document'|escapejs }}')"
+                                                title="Delete">
+                                                <svg class="pd-i"><use href="#i-trash"/></svg>
+                                            </button>
+                                        </span>
                                     </td>
 
                                 </tr>
@@ -267,9 +275,7 @@
 
                     <div class="pd-empty">
                         <span class="pd-empty-ico"><svg class="pd-i"><use href="#i-flask"/></svg></span>
-                        <div>
-                            No test documents found.
-                        </div>
+                        <div>No test documents found.</div>
                     </div>
 
                     {% endif %}
@@ -286,5 +292,146 @@
     </div>
 
 </div>
+
+
+<!-- ===================== ADD MODAL ===================== -->
+<div class="pd-modal-backdrop" id="pd-add-modal">
+    <div class="pd-modal">
+        <form method="post" enctype="multipart/form-data" action="{% url 'project_test' project.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create">
+
+            <div class="pd-modal-head">
+                <svg class="pd-i" style="color:var(--pd-brand-2)"><use href="#i-plus"/></svg>
+                <h4>Add Test Document</h4>
+                <button type="button" class="pd-modal-close" onclick="pdCloseModal('pd-add-modal')">
+                    <svg class="pd-i"><use href="#i-close"/></svg>
+                </button>
+            </div>
+
+            <div class="pd-modal-body">
+                <div class="pd-field">
+                    <label>Title</label>
+                    <input type="text" name="title" placeholder="e.g. Soil Test Report">
+                </div>
+
+                <div class="pd-field">
+                    <label>Document</label>
+                    <div class="pd-file-drop">
+                        <svg class="pd-i"><use href="#i-upload"/></svg>
+                        <span id="pd-add-file-name">Click to choose a file</span>
+                        <input type="file" name="document" required
+                            onchange="document.getElementById('pd-add-file-name').textContent = this.files[0] ? this.files[0].name : 'Click to choose a file'">
+                    </div>
+                </div>
+            </div>
+
+            <div class="pd-modal-foot">
+                <button type="button" class="pd-btn pd-btn-ghost" onclick="pdCloseModal('pd-add-modal')">Cancel</button>
+                <button type="submit" class="pd-btn pd-btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- ===================== EDIT MODAL ===================== -->
+<div class="pd-modal-backdrop" id="pd-edit-modal">
+    <div class="pd-modal">
+        <form method="post" enctype="multipart/form-data" action="{% url 'project_test' project.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="document_id" id="pd-edit-document-id" value="">
+
+            <div class="pd-modal-head">
+                <svg class="pd-i" style="color:var(--pd-brand-2)"><use href="#i-edit"/></svg>
+                <h4>Edit Test Document</h4>
+                <button type="button" class="pd-modal-close" onclick="pdCloseModal('pd-edit-modal')">
+                    <svg class="pd-i"><use href="#i-close"/></svg>
+                </button>
+            </div>
+
+            <div class="pd-modal-body">
+                <div class="pd-field">
+                    <label>Title</label>
+                    <input type="text" name="title" id="pd-edit-title" placeholder="e.g. Soil Test Report">
+                </div>
+
+                <div class="pd-field">
+                    <label>Replace Document (optional)</label>
+                    <div class="pd-file-drop">
+                        <svg class="pd-i"><use href="#i-upload"/></svg>
+                        <span id="pd-edit-file-name">Leave empty to keep existing file</span>
+                        <input type="file" name="document"
+                            onchange="document.getElementById('pd-edit-file-name').textContent = this.files[0] ? this.files[0].name : 'Leave empty to keep existing file'">
+                    </div>
+                </div>
+            </div>
+
+            <div class="pd-modal-foot">
+                <button type="button" class="pd-btn pd-btn-ghost" onclick="pdCloseModal('pd-edit-modal')">Cancel</button>
+                <button type="submit" class="pd-btn pd-btn-primary">Update</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- ===================== DELETE MODAL ===================== -->
+<div class="pd-modal-backdrop" id="pd-delete-modal">
+    <div class="pd-modal">
+        <form method="post" action="{% url 'project_test' project.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="document_id" id="pd-delete-document-id" value="">
+
+            <div class="pd-modal-head">
+                <svg class="pd-i" style="color:var(--pd-danger)"><use href="#i-trash"/></svg>
+                <h4>Delete Document</h4>
+                <button type="button" class="pd-modal-close" onclick="pdCloseModal('pd-delete-modal')">
+                    <svg class="pd-i"><use href="#i-close"/></svg>
+                </button>
+            </div>
+
+            <div class="pd-modal-body">
+                <p class="pd-modal-text">
+                    Are you sure you want to delete <strong id="pd-delete-title"></strong>? This cannot be undone.
+                </p>
+            </div>
+
+            <div class="pd-modal-foot">
+                <button type="button" class="pd-btn pd-btn-ghost" onclick="pdCloseModal('pd-delete-modal')">Cancel</button>
+                <button type="submit" class="pd-btn pd-btn-danger">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    function pdOpenModal(id) {
+        document.getElementById(id).classList.add('open');
+    }
+    function pdCloseModal(id) {
+        document.getElementById(id).classList.remove('open');
+    }
+    function pdOpenEdit(id, title) {
+        document.getElementById('pd-edit-document-id').value = id;
+        document.getElementById('pd-edit-title').value = title;
+        document.getElementById('pd-edit-file-name').textContent = 'Leave empty to keep existing file';
+        pdOpenModal('pd-edit-modal');
+    }
+    function pdOpenDelete(id, title) {
+        document.getElementById('pd-delete-document-id').value = id;
+        document.getElementById('pd-delete-title').textContent = title;
+        pdOpenModal('pd-delete-modal');
+    }
+    // Close modal on backdrop click
+    document.querySelectorAll('.pd-modal-backdrop').forEach(function (bd) {
+        bd.addEventListener('click', function (e) {
+            if (e.target === bd) bd.classList.remove('open');
+        });
+    });
+</script>
 
 {% endblock %}

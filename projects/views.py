@@ -3031,7 +3031,6 @@ def project_schedule_crud(request, pk):
 
 
 
-       
 def project_test(request, pk):
     project = get_object_or_404(
         ProjectFirstLevelName,
@@ -3043,6 +3042,91 @@ def project_test(request, pk):
         document_type='test'
     ).order_by('-uploaded_at')
 
+    # =========================
+    # CREATE
+    # =========================
+    if request.method == 'POST' and request.POST.get('action') == 'create':
+
+        title = request.POST.get('title')
+        document = request.FILES.get('document')
+
+        if not document:
+            messages.error(request, 'Please select a document.')
+            return redirect('project_test', pk=project.pk)
+
+        ProjectDocument.objects.create(
+            project=project,
+            document_type='test',
+            title=title,
+            document=document
+        )
+
+        messages.success(
+            request,
+            'Test document added successfully.'
+        )
+
+        return redirect('project_test', pk=project.pk)
+
+    # =========================
+    # EDIT
+    # =========================
+    if request.method == 'POST' and request.POST.get('action') == 'edit':
+
+        document_id = request.POST.get('document_id')
+
+        project_document = get_object_or_404(
+            ProjectDocument,
+            pk=document_id,
+            project=project,
+            document_type='test'
+        )
+
+        title = request.POST.get('title')
+        new_document = request.FILES.get('document')
+
+        project_document.title = title
+
+        # Only replace file if new file is selected
+        if new_document:
+            project_document.document = new_document
+
+        project_document.save()
+
+        messages.success(
+            request,
+            'Test document updated successfully.'
+        )
+
+        return redirect('project_test', pk=project.pk)
+
+    # =========================
+    # DELETE
+    # =========================
+    if request.method == 'POST' and request.POST.get('action') == 'delete':
+
+        document_id = request.POST.get('document_id')
+
+        project_document = get_object_or_404(
+            ProjectDocument,
+            pk=document_id,
+            project=project,
+            document_type='test'
+        )
+
+        # Delete physical file also
+        if project_document.document:
+            project_document.document.delete(save=False)
+
+        project_document.delete()
+
+        messages.success(
+            request,
+            'Test document deleted successfully.'
+        )
+
+        return redirect('project_test', pk=project.pk)
+
     return render(
         request,
         'firstlevel/project_test.html',
@@ -3050,7 +3134,7 @@ def project_test(request, pk):
             'project': project,
             'documents': documents,
         }
-    )
+    )      
 
 def project_drawing(request, pk):
     project = get_object_or_404(
