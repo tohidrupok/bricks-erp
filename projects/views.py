@@ -2262,25 +2262,7 @@ def project_intro(request, pk):
         }
     )
 
-def agreement_land(request, pk):
-    project = get_object_or_404(
-        ProjectFirstLevelName,
-        pk=pk
-    )
 
-    documents = ProjectDocument.objects.filter(
-        project=project,
-        document_type='agreement'
-    ).order_by('-uploaded_at')
-
-    return render(
-        request,
-        'firstlevel/agreement_land.html',
-        {
-            'project': project,
-            'documents': documents,
-        }
-    )
 
 # from calendar import month_abbr
 
@@ -3030,7 +3012,7 @@ def project_schedule_crud(request, pk):
     )
 
 
-
+@login_required
 def project_test(request, pk):
     project = get_object_or_404(
         ProjectFirstLevelName,
@@ -3136,10 +3118,7 @@ def project_test(request, pk):
         }
     )      
 
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
-
-
+@login_required
 def project_drawing(request, pk):
     project = get_object_or_404(
         ProjectFirstLevelName,
@@ -3251,8 +3230,7 @@ def project_drawing(request, pk):
         }
     )
 
-
-
+@login_required
 def project_certificate(request, pk):
     project = get_object_or_404(
         ProjectFirstLevelName,
@@ -3365,10 +3343,8 @@ def project_certificate(request, pk):
     )
 
 
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
 
-
+@login_required
 def project_approval(request, pk):
     project = get_object_or_404(
         ProjectFirstLevelName,
@@ -3481,7 +3457,117 @@ def project_approval(request, pk):
     )
 
 
+@login_required
+def agreement_land(request, pk):
+    project = get_object_or_404(
+        ProjectFirstLevelName,
+        pk=pk
+    )
 
+    # =========================
+    # CREATE
+    # =========================
+    if request.method == 'POST' and request.POST.get('action') == 'create':
+
+        title = request.POST.get('title')
+        document = request.FILES.get('document')
+
+        if not document:
+            messages.error(
+                request,
+                'Please select an agreement / land document.'
+            )
+            return redirect('agreement_land', pk=project.pk)
+
+        ProjectDocument.objects.create(
+            project=project,
+            document_type='agreement',
+            title=title,
+            document=document
+        )
+
+        messages.success(
+            request,
+            'Agreement / Land document added successfully.'
+        )
+
+        return redirect('agreement_land', pk=project.pk)
+
+    # =========================
+    # EDIT
+    # =========================
+    if request.method == 'POST' and request.POST.get('action') == 'edit':
+
+        document_id = request.POST.get('document_id')
+
+        project_document = get_object_or_404(
+            ProjectDocument,
+            pk=document_id,
+            project=project,
+            document_type='agreement'
+        )
+
+        title = request.POST.get('title')
+        new_document = request.FILES.get('document')
+
+        project_document.title = title
+
+        # New file দিলে পুরোনো file replace হবে
+        if new_document:
+            project_document.document = new_document
+
+        project_document.save()
+
+        messages.success(
+            request,
+            'Agreement / Land document updated successfully.'
+        )
+
+        return redirect('agreement_land', pk=project.pk)
+
+    # =========================
+    # DELETE
+    # =========================
+    if request.method == 'POST' and request.POST.get('action') == 'delete':
+
+        document_id = request.POST.get('document_id')
+
+        project_document = get_object_or_404(
+            ProjectDocument,
+            pk=document_id,
+            project=project,
+            document_type='agreement'
+        )
+
+        # Physical uploaded file delete
+        if project_document.document:
+            project_document.document.delete(save=False)
+
+        project_document.delete()
+
+        messages.success(
+            request,
+            'Agreement / Land document deleted successfully.'
+        )
+
+        return redirect('agreement_land', pk=project.pk)
+
+    # =========================
+    # DOCUMENTS
+    # =========================
+    documents = ProjectDocument.objects.filter(
+        project=project,
+        document_type='agreement'
+    ).order_by('-uploaded_at')
+
+    return render(
+        request,
+        'firstlevel/agreement_land.html',
+        {
+            'project': project,
+            'documents': documents,
+        }
+    )
 
 
 
