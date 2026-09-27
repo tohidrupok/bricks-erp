@@ -3251,12 +3251,105 @@ def project_drawing(request, pk):
         }
     )
 
+
+
 def project_certificate(request, pk):
     project = get_object_or_404(
         ProjectFirstLevelName,
         pk=pk
     )
 
+    # =========================
+    # CREATE
+    # =========================
+    if request.method == 'POST' and request.POST.get('action') == 'create':
+
+        title = request.POST.get('title')
+        document = request.FILES.get('document')
+
+        if not document:
+            messages.error(
+                request,
+                'Please select a certificate document.'
+            )
+            return redirect('project_certificate', pk=project.pk)
+
+        ProjectDocument.objects.create(
+            project=project,
+            document_type='certification',
+            title=title,
+            document=document
+        )
+
+        messages.success(
+            request,
+            'Certificate document added successfully.'
+        )
+
+        return redirect('project_certificate', pk=project.pk)
+
+    # =========================
+    # EDIT
+    # =========================
+    if request.method == 'POST' and request.POST.get('action') == 'edit':
+
+        document_id = request.POST.get('document_id')
+
+        project_document = get_object_or_404(
+            ProjectDocument,
+            pk=document_id,
+            project=project,
+            document_type='certification'
+        )
+
+        title = request.POST.get('title')
+        new_document = request.FILES.get('document')
+
+        project_document.title = title
+
+        # New file 
+        if new_document:
+            project_document.document = new_document
+
+        project_document.save()
+
+        messages.success(
+            request,
+            'Certificate document updated successfully.'
+        )
+
+        return redirect('project_certificate', pk=project.pk)
+
+    # =========================
+    # DELETE
+    # =========================
+    if request.method == 'POST' and request.POST.get('action') == 'delete':
+
+        document_id = request.POST.get('document_id')
+
+        project_document = get_object_or_404(
+            ProjectDocument,
+            pk=document_id,
+            project=project,
+            document_type='certification'
+        )
+
+        # Physical uploaded file delete
+        if project_document.document:
+            project_document.document.delete(save=False)
+
+        project_document.delete()
+
+        messages.success(
+            request,
+            'Certificate document deleted successfully.'
+        )
+
+        return redirect('project_certificate', pk=project.pk)
+
+    # =========================
+    # DOCUMENTS
+    # =========================
     documents = ProjectDocument.objects.filter(
         project=project,
         document_type='certification'
