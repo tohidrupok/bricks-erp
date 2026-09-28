@@ -3512,7 +3512,7 @@ def agreement_land(request, pk):
 
         project_document.title = title
 
-        # New file দিলে পুরোনো file replace হবে
+        # New file 
         if new_document:
             project_document.document = new_document
 
