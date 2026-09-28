@@ -3728,19 +3728,6 @@ def boq_category_list(request):
     categories = BoQCategory.objects.all()
     return render(request, 'boq/boq_category_list.html', {'categories': categories})
 
-# @login_required
-# def create_boq_category(request):
-#     if request.method == 'POST':
-#         form = BoQCategoryForm(request.POST)
-#         if form.is_valid():
-#             form.save()  # Save the BoQCategory to the database
-#             return redirect('boq_category_list')  # Redirect to the list view after saving
-#     else:
-#         form = BoQCategoryForm()
-    
-#     return render(request, 'boq/create_boq_category.html', {'form': form})
-
-
 
 @login_required
 def add_boq_type_only(request):
@@ -3859,82 +3846,7 @@ def boq_supplier_list(request):
     supplier = Suppliers.objects.all()
     return render(request, 'supplier/boq_supplier_list.html', {'suppliers': supplier})
 
-
-    
-# from decimal import Decimal, ROUND_HALF_UP
-# from django.shortcuts import render
-# from django.contrib.auth.decorators import login_required
-# from django.db.models import Sum, Value, DecimalField, OuterRef, Subquery
-# from django.db.models.functions import Coalesce
-# from django.utils import timezone
-# from projects.models import Suppliers
-# from inventories.models import Inventories
-# from accounting.models import LedgerEntry
-
-
-
-# def round2(val):
-#     """Helper function to round values safely to 2 decimal places."""
-#     if val is None:
-#         val = Decimal('0.00')
-#     elif not isinstance(val, Decimal):
-#         val = Decimal(str(val))
-#     return val.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-
-
-# @login_required
-# def boq_supplier_details_view(request):
-#     # 1. Subquery to calculate total purchased per supplier safely in the DB
-#     purchase_subquery = Inventories.objects.filter(
-#         vendor_name=OuterRef('pk')
-#     ).values('vendor_name').annotate(
-#         total=Sum('amount')
-#     ).values('total')
-
-#     # 2. Subquery to calculate total paid per supplier safely in the DB
-#     payment_subquery = LedgerEntry.objects.filter(
-#         vendor=OuterRef('pk'),
-#         type='Vendor'
-#     ).values('vendor').annotate(
-#         total=Sum('debit')
-#     ).values('total')
-
-#     # 3. Main Query: Exclude ONLY 'No Supplier' (case-insensitive)
-#     suppliers = Suppliers.objects.exclude(
-#         supplier_name__iexact='No Supplier'
-#     ).annotate(
-#         total_purchased=Coalesce(
-#             Subquery(purchase_subquery), 
-#             Value(0), 
-#             output_field=DecimalField()
-#         ),
-#         total_paid=Coalesce(
-#             Subquery(payment_subquery), 
-#             Value(0), 
-#             output_field=DecimalField()
-#         )
-#     )
-
-#     # Round individual supplier amounts to 2 decimal places
-#     for supplier in suppliers:
-#         supplier.total_purchased = round2(supplier.total_purchased)
-#         supplier.total_paid = round2(supplier.total_paid)
-#         supplier.balance_due = round2(supplier.total_purchased - supplier.total_paid)
-
-#     # 4. Global Summary Totals rounded to 2 decimal places
-#     overall_total_purchased = round2(sum((s.total_purchased for s in suppliers), Decimal('0.00')))
-#     overall_total_paid = round2(sum((s.total_paid for s in suppliers), Decimal('0.00')))
-#     overall_balance_due = round2(overall_total_purchased - overall_total_paid)
-
-#     context = {
-#         'suppliers': suppliers,
-#         'print_time': timezone.now(),
-#         'overall_total_purchased': overall_total_purchased,
-#         'overall_total_paid': overall_total_paid,
-#         'overall_balance_due': overall_balance_due,
-#     }
-#     return render(request, 'supplier/boq_supplier_details_view.html', context)
-    
+  
 
 from decimal import Decimal, ROUND_HALF_UP
 from django.shortcuts import render
