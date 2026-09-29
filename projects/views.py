@@ -40,6 +40,15 @@ from django.db.models import Min, Max
 from django.db.models import F
 from datetime import date
 from django.core.paginator import Paginator
+from decimal import Decimal
+from django.db.models import Sum
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
+from django.contrib.auth.decorators import login_required
+# from weasyprint import HTML
+
+
 
 
 logger = logging.getLogger(__name__)
@@ -1440,157 +1449,11 @@ def project_boq_details_view(request):
 
 
 
-from decimal import Decimal
-from django.db.models import Sum
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-from django.template.loader import render_to_string
-from django.contrib.auth.decorators import login_required
-# from weasyprint import HTML
 
 
+@login_required
 def boq_pdf_view(request, project_id):
     return HttpResponse("PDF generation is currently disabled. Please enable WeasyPrint and uncomment the code in views.py to generate PDFs.")  
-
-# @login_required
-# def boq_pdf_view(request, project_id):
-#     project = get_object_or_404(ProjectFirstLevelName, id=project_id)
-#     boq_by_type_and_category = {}
-
-#     # Group BOQ items by Category Type and Category Name
-#     for item in project.boq_set.all():
-#         type_key = item.category_type
-#         category_key = item.category_name
-
-#         if type_key not in boq_by_type_and_category:
-#             boq_by_type_and_category[type_key] = {}
-
-#         if category_key not in boq_by_type_and_category[type_key]:
-#             boq_by_type_and_category[type_key][category_key] = {
-#                 'items': [],
-#                 'total': Decimal('0.00'),
-#             }
-
-#         boq_by_type_and_category[type_key][category_key]['items'].append(item)
-#         boq_by_type_and_category[type_key][category_key]['total'] += item.amount or Decimal('0.00')
-
-#     # Calculate Totals
-#     final_total = sum(item.amount or Decimal('0.00') for item in project.boq_set.all())
-
-#     total_by_category_type = (
-#         BOQ.objects.filter(project_name=project)
-#         .values('category_type')
-#         .annotate(total_amount=Sum('amount'))
-#         .order_by('category_type')
-#     )
-
-#     employee_costs = EmployeeCost.objects.filter(project_name=project.project_first_name)
-#     employee_cost_total = employee_costs.aggregate(total=Sum('total_salary'))['total'] or Decimal('0.00')
-
-#     safety_equipment = SafetyEquipment.objects.filter(project_name=project.project_first_name)
-#     safety_equipment_total = safety_equipment.aggregate(total=Sum('total_cost'))['total'] or Decimal('0.00')
-
-#     expense_costs = ExpenseCost.objects.filter(project_name=project.project_first_name)
-#     expense_cost_total = expense_costs.aggregate(total=Sum('total_cost'))['total'] or Decimal('0.00')
-
-#     grand_total = final_total + employee_cost_total + safety_equipment_total + expense_cost_total
-
-#     context = {
-#         'project': project,
-#         'boq_by_type_and_category': boq_by_type_and_category,
-#         'grand_total': grand_total,
-#         'total_by_category_type': total_by_category_type,
-#         'employee_cost_total': employee_cost_total,
-#         'safety_equipment_total': safety_equipment_total,
-#         'employee_costs': employee_costs,
-#         'safety_equipment': safety_equipment,
-#         'expense_costs': expense_costs,
-#         'expense_cost_total': expense_cost_total,
-#     }
-
-#     # Render Template to HTML String
-#     html_string = render_to_string('boq/pdf_template.html', context)
-
-#     # Generate PDF via WeasyPrint
-#     pdf_bytes = HTML(
-#         string=html_string,
-#         base_url=request.build_absolute_uri('/')
-#     ).write_pdf()
-
-#     response = HttpResponse(pdf_bytes, content_type='application/pdf')
-#     response['Content-Disposition'] = 'inline; filename="boq_details.pdf"'
-#     return response
-    
-    
-    
-
-# @login_required
-# def boq_pdf_view(request, project_id):
-#     project = get_object_or_404(ProjectFirstLevelName, id=project_id)
-#     boq_by_type_and_category = {}
-#     for item in project.boq_set.all():
-#         type_key = item.category_type
-#         category_key = item.category_name
-
-#         if type_key not in boq_by_type_and_category:
-#             boq_by_type_and_category[type_key] = {}
-
-#         if category_key not in boq_by_type_and_category[type_key]:
-#             boq_by_type_and_category[type_key][category_key] = {
-#                 'items': [],
-#                 'total': Decimal('0.00')
-#             }
-
-#         boq_by_type_and_category[type_key][category_key]['items'].append(item)
-#         boq_by_type_and_category[type_key][category_key]['total'] += item.amount or Decimal('0.00')
-
-#     final_total = sum(item.amount or Decimal('0.00') for item in project.boq_set.all())
-
-#     total_by_category_type = (
-#         BOQ.objects.filter(project_name=project)
-#         .values('category_type')
-#         .annotate(total_amount=Sum('amount'))
-#         .order_by('category_type')
-#     )
-
-#     employee_costs = EmployeeCost.objects.filter(project_name=project.project_first_name)
-#     employee_cost_total = employee_costs.aggregate(total=Sum('total_salary'))['total'] or 0
-
-#     safety_equipment = SafetyEquipment.objects.filter(project_name=project.project_first_name)
-#     safety_equipment_total = safety_equipment.aggregate(total=Sum('total_cost'))['total'] or 0
-
-#     expense_costs = ExpenseCost.objects.filter(project_name=project.project_first_name)
-#     expense_cost_total = expense_costs.aggregate(total=Sum('total_cost'))['total'] or 0
-
-#     grand_total = final_total + employee_cost_total + safety_equipment_total + expense_cost_total
-
-#     context = {
-#         'project': project,
-#         'boq_by_type_and_category': boq_by_type_and_category,
-#         'grand_total': grand_total,
-#         'total_by_category_type': total_by_category_type,
-#         'employee_cost_total': employee_cost_total,
-#         'safety_equipment_total': safety_equipment_total,
-#         'employee_costs': employee_costs,
-#         'safety_equipment': safety_equipment,
-#         'expense_costs': expense_costs,
-#         'expense_cost_total': expense_cost_total,
-#     }
-
-#     # Render PDF
-#     template_path = 'boq/pdf_template.html'
-#     template = get_template(template_path)
-#     html = template.render(context)
-
-#     result = BytesIO()
-#     pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
-
-#     if not pdf.err:
-#         response = HttpResponse(result.getvalue(), content_type='application/pdf')
-#         response['Content-Disposition'] = 'inline; filename="boq_details.pdf"'
-#         return response
-#     else:
-#         return HttpResponse('PDF generation failed')
 
 
 
