@@ -1,0 +1,53 @@
+-<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BOQ Report</title>
+</head>
+<body>
+
+<h2>BOQ Plan vs Actual Report</h2>
+
+<p>Plan Grand Total: {{ plan_grand_total }}</p>
+<p>Actual Grand Total: {{ actual_grand_total }}</p>
+<p>Remaining Budget / Variance: {{ variance }}</p>
+
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Project</th>
+            <th>Item</th>
+            <th>Category</th>
+            <th>Plan Qty</th>
+            <th>Actual Qty</th>
+            <th>Remaining Qty</th>
+            <th>Plan Total</th>
+            <th>Actual Total</th>
+            <th>Variance</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in report_rows %}
+        <tr>
+            <td>{{ row.boq.project_name }}</td>
+            <td>{{ row.boq.item_name }}</td>
+            <td>{{ row.boq.category_name }}</td>
+            <td>{{ row.boq.qty }}</td>
+            <td>{{ row.actual_quantity }}</td>
+            <td>{{ row.remaining_quantity }}</td>
+            <td>{{ row.boq.amount }}</td>
+            <td>{{ row.actual_total }}</td>
+            <td>{{ row.remaining_amount }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="9">No BOQ data available.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p><a href="{% url 'boq_list' %}">Back to BOQ List</a></p>
+
+</body>
+</html>

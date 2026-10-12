@@ -195,32 +195,162 @@ class ProjectScheduleItem(models.Model):
 #         return self.project_name.project_first_name
 
 
+# class BOQ(models.Model):
+#     project_name = models.ForeignKey(ProjectFirstLevelName, on_delete=models.CASCADE)
+#     category_type = models.CharField(
+#         max_length=100,
+#         choices=[('Materials Purchase Cost', 'Materials Purchase Cost'), ('Labour Cost', 'Labour Cost')],
+#         default='Materials Purchase Cost'
+#     )
+#     type_name = models.CharField(max_length=100, default='')
+#     category_name = models.CharField(max_length=255)
+#     supplier_name = models.ForeignKey('Suppliers', on_delete=models.SET_NULL, null=True, blank=True)
+#     item_name = models.ForeignKey('purchase.HeadOfRequisition', on_delete=models.CASCADE)
+#     unit = models.CharField(max_length=50)
+#     qty = models.DecimalField(max_digits=20, decimal_places=2)  
+#     rate = models.DecimalField(max_digits=20, decimal_places=2)
+#     amount = models.DecimalField(max_digits=20, decimal_places=2, blank=True, null=True)
+#     remark = models.TextField(blank=True, null=True)
+#     status_item = models.CharField(max_length=50, default='') 
+#     update_item = models.CharField(max_length=100, default='')
+#     boq_date = models.DateField(null=True, blank=True)
+
+    
+#     def __str__(self):
+#         return f"{self.project_name.project_first_name} - {self.category_type}"
+        
+
+
 class BOQ(models.Model):
-    project_name = models.ForeignKey(ProjectFirstLevelName, on_delete=models.CASCADE)
+    project_name = models.ForeignKey(
+        ProjectFirstLevelName,
+        on_delete=models.CASCADE
+    )
+
     category_type = models.CharField(
         max_length=100,
-        choices=[('Materials Purchase Cost', 'Materials Purchase Cost'), ('Labour Cost', 'Labour Cost')],
+        choices=[
+            ('Materials Purchase Cost', 'Materials Purchase Cost'),
+            ('Labour Cost', 'Labour Cost')
+        ],
         default='Materials Purchase Cost'
     )
-    type_name = models.CharField(max_length=100, default='')
-    category_name = models.CharField(max_length=255)
-    supplier_name = models.ForeignKey('Suppliers', on_delete=models.SET_NULL, null=True, blank=True)
-    item_name = models.ForeignKey('purchase.HeadOfRequisition', on_delete=models.CASCADE)
+
+    type_name = models.CharField(max_length=100, default='', null=True, blank=True)
+    category_name = models.CharField(max_length=255, null=True, blank=True)
+
+    supplier_name = models.ForeignKey(
+        'Suppliers',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    item_name = models.ForeignKey(
+        'purchase.HeadOfRequisition',
+        on_delete=models.CASCADE, null=True, blank=True
+    )
+
+    # Existing BOQ fields
     unit = models.CharField(max_length=50)
-    qty = models.DecimalField(max_digits=20, decimal_places=2)  
+    qty = models.DecimalField(max_digits=20, decimal_places=2)
     rate = models.DecimalField(max_digits=20, decimal_places=2)
-    amount = models.DecimalField(max_digits=20, decimal_places=2, blank=True, null=True)
+    amount = models.DecimalField(
+        max_digits=20,
+        decimal_places=2,
+        blank=True,
+        null=True
+    )
+
+    # New Plan fields
+    item_no = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    description = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    # New actual tracking support
+    # Actual data will be stored in BOQTransaction
+
     remark = models.TextField(blank=True, null=True)
-    status_item = models.CharField(max_length=50, default='') 
-    update_item = models.CharField(max_length=100, default='')
+    status_item = models.CharField(max_length=50, default='', null=True, blank=True)
+    update_item = models.CharField(max_length=100, default='', null=True, blank=True)
     boq_date = models.DateField(null=True, blank=True)
 
-    # def __str__(self):
-    #     return self.project_name.project_first_name
-    
+    def save(self, *args, **kwargs):
+        # Plan total = quantity × rate
+        self.amount = self.qty * self.rate
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.project_name.project_first_name} - {self.category_type}"
-        
+        return (
+            f"{self.project_name.project_first_name} "
+            f"- {self.category_type}"
+        )
+
+
+class BOQTransaction(models.Model):
+    boq = models.ForeignKey(
+        BOQ,
+        on_delete=models.CASCADE,
+        related_name='transactions'
+    )
+
+    actual_quantity = models.DecimalField(
+        max_digits=20,
+        decimal_places=2,
+        default=0
+    )
+
+    actual_rate = models.DecimalField(
+        max_digits=20,
+        decimal_places=2,
+        default=0
+    )
+
+    actual_total = models.DecimalField(
+        max_digits=20,
+        decimal_places=2,
+        default=0,
+        editable=False
+    )
+
+    voucher_no = models.CharField(max_length=100)
+
+    vendor = models.ForeignKey(
+        'Suppliers',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='boq_transactions'
+    )
+
+    transaction_date = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    remark = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        self.actual_total = (
+            self.actual_quantity * self.actual_rate
+        )
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.boq} - {self.voucher_no}"
+
 
 
 class BoRevisedItem(models.Model):

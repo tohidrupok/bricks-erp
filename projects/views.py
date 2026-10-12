@@ -3377,3 +3377,152 @@ def material_entry_create(request):
     }
 
     return render(request, 'firstlevel/material_entry_form.html', context)
+
+
+
+
+
+#####################
+
+# views.py
+
+from decimal import Decimal
+
+from django.contrib import messages
+from django.db.models import Sum
+from django.shortcuts import render, redirect, get_object_or_404
+
+from .models import BOQ, BOQTransaction
+from .forms import BOQForm, BOQTransactionForm
+
+
+def boq_list2(request):
+    boqs = BOQ.objects.select_related(
+        'project_name',
+        'item_name',
+        'supplier_name',
+    ).order_by('-id')
+
+    return render(request, 'boq/boq_list2.html', {
+        'boqs': boqs,
+    })
+
+
+def boq_create2(request):
+    if request.method == 'POST':
+        form = BOQForm(request.POST)
+
+        if form.is_valid():
+            boq = form.save()
+            messages.success(request, 'BOQ Plan created successfully.')
+            return redirect('boq_detail', pk=boq.pk)
+    else:
+        form = BOQForm()
+
+    return render(request, 'boq/boq_form2.html', {
+        'form': form,
+        'title': 'Create BOQ Plan',
+    })
+
+
+def boq_detail2(request, pk):
+    boq = get_object_or_404(
+        BOQ.objects.select_related(
+            'project_name',
+            'item_name',
+            'supplier_name',
+        ),
+        pk=pk,
+    )
+
+    transactions = boq.transactions.select_related(
+        'vendor',
+    ).order_by('-id')
+
+    totals = transactions.aggregate(
+        total_quantity=Sum('actual_quantity'),
+        total_amount=Sum('actual_total'),
+    )
+
+    actual_quantity = totals['total_quantity'] or Decimal('0')
+    actual_total = totals['total_amount'] or Decimal('0')
+
+    return render(request, 'boq/boq_detail.html', {
+        'boq': boq,
+        'transactions': transactions,
+        'actual_quantity': actual_quantity,
+        'actual_total': actual_total,
+        'remaining_quantity': boq.qty - actual_quantity,
+        'remaining_amount': boq.amount - actual_total,
+    })
+
+
+def boq_transaction_create2(request, pk):
+    boq = get_object_or_404(BOQ, pk=pk)
+
+    if request.method == 'POST':
+        form = BOQTransactionForm(request.POST)
+
+        if form.is_valid():
+            transaction = form.save(commit=False)
+            transaction.boq = boq
+            transaction.save()
+
+            messages.success(
+                request,
+                'Actual transaction added successfully.',
+            )
+            return redirect('boq_detail', pk=boq.pk)
+    else:
+        form = BOQTransactionForm()
+
+    return render(request, 'boq/boq_transaction_form.html', {
+        'form': form,
+        'boq': boq,
+        'title': 'Add Actual Transaction',
+    })
+
+
+def boq_report2(request):
+    boqs = BOQ.objects.select_related(
+        'project_name',
+        'item_name',
+    ).order_by('-id')
+
+    report_rows = []
+
+    plan_grand_total = Decimal('0')
+    actual_grand_total = Decimal('0')
+
+    for boq in boqs:
+        totals = boq.transactions.aggregate(
+            actual_quantity=Sum('actual_quantity'),
+            actual_total=Sum('actual_total'),
+        )
+
+        actual_quantity = (
+            totals['actual_quantity'] or Decimal('0')
+        )
+        actual_total = (
+            totals['actual_total'] or Decimal('0')
+        )
+
+        plan_total = boq.amount or Decimal('0')
+
+        report_rows.append({
+            'boq': boq,
+            'actual_quantity': actual_quantity,
+            'actual_total': actual_total,
+            'remaining_quantity': boq.qty - actual_quantity,
+            'remaining_amount': plan_total - actual_total,
+        })
+
+        plan_grand_total += plan_total
+        actual_grand_total += actual_total
+
+    return render(request, 'boq/boq_report.html', {
+        'report_rows': report_rows,
+        'plan_grand_total': plan_grand_total,
+        'actual_grand_total': actual_grand_total,
+        'variance': plan_grand_total - actual_grand_total,
+    })

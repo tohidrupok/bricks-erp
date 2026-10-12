@@ -341,8 +341,14 @@ urlpatterns = [
     path('dashboard/save-expense/',  projects_views.save_expense, name='save-expense'),
     #path('dashboard/boq/', projects_views.boq_view, name='boq_create'),
 
+    path('dashboard/project/boq/', projects_views.boq_list2, name='boq_list'),
+    path('dashboard/project/boq/create/', projects_views.boq_create2, name='boq_create'),
+    path('dashboard/project/boq/<int:pk>/', projects_views.boq_detail2, name='boq_detail'),
+    path('dashboard/project/boq/<int:pk>/transaction/add/',  projects_views.boq_transaction_create2, name='boq_transaction_create',),
+    path('dashboard/project/boq/report/', projects_views.boq_report2, name='boq_report'),
+
+
     path('dashboard/labor-cost', projects_views.labor_cost_create, name='labor_cost_create'),
-    
     path('dashboard/contructor/', projects_views.boq_contructor_list, name='boq_contructor_list'),
     path('dashboard/contructor/add/', projects_views.create_boq_contructor, name='create_boq_contructor'),
     path('dashboard/boq-contructor/edit/<int:id>/', projects_views.edit_boq_contructor, name='edit_boq_contructor'),

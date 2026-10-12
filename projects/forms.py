@@ -355,43 +355,99 @@ class ProjectScheduleItemForm(forms.ModelForm):
         
         
 
+# class BOQForm(forms.ModelForm):
+#     class Meta:
+#         model = BOQ
+#         exclude = ['status_item', 'update_item', 'type_name', 'category_type']
+#         widgets = {
+#             'project_name': forms.Select(attrs={'class': 'your-css-class'}),
+#             'category_name': forms.TextInput(attrs={'class': 'your-css-class'}),
+#             'supplier_name': forms.Select(attrs={'class': 'your-css-class'}),
+#             'item_name': forms.TextInput(attrs={'class': 'your-css-class'}),
+#             'unit': forms.TextInput(attrs={'class': 'your-css-class'}),
+#             'qty': forms.NumberInput(attrs={'class': 'your-css-class'}),
+#             'rate': forms.NumberInput(attrs={'class': 'your-css-class'}),
+#             'amount': forms.NumberInput(attrs={'class': 'your-css-class'}),
+#             'remark': forms.Textarea(attrs={'class': 'your-css-class'}),
+#             'boq_date': forms.DateInput(attrs={'type': 'date', 'class': 'your-css-class'}),
+#         }
+
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         qty = cleaned_data.get("qty")
+#         rate = cleaned_data.get("rate")
+
+#         if qty is None or rate is None:
+#             raise forms.ValidationError("Quantity and Rate cannot be empty.")
+
+#         try:
+#             if Decimal(qty) <= 0 or Decimal(rate) <= 0:
+#                 raise forms.ValidationError("Quantity and Rate must be greater than zero.")
+#         except InvalidOperation:
+#             raise forms.ValidationError("Invalid decimal value provided.")
+
+#         return cleaned_data
+        
+
+# forms.py
+
+from django import forms
+from .models import BOQ, BOQTransaction
+
 class BOQForm(forms.ModelForm):
     class Meta:
         model = BOQ
-        exclude = ['status_item', 'update_item', 'type_name', 'category_type']
+        fields = [
+            'project_name',
+            'category_type',
+            'supplier_name',
+            'item_no',
+            'description',
+            'unit',
+            'qty',
+            'rate',
+            'remark',
+            'boq_date',
+        ]
+
         widgets = {
-            'project_name': forms.Select(attrs={'class': 'your-css-class'}),
-            'category_name': forms.TextInput(attrs={'class': 'your-css-class'}),
-            'supplier_name': forms.Select(attrs={'class': 'your-css-class'}),
-            'item_name': forms.TextInput(attrs={'class': 'your-css-class'}),
-            'unit': forms.TextInput(attrs={'class': 'your-css-class'}),
-            'qty': forms.NumberInput(attrs={'class': 'your-css-class'}),
-            'rate': forms.NumberInput(attrs={'class': 'your-css-class'}),
-            'amount': forms.NumberInput(attrs={'class': 'your-css-class'}),
-            'remark': forms.Textarea(attrs={'class': 'your-css-class'}),
-            'boq_date': forms.DateInput(attrs={'type': 'date', 'class': 'your-css-class'}),
+            'description': forms.Textarea(attrs={'rows': 3}),
+            'boq_date': forms.DateInput(attrs={'type': 'date'}),
+            'qty': forms.NumberInput(attrs={'step': '0.01', 'min': '0'}),
+            'rate': forms.NumberInput(attrs={'step': '0.01', 'min': '0'}),
         }
+        
+class BOQTransactionForm(forms.ModelForm):
+    class Meta:
+        model = BOQTransaction
+        fields = [
+            'actual_quantity',
+            'actual_rate',
+            'voucher_no',
+            'vendor',
+            'transaction_date',
+            'remark',
+        ]
 
-    def clean(self):
-        cleaned_data = super().clean()
-        qty = cleaned_data.get("qty")
-        rate = cleaned_data.get("rate")
-
-        if qty is None or rate is None:
-            raise forms.ValidationError("Quantity and Rate cannot be empty.")
-
-        try:
-            if Decimal(qty) <= 0 or Decimal(rate) <= 0:
-                raise forms.ValidationError("Quantity and Rate must be greater than zero.")
-        except InvalidOperation:
-            raise forms.ValidationError("Invalid decimal value provided.")
-
-        return cleaned_data
+        widgets = {
+            'transaction_date': forms.DateInput(attrs={
+                'type': 'date',
+            }),
+            'actual_quantity': forms.NumberInput(attrs={
+                'step': '0.01',
+                'min': '0',
+            }),
+            'actual_rate': forms.NumberInput(attrs={
+                'step': '0.01',
+                'min': '0',
+            }),
+            'remark': forms.Textarea(attrs={
+                'rows': 3,
+            }),
+        }
+      
         
         
-        
-        
-
 class BoRevisedItemForm(forms.ModelForm):
     class Meta:
         model = BoRevisedItem

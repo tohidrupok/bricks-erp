@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import BOQ, ProjectFirstLevelName,Donation, EmployeeCost, SafetyEquipment, BoQCategory,ExpenseCost,SiteSupervisor,Suppliers,ProjectLocation,BoRevisedItem,ContractorActivity,MaterialEntry
 from .models import *
 admin.site.register(BOQ)
+admin.site.register(BOQTransaction)
 admin.site.register(EmployeeCost)
 admin.site.register(SafetyEquipment)
 admin.site.register(BoQCategory)

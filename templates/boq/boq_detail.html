@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BOQ Details</title>
+</head>
+<body>
+
+<h2>BOQ Details</h2>
+
+<p>Project: {{ boq.project_name }}</p>
+<p>Item: {{ boq.item_name }}</p>
+<p>Description: {{ boq.description|default:boq.item_name }}</p>
+<p>Category: {{ boq.category_name }}</p>
+<p>Plan Quantity: {{ boq.qty }} {{ boq.unit }}</p>
+<p>Plan Rate: {{ boq.rate }}</p>
+<p>Plan Total: {{ boq.amount }}</p>
+
+<hr>
+
+<h3>Actual Summary</h3>
+
+<p>Total Actual Quantity: {{ actual_quantity }}</p>
+<p>Total Actual Amount: {{ actual_total }}</p>
+<p>Remaining Quantity: {{ remaining_quantity }}</p>
+<p>Remaining Amount: {{ remaining_amount }}</p>
+
+<a href="{% url 'boq_transaction_create' boq.pk %}">
+    + Add Actual Transaction
+</a>
+
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Actual Qty</th>
+            <th>Actual Rate</th>
+            <th>Actual Total</th>
+            <th>Voucher</th>
+            <th>Vendor</th>
+            <th>Remarks</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for transaction in transactions %}
+        <tr>
+            <td>{{ transaction.transaction_date|default:"-" }}</td>
+            <td>{{ transaction.actual_quantity }}</td>
+            <td>{{ transaction.actual_rate }}</td>
+            <td>{{ transaction.actual_total }}</td>
+            <td>{{ transaction.voucher_no }}</td>
+            <td>{{ transaction.vendor|default:"-" }}</td>
+            <td>{{ transaction.remark|default:"-" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">No actual transactions found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p><a href="{% url 'boq_list' %}">Back to BOQ List</a></p>
+
+</body>
+</html>

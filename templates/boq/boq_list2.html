@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BOQ List</title>
+</head>
+<body>
+
+<h2>BOQ Plan List</h2>
+
+<a href="{% url 'boq_create' %}">+ Create BOQ</a>
+<a href="{% url 'boq_report' %}">Plan vs Actual Report</a>
+
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Project</th>
+            <th>Item</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Unit</th>
+            <th>Plan Qty</th>
+            <th>Plan Rate</th>
+            <th>Plan Total</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for boq in boqs %}
+        <tr>
+            <td>{{ boq.project_name }}</td>
+            <td>{{ boq.item_name }}</td>
+            <td>{{ boq.description|default:boq.item_name }}</td>
+            <td>{{ boq.category_name }}</td>
+            <td>{{ boq.unit }}</td>
+            <td>{{ boq.qty }}</td>
+            <td>{{ boq.rate }}</td>
+            <td>{{ boq.amount|default_if_none:"0.00" }}</td>
+            <td>
+                <a href="{% url 'boq_detail' boq.pk %}">
+                    View / Actual
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="9">No BOQ items found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+
+<h2>{{ title }}</h2>
+
+<h3>BOQ Item Information</h3>
+
+<p>Project: {{ boq.project_name }}</p>
+<p>Item: {{ boq.item_name }}</p>
+<p>Description: {{ boq.description|default:boq.item_name }}</p>
+<p>Plan Quantity: {{ boq.qty }} {{ boq.unit }}</p>
+<p>Plan Rate: {{ boq.rate }}</p>
+<p>Plan Total: {{ boq.amount }}</p>
+
+<hr>
+
+<form method="post">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">Save Actual Transaction</button>
+    <a href="{% url 'boq_detail' boq.pk %}">Cancel</a>
+</form>
+
+</body>
+</html>
