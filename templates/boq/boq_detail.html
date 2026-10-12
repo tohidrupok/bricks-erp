@@ -12,7 +12,7 @@
 <p>Project: {{ boq.project_name }}</p>
 <p>Item: {{ boq.item_name }}</p>
 <p>Description: {{ boq.description|default:boq.item_name }}</p>
-<p>Category: {{ boq.category_name }}</p>
+<p>Category: {{ boq.category_type }}</p>
 <p>Plan Quantity: {{ boq.qty }} {{ boq.unit }}</p>
 <p>Plan Rate: {{ boq.rate }}</p>
 <p>Plan Total: {{ boq.amount }}</p>
