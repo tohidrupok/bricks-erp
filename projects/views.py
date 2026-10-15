@@ -3396,8 +3396,10 @@ from .models import BOQ, BOQTransaction
 from .forms import BOQForm, BOQTransactionForm
 
 
-def boq_list2(request):
-    boqs = BOQ.objects.select_related(
+def boq_list2(request, project_id):
+    boqs = BOQ.objects.filter(
+        project_name_id=project_id
+    ).select_related(
         'project_name',
         'item_name',
         'supplier_name',
@@ -3405,8 +3407,8 @@ def boq_list2(request):
 
     return render(request, 'boq/boq_list2.html', {
         'boqs': boqs,
+        'project_id': project_id,
     })
-
 
 def boq_create2(request):
     if request.method == 'POST':
@@ -3483,8 +3485,13 @@ def boq_transaction_create2(request, pk):
     })
 
 
-def boq_report2(request):
-    boqs = BOQ.objects.select_related(
+
+
+
+def boq_report2(request, project_id):
+    boqs = BOQ.objects.filter(
+        project_name_id=project_id
+    ).select_related(
         'project_name',
         'item_name',
     ).order_by('-id')
@@ -3507,13 +3514,25 @@ def boq_report2(request):
             totals['actual_total'] or Decimal('0')
         )
 
+        actual_rate = (
+            actual_total / actual_quantity
+            if actual_quantity > 0
+            else Decimal('0')
+        )
+
         plan_total = boq.amount or Decimal('0')
+        plan_quantity = boq.qty or Decimal('0')
+        plan_rate = boq.rate or Decimal('0')
 
         report_rows.append({
             'boq': boq,
+            'plan_quantity': plan_quantity,
+            'plan_rate': plan_rate,
+            'plan_total': plan_total,
             'actual_quantity': actual_quantity,
+            'actual_rate': actual_rate,
             'actual_total': actual_total,
-            'remaining_quantity': boq.qty - actual_quantity,
+            'remaining_quantity': plan_quantity - actual_quantity,
             'remaining_amount': plan_total - actual_total,
         })
 
@@ -3525,4 +3544,5 @@ def boq_report2(request):
         'plan_grand_total': plan_grand_total,
         'actual_grand_total': actual_grand_total,
         'variance': plan_grand_total - actual_grand_total,
+        'project_id': project_id,
     })

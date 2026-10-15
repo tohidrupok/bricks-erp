@@ -1,53 +1,401 @@
--<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>BOQ Report</title>
-</head>
-<body>
+<!-- templates/boq/boq_report.html -->
+{% extends 'base.html' %}
+{% load static %}
 
-<h2>BOQ Plan vs Actual Report</h2>
+{% block title %}BOQ Plan vs Actual Report - BM ERP{% endblock %}
 
-<p>Plan Grand Total: {{ plan_grand_total }}</p>
-<p>Actual Grand Total: {{ actual_grand_total }}</p>
-<p>Remaining Budget / Variance: {{ variance }}</p>
+{% block content %}
+<style>
+    /* Alert messages */
+    .boq-alert {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        border: 1px solid transparent;
+    }
+    .boq-alert.success { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+    .boq-alert.error   { color: #991b1b; background: #fee2e2; border-color: #fecaca; }
+    .boq-alert.warning { color: #92400e; background: #fef3c7; border-color: #fde68a; }
+    .boq-alert.info    { color: #1e40af; background: #dbeafe; border-color: #bfdbfe; }
 
-<table border="1" cellpadding="8" cellspacing="0">
-    <thead>
-        <tr>
-            <th>Project</th>
-            <th>Item</th>
-            <th>Category</th>
-            <th>Plan Qty</th>
-            <th>Actual Qty</th>
-            <th>Remaining Qty</th>
-            <th>Plan Total</th>
-            <th>Actual Total</th>
-            <th>Variance</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for row in report_rows %}
-        <tr>
-            <td>{{ row.boq.project_name }}</td>
-            <td>{{ row.boq.item_name }}</td>
-            <td>{{ row.boq.category_name }}</td>
-            <td>{{ row.boq.qty }}</td>
-            <td>{{ row.actual_quantity }}</td>
-            <td>{{ row.remaining_quantity }}</td>
-            <td>{{ row.boq.amount }}</td>
-            <td>{{ row.actual_total }}</td>
-            <td>{{ row.remaining_amount }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="9">No BOQ data available.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    /* Buttons */
+    .btn-boq {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all .15s ease;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .btn-boq svg { width: 16px; height: 16px; }
+    .btn-boq-primary {
+        background: #1e40af;
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(30, 64, 175, .25);
+    }
+    .btn-boq-primary:hover { background: #1e3a8a; transform: translateY(-1px); }
+    .btn-boq-outline {
+        background: #fff;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+    }
+    .btn-boq-outline:hover { background: #f8fafc; border-color: #94a3b8; }
 
-<p><a href="{% url 'boq_list' %}">Back to BOQ List</a></p>
+    /* Cards */
+    .card {
+        background: #fff;
+        border: 1px solid #f1f5f9;
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, .06);
+    }
 
-</body>
-</html>
+    /* Stat (shared) */
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .stat-icon svg { width: 22px; height: 22px; }
+    .stat-label { font-size: 12.5px; color: #64748b; font-weight: 500; }
+    .stat-value { font-size: 22px; font-weight: 700; color: #0f172a; line-height: 1.25; font-variant-numeric: tabular-nums; }
+    .stat-hint  { font-size: 11.5px; color: #94a3b8; margin-top: 2px; }
+
+    /* One-line summary strip */
+    .summary-strip {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .summary-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 20px;
+        min-width: 0;
+    }
+    .summary-item + .summary-item { border-left: 1px solid #f1f5f9; }
+    .summary-item .stat-icon { width: 40px; height: 40px; }
+    .summary-item .stat-icon svg { width: 19px; height: 19px; }
+    .summary-item .stat-value { font-size: 19px; white-space: nowrap; }
+
+    @media (max-width: 767px) {
+        .summary-strip { grid-template-columns: 1fr; }
+        .summary-item + .summary-item { border-left: none; border-top: 1px solid #f1f5f9; }
+    }
+
+    /* Table */
+    .boq-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .boq-table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 11.5px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        padding: 13px 16px;
+        border-bottom: 1px solid #e2e8f0;
+        white-space: nowrap;
+        text-align: left;
+    }
+    /* group header row */
+    .boq-table thead tr.group-row th {
+        text-align: center;
+        font-size: 12px;
+        padding: 10px 16px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .boq-table thead th.g-plan   { background: #eff6ff; color: #1d4ed8; }
+    .boq-table thead th.g-actual { background: #fff7ed; color: #c2410c; }
+    .boq-table thead th.g-remain { background: #f0fdf4; color: #15803d; }
+
+    .boq-table tbody td {
+        padding: 14px 16px;
+        font-size: 14px;
+        color: #334155;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+    .boq-table tbody tr { transition: background .15s ease; }
+    .boq-table tbody tr:hover { background: #f8fafc; }
+    .boq-table tbody tr:last-child td { border-bottom: none; }
+    .boq-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .boq-table .col-divider { border-left: 1px solid #e2e8f0; }
+
+    /* Badges */
+    .badge-cat {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        background: #eff6ff;
+        color: #1d4ed8;
+        white-space: nowrap;
+    }
+    .badge-remain {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 700;
+        background: #f0fdf4;
+        color: #15803d;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Search */
+    .boq-search { position: relative; width: 100%; max-width: 320px; }
+    .boq-search svg {
+        position: absolute; left: 12px; top: 50%;
+        transform: translateY(-50%);
+        width: 16px; height: 16px; color: #94a3b8;
+    }
+    .boq-search input {
+        width: 100%;
+        padding: 10px 14px 10px 38px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 14px;
+        background: #fff;
+        outline: none;
+        transition: all .15s ease;
+    }
+    .boq-search input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, .15);
+    }
+
+    /* Empty state */
+    .empty-state { padding: 60px 20px; text-align: center; }
+    .empty-state .empty-icon {
+        width: 64px; height: 64px;
+        margin: 0 auto 14px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex; align-items: center; justify-content: center;
+        color: #94a3b8;
+    }
+    .empty-state .empty-icon svg { width: 30px; height: 30px; }
+
+    /* Print */
+    @media print {
+        .no-print { display: none !important; }
+        .card { box-shadow: none; }
+    }
+    @media (max-width: 640px) {
+        .btn-boq { padding: 9px 14px; font-size: 13px; }
+    }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+            <!-- Page Header -->
+            <div class="intro-y mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-slate-800">BOQ Plan vs Actual Report</h2>
+                    <p class="mt-1 text-sm text-slate-500">Plan ar Actual cost er tulona, remaining quantity ebong budget variance ekhane dekhun.</p>
+                </div>
+                <div class="no-print flex flex-wrap items-center gap-3">
+                    <a href="javascript:history.back()" class="btn-boq btn-boq-outline">
+                        <i data-lucide="arrow-left"></i> Back to BOQ List
+                    </a>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+            <div class="intro-y mt-5">
+                {% for message in messages %}
+                <div class="boq-alert {{ message.tags }}">
+                    {% if message.tags == 'success' %}
+                        <i data-lucide="check-circle-2" style="width:18px;height:18px"></i>
+                    {% elif message.tags == 'error' %}
+                        <i data-lucide="alert-circle" style="width:18px;height:18px"></i>
+                    {% else %}
+                        <i data-lucide="info" style="width:18px;height:18px"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Summary (one line) -->
+            <div class="intro-y card mt-5 summary-strip">
+                <div class="summary-item">
+                    <div class="stat-icon" style="background:#eff6ff;color:#1d4ed8;">
+                        <i data-lucide="clipboard-list"></i>
+                    </div>
+                    <div>
+                        <div class="stat-label">Plan Grand Total</div>
+                        <div class="stat-value">{{ plan_grand_total }}</div>
+                        <div class="stat-hint">Total planned budget</div>
+                    </div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="stat-icon" style="background:#fff7ed;color:#ea580c;">
+                        <i data-lucide="wallet"></i>
+                    </div>
+                    <div>
+                        <div class="stat-label">Actual Grand Total</div>
+                        <div class="stat-value">{{ actual_grand_total }}</div>
+                        <div class="stat-hint">Total actual spent</div>
+                    </div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="stat-icon" id="varianceIcon" style="background:#f0fdf4;color:#16a34a;">
+                        <i data-lucide="scale"></i>
+                    </div>
+                    <div>
+                        <div class="stat-label">Remaining Budget / Variance</div>
+                        <div class="stat-value" id="varianceValue">{{ variance }}</div>
+                        <div class="stat-hint" id="varianceHint">Plan - Actual</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div class="intro-y mt-5 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+                <div class="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" style="width:18px;height:18px;color:#1d4ed8"></i>
+                        <h3 class="text-base font-semibold text-slate-800">Detailed Comparison</h3>
+                    </div>
+                    <div class="boq-search no-print">
+                        <i data-lucide="search"></i>
+                        <input type="text" id="reportSearch" placeholder="Search description or category...">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="boq-table" id="reportTable">
+                        <thead>
+                            <tr class="group-row">
+                                <th colspan="3"></th>
+                                <th colspan="3" class="g-plan col-divider">Plan</th>
+                                <th colspan="3" class="g-actual col-divider">Actual</th>
+                                <th class="g-remain col-divider">Balance</th>
+                            </tr>
+                            <tr>
+                                <th>#</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th class="num col-divider">Qty</th>
+                                <th class="num">Rate</th>
+                                <th class="num">Amount</th>
+                                <th class="num col-divider">Qty</th>
+                                <th class="num">Rate</th>
+                                <th class="num">Amount</th>
+                                <th class="num col-divider">Remaining Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in report_rows %}
+                            <tr>
+                                <td style="color:#94a3b8;">{{ forloop.counter }}</td>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                            <i data-lucide="folder-kanban" style="width:16px;height:16px"></i>
+                                        </span>
+                                        <span style="font-weight:600;color:#0f172a;">{{ row.boq.description }}</span>
+                                    </div>
+                                </td>
+                                <td><span class="badge-cat">{{ row.boq.category_type }}</span></td>
+
+                                <td class="num col-divider">{{ row.boq.qty }}</td>
+                                <td class="num">{{ row.boq.rate }}</td>
+                                <td class="num" style="font-weight:700;color:#1d4ed8;">{{ row.boq.amount|default_if_none:"0.00" }}</td>
+
+                                <td class="num col-divider">{{ row.actual_quantity }}</td>
+                                <td class="num">{{ row.actual_rate }}</td>
+                                <td class="num" style="font-weight:700;color:#c2410c;">{{ row.actual_total }}</td>
+
+                                <td class="num col-divider">
+                                    <span class="badge-remain">{{ row.remaining_quantity }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="10">
+                                    <div class="empty-state">
+                                        <div class="empty-icon"><i data-lucide="inbox"></i></div>
+                                        <h4 style="font-size:16px;font-weight:600;color:#334155;">No BOQ data available</h4>
+                                        <p style="font-size:13.5px;color:#94a3b8;margin:6px 0 0;">Report dekhanor moto kono data nei.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+
+<!-- Lucide icons (skip this line if your base.html already loads Lucide) -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.lucide) { lucide.createIcons(); }
+
+        // Variance color (negative = over budget = red, otherwise green)
+        var vEl = document.getElementById('varianceValue');
+        var vIcon = document.getElementById('varianceIcon');
+        var vHint = document.getElementById('varianceHint');
+        if (vEl) {
+            var num = parseFloat(vEl.innerText.replace(/[^0-9.\-]/g, ''));
+            if (!isNaN(num) && num < 0) {
+                vEl.style.color = '#dc2626';
+                vIcon.style.background = '#fef2f2';
+                vIcon.style.color = '#dc2626';
+                vHint.innerText = 'Over budget';
+            } else if (!isNaN(num)) {
+                vEl.style.color = '#16a34a';
+                vHint.innerText = 'Within budget';
+            }
+        }
+
+        // Live search
+        var input = document.getElementById('reportSearch');
+        if (input) {
+            input.addEventListener('input', function () {
+                var q = this.value.toLowerCase();
+                document.querySelectorAll('#reportTable tbody tr').forEach(function (row) {
+                    if (row.querySelector('.empty-state')) return;
+                    row.style.display = row.innerText.toLowerCase().indexOf(q) > -1 ? '' : 'none';
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

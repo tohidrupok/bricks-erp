@@ -1,55 +1,333 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>BOQ List</title>
-</head>
-<body>
+<!-- templates/property_list.html -->
+{% extends 'base.html' %}
+{% load static %}
 
-<h2>BOQ Plan List</h2>
+{% block title %}BOQ Category List - BM ERP{% endblock %}
 
-<a href="{% url 'boq_create' %}">+ Create BOQ</a>
-<a href="{% url 'boq_report' %}">Plan vs Actual Report</a>
+{% block content %}
+<style>
+    /* Alert messages */
+    .boq-alert {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        border: 1px solid transparent;
+    }
+    .boq-alert.success { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+    .boq-alert.error   { color: #991b1b; background: #fee2e2; border-color: #fecaca; }
+    .boq-alert.warning { color: #92400e; background: #fef3c7; border-color: #fde68a; }
+    .boq-alert.info    { color: #1e40af; background: #dbeafe; border-color: #bfdbfe; }
 
-<table border="1" cellpadding="8" cellspacing="0">
-    <thead>
-        <tr>
-            <th>Project</th>
-            <th>Item</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Unit</th>
-            <th>Plan Qty</th>
-            <th>Plan Rate</th>
-            <th>Plan Total</th>
-            <th>Action</th>
-        </tr>
-    </thead>
+    /* Table */
+    .boq-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .boq-table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 11.5px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        padding: 14px 16px;
+        border-bottom: 1px solid #e2e8f0;
+        white-space: nowrap;
+        text-align: left;
+    }
+    .boq-table tbody td {
+        padding: 14px 16px;
+        font-size: 14px;
+        color: #334155;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+    .boq-table tbody tr { transition: background .15s ease; }
+    .boq-table tbody tr:hover { background: #f8fafc; }
+    .boq-table tbody tr:last-child td { border-bottom: none; }
+    .boq-table .num { text-align: right; font-variant-numeric: tabular-nums; }
 
-    <tbody>
-        {% for boq in boqs %}
-        <tr>
-            <td>{{ boq.project_name }}</td>
-            <td>{{ boq.item_name }}</td>
-            <td>{{ boq.description|default:boq.item_name }}</td>
-            <td>{{ boq.category_name }}</td>
-            <td>{{ boq.unit }}</td>
-            <td>{{ boq.qty }}</td>
-            <td>{{ boq.rate }}</td>
-            <td>{{ boq.amount|default_if_none:"0.00" }}</td>
-            <td>
-                <a href="{% url 'boq_detail' boq.pk %}">
-                    View / Actual
-                </a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="9">No BOQ items found.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    /* Badges */
+    .badge-cat {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        background: #eff6ff;
+        color: #1d4ed8;
+        white-space: nowrap;
+    }
+    .badge-unit {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        background: #f1f5f9;
+        color: #475569;
+    }
 
-</body>
-</html>
+    /* Buttons */
+    .btn-boq {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all .15s ease;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .btn-boq svg { width: 16px; height: 16px; }
+    .btn-boq-primary {
+        background: #1e40af;
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(30, 64, 175, .25);
+    }
+    .btn-boq-primary:hover { background: #1e3a8a; transform: translateY(-1px); }
+    .btn-boq-outline {
+        background: #fff;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+    }
+    .btn-boq-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+
+    .btn-view {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 12px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        background: #eff6ff;
+        color: #1d4ed8;
+        text-decoration: none;
+        transition: all .15s ease;
+        white-space: nowrap;
+    }
+    .btn-view svg { width: 14px; height: 14px; }
+    .btn-view:hover { background: #1d4ed8; color: #fff; }
+
+    /* Stat cards */
+    .stat-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 18px 20px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, .06);
+        border: 1px solid #f1f5f9;
+    }
+    .stat-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .stat-icon svg { width: 22px; height: 22px; }
+    .stat-label { font-size: 12.5px; color: #64748b; font-weight: 500; }
+    .stat-value { font-size: 22px; font-weight: 700; color: #0f172a; line-height: 1.2; }
+
+    /* Search */
+    .boq-search {
+        position: relative;
+        width: 100%;
+        max-width: 320px;
+    }
+    .boq-search svg {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        color: #94a3b8;
+    }
+    .boq-search input {
+        width: 100%;
+        padding: 10px 14px 10px 38px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 14px;
+        background: #fff;
+        outline: none;
+        transition: all .15s ease;
+    }
+    .boq-search input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, .15);
+    }
+
+    /* Empty state */
+    .empty-state { padding: 60px 20px; text-align: center; }
+    .empty-state .empty-icon {
+        width: 64px; height: 64px;
+        margin: 0 auto 14px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex; align-items: center; justify-content: center;
+        color: #94a3b8;
+    }
+    .empty-state .empty-icon svg { width: 30px; height: 30px; }
+
+    @media (max-width: 640px) {
+        .btn-boq { padding: 9px 14px; font-size: 13px; }
+    }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+            <!-- Page Header -->
+            <div class="intro-y mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-slate-800">BOQ Category List</h2>
+                    <p class="mt-1 text-sm text-slate-500">Bill of Quantities er sob item ebong plan details ekhane dekhun.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <a href="{% url 'boq_report' project_id %}" class="btn-boq btn-boq-outline">
+                        <i data-lucide="bar-chart-3"></i> Plan vs Actual Report
+                    </a>
+                    <a href="{% url 'boq_create' %}" class="btn-boq btn-boq-primary">
+                        <i data-lucide="plus"></i> Create BOQ
+                    </a>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+            <div class="intro-y mt-5">
+                {% for message in messages %}
+                <div class="boq-alert {{ message.tags }}">
+                    {% if message.tags == 'success' %}
+                        <i data-lucide="check-circle-2" style="width:18px;height:18px"></i>
+                    {% elif message.tags == 'error' %}
+                        <i data-lucide="alert-circle" style="width:18px;height:18px"></i>
+                    {% else %}
+                        <i data-lucide="info" style="width:18px;height:18px"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Table Card -->
+            <div class="intro-y mt-6 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+                <div class="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="list" style="width:18px;height:18px;color:#1d4ed8"></i>
+                        <h3 class="text-base font-semibold text-slate-800">All BOQ Items</h3>
+                    </div>
+                    <div class="boq-search">
+                        <i data-lucide="search"></i>
+                        <input type="text" id="boqSearch" placeholder="Search project, item, category...">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="boq-table" id="boqTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Project</th>
+                                
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th>Unit</th>
+                                <th class="num">Plan Qty</th>
+                                <th class="num">Plan Rate</th>
+                                <th class="num">Plan Total</th>
+                                <th style="text-align:center;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for boq in boqs %}
+                            <tr>
+                                <td style="color:#94a3b8;">{{ forloop.counter }}</td>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                            <i data-lucide="folder-kanban" style="width:16px;height:16px"></i>
+                                        </span>
+                                        <span style="font-weight:600;color:#0f172a;">{{ boq.project_name }}</span>
+                                    </div>
+                                </td>
+                                
+                                <td style="color:#64748b;max-width:220px;">{{ boq.description|default:boq.item_name }}</td>
+                                <td><span class="badge-cat">{{ boq.category_type }}</span></td>
+                                <td><span class="badge-unit">{{ boq.unit }}</span></td>
+                                <td class="num">{{ boq.qty }}</td>
+                                <td class="num">{{ boq.rate }}</td>
+                                <td class="num" style="font-weight:700;color:#0f172a;">{{ boq.amount|default_if_none:"0.00" }}</td>
+                                <td style="text-align:center;">
+                                    <a href="{% url 'boq_detail' boq.pk %}" class="btn-view">
+                                        <i data-lucide="eye"></i> View / Actual
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="10">
+                                    <div class="empty-state">
+                                        <div class="empty-icon"><i data-lucide="inbox"></i></div>
+                                        <h4 style="font-size:16px;font-weight:600;color:#334155;">No BOQ items found</h4>
+                                        <p style="font-size:13.5px;color:#94a3b8;margin:6px 0 16px;">Ekhono kono BOQ item add kora hoyni.</p>
+                                        <a href="{% url 'boq_create' %}" class="btn-boq btn-boq-primary">
+                                            <i data-lucide="plus"></i> Create BOQ
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+
+<!-- Lucide icons (skip this line if your base.html already loads Lucide) -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.lucide) { lucide.createIcons(); }
+
+        // Live search
+        var input = document.getElementById('boqSearch');
+        if (input) {
+            input.addEventListener('input', function () {
+                var q = this.value.toLowerCase();
+                document.querySelectorAll('#boqTable tbody tr').forEach(function (row) {
+                    if (row.querySelector('.empty-state')) return;
+                    row.style.display = row.innerText.toLowerCase().indexOf(q) > -1 ? '' : 'none';
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

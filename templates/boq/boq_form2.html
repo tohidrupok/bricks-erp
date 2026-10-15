@@ -1,21 +1,182 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ title }}</title>
-</head>
-<body>
+<!-- templates/boq/boq_form.html -->
+{% extends 'base.html' %}
+{% load static %}
 
-<h2>{{ title }}</h2>
+{% block title %}{{ title }} - BM ERP{% endblock %}
 
-<form method="post">
-    {% csrf_token %}
+{% block content %}
+<style>
+    /* Alert messages */
+    .boq-alert {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 14px; border-radius: 10px;
+        font-size: 14px; font-weight: 500; margin-bottom: 6px;
+        border: 1px solid transparent;
+    }
+    .boq-alert.success { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+    .boq-alert.error   { color: #991b1b; background: #fee2e2; border-color: #fecaca; }
+    .boq-alert.warning { color: #92400e; background: #fef3c7; border-color: #fde68a; }
+    .boq-alert.info    { color: #1e40af; background: #dbeafe; border-color: #bfdbfe; }
 
-    {{ form.as_p }}
+    /* Buttons */
+    .btn-boq {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 9px 18px; border-radius: 10px;
+        font-size: 13.5px; font-weight: 600;
+        transition: all .15s ease; text-decoration: none; cursor: pointer; border: none;
+    }
+    .btn-boq svg { width: 16px; height: 16px; }
+    .btn-boq-primary { background: #1e40af; color: #fff; box-shadow: 0 4px 10px rgba(30,64,175,.25); }
+    .btn-boq-primary:hover { background: #1e3a8a; transform: translateY(-1px); }
+    .btn-boq-outline { background: #fff; color: #334155; border: 1px solid #cbd5e1; }
+    .btn-boq-outline:hover { background: #f8fafc; border-color: #94a3b8; }
 
-    <button type="submit">Save BOQ Plan</button>
-    <a href="{% url 'boq_list' %}">Cancel</a>
-</form>
+    /* Cards */
+    .card {
+        background: #fff; border: 1px solid #f1f5f9;
+        border-radius: 14px; box-shadow: 0 1px 3px rgba(15,23,42,.06);
+    }
+    .card-title {
+        display: flex; align-items: center; gap: 8px;
+        padding: 12px 16px; border-bottom: 1px solid #f1f5f9;
+        font-size: 15px; font-weight: 600; color: #1e293b;
+    }
+    .card-title svg { width: 18px; height: 18px; color: #1d4ed8; }
 
-</body>
-</html>
+    /* Form fields (auto-style Django form widgets) */
+    .form-group label {
+        display: block; margin-bottom: 5px;
+        font-size: 12px; font-weight: 600; color: #475569;
+        text-transform: uppercase; letter-spacing: .04em;
+    }
+    .form-group label .req { color: #dc2626; margin-left: 2px; }
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group input[type="date"],
+    .form-group input[type="datetime-local"],
+    .form-group input[type="email"],
+    .form-group select,
+    .form-group textarea {
+        width: 100%; padding: 10px 14px;
+        border: 1px solid #e2e8f0; border-radius: 10px;
+        font-size: 14px; color: #334155; background: #fff;
+        outline: none; transition: all .15s ease;
+    }
+    .form-group textarea { min-height: 84px; resize: vertical; }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+    }
+    .form-group input[readonly] { background: #f8fafc; color: #64748b; }
+    .field-help { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+    .field-error { font-size: 12.5px; color: #dc2626; margin-top: 4px; font-weight: 500; }
+    .has-error input, .has-error select, .has-error textarea { border-color: #fca5a5; background: #fef2f2; }
+
+    @media (max-width: 640px) { .btn-boq { padding: 8px 14px; font-size: 13px; } }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-8 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+            <!-- Page Header -->
+            <div class="intro-y mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-slate-800">{{ title }}</h2>
+                    <p class="text-sm text-slate-500">BOQ plan er sob information niche puron korun.</p>
+                </div>
+                <div>
+                    <a href="{% url 'boq_list' %}" class="btn-boq btn-boq-outline">
+                        <i data-lucide="arrow-left"></i> Back to BOQ List
+                    </a>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+            <div class="intro-y mt-4">
+                {% for message in messages %}
+                <div class="boq-alert {{ message.tags }}">
+                    {% if message.tags == 'success' %}
+                        <i data-lucide="check-circle-2" style="width:18px;height:18px"></i>
+                    {% elif message.tags == 'error' %}
+                        <i data-lucide="alert-circle" style="width:18px;height:18px"></i>
+                    {% else %}
+                        <i data-lucide="info" style="width:18px;height:18px"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Form Card -->
+            <div class="intro-y card mt-4">
+                <div class="card-title">
+                    <i data-lucide="clipboard-list"></i> BOQ Plan Details
+                </div>
+
+                <form method="post" class="p-4">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="boq-alert error mb-4">
+                        <i data-lucide="alert-circle" style="width:18px;height:18px"></i>
+                        <span>{{ form.non_field_errors|join:" " }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="grid grid-cols-1 gap-x-5 gap-y-4 md:grid-cols-2 lg:grid-cols-3">
+                        {% for field in form %}
+                            {% if field.is_hidden %}
+                                {{ field }}
+                            {% else %}
+                            <div class="form-group {% if field.errors %}has-error{% endif %} {% if field.name == 'description' or field.name == 'remark' or field.name == 'remarks' or field.name == 'note' %}md:col-span-2 lg:col-span-3{% endif %}">
+                                <label for="{{ field.id_for_label }}">
+                                    {{ field.label }}{% if field.field.required %}<span class="req">*</span>{% endif %}
+                                </label>
+                                {{ field }}
+                                {% if field.help_text %}<div class="field-help">{{ field.help_text }}</div>{% endif %}
+                                {% for error in field.errors %}
+                                    <div class="field-error">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="mt-5 flex flex-wrap items-center justify-end gap-3 border-t border-slate-100 pt-4">
+                        <a href="javascript:history.back()" class="btn-boq btn-boq-outline">
+                            <i data-lucide="x"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn-boq btn-boq-primary">
+                            <i data-lucide="save"></i> Save BOQ Plan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+
+<!-- Lucide icons (skip this line if your base.html already loads Lucide) -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.lucide) { lucide.createIcons(); }
+    });
+</script>
+{% endblock %}

@@ -1,67 +1,354 @@
+<!-- templates/boq/boq_detail.html -->
+{% extends 'base.html' %}
+{% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>BOQ Details</title>
-</head>
-<body>
+{% block title %}BOQ Details - BM ERP{% endblock %}
 
-<h2>BOQ Details</h2>
+{% block content %}
+<style>
+    /* Alert messages */
+    .boq-alert {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 14px; border-radius: 10px;
+        font-size: 14px; font-weight: 500; margin-bottom: 6px;
+        border: 1px solid transparent;
+    }
+    .boq-alert.success { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+    .boq-alert.error   { color: #991b1b; background: #fee2e2; border-color: #fecaca; }
+    .boq-alert.warning { color: #92400e; background: #fef3c7; border-color: #fde68a; }
+    .boq-alert.info    { color: #1e40af; background: #dbeafe; border-color: #bfdbfe; }
 
-<p>Project: {{ boq.project_name }}</p>
-<p>Item: {{ boq.item_name }}</p>
-<p>Description: {{ boq.description|default:boq.item_name }}</p>
-<p>Category: {{ boq.category_type }}</p>
-<p>Plan Quantity: {{ boq.qty }} {{ boq.unit }}</p>
-<p>Plan Rate: {{ boq.rate }}</p>
-<p>Plan Total: {{ boq.amount }}</p>
+    /* Buttons */
+    .btn-boq {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 9px 16px; border-radius: 10px;
+        font-size: 13.5px; font-weight: 600;
+        transition: all .15s ease; text-decoration: none; cursor: pointer;
+    }
+    .btn-boq svg { width: 16px; height: 16px; }
+    .btn-boq-primary { background: #1e40af; color: #fff; box-shadow: 0 4px 10px rgba(30,64,175,.25); }
+    .btn-boq-primary:hover { background: #1e3a8a; transform: translateY(-1px); }
+    .btn-boq-outline { background: #fff; color: #334155; border: 1px solid #cbd5e1; }
+    .btn-boq-outline:hover { background: #f8fafc; border-color: #94a3b8; }
 
-<hr>
+    /* Cards */
+    .card {
+        background: #fff; border: 1px solid #f1f5f9;
+        border-radius: 14px; box-shadow: 0 1px 3px rgba(15,23,42,.06);
+    }
 
-<h3>Actual Summary</h3>
+    /* Info fields */
+    .info-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; }
+    .info-value { font-size: 14px; font-weight: 600; color: #0f172a; margin-top: 2px; }
 
-<p>Total Actual Quantity: {{ actual_quantity }}</p>
-<p>Total Actual Amount: {{ actual_total }}</p>
-<p>Remaining Quantity: {{ remaining_quantity }}</p>
-<p>Remaining Amount: {{ remaining_amount }}</p>
+    /* Stat (shared) */
+    .stat-icon {
+        width: 42px; height: 42px; border-radius: 11px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .stat-icon svg { width: 20px; height: 20px; }
+    .stat-label { font-size: 12px; color: #64748b; font-weight: 500; }
+    .stat-value { font-size: 19px; font-weight: 700; color: #0f172a; line-height: 1.2; font-variant-numeric: tabular-nums; }
+    .text-danger { color: #dc2626 !important; }
+    .text-success { color: #16a34a !important; }
 
-<a href="{% url 'boq_transaction_create' boq.pk %}">
-    + Add Actual Transaction
-</a>
+    /* One-line summary strip */
+    .summary-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+    }
+    .summary-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 18px;
+        min-width: 0;
+    }
+    .summary-item + .summary-item { border-left: 1px solid #f1f5f9; }
+    .summary-item .stat-icon { width: 38px; height: 38px; }
+    .summary-item .stat-icon svg { width: 18px; height: 18px; }
+    .summary-item .stat-value { font-size: 17px; white-space: nowrap; }
 
-<table border="1" cellpadding="8" cellspacing="0">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Actual Qty</th>
-            <th>Actual Rate</th>
-            <th>Actual Total</th>
-            <th>Voucher</th>
-            <th>Vendor</th>
-            <th>Remarks</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for transaction in transactions %}
-        <tr>
-            <td>{{ transaction.transaction_date|default:"-" }}</td>
-            <td>{{ transaction.actual_quantity }}</td>
-            <td>{{ transaction.actual_rate }}</td>
-            <td>{{ transaction.actual_total }}</td>
-            <td>{{ transaction.voucher_no }}</td>
-            <td>{{ transaction.vendor|default:"-" }}</td>
-            <td>{{ transaction.remark|default:"-" }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="7">No actual transactions found.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    @media (max-width: 767px) {
+        .summary-strip { grid-template-columns: repeat(2, 1fr); }
+        .summary-item:nth-child(3) { border-left: none; }
+        .summary-item:nth-child(n+3) { border-top: 1px solid #f1f5f9; }
+    }
 
-<p><a href="{% url 'boq_list' %}">Back to BOQ List</a></p>
+    /* Progress */
+    .progress-track { height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, #3b82f6, #1d4ed8); border-radius: 999px; max-width: 100%; }
+    .progress-bar.over { background: linear-gradient(90deg, #f87171, #dc2626); }
 
-</body>
-</html>
+    /* Table */
+    .boq-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .boq-table thead th {
+        background: #f8fafc; color: #64748b;
+        font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+        padding: 11px 14px; border-bottom: 1px solid #e2e8f0;
+        white-space: nowrap; text-align: left;
+    }
+    .boq-table tbody td {
+        padding: 10px 14px; font-size: 13.5px; color: #334155;
+        border-bottom: 1px solid #f1f5f9; vertical-align: middle;
+    }
+    .boq-table tbody tr { transition: background .15s ease; }
+    .boq-table tbody tr:hover { background: #f8fafc; }
+    .boq-table tbody tr:last-child td { border-bottom: none; }
+    .boq-table tfoot td {
+        padding: 11px 14px; font-size: 13.5px; font-weight: 700; color: #0f172a;
+        background: #f8fafc; border-top: 1px solid #e2e8f0;
+    }
+    .boq-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* Badges */
+    .badge-cat {
+        display: inline-flex; padding: 3px 10px; border-radius: 999px;
+        font-size: 12px; font-weight: 600; background: #eff6ff; color: #1d4ed8; white-space: nowrap;
+    }
+    .badge-unit {
+        display: inline-block; padding: 2px 8px; border-radius: 6px;
+        font-size: 12px; font-weight: 600; background: #f1f5f9; color: #475569;
+    }
+    .badge-voucher {
+        display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 6px;
+        font-size: 12px; font-weight: 600; background: #fff7ed; color: #c2410c; white-space: nowrap;
+    }
+
+    /* Empty state */
+    .empty-state { padding: 36px 20px; text-align: center; }
+    .empty-state .empty-icon {
+        width: 54px; height: 54px; margin: 0 auto 10px; border-radius: 50%;
+        background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;
+    }
+    .empty-state .empty-icon svg { width: 26px; height: 26px; }
+
+    @media print { .no-print { display: none !important; } }
+    @media (max-width: 640px) { .btn-boq { padding: 8px 12px; font-size: 13px; } }
+</style>
+
+<div class="rubick px-5 sm:px-8 py-5 before:content-[''] before:bg-gradient-to-b before:from-theme-1 before:to-theme-2 dark:before:from-darkmode-800 dark:before:to-darkmode-800 before:fixed before:inset-0 before:z-[-1]">
+    <!-- BEGIN: Mobile Menu -->
+    {% include 'partials/mobile.html' %}
+    <!-- END: Mobile Menu -->
+    <div class="mt-[4.7rem] flex md:mt-0">
+        <!-- BEGIN: Side Menu -->
+        {% include 'partials/sidebar_list.html' %}
+        <!-- END: Side Menu -->
+        <!-- BEGIN: Content -->
+        <div class="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-8 before:block before:h-px before:w-full before:content-[''] dark:bg-darkmode-700 md:px-[22px]">
+            <!-- BEGIN: Top Bar -->
+            {% include 'partials/header.html' %}
+            <!-- END: Top Bar -->
+
+            <!-- Page Header -->
+            <div class="intro-y mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-slate-800">BOQ Details</h2>
+                    <p class="text-sm text-slate-500">{{ boq.project_name }} &middot; {{ boq.item_name }}</p>
+                </div>
+                <div class="no-print flex flex-wrap items-center gap-2">
+                    <a href="{% url 'boq_list' %}" class="btn-boq btn-boq-outline">
+                        <i data-lucide="arrow-left"></i> Back
+                    </a>
+                    <a href="{% url 'boq_transaction_create' boq.pk %}" class="btn-boq btn-boq-primary">
+                        <i data-lucide="plus"></i> Add Actual Transaction
+                    </a>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+            <div class="intro-y mt-4">
+                {% for message in messages %}
+                <div class="boq-alert {{ message.tags }}">
+                    {% if message.tags == 'success' %}
+                        <i data-lucide="check-circle-2" style="width:18px;height:18px"></i>
+                    {% elif message.tags == 'error' %}
+                        <i data-lucide="alert-circle" style="width:18px;height:18px"></i>
+                    {% else %}
+                        <i data-lucide="info" style="width:18px;height:18px"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Plan Info Card -->
+            <div class="intro-y card mt-4 p-4">
+                <div class="mb-3 flex items-center gap-2">
+                    <i data-lucide="clipboard-list" style="width:18px;height:18px;color:#1d4ed8"></i>
+                    <h3 class="text-base font-semibold text-slate-800">Plan Information</h3>
+                </div>
+
+                <div class="grid grid-cols-2 gap-x-6 gap-y-3 lg:grid-cols-4">
+                    <div>
+                        <div class="info-label">Project</div>
+                        <div class="info-value">{{ boq.project_name }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Item</div>
+                        <div class="info-value">{{ boq.item_name }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Category</div>
+                        <div class="mt-1"><span class="badge-cat">{{ boq.category_type }}</span></div>
+                    </div>
+                    <div>
+                        <div class="info-label">Unit</div>
+                        <div class="mt-1"><span class="badge-unit">{{ boq.unit }}</span></div>
+                    </div>
+
+                    <div>
+                        <div class="info-label">Plan Quantity</div>
+                        <div class="info-value">{{ boq.qty }} {{ boq.unit }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Plan Rate</div>
+                        <div class="info-value">{{ boq.rate }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Plan Total</div>
+                        <div class="info-value" style="color:#1d4ed8;">{{ boq.amount|default_if_none:"0.00" }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Description</div>
+                        <div class="info-value" style="font-weight:500;color:#475569;">{{ boq.description|default:boq.item_name }}</div>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="mt-4 border-t border-slate-100 pt-3">
+                    <div class="mb-1 flex items-center justify-between text-xs font-medium text-slate-500">
+                        <span>Quantity Used</span>
+                        <span>{{ actual_quantity }} / {{ boq.qty }} {{ boq.unit }} ({% widthratio actual_quantity boq.qty 100 %}%)</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-bar {% if remaining_quantity < 0 %}over{% endif %}" style="width: {% widthratio actual_quantity boq.qty 100 %}%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actual Summary (one line) -->
+            <div class="intro-y card mt-4 summary-strip">
+                <div class="summary-item">
+                    <div class="stat-icon" style="background:#fff7ed;color:#ea580c;"><i data-lucide="package"></i></div>
+                    <div>
+                        <div class="stat-label">Actual Quantity</div>
+                        <div class="stat-value">{{ actual_quantity }}</div>
+                    </div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="stat-icon" style="background:#fff7ed;color:#ea580c;"><i data-lucide="wallet"></i></div>
+                    <div>
+                        <div class="stat-label">Actual Amount</div>
+                        <div class="stat-value">{{ actual_total }}</div>
+                    </div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="stat-icon" style="background:{% if remaining_quantity < 0 %}#fef2f2;color:#dc2626{% else %}#f0fdf4;color:#16a34a{% endif %};"><i data-lucide="layers"></i></div>
+                    <div>
+                        <div class="stat-label">Remaining Quantity</div>
+                        <div class="stat-value {% if remaining_quantity < 0 %}text-danger{% else %}text-success{% endif %}">{{ remaining_quantity }}</div>
+                    </div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="stat-icon" style="background:{% if remaining_amount < 0 %}#fef2f2;color:#dc2626{% else %}#f0fdf4;color:#16a34a{% endif %};"><i data-lucide="scale"></i></div>
+                    <div>
+                        <div class="stat-label">Remaining Amount</div>
+                        <div class="stat-value {% if remaining_amount < 0 %}text-danger{% else %}text-success{% endif %}">{{ remaining_amount }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions Table -->
+            <div class="intro-y card mt-4 overflow-hidden">
+                <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="receipt" style="width:18px;height:18px;color:#1d4ed8"></i>
+                        <h3 class="text-base font-semibold text-slate-800">Actual Transactions</h3>
+                    </div>
+                    <span class="badge-unit">{{ transactions|length }} record{{ transactions|length|pluralize }}</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="boq-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th class="num">Actual Qty</th>
+                                <th class="num">Actual Rate</th>
+                                <th class="num">Actual Total</th>
+                                <th>Voucher</th>
+                                <th>Vendor</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in transactions %}
+                            <tr>
+                                <td style="color:#94a3b8;">{{ forloop.counter }}</td>
+                                <td style="white-space:nowrap;">
+                                    <span class="flex items-center gap-1.5">
+                                        <i data-lucide="calendar" style="width:14px;height:14px;color:#94a3b8"></i>
+                                        {{ transaction.transaction_date|default:"-" }}
+                                    </span>
+                                </td>
+                                <td class="num">{{ transaction.actual_quantity }}</td>
+                                <td class="num">{{ transaction.actual_rate }}</td>
+                                <td class="num" style="font-weight:700;color:#c2410c;">{{ transaction.actual_total }}</td>
+                                <td>
+                                    {% if transaction.voucher_no %}
+                                        <span class="badge-voucher"><i data-lucide="hash" style="width:12px;height:12px"></i>{{ transaction.voucher_no }}</span>
+                                    {% else %}-{% endif %}
+                                </td>
+                                <td>{{ transaction.vendor|default:"-" }}</td>
+                                <td style="color:#64748b;max-width:220px;">{{ transaction.remark|default:"-" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8">
+                                    <div class="empty-state">
+                                        <div class="empty-icon"><i data-lucide="inbox"></i></div>
+                                        <h4 style="font-size:15px;font-weight:600;color:#334155;">No actual transactions found</h4>
+                                        <p style="font-size:13px;color:#94a3b8;margin:4px 0 12px;">Ekhono kono actual transaction add kora hoyni.</p>
+                                        <a href="{% url 'boq_transaction_create' boq.pk %}" class="btn-boq btn-boq-primary">
+                                            <i data-lucide="plus"></i> Add Actual Transaction
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        {% if transactions %}
+                        <tfoot>
+                            <tr>
+                                <td colspan="2">Total</td>
+                                <td class="num">{{ actual_quantity }}</td>
+                                <td></td>
+                                <td class="num" style="color:#c2410c;">{{ actual_total }}</td>
+                                <td colspan="3"></td>
+                            </tr>
+                        </tfoot>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- END: Content -->
+    </div>
+</div>
+
+<!-- Lucide icons (skip this line if your base.html already loads Lucide) -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.lucide) { lucide.createIcons(); }
+    });
+</script>
+{% endblock %}
